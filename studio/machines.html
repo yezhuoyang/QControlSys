@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Machine workbench · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/machines.css" />
+    <script type="importmap">
+      { "imports": { "three": "/three/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <i class="brand-mark"></i>QControl <span>Studio</span>
+      </div>
+      <nav>
+        <a href="/board-validation">Board measurements</a>
+        <a href="/feedforward">Feed-forward bench</a>
+        <a href="/validation">Hardware validation</a
+        ><a href="/qccd-studio">QCCD Studio</a>
+      </nav>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <h1>Machine workbench</h1>
+          <p>
+            Follow the control electronics, signal paths and qubits in one
+            installation.
+          </p>
+        </div>
+        <label
+          >Design
+          <select id="example"></select
+        ></label>
+      </div>
+      <div id="alert" role="alert" hidden></div>
+      <nav id="machinePlatforms" aria-label="Quantum hardware">
+        <button data-platform="superconducting">Superconducting</button>
+        <button data-platform="neutral">Neutral atoms</button>
+        <button data-platform="qccd">QCCD ions</button>
+      </nav>
+      <div class="action-row">
+        <button id="newMachine">New machine</button>
+        <button id="run" class="primary">Compile and run</button
+        ><button id="save">Save design and source</button>
+        <button id="open">Open file</button
+        ><input id="file" type="file" accept=".json,.qasm,.qasm3" hidden />
+        <button id="export" disabled>Export replay</button
+        ><output id="status" aria-live="polite"></output>
+      </div>
+      <div class="workbench">
+        <section class="physical">
+          <div class="assembly-tools action-row">
+            <label
+              >Primitive
+              <select id="primitive"></select
+            ></label>
+            <button
+              id="add"
+              draggable="true"
+              title="Drag onto the assembly or click to add"
+            >
+              Add component
+            </button>
+            <label
+              >Part
+              <select id="component"></select
+            ></label>
+            <button
+              id="move"
+              draggable="true"
+              title="Drag onto the assembly or click to enter coordinates"
+            >
+              Move part
+            </button>
+          </div>
+          <div class="machine-views">
+            <div class="viewport" id="viewport">
+              <div class="viewbar">
+                <span class="view-title">Component assembly</span>
+                <div id="sceneControls" hidden>
+                  <label
+                    ><input type="checkbox" id="enlargeRegister" checked />
+                    Enlarge qubits</label
+                  >
+                  <button id="fitRegister">Zoom to qubits</button>
+                  <button id="wholeSystem">Whole machine</button>
+                </div>
+              </div>
+              <div class="viewhint">
+                Drag to orbit · Scroll to zoom · Select hardware
+              </div>
+            </div>
+            <section
+              id="devicePanel"
+              aria-label="Quantum device register"
+              hidden
+            >
+              <div class="device-heading">
+                <h2 id="registerTitle">Quantum register</h2>
+                <strong id="registerCount"></strong>
+              </div>
+              <div class="drive-controls">
+                <output id="driveReadout"></output
+                ><button id="nextDrive" disabled>Next drive sample</button>
+                <button id="focusQubit" disabled>Zoom to selected site</button>
+              </div>
+              <div id="qubitList" aria-label="Physical qubits"></div>
+              <p id="qubitInspector"></p>
+              <p id="drivePath" hidden></p>
+              <details id="dcPanel" hidden><summary>Exercise a trap DC output</summary>
+                <p>Send signed sample words through a reference DAC channel. The socket voltage is the endpoint of this electrical test.</p>
+                <label>Channel <input id="dcChannel" type="number" value="1" min="1" max="268"></label>
+                <label>Sample words <input id="dcWords" type="text" value="0, 8192, -4096, 0"></label>
+                <button id="dcRun">Run DC channel</button><button id="gateRun" hidden>Return to gate program</button>
+              </details>
+              <details id="steerPanel" hidden><summary>Drive an AOD steering channel</summary>
+                <p>Program an RF tone and follow its sample words to the DAC and transducer. A trap channel places one reference atom in a moving tweezer.</p>
+                <label>Channel <select id="steerLane"></select></label>
+                <label>Tones (MHz) <input id="steerTones" value="80, 81"></label>
+                <button id="steerRun">Run AOD channel</button><button id="steerGate" hidden>Return to gate program</button>
+                <button id="nextTone" hidden>Next resolved tone</button><output id="steerReading"></output>
+              </details>
+              <details>
+                <summary>Dimensions and model</summary>
+                <p id="registerBasis"></p>
+                <a id="transportReplay" hidden></a>
+              </details>
+            </section>
+          </div>
+          <div class="transport">
+            <button id="back" aria-label="Previous event">‹</button
+            ><button id="playTrace" type="button">Play trace</button
+            ><button id="next" aria-label="Next event">›</button>
+            <input
+              id="step"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+              aria-label="Trace step"
+            /><output id="count"></output>
+          </div>
+          <section id="pulsePanel" hidden aria-label="Pulse provenance">
+            <header><h2>Trace a pulse</h2><select id="pulseChoice" aria-label="Recorded qubit arrival"></select></header>
+            <p id="pulseOrigin"></p>
+            <div class="pulse-tools"><button id="pulseFollow">Follow from FPGA</button><button id="pulseNext">Next hop</button><output id="pulseAt"></output></div>
+            <details id="pulseDetails"><summary>Wires, ports and optical sources</summary>
+              <ol id="pulseHops"></ol><div id="pulseCauses"></div><div id="pulseCarriers"></div>
+            </details>
+          </section>
+          <section id="wirePanel" aria-label="Physical wiring"></section>
+        </section>
+        <aside>
+          <div class="panel-label">Event inspector</div>
+          <div id="when" class="event-time"></div>
+          <h2 id="op"></h2>
+          <p id="part"></p>
+          <dl id="values"></dl>
+          <div id="parents"></div>
+        </aside>
+      </div>
+      <section id="signalPanel" hidden>
+        <label
+          >Signal monitor
+          <select id="signal"></select
+        ></label>
+        <canvas
+          id="signalPlot"
+          aria-label="Selected physical port waveform over time"
+        ></canvas>
+      </section>
+      <div class="edit-grid">
+        <section>
+          <h2>Hardware design</h2>
+          <label
+            >Connect output
+            <select id="outputPort"></select
+          ></label>
+          <label
+            >to input
+            <select id="inputPort"></select
+          ></label>
+          <div class="action-row">
+            <label
+              >Endpoint delay (ps)
+              <input id="delay" type="number" min="1" step="1" value="500"
+            /></label>
+            <button id="wire">Connect</button>
+          </div>
+          <label>Physical interface <select id="wireMedium"></select></label>
+          <label id="wireRateLabel" hidden>Line rate (Gb/s) <input id="wireRate" type="number" value="2.5" min="0.001" step="any"></label>
+          <label
+            >Connection
+            <select id="connection"></select
+          ></label>
+          <button id="unwire">Disconnect</button>
+          <details id="partEditor">
+            <summary>Edit selected component</summary>
+            <label>Label <input id="partLabel" /></label>
+            <label>Center in mm, x/y/z <input id="center" /></label>
+            <label>Size in mm, x/y/z <input id="size" /></label>
+            <textarea
+              id="model"
+              aria-label="Component model parameters"
+              spellcheck="false"
+            ></textarea>
+            <button id="applyPart">Apply component</button>
+          </details>
+          <details>
+            <summary>Machine parameters, placement and calibrations</summary>
+            <textarea
+              id="design"
+              spellcheck="false"
+              aria-label="Machine JSON"
+            ></textarea>
+            <button id="apply">Apply machine text</button>
+          </details>
+        </section>
+        <section>
+          <h2>Source program</h2>
+          <label
+            >Language
+            <select id="language">
+              <option value="qasm">OpenQASM 3 subset</option>
+              <option value="ir">Control IR</option>
+            </select></label
+          ><textarea
+            id="source"
+            aria-label="Source program"
+            spellcheck="false"
+          ></textarea>
+          <details>
+            <summary>Compiled FPGA instructions</summary>
+            <pre id="asm"></pre>
+          </details>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/machines.js"></script>
+  </body>
+</html>

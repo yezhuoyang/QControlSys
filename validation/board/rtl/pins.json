@@ -1,0 +1,63 @@
+{
+  "revision": "94cecd4eb9d04f4ebb957f70a5783b45cbd7a51a",
+  "member": "firmware-source/2017.4/Vivado/hdl/dio24_timing.v",
+  "sha256": "dcc2c6bfe67ba4f107324336b5d45b2b03c279ed453e9be6d8f3935c724f4816",
+  "origin": "first change of output data",
+  "timeGridPs": 20000,
+  "pins": [
+    {
+      "atPs": 0,
+      "address": 21,
+      "word": 10922,
+      "strobe": 0
+    },
+    {
+      "atPs": 240000,
+      "address": 21,
+      "word": 10922,
+      "strobe": 1
+    },
+    {
+      "atPs": 740000,
+      "address": 21,
+      "word": 10922,
+      "strobe": 0
+    },
+    {
+      "atPs": 4000000,
+      "address": 21,
+      "word": -21846,
+      "strobe": 0
+    },
+    {
+      "atPs": 4240000,
+      "address": 21,
+      "word": -21846,
+      "strobe": 1
+    },
+    {
+      "atPs": 4740000,
+      "address": 21,
+      "word": -21846,
+      "strobe": 0
+    },
+    {
+      "atPs": 12000000,
+      "address": 21,
+      "word": 32767,
+      "strobe": 0
+    },
+    {
+      "atPs": 12240000,
+      "address": 21,
+      "word": 32767,
+      "strobe": 1
+    },
+    {
+      "atPs": 12740000,
+      "address": 21,
+      "word": 32767,
+      "strobe": 0
+    }
+  ]
+}

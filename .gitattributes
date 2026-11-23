@@ -1,0 +1,3 @@
+# Preserve byte identities of native artifacts that are bound to upstream SHA-256 digests.
+validation/qccd/h2-theta1.tsir.json -text
+validation/neutral/zac/** -text

@@ -1,0 +1,35 @@
+{
+  "kind": "qccd-broadcast",
+  "version": 1,
+  "clockNs": 1000,
+  "latchNs": 5000,
+  "settleNs": 2000,
+  "gateNs": 3000,
+  "opticalDelayNs": 40,
+  "travelUm": 120,
+  "fullScaleMv": 2000,
+  "gateZone": "A",
+  "zones": [
+    {
+      "id": "A",
+      "wired": true,
+      "initialEnable": false,
+      "requestEnable": true,
+      "arrivalNs": 4000
+    },
+    {
+      "id": "B",
+      "wired": true,
+      "initialEnable": true,
+      "requestEnable": false,
+      "arrivalNs": 4000
+    }
+  ],
+  "waveform": [
+    { "offsetNs": 0, "mv": 0 },
+    { "offsetNs": 10000, "mv": 312 },
+    { "offsetNs": 20000, "mv": 1000 },
+    { "offsetNs": 30000, "mv": 1688 },
+    { "offsetNs": 40000, "mv": 2000 }
+  ]
+}

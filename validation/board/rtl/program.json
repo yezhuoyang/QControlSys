@@ -1,0 +1,11 @@
+{
+  "clockPs": 20000,
+  "timestampTickPs": 1000000,
+  "address": 21,
+  "instructions": [
+    {"tick": 2, "word": 10922},
+    {"tick": 6, "word": -21846},
+    {"tick": 10, "word": 7777, "nop": true},
+    {"tick": 14, "word": 32767}
+  ]
+}

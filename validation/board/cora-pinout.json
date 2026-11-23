@@ -1,0 +1,33 @@
+{
+  "member": "firmware-source/2017.4/Vivado/xdc/Cora-Z7-buffer-board-v1.2.xdc",
+  "sha256": "46378d4fae215ae2e85cbb0f251b1cee18fb04a8b3e216f0ed66411dfa6eae92",
+  "data": [
+    "R14",
+    "R17",
+    "V18",
+    "V17",
+    "T15",
+    "T14",
+    "V13",
+    "U14",
+    "R16",
+    "U12",
+    "U13",
+    "V15",
+    "T16",
+    "U17",
+    "T17",
+    "R18"
+  ],
+  "address": [
+    "A20",
+    "P14",
+    "N16",
+    "L16",
+    "K17",
+    "J19",
+    "F17"
+  ],
+  "strobe": "B19",
+  "start": "F19"
+}

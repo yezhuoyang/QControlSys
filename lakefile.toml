@@ -1,0 +1,16 @@
+name = "qcontrol"
+version = "0.1.0"
+defaultTargets = ["qcontrol"]
+
+[[lean_lib]]
+name = "QControl"
+
+[[lean_exe]]
+name = "qcontrol"
+root = "Main"
+needs = ["qccdInstallation"]
+
+[[input_file]]
+name = "qccdInstallation"
+path = "physical/qccd-installation.json"
+text = true

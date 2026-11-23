@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "word": 2,
+  "readoutNs": 1000,
+  "demodNs": 150,
+  "linkNs": 450,
+  "sampleNs": 1600,
+  "clockNs": 10,
+  "widthNs": 50,
+  "gapNs": 30,
+  "tx": { "x": -112, "z": -17 },
+  "rx": { "x": 112, "z": 17 }
+}

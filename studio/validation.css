@@ -1,0 +1,172 @@
+.top nav a,
+#studyLinks a,
+#designLinks a {
+  color: #176052;
+  font-weight: 600;
+  margin-right: 1rem;
+}
+.no-case .workbench,
+.no-case .system-tools,
+.no-case .system-info,
+.no-case .instrument:has(#scope) {
+  display: none;
+}
+#platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+.experiment-choice {
+  display: block;
+  margin-bottom: 1rem;
+}
+.experiment-choice[hidden] {
+  display: none;
+}
+.experiment-choice select {
+  max-width: min(100%, 550px);
+}
+#platforms button[aria-pressed="true"] {
+  background: #185d55;
+  color: white;
+  border-color: #185d55;
+}
+.study-head,
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.controls {
+  justify-content: flex-start;
+}
+.controls select {
+  max-width: min(320px, 70vw);
+}
+#verdict {
+  color: #125a49;
+}
+#verdict[data-passed="false"],
+#editorError {
+  color: #a23921;
+}
+#statistics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.3rem;
+  padding: 0.55rem 0;
+}
+#statistics div {
+  display: grid;
+  gap: 2px;
+}
+#statistics b {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.35rem;
+}
+#statistics small,
+#plotCaption,
+#loading {
+  color: #46635a;
+}
+.plot-wrap {
+  width: 100%;
+  min-width: 0;
+}
+#comparison {
+  display: block;
+  height: 238px;
+  width: 100%;
+  cursor: crosshair;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.3rem;
+  color: #40574e;
+  font-size: 0.83rem;
+}
+.legend span::before {
+  content: "";
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+  background: #ac622b;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+}
+.legend span:first-child::before {
+  background: #166a64;
+  width: 20px;
+  height: 3px;
+  vertical-align: middle;
+}
+.legend span:last-child::before {
+  background: #748b93;
+}
+#values {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.38rem 0.6rem;
+  font-size: 0.82rem;
+}
+#values dt {
+  color: #47625a;
+}
+#values dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+#designSteps {
+  margin-top: 0.8rem;
+}
+#parents button {
+  margin: 3px;
+}
+.table-scroll {
+  overflow: auto;
+  max-height: 340px;
+}
+#when.analysis-stamp {
+  font: 600 0.85rem system-ui;
+  margin: 0.7rem 0;
+  color: #47625a;
+}
+#seriesLabel {
+  display: block;
+  margin: 0.5rem 0;
+}
+#seriesLabel[hidden] {
+  display: none;
+}
+#parameters,
+#design {
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#editor textarea {
+  width: 100%;
+  min-height: 45vh;
+  font-family: monospace;
+}
+#scope {
+  width: 100%;
+  display: block;
+}
+@media (max-width: 650px) {
+  .top nav a {
+    margin-right: 0.5rem;
+    font-size: 0.82rem;
+  }
+  #statistics {
+    gap: 0.5rem 1rem;
+  }
+  #statistics b {
+    font-size: 1.15rem;
+  }
+}

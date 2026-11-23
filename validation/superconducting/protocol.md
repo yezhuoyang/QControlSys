@@ -1,0 +1,23 @@
+# Held-out transmon pulse-area benchmark
+
+The target is the real part of the archived mode-matched emission cross-power for the 25 ns Gaussian-width slice used in Figure 6(c). Choose the nearest stored width if there is no exact match and report the actual value. Include all 50 drive settings in file order. Even zero-based amplitude indices calibrate the response. Odd indices are held out.
+
+Compare the measured endpoint to an affine readout of a resonant two-level rotation. Compute the rotation from the area under the executed DAC envelope. Fit a rotation-area coefficient, a nonnegative contrast and an offset using calibration observations alone. Search from 0.05 through 8 full rotations at the largest calibration area, with uniform steps of at most 0.002 rotation. Use the minimum unweighted squared residual. The origin corresponds to zero drive. There is no free phase or fitted damping parameter.
+
+Reconstruct the 50 MHz intermediate-frequency waveform on a 2 ns grid, with the Gaussian centred between the endpoints and truncated at ±2σ. Scale the native `ampIf` setting numerically to a fraction of the simulator's ±1 V full scale. Add a trailing zero to close the final hold interval. Estimate the resonant envelope area as twice the magnitude of the time integral of the executed zero-order-held DAC output against a complex 50 MHz reference. The model uses an ideal resonant mixer and a calibrated area-to-rotation conversion. The experimental digitizer operated at 500 MS/s. The model's matching DAC sample rate is an assumption.
+
+The result passes if the held-out root-mean-square error is at most 15% of the held-out observed peak-to-peak range **and** the held-out coefficient of determination is at least 0.75. Use all 25 held-out settings. Zero range or zero variance fails. These are engineering acceptance thresholds chosen for this benchmark. The split and criteria were written before inspecting the detector values or computing a residual.
+
+Dataset and experiment. [Labranca, Mendeley Data v1](https://doi.org/10.17632/vzs49gddsm.1) · [Labranca et al., New Journal of Physics 27, 073001, Figure 6](https://doi.org/10.1088/1367-2630/ade736)
+
+## Data provenance and reproduction
+
+Danilo Labranca deposited the acquired data on 13 January 2025. The 478,866-byte `RabiOscillations.mat` file has SHA-256 `d72b3251e478594dd86320415553b5253c240fa72ad7644f2db445c2d14aa844`. The original repository file identifier is `cffd7634-d4df-490b-8653-658744784345`. The repository's v1 manifest and an independent download of the original file agree on that digest. Data are used and adapted under CC BY 4.0. [Institutional deposit](https://board.unimib.it/datasets/vzs49gddsm/1) · [Archive manifest](https://board.unimib.it/public-api/datasets/vzs49gddsm/files?version=1&folder_id=root) · [License](https://creativecommons.org/licenses/by/4.0/)
+
+Run `python validation/superconducting/extract.py` with SciPy installed to re-download the original MAT file and regenerate the CSV. Pass `--mat RabiOscillations.mat` for a local copy. The CSV contains the file's `ampIf`, `attenuation` and real-valued `PCorr` values for zero-based row 2 of `output.pulseSigmas`. The only transformations are selecting the row, writing round-trip decimal floats and attaching the zero-based column index. The canonical LF CSV SHA-256 is `f54e605a7bbe535c93cc1b2538e922c64ddeda8394b96f2fef066fcc3dcde9f6`. The ordinary benchmark uses the checked-in slice and the Python standard library.
+
+The source includes the drive frequency, Gaussian widths, truncation setting and amplitude axis. The study reports the mixer IF, the 90-degree hybrid that splits the emitted microwave field, and two independently amplified and digitized receiver channels. The measured endpoint is their time-mode-matched cross-power. Register transactions, the DAC-code mapping, its sample clock, and the ideal resonant upconversion are simulator choices. A calibration-only offset and contrast account for collection efficiency and readout gain. This assesses interpolation within one archived sweep. A test of transfer across devices, timing jitter, noise spectra, or absolute emission efficiency requires separate measurements.
+
+## Result
+
+Run `python validation/run.py --platform superconducting --check` after building the executable. The 25 held-out settings gave an RMSE of 0.000006724 in native cross-power units over a measured range of 0.00010983. The normalized RMSE was 6.12% and R² was 0.9585. Both predeclared criteria passed. Some measured cross-powers were negative near the noise floor. The benchmark retains their signed values.

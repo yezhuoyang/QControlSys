@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QCCD Studio replay · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/studio-replay.css" />
+    <script type="importmap">
+      { "imports": { "three": "/three/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <i class="brand-mark" aria-hidden="true"></i>QControl
+        <span>Studio</span>
+      </div>
+      <nav aria-label="Program actions">
+        <select id="bench" aria-label="Choose bench">
+          <option value="/machines">Machine workbench</option>
+          <option value="/feedforward">Feed-forward</option>
+          <option value="/qccd">QCCD broadcast</option>
+          <option value="/controller">FPGA waveform controller</option>
+          <option value="/validation">Hardware validation</option>
+          <option value="/qccd-studio" selected>QCCD Studio replay</option>
+          <option value="/neutral">Neutral-atom AOD</option>
+        </select>
+        <button id="open">Open files</button
+        ><button id="export" disabled>Export trace</button>
+      </nav>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <h1>QCCD Studio replay</h1>
+          <p id="machineTitle">
+            Opening the H2 racetrack and its 32-qubit GHZ program…
+          </p>
+        </div>
+        <div id="runState" class="run-state" role="status">Loading replay…</div>
+      </div>
+      <div id="alert" role="alert" hidden></div>
+      <div class="workbench">
+        <section class="physical" aria-label="Trap replay">
+          <div class="viewport" id="viewport">
+            <div class="viewbar">
+              <span class="view-title">Trap topology</span>
+              <div><button id="resetView">Reset view</button></div>
+            </div>
+            <div id="labels"></div>
+            <div class="legend">
+              <span>Ion</span><span>Gate site</span><span>Active route</span>
+            </div>
+            <div class="viewhint">Drag to orbit · Select an ion or site</div>
+          </div>
+          <div class="transport">
+            <div class="buttons">
+              <button id="back" disabled aria-label="Previous event">‹</button
+              ><button id="play" disabled>Play</button
+              ><button id="next" disabled aria-label="Next event">›</button>
+            </div>
+            <input
+              id="step"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+              disabled
+              aria-label="Replay cycle"
+            /><output id="counter">—</output>
+          </div>
+        </section>
+        <aside>
+          <div class="panel-label">Cycle inspector</div>
+          <div class="event-time" id="eventTime">—</div>
+          <h2 id="eventTitle">Initial state</h2>
+          <p class="description" id="sourceRef"></p>
+          <div class="inspector-section">
+            <h3>Transport and operands</h3>
+            <div id="moves" class="change"></div>
+          </div>
+          <div class="inspector-section">
+            <h3>Control dispatch</h3>
+            <div id="driver" class="change"></div>
+            <details id="bankDetail">
+              <summary>Channel banks</summary>
+              <div id="banks" class="change"></div>
+            </details>
+          </div>
+          <div class="inspector-section">
+            <h3>Previous cycle</h3>
+            <div id="causes"></div>
+          </div>
+          <div class="inspector-section">
+            <h3>Hardware selection</h3>
+            <div id="selection" class="change">
+              Choose a site or ion in the trap topology.
+            </div>
+          </div>
+        </aside>
+      </div>
+      <section class="instrument">
+        <div class="instrument-head">
+          <div>
+            <h2>Replay evidence</h2>
+            <p id="geometryNote"></p>
+          </div>
+          <a href="/model/StudioPlacement.lean" target="_blank" rel="noopener"
+            >Placement check</a
+          >
+        </div>
+        <dl id="metrics" class="metric-strip"></dl>
+        <p id="timeNote" class="subtle"></p>
+        <details>
+          <summary>Studio rule verdicts</summary>
+          <div id="rules"></div>
+        </details>
+      </section>
+      <section class="trace-panel">
+        <div class="trace-head">
+          <h2>Execution trace</h2>
+          <label class="filter"
+            >Find cycle
+            <input
+              id="filter"
+              type="search"
+              placeholder="Ion, site or instruction ID"
+              aria-label="Filter execution trace"
+          /></label>
+        </div>
+        <div class="trace-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Cycle</th>
+                <th>Source ID</th>
+                <th>Instruction</th>
+                <th>Sites</th>
+                <th>End time</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="trace-pages">
+          <button id="prevRows" disabled>Earlier cycles</button
+          ><output id="rowRange" aria-live="polite"></output
+          ><button id="nextRows" disabled>Later cycles</button>
+        </div>
+        <details>
+          <summary>Selected source instruction</summary>
+          <pre id="instruction"></pre>
+        </details>
+      </section>
+      <section class="instrument">
+        <div class="instrument-head">
+          <div>
+            <h2>Studio source files</h2>
+            <p id="sourceNames">
+              Load an architecture and program, or a Studio design.
+            </p>
+          </div>
+          <div class="config">
+            <button id="native" disabled>Open native editor</button
+            ><button id="saveArch" disabled>Save architecture</button
+            ><button id="saveTSIR" disabled>Save TSIR</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <dialog id="importer">
+      <form method="dialog">
+        <header>
+          <h2>Open QCCD Studio files</h2>
+          <button>Close</button>
+        </header>
+      </form>
+      <form id="importForm">
+        <label
+          >Architecture or Studio design<input
+            id="archFile"
+            type="file"
+            accept=".json"
+            required /></label
+        ><label
+          >Compiled TSIR program<input id="progFile" type="file" accept=".json"
+        /></label>
+        <p>
+          A Studio design can replay its embedded program calls. An architecture
+          file needs a companion TSIR program.
+        </p>
+        <p id="importError" role="alert"></p>
+        <footer>
+          <button type="button" id="demo">Load H2 example</button
+          ><button id="apply" type="submit">Open replay</button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="nativeDialog">
+      <header>
+        <div>
+          <h2>QCCD Studio</h2>
+          <p>
+            Save the edited design in Studio, then use Open files to replay it
+            in QControl.
+          </p>
+        </div>
+        <button id="closeNative">Return to replay</button>
+      </header>
+      <p role="status" id="nativeStatus"></p>
+      <iframe
+        id="nativePage"
+        title="Native QCCD Studio editor"
+        sandbox="allow-scripts allow-downloads"
+      ></iframe>
+    </dialog>
+    <script type="module" src="/studio-replay.js"></script>
+  </body>
+</html>

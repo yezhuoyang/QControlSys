@@ -1,0 +1,19 @@
+{
+  "kind": "neutral-aod",
+  "version": 1,
+  "clockNs": 100,
+  "acousticNs": 1200,
+  "referenceKHz": 80000,
+  "nmPerKHz": 10,
+  "columnsKHz": [80500, 81000],
+  "rowsKHz": [80500, 81000],
+  "atoms": [
+    { "id": "A", "column": 0, "row": 0 },
+    { "id": "B", "column": 0, "row": 1 },
+    { "id": "C", "column": 1, "row": 0 }
+  ],
+  "moves": [
+    { "id": "column", "axis": "x", "tone": 0, "targetKHz": 80750, "startNs": 1000, "durationNs": 80000, "steps": 5 },
+    { "id": "row", "axis": "y", "tone": 1, "targetKHz": 81250, "startNs": 90000, "durationNs": 80000, "steps": 5 }
+  ]
+}

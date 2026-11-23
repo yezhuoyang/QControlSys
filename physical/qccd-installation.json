@@ -1,0 +1,58 @@
+{
+  "unit": "mm",
+  "studioBindings": {
+    "driver": {"transport":["dac","analog","feedthrough","carrier","chip"],"optical":["laser","optical-fiber","optics","chip"]},
+    "operation": {"init":["controller","chip"],"barrier":["controller"],"decode":["controller"]},
+    "default": ["chip"],
+    "basis": "A native TSIR cycle activates these illustrative assemblies together. Studio supplies its driver and cycle interval."
+  },
+  "name": "QCCD reference installation",
+  "note": "The bench, chassis, chamber, carrier and cables are an illustrative lab installation. Route lengths are drawn lengths. Program timing determines signal arrival. The chip uses the H2 electrode span and isthmus width. Its surface faces up here. The imported H2 wells follow Studio geometry. The broadcast program places its own independent lanes inside the same reference envelope. Beads, collimated light rays and indicator lights are display markers.",
+  "chipModel": {
+    "electrodeSpanMm": 6.58,
+    "isthmusWidthMm": 2.02,
+    "h2PitchMm": 0.75,
+    "h2OriginPitch": [1.5, 0.5],
+    "ionHeightMm": 0.07,
+    "markerRadiusMm": 0.034,
+    "coLocatedMarkerSeparationMm": 0.074,
+    "broadcastLanePitchMm": 0.27,
+    "broadcastStartMm": -0.5,
+    "basis": "Moses et al. Figs. 1 and 2 and Sec. II.A supply the H2 span, width, pitch and ion-surface separation. Studio provides H2 site positions in pitch units. Broadcast lane spacing, marker size and within-site display separation are illustrative."
+  },
+  "parts": [
+    {"id":"bench","label":"Optical work surface","kind":"table","centerMm":[0,0,0],"sizeMm":[1240,28,840],"basis":"Example support dimensions."},
+    {"id":"rack","label":"Electronics rack frame","kind":"rack","centerMm":[-290,168,0],"sizeMm":[475,308,350],"basis":"Example short rack with open front and sides."},
+    {"id":"controller","label":"FPGA control chassis","kind":"fpga","centerMm":[-290,203,0],"sizeMm":[438,44,290],"basis":"Example rack controller enclosure."},
+    {"id":"selector","label":"Selector receiver","kind":"receiver","centerMm":[-290,134,0],"sizeMm":[437,38,274],"basis":"Example data receiver and latch module."},
+    {"id":"dac","label":"Transport DAC chassis","kind":"dac","centerMm":[-290,72,0],"sizeMm":[438,48,290],"basis":"Example transport output chassis."},
+    {"id":"laser","label":"Fiber-coupled laser modulator","kind":"laser","centerMm":[170,57,-210],"sizeMm":[234,82,110],"basis":"Example optical source and modulator package."},
+    {"id":"chamber","label":"Vacuum chamber cutaway","kind":"chamber","centerMm":[295,104,48],"sizeMm":[202,174,174],"basis":"Example chamber outer envelope. Front, lid and near wall omitted for access."},
+    {"id":"feedthrough","label":"Electrical vacuum feedthrough","kind":"feedthrough","centerMm":[191,85,48],"sizeMm":[22,40,40],"basis":"Example electrical feedthrough at the chamber wall."},
+    {"id":"optics","label":"Optical gate head","kind":"objective","centerMm":[295,130,-58],"sizeMm":[44,44,42],"basis":"Example fiber collimator outside the optical port."},
+    {"id":"mount","label":"Carrier pedestal","kind":"mount","centerMm":[295,62.4,48],"sizeMm":[42,70.8,40],"basis":"Example mechanical support inside the chamber cutaway."},
+    {"id":"carrier","label":"Ceramic chip carrier","kind":"carrier","centerMm":[295,99,48],"sizeMm":[32,2.4,28],"basis":"Example ceramic package footprint and thickness."},
+    {"id":"chip","label":"Trap die and electrodes","kind":"chip","centerMm":[295,100.45,48],"sizeMm":[8.4,0.5,4.2],"basis":"Example die outline and thickness. Electrode span 6.58 mm and isthmus width 2.02 mm follow Moses et al. Fig. 1."}
+  ],
+  "links": [
+    {"id":"fiber","kind":"data fiber","from":"controller","to":"selector","pointsMm":[[-415,203,145],[-415,199,181],[-395,177,197],[-390,145,170],[-390,134,137]]},
+    {"id":"dac-bus","kind":"digital cable","from":"controller","to":"dac","pointsMm":[[-250,203,145],[-250,202,169],[-275,142,189],[-274,92,165],[-250,72,145]]},
+    {"id":"analog","kind":"shielded analog cable","from":"dac","to":"feedthrough","pointsMm":[[-108,72,145],[-82,67,163],[-41,51,155],[63,48,131],[153,76,48],[180,85,48]]},
+    {"id":"selector-lines","kind":"digital cable","from":"selector","to":"feedthrough","pointsMm":[[-110,134,137],[-67,126,145],[-15,65,113],[92,61,85],[180,85,51]]},
+    {"id":"electrode-drive","kind":"vacuum harness","from":"feedthrough","to":"carrier","pointsMm":[[202,85,48],[216,88,48],[249,96,56],[279,99.7,55]]},
+    {"id":"carrier-bond","kind":"package bond","from":"carrier","to":"chip","pointsMm":[[287,100.2,48.8],[289,100.95,48.8],[291.1,100.7,48.8]]},
+    {"id":"optical-fiber","kind":"gate-light fiber","from":"laser","to":"optics","pointsMm":[[287,62,-205],[309,64,-193],[327,84,-163],[322,109,-123],[295,130,-79]]},
+    {"id":"gate-beam","kind":"optical path","from":"optics","to":"chip","pointsMm":[[295,130,-37],[295,100.77,48]]}
+  ],
+  "focus": [
+    {"id":"installation","label":"Full installation","centerMm":[0,101,-12],"spanMm":1380},
+    {"id":"controller","label":"FPGA and DAC rack","centerMm":[-290,170,0],"spanMm":610},
+    {"id":"chamber","label":"Vacuum chamber","centerMm":[295,105,43],"spanMm":270},
+    {"id":"carrier","label":"Chip carrier","centerMm":[295,100,48],"spanMm":41},
+    {"id":"chip","label":"Trap electrodes and ions","centerMm":[295,100.73,48],"spanMm":9.4}
+  ],
+  "sources": [
+    {"title":"Moses et al., A Race-Track Trapped-Ion Quantum Processor, Figs. 1–2 and Sec. II.A","url":"https://doi.org/10.1103/PhysRevX.13.041052"},
+    {"title":"QCCD Studio H2 geometry reconstruction and approximation notes","url":"https://github.com/yezhuoyang/QCCD/blob/compiler/Reproduce/moses2023/DESIGN.md"}
+  ]
+}

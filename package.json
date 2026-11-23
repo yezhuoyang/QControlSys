@@ -1,0 +1,13 @@
+{
+  "name": "qcontrol-studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "lake build",
+    "start": "lake build && node server.mjs",
+    "test": "lake build && node --test"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  }
+}

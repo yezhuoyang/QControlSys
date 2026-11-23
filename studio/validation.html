@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Hardware validation · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/validation.css" />
+    <script type="importmap">
+      { "imports": { "three": "/three/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <i class="brand-mark" aria-hidden="true"></i>QControl
+        <span>Studio</span>
+      </div>
+      <nav>
+        <a href="/board-validation">Board measurements</a>
+        <a href="/machines">Machine workbench</a>
+        <a href="/controller">Controller bench</a
+        ><a href="/qccd-studio">QCCD Studio</a>
+        <a href="/api/validation/results" download="hardware-validation.json"
+          >Save results</a
+        >
+      </nav>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <h1>Hardware validation</h1>
+          <p>
+            Replay a published experiment and compare predictions with
+            measurements held out of calibration.
+          </p>
+        </div>
+      </div>
+      <div id="alert" role="alert" hidden></div>
+      <nav id="platforms" aria-label="Hardware platform">
+        <button data-platform="qccd">QCCD trapped ions</button
+        ><button data-platform="neutral">Neutral atoms</button>
+        <button data-platform="superconducting">Superconducting</button>
+      </nav>
+      <label class="experiment-choice" hidden
+        >Experiment
+        <select id="experiment"></select
+      ></label>
+      <section class="instrument" aria-labelledby="study">
+        <div class="study-head">
+          <div>
+            <h2 id="study">Loading experiments…</h2>
+            <p id="observable"></p>
+          </div>
+          <strong id="verdict" role="status"></strong>
+        </div>
+        <div id="statistics"></div>
+        <p id="criterion"></p>
+        <label id="seriesLabel" hidden
+          ><span></span>
+          <select id="series"></select
+        ></label>
+        <div class="plot-wrap">
+          <canvas
+            id="comparison"
+            aria-label="Measured observations and predictions"
+          ></canvas>
+        </div>
+        <div class="legend">
+          <span>Prediction</span><span>Held-out measurement</span
+          ><span>Calibration measurement</span>
+        </div>
+        <p id="plotCaption"></p>
+        <p id="scopeNote"></p>
+        <div id="studyLinks"></div>
+      </section>
+      <section class="instrument controls">
+        <label
+          >Observation
+          <select id="observation"></select
+        ></label>
+        <button id="edit" disabled>Edit controller program</button
+        ><button id="restore" hidden>Restore reference</button>
+        <button id="save" disabled>Save case trace</button
+        ><output id="loading" aria-live="polite"></output>
+      </section>
+      <div class="workbench">
+        <section class="physical" aria-label="Experiment apparatus">
+          <div class="viewport" id="viewport">
+            <div class="viewbar">
+              <span class="view-title">Reference installation</span>
+            </div>
+            <div class="viewhint">
+              Drag to orbit · Scroll to zoom · Select hardware
+            </div>
+          </div>
+          <div class="transport">
+            <button id="back" aria-label="Previous step">‹</button
+            ><button id="next" aria-label="Next step">›</button>
+            <input
+              id="step"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+              aria-label="Trace step"
+            /><output id="counter"></output>
+          </div>
+        </section>
+        <aside>
+          <div class="panel-label">Event inspector</div>
+          <div class="event-time" id="when"></div>
+          <h2 id="eventName"></h2>
+          <p id="description"></p>
+          <div id="selection"></div>
+          <dl id="values"></dl>
+          <details>
+            <summary>Input events</summary>
+            <div id="parents"></div>
+          </details>
+        </aside>
+      </div>
+      <section class="instrument">
+        <h2>Delivered waveform</h2>
+        <p>
+          Buffer fill, DAC code and filtered output at the selected controller
+          step.
+        </p>
+        <canvas id="scope" aria-label="Waveform and controller buffer"></canvas>
+      </section>
+      <section class="instrument">
+        <h2 id="designTitle">Design source</h2>
+        <p id="designDescription"></p>
+        <div id="designLinks"></div>
+        <div id="designSteps"></div>
+        <details>
+          <summary>Design record</summary>
+          <pre id="design"></pre>
+        </details>
+      </section>
+      <section class="instrument">
+        <details>
+          <summary>Fitted parameters and acceptance metrics</summary>
+          <pre id="parameters"></pre>
+        </details>
+        <details>
+          <summary>Observation table</summary>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Observation</th>
+                  <th>Split</th>
+                  <th>Measured</th>
+                  <th>Predicted</th>
+                  <th>Residual</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+    </main>
+    <dialog id="editor">
+      <h2>Controller program</h2>
+      <p>
+        Edited programs are counterfactual runs. Restore the published setting
+        to compare with its measurement.
+      </p>
+      <textarea
+        id="program"
+        spellcheck="false"
+        aria-label="Controller program JSON"
+      ></textarea>
+      <p id="editorError" role="alert"></p>
+      <button id="cancel">Cancel</button>
+      <button id="apply">Replay program</button>
+    </dialog>
+    <script type="module" src="/validation.js"></script>
+  </body>
+</html>

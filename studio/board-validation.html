@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Board measurements · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/board-validation.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <i class="brand-mark"></i>QControl <span>Studio</span>
+      </div>
+      <nav>
+        <a href="/machines">Machine workbench</a
+        ><a href="/validation">Device measurements</a>
+      </nav>
+    </header>
+    <main>
+      <h1>Quantum controller measurements</h1>
+      <p class="intro">
+        Follow a trapped-ion DAC update from FPGA pins to the analog output, or
+        inspect the INO/LENS cold-atom controller’s timing, cable and
+        memory-transfer measurements.
+      </p>
+      <div id="error" role="alert" hidden></div>
+      <section class="instrument" id="electrode">
+        <h2>Trapped-ion electrode DAC</h2>
+        <p>
+          Compare a full 20 V transition from the Duke prototype with a replay
+          of the Spartan-7, DAC81416 and output filter. The rising edge
+          calibrates the effective slew rate and time origin. The falling edge
+          tests both.
+        </p>
+        <label
+          >Output transition
+          <select id="edge">
+            <option value="falling">+10 V to −10 V · held out</option>
+            <option value="rising">−10 V to +10 V · calibration</option>
+          </select>
+        </label>
+        <div class="plot-key">
+          <span class="measured">Published curve and stroke extent</span>
+          <span class="predicted">Replay</span>
+        </div>
+        <canvas
+          id="edgePlot"
+          aria-label="Published DAC output and simulated voltage in microseconds"
+        ></canvas>
+        <label class="slider"
+          >Figure column
+          <input id="edgeRow" type="range" min="0" max="771" value="385"
+        /></label>
+        <output id="edgeReading" aria-live="polite"></output>
+        <p>
+          <a id="debugEdge">Follow this voltage back to the SPI pins in 3D</a>
+          · <a id="debugWord">Inspect the 24-bit DAC write</a>
+        </p>
+        <p id="edgeResult"></p>
+        <details>
+          <summary>Timing reference and figure resolution</summary>
+          <p>
+            The comparison uses the blue stroke in Figure 8. Each image column
+            spans 0.129 µs horizontally. One vertical pixel corresponds to 66
+            mV. The shaded band shows the drawn stroke thickness. The figure
+            supplies two plotted edges and no synchronized command trigger. The
+            SPI program and physical routing are reconstructions.
+          </p>
+          <p>
+            The replay uses a 48.22 kHz single-pole output filter and 0.1 µs
+            analog steps. Band entry is measured from the 0 V crossing to the
+            first column after which the curve centre stays within 1 V of the
+            final nominal level for the rest of the plot.
+          </p>
+          <p>
+            <a href="https://arxiv.org/html/2605.01132v1#S5.SS4"
+              >Peaks, Kaarls and Noel · Figure 8 (CC BY 4.0)</a
+            >
+            ·
+            <a href="https://www.ti.com/lit/ds/symlink/dac81416.pdf"
+              >Texas Instruments · DAC81416 serial interface</a
+            >
+          </p>
+        </details>
+      </section>
+      <section class="instrument" id="cold-atom">
+        <h2>FPGA trigger and analog output</h2>
+        <p>
+          One free-running capture sets the triangular waveform. Nine other
+          captures test the same program, including five runs where a low
+          trigger pauses the DAC ramp.
+        </p>
+        <label
+          >Oscilloscope capture
+          <select id="capture"></select
+        ></label>
+        <div class="plot-key">
+          <span class="measured">CH2 measured</span
+          ><span class="predicted">CH2 replay</span
+          ><span class="trigger">CH1 trigger</span>
+        </div>
+        <canvas
+          id="plot"
+          aria-label="Measured and replayed voltage, with the input trigger on its own axis"
+        ></canvas>
+        <label class="slider"
+          >Scope sample
+          <input id="row" type="range" min="0" max="2499" value="420"
+        /></label>
+        <output id="reading" aria-live="polite"></output>
+        <p><a id="debugRamp">Inspect this sample in the 3D debugger</a></p>
+        <p id="voltageResult"></p>
+        <details>
+          <summary>Measurement and calibration</summary>
+          <p>
+            Figure 10 records CH1 and CH2 every 400 µs. The debugger
+            reconstructs the 4 µs update cadence around the selected scope
+            sample. It uses the published v1.2 pin assignments and buffer-card
+            schematic for the 16 data lines, seven address lines and separate
+            strobe. The scope captures do not identify the card revision.
+            Routing geometry, command words and individual strobe times are
+            reconstructed. CH1 edges are placed halfway between scope samples.
+          </p>
+          <p id="rampSources"></p>
+        </details>
+        <h3>Firmware pin timing</h3>
+        <p id="rtlResult"></p>
+        <p>
+          <a id="debugRtl" href="/machines?boardCase=rtl-bus"
+            >Step through the firmware comparison in 3D</a
+          >
+          ·
+          <a
+            href="https://github.com/INO-quantum/FPGA-SoC-experiment-control/blob/94cecd4eb9d04f4ebb957f70a5783b45cbd7a51a/firmware-source/2017.4/Vivado/hdl/dio24_timing.v"
+            >Original timing module</a
+          >
+        </p>
+      </section>
+      <section class="instrument">
+        <h2>Trigger cable flight time</h2>
+        <p>
+          The primary FPGA estimates one-way delay from a reflected pulse. Four
+          calibration lengths establish effective propagation speed. Each
+          remaining length is an independent test of the model across the
+          available clock phases.
+        </p>
+        <label
+          >Installed RG-58 cable
+          <select id="length"></select
+        ></label>
+        <output id="cableReading"></output>
+        <p><a id="debugCable">Trace the FPGA pulse in 3D</a></p>
+        <p id="timingResult"></p>
+      </section>
+      <section class="instrument" id="bandwidth">
+        <h2>Memory-to-FPGA bandwidth and deadlines</h2>
+        <p>
+          The FPGA counted 12-byte records at the transmit FIFO. Choose a burst
+          length to compare predicted throughput with repeated hardware
+          measurements on the 50 MHz clock.
+        </p>
+        <label
+          >Records per burst
+          <select id="burst"></select
+        ></label>
+        <output id="dmaReading"></output>
+        <label
+          >Completion deadline (50 MHz cycles from FIFO start)
+          <input id="deadline" type="number" min="0" step="1" required />
+        </label>
+        <output id="deadlineReading" aria-live="polite"></output>
+        <label
+          >Hardware repetition
+          <select id="repetition"></select
+        ></label>
+        <output id="counterReading"></output>
+        <label
+          >Record to inspect
+          <input type="number" id="ordinal" min="1" step="1" value="5"
+        /></label>
+        <p><a id="debugDma">Inspect this record in the 3D debugger</a></p>
+        <p id="dmaResult"></p>
+        <details>
+          <summary>Counter window and model</summary>
+          <p>
+            The first four records can drain at one per clock. The 4,096-record
+            burst sets the subsequent average service time. The counter measures
+            the transfer window inside the FPGA. Operating-system startup time
+            is outside this window. The debugger can probe any record ordinal.
+            The archive reports elapsed cycles for the whole burst.
+          </p>
+        </details>
+      </section>
+      <p>
+        <a href="https://doi.org/10.1063/5.0058986"
+          >Trenkwalder, Zaccanti and Poli · Figures 4, 6, 8 and 10</a
+        >
+        ·
+        <a href="https://doi.org/10.5281/zenodo.5145980"
+          >Original measurements</a
+        >
+        ·
+        <a href="/api/board-validation/results" download="board-validation.json"
+          >Download numerical results</a
+        >
+      </p>
+    </main>
+    <script type="module" src="/board-validation.js"></script>
+  </body>
+</html>

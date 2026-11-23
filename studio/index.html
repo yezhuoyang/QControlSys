@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Feed-forward bench · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="importmap">
+      { "imports": { "three": "/three/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <i class="brand-mark" aria-hidden="true"></i>QControl
+        <span>Studio</span>
+      </div>
+      <nav aria-label="Program actions">
+        <select id="bench" aria-label="Choose bench">
+          <option value="/feedforward">Feed-forward</option>
+          <option value="/qccd">QCCD broadcast</option>
+          <option value="/controller">FPGA waveform controller</option>
+          <option value="/machines">Machine workbench</option>
+          <option value="/validation">Hardware validation</option>
+          <option value="/qccd-studio">QCCD Studio replay</option>
+          <option value="/neutral">Neutral-atom AOD</option>
+        </select>
+        <button id="edit">Edit program</button
+        ><button id="export">Export trace</button>
+      </nav>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <h1>Feed-forward bench</h1>
+          <p>Two-board measurement and conditional RF pulse delivery</p>
+        </div>
+        <div class="run-state" id="runState" role="status">
+          Loading program…
+        </div>
+      </div>
+      <div id="alert" role="alert" hidden></div>
+      <div class="workbench">
+        <section class="physical" aria-label="Interactive hardware model">
+          <div class="viewport" id="viewport">
+            <div class="viewbar">
+              <span class="view-title">Hardware view</span>
+              <div>
+                <button id="move" aria-pressed="false">Move boards</button
+                ><button id="resetView">Reset view</button>
+              </div>
+            </div>
+            <div id="labels"></div>
+            <div id="signalLegend" hidden aria-label="Signal paths">
+              <span>Selector data</span><span>Electrode drive</span
+              ><span>Gate light</span>
+            </div>
+            <div class="viewhint" id="viewhint">
+              Drag to orbit · Scroll to zoom · Click to inspect
+            </div>
+          </div>
+          <div class="transport">
+            <div class="buttons">
+              <button
+                id="back"
+                title="Previous event (Left arrow)"
+                aria-label="Previous event"
+              >
+                ‹</button
+              ><button id="play" aria-label="Play trace">Play</button
+              ><button
+                id="next"
+                title="Next event (Right arrow)"
+                aria-label="Next event"
+              >
+                ›
+              </button>
+            </div>
+            <input
+              id="step"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+              aria-label="Trace event"
+            /><output id="counter">—</output>
+          </div>
+        </section>
+        <aside>
+          <div class="panel-label">Event inspector</div>
+          <div class="event-time" id="eventTime">0 <small>ns</small></div>
+          <h2 id="eventTitle">Initial state</h2>
+          <p class="description" id="description"></p>
+          <div class="inspector-section">
+            <h3>Register changes</h3>
+            <div id="changes"></div>
+            <details>
+              <summary>All registers</summary>
+              <dl id="registers"></dl>
+            </details>
+          </div>
+          <div class="inspector-section">
+            <h3>Causes</h3>
+            <div id="causes"></div>
+          </div>
+          <div class="inspector-section" id="recipientSection" hidden>
+            <h3>Physical recipients</h3>
+            <div id="recipients"></div>
+          </div>
+          <div class="inspector-section">
+            <h3>Hardware selection</h3>
+            <div id="selection"></div>
+          </div>
+        </aside>
+      </div>
+      <section class="instrument" id="controllerPanel" hidden>
+        <h2>Waveform transfer</h2>
+        <div class="config controller-config">
+          <label>Bus width <select id="busWidth"><option value="16">16 bits</option><option value="32">32 bits</option><option value="64">64 bits</option></select></label>
+          <label>Bus grants <select id="busGrants"><option value="all">All slots</option><option value="half">Alternate slots</option><option value="custom" hidden>Program pattern</option></select></label>
+          <label>Input word <input id="controllerWord" type="number" min="0" max="65535" step="1"></label>
+          <button id="samplesCsv">Save sample CSV</button>
+        </div>
+        <p id="transferSummary"></p>
+        <a href="/board-validation">Compare the controller with published board measurements</a>
+        <details><summary>Compare a trigger-aligned capture</summary>
+          <p>A waveform CSV uses one row per DAC strobe with timeNs and outputUv columns. A <a href="/board-capture-format">four-channel JSON capture</a> compares instruction issue, accepted bus words, DAC strobes and independent connector voltage samples on one trigger.</p>
+          <input type="file" id="compareFile" disabled accept=".csv,.json,text/csv,application/json" aria-label="Measured controller capture">
+          <output id="captureResult" style="white-space:pre-line" aria-live="polite"></output>
+        </details>
+      </section>
+      <section class="instrument" id="wiring" hidden>
+        <div class="instrument-head">
+          <div>
+            <h2>Trap wiring</h2>
+            <p>Drag a source onto a lane or choose its wire below.</p>
+          </div>
+          <div class="config">
+            <span id="opticalTarget"></span
+            ><button id="addLane">Add lane</button>
+          </div>
+        </div>
+        <div class="wire-sources">
+          <span draggable="true" data-wire="dac">Shared DAC</span
+          ><span draggable="true" data-wire="hold">Hold bias</span>
+        </div>
+        <div id="laneCards"></div>
+      </section>
+      <section class="instrument" id="neutralControls" hidden>
+        <div class="instrument-head">
+          <div>
+            <h2>Shared tone move</h2>
+            <p>
+              Drag a tone onto the move or select it below. Apply the target
+              frequency to replay the program.
+            </p>
+          </div>
+        </div>
+        <div id="toneFields" class="lane-card"></div>
+      </section>
+      <section class="instrument">
+        <div class="instrument-head">
+          <div>
+            <h2>Signal monitor</h2>
+            <p>Digital states and DAC envelope across the run</p>
+          </div>
+          <div class="config">
+            <label
+              >Input bits
+              <select id="bits" aria-label="Input bits">
+                <option>00</option>
+                <option>01</option>
+                <option>10</option>
+                <option>11</option>
+              </select></label
+            ><label
+              >Arrival
+              <select id="arrival" aria-label="Result arrival">
+                <option value="nominal">Nominal</option>
+                <option value="late">One edge late</option>
+                <option value="custom" hidden>Custom</option>
+              </select></label
+            >
+          </div>
+        </div>
+        <canvas
+          id="scope"
+          aria-label="Signal timing diagram. Select a time to inspect the last event at or before it."
+        ></canvas>
+      </section>
+      <section class="trace-panel">
+        <div class="trace-head">
+          <h2>Execution trace</h2>
+          <button id="downloadProgram">Save program</button>
+        </div>
+        <div class="trace-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Time</th>
+                <th>Instruction</th>
+                <th>Hardware</th>
+                <th>Event ID</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <dialog id="editor">
+      <form method="dialog">
+        <header>
+          <h2>Bench program</h2>
+          <button aria-label="Close program editor">Close</button>
+        </header>
+      </form>
+      <p>
+        Times are in nanoseconds. Board coordinates are in millimetres. Applying
+        a program starts a new trace.
+      </p>
+      <textarea
+        id="programText"
+        spellcheck="false"
+        aria-label="Bench program JSON"
+      ></textarea>
+      <div id="programError" role="alert"></div>
+      <footer>
+        <a href="/model/QControl.lean" target="_blank" rel="noopener"
+          >Execution rules and proofs</a
+        ><button id="apply">Apply program</button>
+      </footer>
+    </dialog>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

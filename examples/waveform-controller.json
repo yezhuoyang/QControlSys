@@ -1,0 +1,31 @@
+{
+  "kind": "waveform-controller",
+  "version": 1,
+  "clockNs": 4,
+  "busEvery": 2,
+  "busBits": 32,
+  "grantPattern": [true],
+  "fifoWords": 8,
+  "sampleEvery": 1,
+  "dacBits": 12,
+  "fullScaleUv": 1000000,
+  "gainPermille": 1000,
+  "firQ15": [24576, 8192],
+  "inputWord": 0,
+  "maxCycles": 96,
+  "memory": [
+    0, 1024, 4096, 10240, 17408, 23552, 28672, 30720,
+    30720, 28672, 23552, 17408, 10240, 4096, 1024, 0,
+    0, 8192, 16384, 24576, 28672, 24576, 16384, 8192,
+    0, -8192, -16384, -24576, -28672, -24576, -16384, 0
+  ],
+  "code": [
+    {"jnz": {"target": 3}},
+    {"dma": {"address": 0, "count": 16}},
+    {"jump": {"target": 4}},
+    {"dma": {"address": 16, "count": 16}},
+    {"wait": {"ticks": 3}},
+    {"play": {"count": 16}},
+    "halt"
+  ]
+}

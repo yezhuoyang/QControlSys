@@ -1,0 +1,283 @@
+{
+  "title": "ZAC Bernstein–Vazirani transport on the two-AOD architecture",
+  "source": "https://github.com/UCLA-VAST/ZAC/blob/e5083362f99e6915f20c2bd0eaa88b6d1cdcecac/result/zac/arch_eval/full_2aod/code/bv_n14_transpiled_code.json",
+  "architectureSource": "https://github.com/UCLA-VAST/ZAC/blob/e5083362f99e6915f20c2bd0eaa88b6d1cdcecac/hardware_spec/full_architecture_2aod.json",
+  "revision": "e5083362f99e6915f20c2bd0eaa88b6d1cdcecac",
+  "lengthUnit": "µm",
+  "timeUnit": "µs",
+  "program": "bv_n14_transpiled",
+  "architecture": "full_compute_store_architecture",
+  "qubits": 14,
+  "aods": 2,
+  "replayedJobs": 26,
+  "replayedPhases": 78,
+  "selectedMove": {
+    "job": 5,
+    "qubit": 0,
+    "aod": 1,
+    "nativeDependencies": {
+      "qubit": [
+        4
+      ],
+      "site": [
+        2
+      ],
+      "aod": 0
+    },
+    "sourceSite": [
+      1,
+      0,
+      0
+    ],
+    "destinationSite": [
+      0,
+      99,
+      13
+    ],
+    "siteOrder": [
+      "slm",
+      "row",
+      "column"
+    ],
+    "pathUm": [
+      [
+        35,
+        307
+      ],
+      [
+        39,
+        297
+      ]
+    ],
+    "events": [
+      {
+        "id": "job-5-inst-0",
+        "nativeId": 0,
+        "nativeType": "activate",
+        "operation": "load",
+        "beginUs": 150.149276462422,
+        "endUs": 165.149276462422,
+        "pathUm": [
+          [
+            35,
+            307
+          ],
+          [
+            35,
+            307
+          ]
+        ],
+        "fromOwner": "SLM",
+        "toOwner": "AOD",
+        "parentWithinJob": null
+      },
+      {
+        "id": "job-5-inst-1",
+        "nativeId": 1,
+        "nativeType": "move:big",
+        "operation": "move",
+        "beginUs": 165.149276462422,
+        "endUs": 227.73109088241,
+        "pathUm": [
+          [
+            35,
+            307
+          ],
+          [
+            39,
+            297
+          ]
+        ],
+        "fromOwner": "AOD",
+        "toOwner": "AOD",
+        "parentWithinJob": "job-5-inst-0"
+      },
+      {
+        "id": "job-5-inst-2",
+        "nativeId": 2,
+        "nativeType": "deactivate",
+        "operation": "store",
+        "beginUs": 227.73109088241,
+        "endUs": 242.73109088241,
+        "pathUm": [
+          [
+            39,
+            297
+          ],
+          [
+            39,
+            297
+          ]
+        ],
+        "fromOwner": "AOD",
+        "toOwner": "SLM",
+        "parentWithinJob": "job-5-inst-1"
+      }
+    ],
+    "projection": {
+      "axis": "x",
+      "commandedDeltaUm": 4,
+      "nativeDeltaYUm": -10,
+      "calibrationRangeMHz": [
+        120.0,
+        215.0
+      ],
+      "nominalDriveMHz": [
+        170.0,
+        157.29395022616768
+      ],
+      "deliveredMHz": [
+        170.00000259027928,
+        157.29394076277538
+      ],
+      "predictedDeltaUm": 4.083578633775456,
+      "predictedMinusCommandUm": 0.08357863377545627,
+      "appliedPrograms": [
+        {
+          "busBits": 32,
+          "busEvery": 1,
+          "clockNs": 1,
+          "clockSubNsPs": 600,
+          "code": [
+            {
+              "dma": {
+                "address": 0,
+                "count": 32
+              }
+            },
+            {
+              "play": {
+                "count": 32
+              }
+            },
+            "halt"
+          ],
+          "dacBits": 16,
+          "fifoWords": 8,
+          "firQ15": [
+            32768
+          ],
+          "fullScaleUv": 1000000,
+          "gainPermille": 1000,
+          "grantPattern": [
+            true
+          ],
+          "inputWord": 0,
+          "kind": "waveform-controller",
+          "maxCycles": 38,
+          "memory": [
+            16000,
+            -2205,
+            -15392,
+            6447,
+            13616,
+            -10199,
+            -10805,
+            13177,
+            7174,
+            -15154,
+            -2998,
+            15980,
+            -1406,
+            -15592,
+            5703,
+            14021,
+            -9566,
+            -11385,
+            12704,
+            7884,
+            -14876,
+            -3784,
+            15919,
+            -603,
+            -15753,
+            4944,
+            14390,
+            -8910,
+            -11935,
+            12199,
+            8573,
+            -14562
+          ],
+          "sampleEvery": 1,
+          "version": 1
+        },
+        {
+          "busBits": 32,
+          "busEvery": 1,
+          "clockNs": 1,
+          "clockSubNsPs": 600,
+          "code": [
+            {
+              "dma": {
+                "address": 0,
+                "count": 32
+              }
+            },
+            {
+              "play": {
+                "count": 32
+              }
+            },
+            "halt"
+          ],
+          "dacBits": 16,
+          "fifoWords": 8,
+          "firQ15": [
+            32768
+          ],
+          "fullScaleUv": 1000000,
+          "gainPermille": 1000,
+          "grantPattern": [
+            true
+          ],
+          "inputWord": 0,
+          "kind": "waveform-controller",
+          "maxCycles": 38,
+          "memory": [
+            16000,
+            -168,
+            -15996,
+            504,
+            15986,
+            -839,
+            -15968,
+            1174,
+            15944,
+            -1509,
+            -15912,
+            1843,
+            15873,
+            -2176,
+            -15828,
+            2508,
+            15775,
+            -2840,
+            -15715,
+            3169,
+            15649,
+            -3498,
+            -15575,
+            3825,
+            15495,
+            -4150,
+            -15408,
+            4473,
+            15314,
+            -4795,
+            -15213,
+            5114
+          ],
+          "sampleEvery": 1,
+          "version": 1
+        }
+      ],
+      "note": "Projection of the ZAC X displacement onto the independent Durham apparatus. Native Y and transfer times are design coordinates. No measurement of this ZAC job is available."
+    }
+  },
+  "sha256": {
+    "hardware_spec/full_architecture_2aod.json": "731c97ce108d2d1a85cf20303229db6ba845f3e06c13744a3b5d78474e0e08b6",
+    "result/zac/arch_eval/full_2aod/code/bv_n14_transpiled_code.json": "16c4c3dd2764776e79c5eadafd16c9372f9cf7067bf433602bd1b37252f055b1"
+  },
+  "license": "BSD-3-Clause"
+}

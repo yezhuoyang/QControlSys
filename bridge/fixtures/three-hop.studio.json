@@ -1,0 +1,27 @@
+{
+  "kind": "qccd.studio",
+  "version": 1,
+  "arch": null,
+  "geom": [],
+  "seed": {
+    "method": "from_template",
+    "args": ["ring"],
+    "kwargs": {
+      "name": "rotation-preview",
+      "width": 4,
+      "height": 2,
+      "template": "ring144_24v"
+    }
+  },
+  "post": [],
+  "edits": [],
+  "program": {
+    "calls": [
+      { "method": "init", "args": [{ "ion-a": "S0", "ion-b": "S4" }] },
+      { "method": "rotate", "args": [3, "L0"] },
+      { "method": "barrier" },
+      { "method": "rotate", "args": [-1, "L0"] }
+    ]
+  },
+  "saved_at_frame": 0
+}

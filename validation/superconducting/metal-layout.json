@@ -1,0 +1,569 @@
+{
+  "version": 1,
+  "unit": "mm",
+  "component": "TransmonPocket",
+  "instance": "Q1",
+  "distribution": "quantum-metal",
+  "distributionVersion": "0.10.1",
+  "revision": "6d67d409b0994259cb3e9ac1b492440e03178a6b",
+  "source": "https://github.com/qiskit-community/qiskit-metal/blob/6d67d409b0994259cb3e9ac1b492440e03178a6b/src/qiskit_metal/qlibrary/qubits/transmon_pocket.py",
+  "license": "Apache-2.0",
+  "pinOptions": {
+    "drive": {
+      "loc_W": "-1",
+      "loc_H": "+1"
+    },
+    "emit": {
+      "loc_W": "+1",
+      "loc_H": "-1"
+    }
+  },
+  "chip": {
+    "name": "main",
+    "material": "silicon",
+    "boundsMm": [
+      -4.5,
+      -3.0,
+      4.5,
+      3.0
+    ],
+    "surfaceZMm": 0.0,
+    "substrateThicknessMm": 0.75,
+    "substrateDirection": "-Z"
+  },
+  "metalPolygons": [
+    {
+      "name": "ground",
+      "role": "ground",
+      "layer": 1,
+      "points": [
+        [
+          -4.5,
+          -3.0
+        ],
+        [
+          -4.5,
+          3.0
+        ],
+        [
+          4.5,
+          3.0
+        ],
+        [
+          4.5,
+          -3.0
+        ]
+      ],
+      "holes": [
+        [
+          [
+            0.325,
+            -0.184
+          ],
+          [
+            0.325,
+            0.325
+          ],
+          [
+            -0.325,
+            0.325
+          ],
+          [
+            -0.325,
+            0.206
+          ],
+          [
+            -0.425,
+            0.206
+          ],
+          [
+            -0.425,
+            0.184
+          ],
+          [
+            -0.325,
+            0.184
+          ],
+          [
+            -0.325,
+            -0.325
+          ],
+          [
+            0.325,
+            -0.325
+          ],
+          [
+            0.325,
+            -0.206
+          ],
+          [
+            0.425,
+            -0.206
+          ],
+          [
+            0.425,
+            -0.184
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "drive_connector_pad + drive_wire",
+      "role": "port",
+      "layer": 1,
+      "points": [
+        [
+          -0.254516024928,
+          0.125
+        ],
+        [
+          -0.322016024928,
+          0.19
+        ],
+        [
+          -0.425,
+          0.19
+        ],
+        [
+          -0.425,
+          0.2
+        ],
+        [
+          -0.317983975072,
+          0.2
+        ],
+        [
+          -0.250483975072,
+          0.135
+        ],
+        [
+          -0.2275,
+          0.135
+        ],
+        [
+          -0.2275,
+          0.15
+        ],
+        [
+          -0.1025,
+          0.15
+        ],
+        [
+          -0.1025,
+          0.12
+        ],
+        [
+          -0.2275,
+          0.12
+        ],
+        [
+          -0.2275,
+          0.125
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "emit_connector_pad + emit_wire",
+      "role": "port",
+      "layer": 1,
+      "points": [
+        [
+          0.425,
+          -0.19
+        ],
+        [
+          0.425,
+          -0.2
+        ],
+        [
+          0.317983975072,
+          -0.2
+        ],
+        [
+          0.250483975072,
+          -0.135
+        ],
+        [
+          0.2275,
+          -0.135
+        ],
+        [
+          0.2275,
+          -0.15
+        ],
+        [
+          0.1025,
+          -0.15
+        ],
+        [
+          0.1025,
+          -0.12
+        ],
+        [
+          0.2275,
+          -0.12
+        ],
+        [
+          0.2275,
+          -0.125
+        ],
+        [
+          0.254516024928,
+          -0.125
+        ],
+        [
+          0.322016024928,
+          -0.19
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "pad_bot",
+      "role": "electrode",
+      "layer": 1,
+      "points": [
+        [
+          0.2275,
+          -0.105
+        ],
+        [
+          -0.2275,
+          -0.105
+        ],
+        [
+          -0.2275,
+          -0.015
+        ],
+        [
+          0.2275,
+          -0.015
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "pad_top",
+      "role": "electrode",
+      "layer": 1,
+      "points": [
+        [
+          0.2275,
+          0.105
+        ],
+        [
+          0.2275,
+          0.015
+        ],
+        [
+          -0.2275,
+          0.015
+        ],
+        [
+          -0.2275,
+          0.105
+        ]
+      ],
+      "holes": []
+    }
+  ],
+  "pins": [
+    {
+      "name": "drive",
+      "layer": 1,
+      "widthMm": 0.01,
+      "gapMm": 0.006,
+      "points": [
+        [
+          -0.425,
+          0.19
+        ],
+        [
+          -0.425,
+          0.2
+        ]
+      ],
+      "middle": [
+        -0.425,
+        0.195
+      ],
+      "normal": [
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "name": "emit",
+      "layer": 1,
+      "widthMm": 0.01,
+      "gapMm": 0.006,
+      "points": [
+        [
+          0.425,
+          -0.19
+        ],
+        [
+          0.425,
+          -0.2
+        ]
+      ],
+      "middle": [
+        0.425,
+        -0.195
+      ],
+      "normal": [
+        1.0,
+        0.0
+      ]
+    }
+  ],
+  "polygons": [
+    {
+      "name": "pad_top",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          -0.2275,
+          0.015
+        ],
+        [
+          0.2275,
+          0.015
+        ],
+        [
+          0.2275,
+          0.105
+        ],
+        [
+          -0.2275,
+          0.105
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "pad_bot",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          -0.2275,
+          -0.105
+        ],
+        [
+          0.2275,
+          -0.105
+        ],
+        [
+          0.2275,
+          -0.015
+        ],
+        [
+          -0.2275,
+          -0.015
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "rect_pk",
+      "layer": 1,
+      "subtract": true,
+      "points": [
+        [
+          -0.325,
+          -0.325
+        ],
+        [
+          0.325,
+          -0.325
+        ],
+        [
+          0.325,
+          0.325
+        ],
+        [
+          -0.325,
+          0.325
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "drive_connector_pad",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          -0.1025,
+          0.12
+        ],
+        [
+          -0.2275,
+          0.12
+        ],
+        [
+          -0.2275,
+          0.15
+        ],
+        [
+          -0.1025,
+          0.15
+        ]
+      ],
+      "holes": []
+    },
+    {
+      "name": "emit_connector_pad",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          0.1025,
+          -0.12
+        ],
+        [
+          0.2275,
+          -0.12
+        ],
+        [
+          0.2275,
+          -0.15
+        ],
+        [
+          0.1025,
+          -0.15
+        ]
+      ],
+      "holes": []
+    }
+  ],
+  "paths": [
+    {
+      "name": "drive_wire",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          -0.2275,
+          0.13
+        ],
+        [
+          -0.2525,
+          0.13
+        ],
+        [
+          -0.32,
+          0.195
+        ],
+        [
+          -0.425,
+          0.195
+        ]
+      ],
+      "widthMm": 0.01
+    },
+    {
+      "name": "drive_wire_sub",
+      "layer": 1,
+      "subtract": true,
+      "points": [
+        [
+          -0.2275,
+          0.13
+        ],
+        [
+          -0.2525,
+          0.13
+        ],
+        [
+          -0.32,
+          0.195
+        ],
+        [
+          -0.425,
+          0.195
+        ]
+      ],
+      "widthMm": 0.022
+    },
+    {
+      "name": "emit_wire",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          0.2275,
+          -0.13
+        ],
+        [
+          0.2525,
+          -0.13
+        ],
+        [
+          0.32,
+          -0.195
+        ],
+        [
+          0.425,
+          -0.195
+        ]
+      ],
+      "widthMm": 0.01
+    },
+    {
+      "name": "emit_wire_sub",
+      "layer": 1,
+      "subtract": true,
+      "points": [
+        [
+          0.2275,
+          -0.13
+        ],
+        [
+          0.2525,
+          -0.13
+        ],
+        [
+          0.32,
+          -0.195
+        ],
+        [
+          0.425,
+          -0.195
+        ]
+      ],
+      "widthMm": 0.022
+    }
+  ],
+  "junctions": [
+    {
+      "name": "rect_jj",
+      "layer": 1,
+      "subtract": false,
+      "points": [
+        [
+          0.0,
+          -0.015
+        ],
+        [
+          0.0,
+          0.015
+        ]
+      ],
+      "widthMm": 0.02
+    }
+  ],
+  "gdsCheck": {
+    "layer": 1,
+    "nativePolygonCount": 22,
+    "nativeAreaMm2": 53.66697416,
+    "displayAreaMm2": 53.66697416648128,
+    "symmetricDifferenceMm2": 6.48128003017226e-09,
+    "maxDifferenceMm2": 1e-07,
+    "gdsPrecisionM": 1e-09
+  },
+  "scope": "Planar example layout generated by native Quantum Metal. Film thickness, physical junction mask and identity of any fabricated device are unspecified."
+}

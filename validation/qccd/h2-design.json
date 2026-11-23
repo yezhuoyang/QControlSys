@@ -1,0 +1,702 @@
+{
+  "title": "Quantinuum H2 hardware GHZ32 phase-scan circuits",
+  "source": "https://github.com/Quantinuum/quantinuum-hardware-h2-benchmark/blob/d422a716977899d7d6603c9efadb44e89e495125/ghz/data/GHZ_N32.json",
+  "paper": "https://doi.org/10.1103/PhysRevX.13.041052",
+  "studioSource": "https://www.qccd.academy/reproduce/moses2023/",
+  "program": "h2-theta1.tsir.json",
+  "rawSha256": "4d6741f76830ef711b501c82372d1d3d630f0654e8107b1032bd4001b0af3db4",
+  "architectureSha256": "7de34f2f00291d70469bda60838be28bd58d8d95dbeb5283b4dfff35b47ab834",
+  "studioRevision": "97c94dbcb92c63cc529c451363603f1a813388cf",
+  "compilerSha256": "e7cbb4f282fa04144d0ef18dabbf1269d24e420ca3a9972957c5c8bd9dba2699",
+  "timeUnit": "model units",
+  "publishedZBasisSourceSha256": "f51e7c0493bfd29db3efc60a0b8fbedb6817627ff3c23aaa406e173bd8f403d5",
+  "scope": "All 32 source circuits were independently compiled and checked on the Studio H2 design. The 947-cycle Studio demo uses a different GHZ tree. Hardware shots measure parity and do not timestamp routing.",
+  "phases": {
+    "1": {
+      "sourceKey": "(1, 'theta1')",
+      "qasmSha256": "290eee1f95df05467c4e45c9cd582bef9596c27b4a62c27ec0728216f0aab886",
+      "programSha256": "1155f17de0675506df578dba240ac69878dc0e4352dafd59a3161688bc5d15f4",
+      "replacements": [],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "2": {
+      "sourceKey": "(3, 'theta2')",
+      "qasmSha256": "84038610d220b0219d0fe91652f4b43448d1dbdff5795ab7858c9c5db68034af",
+      "programSha256": "e47d546582e984a33a06763467aae09c039df4d8d3275c377c5236e3c81a2cdc",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.799224746714915"
+        ],
+        [
+          "12.468195843934492",
+          "12.370021073509811"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "3": {
+      "sourceKey": "(5, 'theta3')",
+      "qasmSha256": "efcd93a9ae31f2e97c41dfe27bbcc0f0ae1dafd42c2460ad26a5e1193ff3b301",
+      "programSha256": "c799f0d9f0cadb3c08f9d61ced8cb70f058ac7c299e7b284395cbe7734c293b4",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.701049976290232"
+        ],
+        [
+          "12.468195843934492",
+          "12.271846303085129"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "4": {
+      "sourceKey": "(7, 'theta4')",
+      "qasmSha256": "aceb6a4f487d4b293596881e325bb7e6d097dcb085aee4c5f830f945cc544d2d",
+      "programSha256": "831c3aa9509ca263a2694a7c137ce298adae3b4c6785d9b7c44ce288ac0a9331",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.602875205865551"
+        ],
+        [
+          "12.468195843934492",
+          "12.173671532660448"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "5": {
+      "sourceKey": "(9, 'theta5')",
+      "qasmSha256": "2bd1aace5bf9e6f59b74e3cadbc6cdcfd9c99a638a609ef0f014786b7fa0cfa5",
+      "programSha256": "95201f3a908b2e8bc27649bbf20e1b3ccbcd3085cc132d74cd9a5f0888aa44b4",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.50470043544087"
+        ],
+        [
+          "12.468195843934492",
+          "12.075496762235767"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "6": {
+      "sourceKey": "(11, 'theta6')",
+      "qasmSha256": "8df8485726755117da8be6a1dd62641810f52f8d642b914e03abbbeb4dfcee5e",
+      "programSha256": "fec75e3427006702f17a33ff5027b389b512c27b3d23ac31c611538f3cab020b",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.40652566501619"
+        ],
+        [
+          "12.468195843934492",
+          "11.977321991811086"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "7": {
+      "sourceKey": "(13, 'theta7')",
+      "qasmSha256": "222a43d515423ffcd86cc8afd43c81c3bf09e36f0f86ac1f3b785227d8bab66d",
+      "programSha256": "183c9f3459aa1456b97f4c58a3d8aaaca78f6fbb24a4695bbd1845d8083c90fd",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.30835089459151"
+        ],
+        [
+          "12.468195843934492",
+          "11.879147221386406"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "8": {
+      "sourceKey": "(15, 'theta8')",
+      "qasmSha256": "92a7ba82f06e42b06158d375e7b67053bf676facb77333b691495fc30ed15ac6",
+      "programSha256": "9d44c331e0211d77f48a373cb4fb5f5c3dba8107f48e3450419090e2fd5f9807",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.210176124166827"
+        ],
+        [
+          "12.468195843934492",
+          "11.780972450961723"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "9": {
+      "sourceKey": "(17, 'theta9')",
+      "qasmSha256": "9256e3cae438ef88cf9aad7dded7107eddecdc9cc637475e4543190b6ae0add6",
+      "programSha256": "e287aa0ba92b254dbce0f3c3f20b511dcc0b3734ce1f5350b90e8efc4215da93",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.112001353742146"
+        ],
+        [
+          "12.468195843934492",
+          "11.682797680537043"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "10": {
+      "sourceKey": "(19, 'theta10')",
+      "qasmSha256": "bbe4220d3d7a03e88ca10df23b44b75394cebd810eb271d8de7af5d4fd68ec66",
+      "programSha256": "540f510f109fc00708bafe0e168a9425a4a77a4121f16b644da495cf4c8b4bc8",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-10.013826583317465"
+        ],
+        [
+          "12.468195843934492",
+          "11.584622910112362"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "11": {
+      "sourceKey": "(21, 'theta11')",
+      "qasmSha256": "64b35d1b01a92a947d3e1d90bde56ce17753dcbb246566e468a28e5abcf2cec8",
+      "programSha256": "b9276bafbde3d47dd626eac63a0904a9678ea89961c132336294aa7fd7ad5c29",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.915651812892785"
+        ],
+        [
+          "12.468195843934492",
+          "11.486448139687681"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "12": {
+      "sourceKey": "(23, 'theta12')",
+      "qasmSha256": "c1c104b98b1197d837b7507823b6e2375c32444661dad4549e97268a3801132f",
+      "programSha256": "ea03b0431e2711d9c556ba60a783d0e7bee9bc75b4aa5c8b357d16ea0d964623",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.817477042468104"
+        ],
+        [
+          "12.468195843934492",
+          "11.388273369263"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "13": {
+      "sourceKey": "(25, 'theta13')",
+      "qasmSha256": "f9b65223e00a62138cf186a8bb2794e9e0ae7da556528d7d326da38196ab80e3",
+      "programSha256": "8cb1221dfe394537a9834384ec51b34c816daccb8159722f14b9df3a1118da0f",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.719302272043423"
+        ],
+        [
+          "12.468195843934492",
+          "11.29009859883832"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "14": {
+      "sourceKey": "(27, 'theta14')",
+      "qasmSha256": "ca8ef251f01104b912348c0b00ee8c29475c5fa6d767d52f1451f132cfba5292",
+      "programSha256": "fe5dd24415e60fa2b26cf4931b0fe9b8c62346ff5fa8b73f700a9c4c57b33c82",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.62112750161874"
+        ],
+        [
+          "12.468195843934492",
+          "11.191923828413637"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "15": {
+      "sourceKey": "(29, 'theta15')",
+      "qasmSha256": "8ceb549ae36caa7d27d559c8a968540da24ab82be1990897e453f4160326c28a",
+      "programSha256": "3c999f99720afcb699949d4b6252502747d4fe9cb7d9c6cdb2c1e410ebfac264",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.52295273119406"
+        ],
+        [
+          "12.468195843934492",
+          "11.093749057988957"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "16": {
+      "sourceKey": "(31, 'theta16')",
+      "qasmSha256": "23c5313183705b7bd09c69fc1ffbf63a1e5904e7b302da5379abf47bf187ceac",
+      "programSha256": "89eb16a0b138053436d415ec48bf1bfa5e92ead02720eeb320e48740e8e1ae55",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.42477796076938"
+        ],
+        [
+          "12.468195843934492",
+          "10.995574287564276"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "17": {
+      "sourceKey": "(33, 'theta17')",
+      "qasmSha256": "d0ee3491159666172c5cd123607899d4937b6332964c208337be628428721ade",
+      "programSha256": "c39d6addb75c735064365132ff1a0e10bf964d9deb63a040da0e2cf98101a5d3",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.326603190344699"
+        ],
+        [
+          "12.468195843934492",
+          "10.897399517139595"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "18": {
+      "sourceKey": "(35, 'theta18')",
+      "qasmSha256": "2ce44a0e3059d4f29bd7f3459ac6d5cbc461665b92c06140f8de80efebc3f294",
+      "programSha256": "bb069acaccd329ec57914a190d6f7261615e210d5a6995ad6052fd26aa98137e",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.228428419920018"
+        ],
+        [
+          "12.468195843934492",
+          "10.799224746714915"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "19": {
+      "sourceKey": "(37, 'theta19')",
+      "qasmSha256": "9de2947d4f353a76abb11950fc0c36cf46451c4d57a8651b54beb19f6d8697b9",
+      "programSha256": "ffa238f2a706a3a13bd9528aaefa42f3f0b75ca352a6b384b6fc0ee58e0160fc",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.130253649495335"
+        ],
+        [
+          "12.468195843934492",
+          "10.701049976290232"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "20": {
+      "sourceKey": "(39, 'theta20')",
+      "qasmSha256": "14c6a2c983977b0e91c02a65a0c1aeb31b2c231cafc67c0172c77cea55b61cdf",
+      "programSha256": "9c74c9cc2ae8f551ebb6124dc28b8495e34499e694108ffc836b893c76881b33",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-9.032078879070655"
+        ],
+        [
+          "12.468195843934492",
+          "10.602875205865551"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "21": {
+      "sourceKey": "(41, 'theta21')",
+      "qasmSha256": "058e4325f9f956d2773ad5df15113d6ac2c6dd4ded4d380862599a4e50887f35",
+      "programSha256": "f1f04d17a7466df66cb0f10a491e5a9fa90977086518eb7be3e51cb8a4858bf6",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.933904108645974"
+        ],
+        [
+          "12.468195843934492",
+          "10.50470043544087"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "22": {
+      "sourceKey": "(43, 'theta22')",
+      "qasmSha256": "634605b315d98788ee037d6142aee2ce172db0521ddcfe3d68bb246f117acb6d",
+      "programSha256": "28698cae34e4e456716f225e7e69007285c7b484a197e288885651bd560a4367",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.835729338221293"
+        ],
+        [
+          "12.468195843934492",
+          "10.40652566501619"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "23": {
+      "sourceKey": "(45, 'theta23')",
+      "qasmSha256": "7c2a27707f5a390761b7450e19496ee801029848f606570b941f97c0495e3010",
+      "programSha256": "69e32399c9ff46f7a66d5b9785fdee28371446d0192c710d5784152f18a61c49",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.737554567796613"
+        ],
+        [
+          "12.468195843934492",
+          "10.30835089459151"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "24": {
+      "sourceKey": "(47, 'theta24')",
+      "qasmSha256": "a0ff9aa42d285484a2541fa863be5adb0e8955229e9d4dfa995fcd4fd010bc71",
+      "programSha256": "1d8dfd0a32d57e7201c10d78a62af3e1e109de317bd7a890160fab21f2ff3951",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.639379797371932"
+        ],
+        [
+          "12.468195843934492",
+          "10.210176124166829"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "25": {
+      "sourceKey": "(49, 'theta25')",
+      "qasmSha256": "f26a078deec76d222990b0bad6877cf428828397df8ed14307b94588a7943d54",
+      "programSha256": "4140579bf7be7b61e4af498a102a62374f7c39c250f5d2c2e0d0a7ed01067f84",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.54120502694725"
+        ],
+        [
+          "12.468195843934492",
+          "10.112001353742146"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "26": {
+      "sourceKey": "(51, 'theta26')",
+      "qasmSha256": "6d187f22f39261eaa4e2177681833e02a0f724f79a6ccac9a3cf5c34b58624a4",
+      "programSha256": "8439d834ba74784f2200fbc204f552330fac2a7ac4dfc3da0f5aa29ff72eff10",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.443030256522569"
+        ],
+        [
+          "12.468195843934492",
+          "10.013826583317465"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "27": {
+      "sourceKey": "(53, 'theta27')",
+      "qasmSha256": "8a8d7880ab0f1bc2c04160cd9d4345500cd4728548ce5957d221ba1ca510bf03",
+      "programSha256": "10a3c02c4e59bda2420856b6e244309d58ed4b84d869f665613f1e4d677b2e44",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.344855486097888"
+        ],
+        [
+          "12.468195843934492",
+          "9.915651812892785"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "28": {
+      "sourceKey": "(55, 'theta28')",
+      "qasmSha256": "dc4b8118a8cf23fa769e40816c53e6d44d2730462bab1d360bd063234aac7c8f",
+      "programSha256": "b0a75aa1f11c0487bb1129a9e0afc38de5b74d0d978c1d2af2b6580ac24465ee",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.246680715673207"
+        ],
+        [
+          "12.468195843934492",
+          "9.817477042468104"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "29": {
+      "sourceKey": "(57, 'theta29')",
+      "qasmSha256": "83ad74e0b2bd280e0c8f70a4e5e9bf2b3ef79379b96b70f4bf58cd9715110552",
+      "programSha256": "8d14d81c8cd31758c74a2197db53ca08325a3f584cdfd2b979fd0d4b51d18509",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.148505945248527"
+        ],
+        [
+          "12.468195843934492",
+          "9.719302272043423"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "30": {
+      "sourceKey": "(59, 'theta30')",
+      "qasmSha256": "c6001d5260e78052991f61be15bc2918320d300899138218cd7e29efbbe42b51",
+      "programSha256": "1834188f0a1c3dacec6df7a69e8aba4a25e1e5e172c09be9bd2d974aa32490b4",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-8.050331174823844"
+        ],
+        [
+          "12.468195843934492",
+          "9.62112750161874"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "31": {
+      "sourceKey": "(61, 'theta31')",
+      "qasmSha256": "f4fb53976528020b1a4528aad517696ef70f93e7f32d98fa360002ef7ce0eb99",
+      "programSha256": "98aa4cec4b5a6221129c5df0dbc6d51d0a84ff545e5983e5761259210755f3f3",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-7.9521564043991635"
+        ],
+        [
+          "12.468195843934492",
+          "9.52295273119406"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    },
+    "32": {
+      "sourceKey": "(63, 'theta32')",
+      "qasmSha256": "5183cdc13958044e67ba4598b396789d08b744617882b6fa893d310b0e9e3d64",
+      "programSha256": "b5520edfc2b9c344adbddc35c0b841eb3fc5163ac188933e5d10d1b961ae38f4",
+      "replacements": [
+        [
+          "-10.897399517139595",
+          "-7.853981633974483"
+        ],
+        [
+          "12.468195843934492",
+          "9.42477796076938"
+        ]
+      ],
+      "instructions": 849,
+      "cycles": 1170,
+      "ruleViolations": 0,
+      "certificate": "accepted",
+      "R10": "partial",
+      "sourceAnalysisRotationsChecked": 64
+    }
+  },
+  "frame": {
+    "id": "tsir-713-0",
+    "sourceId": 713,
+    "substep": 0,
+    "op": "gate",
+    "label": "VZ",
+    "ions": [
+      "q0"
+    ],
+    "targets": [
+      "DG04"
+    ],
+    "start": 1480.0,
+    "end": 1483.0
+  },
+  "summary": {
+    "ions": 32,
+    "cycles": 1170,
+    "gatePairs": 31,
+    "measurements": 32,
+    "ruleViolations": 0
+  },
+  "programSha256": "1155f17de0675506df578dba240ac69878dc0e4352dafd59a3161688bc5d15f4"
+}

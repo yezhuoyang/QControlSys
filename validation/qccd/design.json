@@ -1,0 +1,31 @@
+{
+  "title": "QCCD Studio H2 GHZ32 shuttle",
+  "source": "https://github.com/yezhuoyang/QCCD/blob/97c94dbcb92c63cc529c451363603f1a813388cf/Reproduce/moses2023/demo/ghz32.tsir.json",
+  "architectureSource": "https://github.com/yezhuoyang/QCCD/blob/97c94dbcb92c63cc529c451363603f1a813388cf/Reproduce/moses2023/h2.arch.json",
+  "revision": "97c94dbcb92c63cc529c451363603f1a813388cf",
+  "architecture": "Reproduce/moses2023/h2.arch.json",
+  "architectureSha256": "7de34f2f00291d70469bda60838be28bd58d8d95dbeb5283b4dfff35b47ab834",
+  "program": "Reproduce/moses2023/demo/ghz32.tsir.json",
+  "programSha256": "0e3abdf708238626cab2d22871265d6740011f278da780939177f59d2c3c03d9",
+  "engine": "qccd.verify.verify",
+  "summary": {"ions":32,"cycles":947,"gatePairs":31,"measurements":32,"ruleViolations":0},
+  "frame": {
+    "id": "tsir-2-0",
+    "sourceId": 2,
+    "sourceIndex": 2,
+    "substep": 0,
+    "op": "simd",
+    "label": "shuttle",
+    "parents": ["tsir-1-0"],
+    "start": 1.0,
+    "end": 3.0,
+    "moves": [{"ion":"q0","from":"AUXD0","via":["e00"],"to":"DG01"}],
+    "positions": {"q0":"DG01"},
+    "physicalParts": ["dac","analog","feedthrough","carrier","chip"]
+  },
+  "action": "L0:+1",
+  "channels": ["zone.AUXD0"],
+  "timeUnit": "model units",
+  "scope": "Native Studio resolves sites, channel assignment, and move order. Clark et al. measured a separate GTRI calcium-ion trap. Its 1.2 µs transport and measured trajectory cannot calibrate H2.",
+  "reproduce": "python -B validation/qccd/verify_design.py"
+}

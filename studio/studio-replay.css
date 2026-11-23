@@ -1,0 +1,176 @@
+.viewport {
+  min-height: clamp(350px, 31vw, 510px);
+}
+.workbench aside {
+  max-height: 530px;
+  overflow: auto;
+}
+.legend {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  display: flex;
+  gap: 12px;
+  color: #e3ede9;
+  font-size: 0.76rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #203337ed;
+  pointer-events: none;
+}
+.legend span::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #80e8d9;
+}
+.legend span:nth-child(2)::before {
+  background: #b99bdc;
+  border-radius: 1px;
+}
+.legend span:nth-child(3)::before {
+  background: #ffd07d;
+  border-radius: 1px;
+}
+.metric-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem 3rem;
+  margin: 1rem 0 0.7rem;
+}
+.metric-strip div {
+  display: grid;
+  gap: 0.2rem;
+}
+.metric-strip dt {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.metric-strip dd {
+  margin: 0;
+  font: 1.25rem var(--mono);
+}
+.instrument a {
+  font-size: 0.85rem;
+  color: var(--green);
+}
+#nativeDialog {
+  width: 96vw;
+  max-width: none;
+  height: 94vh;
+  padding: 12px;
+}
+#nativeDialog header {
+  margin-bottom: 8px;
+}
+#nativePage {
+  width: 100%;
+  height: calc(100% - 68px);
+  border: 1px solid var(--line);
+  background: white;
+}
+#nativeDialog header p {
+  font-size: 0.8rem;
+}
+.instrument .config {
+  flex-wrap: wrap;
+}
+.filter {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.filter input {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  width: 180px;
+  background: #f8faf7;
+}
+.trace-scroll td:nth-child(4) {
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.trace-pages {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.trace-pages button {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+}
+#instruction {
+  max-height: 320px;
+  overflow: auto;
+  background: #f5f7f3;
+  padding: 12px;
+  color: var(--ink);
+}
+#importForm label {
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+  font-weight: 550;
+}
+#importForm input {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 8px;
+  width: 100%;
+  font-size: 0.85rem;
+}
+#importer footer {
+  margin-top: 17px;
+}
+#importError {
+  color: #923d29;
+}
+#rules p {
+  padding: 0.2rem 0;
+  font-size: 0.85rem;
+}
+#moves,
+#driver {
+  max-height: 7em;
+  overflow: auto;
+}
+#sourceRef,
+#geometryNote,
+#timeNote,
+#sourceNames,
+#rules {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 820px) {
+  .legend {
+    right: auto;
+    left: 14px;
+    bottom: 39px;
+  }
+  .metric-strip {
+    gap: 1rem;
+  }
+}
+@media (max-width: 650px) {
+  .viewport {
+    min-height: 300px;
+  }
+  .workbench aside {
+    max-height: none;
+  }
+  .trace-head {
+    flex-wrap: wrap;
+  }
+  .filter input {
+    width: 160px;
+  }
+}
