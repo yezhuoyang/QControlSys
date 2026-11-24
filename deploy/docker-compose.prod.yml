@@ -1,0 +1,33 @@
+# PRODUCTION deployment of QuantumOS on the qccd.academy droplet, beside QCCD Studio.
+#
+# Lives in /opt/quantumos on the server, with .env holding QUANTUMOS_TAG=<commit>. The image is
+# built elsewhere and loaded with `docker load` (deploy/README.md), so nothing is compiled on the
+# server. Public traffic reaches it only through the host's nginx
+# (deploy/nginx-quantumos.conf: https://quantumos.it.com -> 127.0.0.1:8400).
+#
+#   QUANTUMOS_TAG=<commit> docker compose -f docker-compose.prod.yml up -d
+#
+# The droplet serves other sites, so the container has hard limits. A heavy run (the H2
+# program, the ZAC program, the distance-5 decoder) peaks near 190 MiB and takes 2-6 s; two run
+# at once, eight more may wait, and further requests get 503 until a slot frees.
+
+name: quantumos
+
+services:
+  web:
+    image: "quantumos:${QUANTUMOS_TAG:?set QUANTUMOS_TAG to the image tag}"
+    environment:
+      PORT: "8080"
+      QUANTUMOS_HOST: 0.0.0.0
+      QUANTUMOS_MAX_RUNS: "2"
+      QUANTUMOS_MAX_QUEUE: "8"
+      QUANTUMOS_CACHE_SECONDS: "300"
+    ports: ["127.0.0.1:8400:8080"]
+    restart: unless-stopped
+    mem_limit: 1g
+    memswap_limit: 1g
+    cpus: 1.0
+    pids_limit: 256
+    tmpfs: ["/tmp:size=256m"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]

@@ -139,7 +139,7 @@ docker build -t quantumos .
 docker run -p 8080:8080 quantumos      # then open http://localhost:8080
 ```
 
-The image builds the Lean model and clones [QCCD Studio] for the trapped-ion examples. Without Docker, run `npm start` behind a reverse proxy with these settings:
+The image builds the Lean model and installs [QCCD Studio] with its pinned compiler for the trapped-ion examples. The public site, https://quantumos.it.com, runs this image beside QCCD Studio: [deploy/README.md](deploy/README.md) gives the DNS records, the server setup and how to update it. Without Docker, run `npm start` behind a reverse proxy with these settings:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
