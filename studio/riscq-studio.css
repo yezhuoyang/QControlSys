@@ -204,3 +204,6 @@ body.explaining .views button[data-explain] { outline-offset: -3px; }
   .viewport { min-height: 52vh; }
   .progcol { min-height: 80vh; }
 }
+
+/* Under the site's menu bar (site-nav.js) the page's own brand would repeat it. */
+.qn ~ .head .brand { display: none; }

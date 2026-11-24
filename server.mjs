@@ -33,6 +33,22 @@ const routes = new Map([
   ["/riscq-design.js", "studio/riscq-design.js"],
   ["/riscq-design.css", "studio/riscq-design.css"],
   ["/riscq-design-doc.js", "studio/riscq-design-doc.js"],
+  // Home page, tutorial and the menu bar every page loads.
+  ["/home.css", "studio/home.css"],
+  ["/learn", "studio/learn.html"],
+  ["/site-nav.js", "studio/site-nav.js"],
+  // Optics: Gaussian beams through each platform's optical bench, and the world the stage draws.
+  ["/riscq-optics.js", "studio/riscq-optics.js"],
+  ["/riscq-benches.js", "studio/riscq-benches.js"],
+  ["/riscq-world.js", "studio/riscq-world.js"],
+  ["/riscq-light.js", "studio/riscq-light.js"],
+  ["/riscq-beamview.js", "studio/riscq-beamview.js"],
+  ["/docs/riscq-workspace.md", "docs/riscq-workspace.md"],
+  ["/docs/media/riscq-ions.gif", "docs/media/riscq-ions.gif"],
+  ["/docs/media/riscq-atoms.gif", "docs/media/riscq-atoms.gif"],
+  ["/docs/media/riscq-feedforward.gif", "docs/media/riscq-feedforward.gif"],
+  ["/docs/media/riscq-decoder.gif", "docs/media/riscq-decoder.gif"],
+  ["/docs/media/riscq-design.png", "docs/media/riscq-design.png"],
   ["/model/RiscQ/Soc.lean", "QControl/RiscQ/Soc.lean"],
   ["/model/RiscQ/Timing.lean", "QControl/RiscQ/Timing.lean"],
   ["/model/RiscQ/Rv32.lean", "QControl/RiscQ/Rv32.lean"],
@@ -50,7 +66,7 @@ const routes = new Map([
   ["/installation-lens.js", "studio/installation-lens.js"],
   ["/register-view.js", "studio/register-view.js"],
   ["/machines.css", "studio/machines.css"],
-  ["/", "studio/machines.html"],
+  ["/", "studio/home.html"],
   ["/feedforward", "studio/index.html"],
   ["/style.css", "studio/style.css"],
   ["/app.js", "studio/app.js"],
@@ -112,7 +128,22 @@ const mime = {
   ".json": "application/json",
   ".md": "text/markdown",
   ".lean": "text/plain",
+  ".gif": "image/gif",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
 };
+
+/**
+ * The course: /course/… is served from studio/course/. A folder gives its index.html, a name
+ * without an extension its .html file. Names are letters, digits, "-", "_" and "." only.
+ */
+function courseAsset(pathname) {
+  if (pathname !== "/course" && !pathname.startsWith("/course/")) return undefined;
+  const rest = pathname.slice("/course".length).replace(/^\//, "");
+  if (rest.split("/").some((part) => part === ".." || !/^[A-Za-z0-9._-]*$/.test(part))) return undefined;
+  const file = rest === "" || rest.endsWith("/") ? rest + "index.html" : path.extname(rest) ? rest : rest + ".html";
+  return path.join("studio", "course", file);
+}
 
 function jsonProcess(command, args, input, options) {
   return new Promise((resolve, reject) => {
@@ -399,7 +430,7 @@ if (
         ]);
         return reply(res, 200, "application/json", JSON.stringify(page));
       }
-      const asset = routes.get(url.pathname);
+      const asset = routes.get(url.pathname) ?? courseAsset(url.pathname);
       if (req.method !== "GET" || !asset)
         return reply(res, 404, "text/plain", "Unknown resource.");
       const body = await readFile(path.join(root, asset));

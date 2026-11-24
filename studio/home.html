@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QControl Studio</title>
+    <meta name="description" content="A general framework to simulate real quantum computers with control systems: programs lowered to RISC-Q firmware, executed in a Lean model, shown driving transmons, trapped ions and neutral atoms in 3D." />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/home.css" />
+  </head>
+  <body>
+    <main>
+      <div class="wrap hero">
+        <div>
+          <h1>A general framework to simulate <em>real quantum computers</em> with control systems</h1>
+          <p class="pitch">
+            Write a program in OpenQASM, ZAC, a QCCD Studio program or fault-tolerance system calls. It is compiled to timed hardware
+            instructions, lowered to RV32I firmware for RISC-Q control cores, and executed batch by batch in a Lean 4 model of the
+            controller. Then you watch that firmware drive the machine in 3D: pulses on the coax, ions shuttling through a trap, atoms
+            carried by optical tweezers.
+          </p>
+          <div class="ctas">
+            <a class="btn primary" href="/riscq-studio">Open the workspace</a>
+            <a class="btn" href="/riscq-design">Design hardware</a>
+            <a class="btn" href="/course">Take the course</a>
+          </div>
+          <p class="aside">New to control systems? Read the <a href="/learn">background</a>: the physics of each platform, optics, and the control stack.</p>
+        </div>
+        <figure class="preview" style="margin: 0">
+          <div class="tabs" role="tablist" aria-label="Example runs">
+            <button role="tab" aria-selected="true" data-k="0">Trapped ions</button
+            ><button role="tab" aria-selected="false" data-k="1">Neutral atoms</button
+            ><button role="tab" aria-selected="false" data-k="2">Feed-forward</button
+            ><button role="tab" aria-selected="false" data-k="3">Decoder</button
+            ><button role="tab" aria-selected="false" data-k="4">Your hardware</button>
+          </div>
+          <img id="previewImg" src="/docs/media/riscq-ions.gif" width="960" height="540" alt="Ions shuttle between gate zones of a trap while the control cores around it drive the electrodes and lasers" />
+          <figcaption class="cap" id="previewCap"></figcaption>
+        </figure>
+      </div>
+
+      <section class="block">
+        <div class="wrap">
+          <h2>Choose your platform</h2>
+          <p class="lead">
+            One controller design, RISC-Q, drives three kinds of quantum computer. Each card says how its qubits are controlled, where
+            its hardware is designed, and which runs to open first.
+          </p>
+          <div class="grid3">
+            <article class="card platform">
+              <svg class="icon" viewBox="0 0 46 46" aria-hidden="true">
+                <rect x="1" y="1" width="44" height="44" rx="9" fill="#eef3f6" stroke="#b8c8d2" />
+                <path d="M19 9h8v10h10v8H27v10h-8V27H9v-8h10z" fill="#e3b23c" stroke="#7a5a10" stroke-width="1" />
+                <path d="M33 33l4 4m-2-6 4 4" stroke="#b4692a" stroke-width="2" />
+              </svg>
+              <h3>Superconducting transmons</h3>
+              <p class="how">Each qubit is a transmon on a chip at millikelvin. Microwave pulses from DACs travel down coax to drive it; a
+                readout tone into its resonator returns to an ADC and is demodulated into a bit.</p>
+              <h4>Design it here</h4>
+              <ul><li><a href="/riscq-design">Hardware design editor</a>: boards, cores, DACs, ADCs, qubits, resonators and routed coax</li></ul>
+              <h4>Example runs</h4>
+              <ul>
+                <li><a href="/riscq-studio?example=superconducting-feedforward&amp;outcome=c=1">Bell pair with feed-forward</a></li>
+                <li><a href="/riscq-studio?example=superconducting-design">The ring as an editable design</a></li>
+                <li><a href="/riscq-studio?example=superconducting-repetition&amp;outcome=s0=1">Repetition code with a decoder core</a></li>
+              </ul>
+              <div class="go"><a href="/learn#superconducting">Background: transmons →</a></div>
+            </article>
+            <article class="card platform">
+              <svg class="icon" viewBox="0 0 46 46" aria-hidden="true">
+                <rect x="1" y="1" width="44" height="44" rx="9" fill="#f4f1fb" stroke="#cfc4e6" />
+                <rect x="7" y="13" width="32" height="20" rx="6" fill="none" stroke="#e8a0a8" stroke-width="2.5" />
+                <circle cx="12" cy="13" r="4" fill="#26324a" /><circle cx="34" cy="33" r="4" fill="#26324a" />
+                <rect x="18" y="9" width="10" height="7" rx="3.5" fill="#58b8ac" />
+              </svg>
+              <h3>Trapped-ion QCCD</h3>
+              <p class="how">Ions sit in a surface trap. Electrode voltages shuttle them between zones, lasers drive gates on ions in a gate
+                zone, and their fluorescence under a detection beam is counted by photon detectors.</p>
+              <h4>Design it in QCCD Studio</h4>
+              <ul><li><a href="https://www.qccd.academy/studio.html#design" target="_blank" rel="noopener">QCCD Studio design page ↗</a>: sites, junctions, segments, zones</li></ul>
+              <h4>Example runs</h4>
+              <ul>
+                <li><a href="/riscq-studio?example=qccd-ghz3&amp;outcome=q0=1&amp;outcome=q2=1">GHZ of three ions, from OpenQASM</a></li>
+                <li><a href="/riscq-studio?example=qccd-rotation">Loop rotation on a Studio design</a></li>
+                <li><a href="/qccd-studio">H2 replay, physical view</a></li>
+              </ul>
+              <p class="honest">This site has no QCCD editor. The trap geometry and the program come from QCCD Studio, which this project replays.</p>
+              <div class="go"><a href="/learn#trapped-ion">Background: trapped ions →</a></div>
+            </article>
+            <article class="card platform">
+              <svg class="icon" viewBox="0 0 46 46" aria-hidden="true">
+                <rect x="1" y="1" width="44" height="44" rx="9" fill="#10171d" />
+                <g fill="#ffb45c"><circle cx="12" cy="14" r="2.5" /><circle cx="20" cy="14" r="2.5" /><circle cx="28" cy="14" r="2.5" /><circle cx="12" cy="22" r="2.5" /><circle cx="28" cy="22" r="2.5" /></g>
+                <rect x="8" y="29" width="30" height="9" rx="2" fill="#3b4fd6" opacity=".55" />
+                <path d="M20 4l-4 18h8z" fill="#ff7a5c" opacity=".55" /><circle cx="20" cy="22" r="2.5" fill="#fff2d0" />
+              </svg>
+              <h3>Neutral atoms</h3>
+              <p class="how">Atoms are held in optical tweezers. RF tones on acousto-optic deflectors steer moving tweezers that carry atoms
+                between zones; Rydberg lasers entangle neighbours and a Raman laser drives one-qubit gates.</p>
+              <h4>Design it as a ZAC architecture</h4>
+              <ul><li>A ZAC architecture file sets the zones, trap grids and AODs: <code>validation/neutral/zac/full_architecture_2aod.json</code></li></ul>
+              <h4>Example runs</h4>
+              <ul><li><a href="/riscq-studio?example=neutral-bv14">ZAC 14-qubit program on a zoned array</a></li></ul>
+              <p class="honest">There is no in-browser editor for the atom array yet. Edit the architecture file and the compiled ZAC program.</p>
+              <div class="go"><a href="/learn#neutral-atom">Background: neutral atoms →</a></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="wrap">
+          <h2>From a program to a pulse</h2>
+          <p class="lead">Every picture in the workspace is derived from one trace. A person and a script that replay the same program see the same frames.</p>
+          <div class="pipeline">
+            <div><b>1 · Source</b><span>Your program</span><p>OpenQASM, a QCCD Studio program, a ZAC program, or system calls.</p></div>
+            <div><b>2 · Hardware</b><span>Timed operations</span><p>Pulses, ion shuttles, AOD moves, each with a start and a duration.</p></div>
+            <div><b>3 · Firmware</b><span>RV32I machine code</span><p>One program per RISC-Q control core, issuing timed register writes.</p></div>
+            <div><b>4 · Execution</b><span>Lean 4 model</span><p>The controller runs the firmware batch by batch and emits a trace.</p></div>
+            <div><b>5 · Debugger</b><span>3D, step by step</span><p>Scene, layers and inspector are rebuilt from the trace frames.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="wrap grid4">
+          <a class="card c-learn" href="/course"><h3>Learn</h3><p>The course: the stack, the controller, the three machines, hardware design and fault tolerance, with exercises.</p></a>
+          <a class="card c-design" href="/riscq-design"><h3>Design</h3><p>Build a pulse-controlled machine: parts, positions, channels and routed wires, checked on every edit.</p></a>
+          <a class="card c-work" href="/riscq-studio"><h3>Workspace</h3><p>Step through a run: the machine in 3D beside the source, hardware instructions and firmware.</p></a>
+          <a class="card c-valid" href="/validation"><h3>Validation</h3><p>What is proved in Lean, what is tested against RISC-Q and QCCD Studio, and what is assumed.</p></a>
+        </div>
+      </section>
+    </main>
+    <footer class="foot">
+      <p>QControlSys simulates the classical control system and the operations it schedules. No quantum state is simulated; measurement outcomes are inputs.</p>
+      <p>Built on <a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q" target="_blank" rel="noopener">RISC-Q</a>,
+        <a href="https://github.com/yezhuoyang/QCCD/tree/compiler" target="_blank" rel="noopener">QCCD Studio</a>,
+        <a href="https://github.com/UCLA-VAST/ZAC" target="_blank" rel="noopener">ZAC</a> and
+        <a href="https://github.com/NamiLiy/Helios_scalable_QEC" target="_blank" rel="noopener">Helios</a> · MIT · <a href="/docs/riscq-workspace.md">workspace notes</a></p>
+    </footer>
+    <script>
+      // The preview: one recorded run per tab, each with the address that replays it.
+      const runs = [
+        ["/docs/media/riscq-ions.gif", "Ions shuttle between gate zones while electrode waveforms and laser pulses travel from the control cores to the trap. A GHZ circuit compiled by QCCD Studio.", "/riscq-studio?example=qccd-ghz3&outcome=q0=1&outcome=q2=1", "Step through it →"],
+        ["/docs/media/riscq-atoms.gif", "Two AODs carry atoms from the storage zone into the entanglement zone; the control cores step each tone's RF frequency along the path. A 14-qubit ZAC program.", "/riscq-studio?example=neutral-bv14", "Step through it →"],
+        ["/docs/media/riscq-feedforward.gif", "A measured bit leaves q0's readout, crosses the board hub to every core and opens the X pulse it conditions on q2.", "/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=404", "Step through it →"],
+        ["/docs/media/riscq-decoder.gif", "A decoder core reads two syndrome bits from the hub, looks up the correction and records a Pauli-frame update.", "/riscq-studio?example=superconducting-repetition&outcome=s0=1&step=803", "Step through it →"],
+        ["/docs/media/riscq-design.png", "Your own machine: a control board, cores and converters, with coax routed in 3D to a transmon chip. Each wire's delay follows from its routed length.", "/riscq-design", "Open the editor →"],
+      ];
+      const img = document.getElementById("previewImg"), cap = document.getElementById("previewCap");
+      const show = (k) => {
+        const [src, text, href, go] = runs[k];
+        img.src = src;
+        img.alt = text;
+        cap.replaceChildren(text + " ", Object.assign(document.createElement("a"), { href, textContent: go }));
+        for (const b of document.querySelectorAll(".preview [role=tab]")) b.setAttribute("aria-selected", String(Number(b.dataset.k) === k));
+      };
+      for (const b of document.querySelectorAll(".preview [role=tab]")) b.onclick = () => show(Number(b.dataset.k));
+      show(0);
+    </script>
+    <script type="module" src="/site-nav.js"></script>
+  </body>
+</html>

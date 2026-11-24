@@ -10,6 +10,10 @@ import * as model from "./riscq-model.js";
 import * as layers from "./riscq-layers.js";
 import * as glossary from "./riscq-glossary.js";
 import { createWorkspaceStage } from "./riscq-stage.js";
+import { signalsAt } from "./riscq-world.js";
+import * as benches from "./riscq-benches.js";
+import { wavelengthRgb } from "./riscq-optics.js";
+import { lightScene } from "./riscq-beamview.js";
 
 const $ = (id) => document.getElementById(id);
 const integer = new Intl.NumberFormat("en-US");
@@ -104,6 +108,10 @@ let playing = false, playClock = 0, playCarry = 0, dirty = false;
 // as a continuous motion. The step shown is the last frame at or before it. null when paused.
 let clockBatch = null;
 let view = "chip", coreChoice = "follow", hint = null, kindCursor = {};
+// Hover records of the beams and signals drawn at this step, by stage id ("beam:…", "signal:…").
+let lightIndex = new Map();
+// The optical bench of the run (riscq-benches.js), built once per run, and its elements.
+let bench = null, benchElements = [], opticIndex = new Map();
 /** Per-run lookups: rows of hardware instructions, origins and windows. */
 let ix = null;
 
@@ -377,6 +385,22 @@ function partCard(id) {
     return [cardHead("Trapped ion", id.slice(4)), el("p", { text: "One qubit. Its position comes from QCCD Studio's replay: the ion is at a site once the transport cycle that moves it has played every waveform on time." }),
       el("div", { class: "live", text: ion?.moving ? "moving " + ion.moving.from + " → " + ion.moving.to + " in " + ion.moving.op + " · " + Math.round((ion.fraction ?? 0) * 100) + "% of its window" : "at site " + (ion?.site ?? "unknown") })];
   }
+  if (id.startsWith("optic:")) {
+    const e = opticIndex.get(id);
+    if (id === "optic:sample") return [cardHead("Optical bench", "The apparatus"), el("p", { text: "Where the bench delivers its light: the atom plane or the trap surface, shown in close-up at the centre of the stage." })];
+    if (id === "optic:table" || !e) return [cardHead("Optical table", "The bench of this platform"), el("p", { text: "Every laser, modulator, fiber, lens and objective of the bench at one scale, with the path of each beam that is on. The close-up of the light at the apparatus is drawn at the apparatus's own scale." }),
+      el("div", { class: "live", text: benchElements.length + " elements · " + (bench?.lasers?.length ?? 0) + " lasers" })];
+    return [cardHead("Optical element · " + e.kind, e.label), el("div", { class: "live" }, [["position", e.at.map((v) => v.toFixed(2)).join(", ") + " mm"], e.wxUm ? ["beam radius here", (e.wxUm / 1000).toFixed(3) + " × " + (e.wyUm / 1000).toFixed(3) + " mm"] : null,
+      ["train", e.train ?? "—"]].filter(Boolean).map(([k, v]) => el("div", {}, el("span", { class: "muted", text: k + " " }), v))), e.source ? el("div", { class: "src", text: e.source }) : null];
+  }
+  if (id.startsWith("signal:") || id.startsWith("beam:")) {
+    // Light and signals on the stage: their own records, derived from the trace this step.
+    const item = lightIndex.get(id);
+    if (!item) return [cardHead(id.startsWith("beam:") ? "Laser beam" : "Signal", id.replace(/^\w+:/, "")), el("p", { text: "Not live at this step." })];
+    return [cardHead(item.kind, item.title), item.text ? el("p", { text: item.text }) : null,
+      el("div", { class: "live" }, item.lines.map(([k, v]) => el("div", {}, el("span", { class: "muted", text: k + " " }), v))),
+      item.source ? el("div", { class: "src", text: item.source }) : null];
+  }
   if (id.startsWith("atom:")) {
     const atom = layers.atomPositions(run, state.atBatch).find((a) => "atom:" + a.atom === id);
     return [cardHead("Neutral atom", "Atom " + id.slice(5)), el("p", { text: "One qubit in an optical tweezer. While an AOD carries it, it sits where its column tone crosses its row tone. Atoms are assumed to follow their tones." }),
@@ -501,9 +525,12 @@ function paintKinds() {
         choose(ids[kindCursor[kind]]);
       } }, el("i", { class: "av", style: "background:" + kindColours[kind] }), glossary.PARTS[kind]?.[0] ?? kind, el("span", { class: "n", text: count(ids.length) }));
   }));
+  // One world for all three views (riscq-world.js): the note is the same in each.
   const chip = layers.chipLayout(run);
-  $("chipNote").textContent = (view === "chip" ? chip.note + " " : "") +
-    (view === "chip" ? "Converters and channels ring the apparatus at the angle of the parts they drive." : "Floorplan positions after RISC-Q's two-region layout, in tenths of a clock region. They are schematic, not physical dimensions.");
+  $("chipNote").textContent = (run.system.parts.some((p) => p.kind === "device") ? "Apparatus: " + chip.note + " " : "") +
+    "All three views show this one layout: they frame it differently and fade what they do not focus on. Converters ring the apparatus at the angle of the parts they drive, channels beside them, cores outside at the angle of their channels, joined to the hub by a bus ring. Outside the apparatus the layout is schematic." +
+    (run.platform === "neutral" || run.platform === "qccd" ? " Beams are drawn at their Gaussian 1/e² radius from the optical bench (riscq-benches.js); infrared light is drawn in a false colour." : "") +
+    (run.platform === "superconducting" ? " A microwave pulse is drawn as a packet that leaves its DAC when its window opens and reaches the qubit after its wire delay." : "");
 }
 
 function paintSelection() {
@@ -733,6 +760,34 @@ function paint() {
     extra.tones = new Map(model.tonesAt(run, shown).map((t) => [t.part, t.um]));
     extra.openParts = state.openWindows.map((w) => w.part);
   }
+  // Electrical signals in flight on their wires, and the light of the optical benches.
+  lightIndex = new Map();
+  const carriers = new Map((run.platform === "superconducting" ? benches.microwaveAt(run, state) : []).map((m) => [m.window?.id ?? m.id, m]));
+  if (bench?.trains?.length) {
+    const beams = benches.beamsAt(run, bench, state, { tones: extra.tones ?? new Map() });
+    const scene = lightScene(stage.world(), bench, beams, { height: run.platform === "neutral" ? 90 : 60, elements: benchElements });
+    extra.beams = scene.close.map((c) => ({ ...c, colour: wavelengthRgb(c.lambdaNm).rgb }));
+    extra.table = scene.table;
+    for (const [key, record] of scene.records) lightIndex.set(key, record);
+  }
+  extra.signals = signalsAt(run, state, shown).map((s) => {
+    const freqMHz = s.window.freq !== undefined ? s.window.freq : null;
+    const mw = carriers.get(s.window.id);
+    lightIndex.set("signal:" + s.id, {
+      kind: { drive: "Drive pulse", "cz-drive": "CZ pulse", "readout-tone": "Readout tone", acquire: "Returning readout signal" }[s.kind] ?? "RF drive",
+      title: s.binding.id + " → " + s.binding.part,
+      text: s.kind === "acquire" ? "The signal reflected by the resonator travels back to the ADC, which demodulates it during this window."
+        : run.platform === "superconducting" ? "A pulse leaves the DAC when its window opens and reaches " + s.binding.part + " after the wire's delay."
+        : /^electrodes:/.test(s.binding.part) ? "The DAC plays the transport waveform on the electrodes of " + s.binding.part.replace(/^electrodes:(zone\.)?/, "") + "."
+        : "The DAC plays the RF tone of the acousto-optic modulator or deflector that switches and steers this light. The light itself is drawn as its beam.",
+      lines: [["window", s.window.id + " · batches " + s.window.opens + "–" + s.window.closes], ["converter", s.window.converter],
+        ["wire delay", model.formatTime(s.binding.delayPs ?? 0)], ["elapsed", model.formatTime(s.elapsedPs) + (s.t < 1 ? " · in flight" : " · arrived")],
+        ...(mw?.carrierHz ? [["carrier", (mw.carrierHz / 1e9).toFixed(6) + " GHz"]] : []), ...(mw?.ampFraction !== undefined ? [["amplitude", (100 * mw.ampFraction).toFixed(2) + " % of full scale"]] : []),
+        ["frequency code", String(freqMHz)], ["amplitude code", String(s.window.amp)], ["instruction", s.window.source ?? "—"]],
+      source: "Delay: routed wire length ÷ signal speed (riscq/design.mjs, machine/interconnect.mjs)",
+    });
+    return { ...s, glowAt: s.to, glowSize: 9 };
+  });
   stage.show(frame, state, frame ? model.causalPath(run, frame.id) : [], chosen, fault, extra);
   paintNow(frame, fault);
   paintOffview(frame);
@@ -817,6 +872,16 @@ function show(bundle, text, keepStep) {
     : "This run's source (" + (run.source?.language ?? "none") + ") cannot be recompiled from the page. Choose an OpenQASM or system-call program to write your own.";
   $("sourceEdit").disabled = $("runSource").disabled = $("resetSource").disabled = !editable();
   if (editable() && program?.qasm === undefined && program?.calls === undefined) $("sourceEdit").value = run.source.text;
+  // The optical bench of a laser platform: its trains, elements and their hover records.
+  try {
+    bench = benches.benchFor(run);
+    benchElements = bench?.trains?.length ? benches.benchElements(bench) : [];
+  } catch (error) {
+    bench = null;
+    benchElements = [];
+    note("The optical bench could not be built: " + error.message);
+  }
+  opticIndex = new Map(benchElements.map((e) => ["optic:" + e.label, e]));
   stage.setRun(run, view);
   paintKinds();
   paint();

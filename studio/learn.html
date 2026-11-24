@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Background · QControl Studio</title>
+    <meta name="description" content="Background reference for QControl Studio: the physics of transmons, trapped ions and neutral atoms, light and optics, the control stack, where each platform is designed, and scripted use." />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/home.css" />
+    <style>
+      .page { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+      .toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow: auto; padding: 22px 0 30px; font-size: 13.5px; }
+      .toc b { display: block; font: 600 10.5px "Inter", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 14px 0 3px; }
+      .toc a { display: block; padding: 2px 6px; border-radius: 5px; color: #33494c; text-decoration: none; }
+      .toc a:hover { background: var(--pale); color: var(--green); }
+      .toc a.on { background: var(--pale); color: var(--green); font-weight: 600; }
+      .doc { max-width: 860px; padding: 26px 0 40px; min-width: 0; }
+      .doc > h1 { font-size: 40px; margin: 0 0 10px; }
+      .doc > p.intro { font-size: 17px; color: #33494c; margin: 0 0 24px; }
+      .part-card { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 20px 22px; margin: 0 0 14px; }
+      .part-card .kicker { font: 600 11.5px "Inter", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+      .part-card h3 { margin: 2px 0 4px; font-size: 18px; }
+      .part-card p { margin: 0 0 10px; color: #33494c; font-size: 14.5px; }
+      .part-card ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 26px; font-size: 14.5px; }
+      .part-card li { display: flex; gap: 12px; padding: 3px 0; break-inside: avoid; }
+      .part-card li span { color: var(--muted); width: 22px; flex: 0 0 auto; }
+      .k-a { color: #2f6fb8; } .k-b { color: var(--orange); } .k-c { color: var(--green); } .k-d { color: #b0428a; } .k-e { color: #8a6a10; } .k-f { color: var(--violet); }
+      .part-head { margin: 46px 0 8px; padding-top: 16px; border-top: 2px solid var(--soft); }
+      .part-head .kicker { font: 600 12px "Inter", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+      .part-head h2 { margin: 2px 0 4px; font-size: 30px; }
+      .part-head p { margin: 0; color: var(--muted); }
+      .lesson { padding: 18px 0 8px; scroll-margin-top: 10px; }
+      .lesson h3 { font-size: 22px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline; }
+      .lesson h3 .num { font: 600 13px var(--mono); color: var(--muted); background: #eef3f1; border-radius: 5px; padding: 2px 6px; }
+      .lesson p, .lesson li { color: #23393c; }
+      .lesson ul, .lesson ol { padding-left: 22px; }
+      .lesson li { margin: 3px 0; }
+      .lesson table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 10px 0 14px; }
+      .lesson th, .lesson td { text-align: left; border-bottom: 1px solid var(--soft); padding: 6px 10px 6px 0; vertical-align: top; }
+      .lesson th { font: 600 12px "Inter", sans-serif; color: var(--muted); }
+      .lesson .tbl { overflow-x: auto; }
+      figure.fig { margin: 14px 0 18px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 12px; }
+      figure.fig svg { display: block; width: 100%; height: auto; }
+      figure.fig figcaption { font-size: 13.5px; color: var(--muted); margin-top: 8px; }
+      .note { border-left: 3px solid var(--teal); background: #f2f8f6; padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 14.5px; margin: 12px 0; }
+      .note.bound { border-left-color: #c9a456; background: #fbf7ec; }
+      .open { display: inline-flex; gap: 6px; margin: 6px 0 4px; padding: 6px 12px; border: 1px solid var(--green); border-radius: 7px; color: var(--green); font-weight: 600; font-size: 14px; text-decoration: none; }
+      .open:hover { background: var(--pale); }
+      .opens { display: flex; flex-wrap: wrap; gap: 8px; }
+      .eq { font: 15px var(--mono); background: #f4f7f6; border-radius: 8px; padding: 8px 12px; margin: 8px 0; overflow-x: auto; white-space: nowrap; }
+      pre.cmd { font: 13px var(--mono); background: #172c32; color: #e3efe9; border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+      .src { font-size: 13px; color: var(--muted); }
+      .incourse { font-size: 14px; background: #eef4fb; border-radius: 8px; padding: 6px 12px; }
+      .incourse a { font-weight: 600; }
+      @media (max-width: 960px) {
+        .page { grid-template-columns: 1fr; gap: 0; }
+        .toc { display: none; }
+        .part-card ol { columns: 1; }
+      }
+      @media (max-width: 520px) {
+        .page { padding: 0 16px; }
+        .doc > h1 { font-size: 32px; }
+        .part-card { grid-template-columns: 1fr; }
+        .part-card svg { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <nav class="toc" aria-label="Lessons" id="toc"></nav>
+      <main class="doc">
+        <h1>Background</h1>
+        <p class="intro">
+          The reference behind the simulator, like a physics appendix: how each platform's qubits are driven, the optics of lasers and
+          tweezers, the control stack and what is proved or assumed about it, where each platform's hardware is designed, and how to run
+          everything from a script. To learn by doing, with exercises in the workspace, take <a href="/course">the course</a>. Wherever a
+          topic is one of its lessons, this page links to it instead of teaching it twice.
+        </p>
+
+        <div id="overview"></div>
+
+        <!-- ═══════════════════════════ PART A ═══════════════════════════ -->
+        <header class="part-head" id="part-a" data-part="A" data-title="The three platforms" data-kicker="k-a"
+          data-desc="What a control system does, how transmons, trapped ions and neutral atoms are physically driven, feed-forward, and time scales.">
+          <div class="kicker k-a">Part A</div>
+          <h2>The three platforms</h2>
+          <p>What the classical side of a quantum computer must do, platform by platform.</p>
+        </header>
+
+        <section class="lesson" id="a1" data-title="What a control system does">
+          <h3><span class="num">A1</span>What a control system does</h3>
+          <p>
+            Qubits are acted on by physical signals: microwave pulses, laser pulses, electrode voltages. A gate is a pulse of the right
+            frequency, amplitude, phase and duration that arrives at the right qubit at the right time. The control system is the classical
+            hardware that produces those signals. It has four jobs:
+          </p>
+          <ol>
+            <li><b>Generate.</b> Digital-to-analog converters (DACs) synthesize waveforms. A pulse is a carrier frequency, an amplitude, a phase and an envelope.</li>
+            <li><b>Time.</b> Pulses on different channels must start on the scheduled clock cycle. A gate that is late by a few nanoseconds is a different gate.</li>
+            <li><b>Measure.</b> Analog-to-digital converters (ADCs) or photon counters turn the qubit's response into a bit.</li>
+            <li><b>Decide.</b> A measured bit can choose a later pulse (feed-forward), or many bits can go to a decoder that finds an error correction. This must finish within the qubits' coherence time.</li>
+          </ol>
+          <p>
+            In this project the control system is a set of <a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q" target="_blank" rel="noopener">RISC-Q</a>
+            control cores: small RISC-V processors, each next to a group of DAC and ADC channels. They run firmware compiled from your program.
+            What is simulated is that classical machine, cycle by cycle. <b>No quantum state is simulated.</b> A measurement's outcome is an input you choose.
+          </p>
+          <p class="incourse">In the course: <a href="/course/A1">A1 The stack in one picture</a></p>
+        </section>
+
+        <section class="lesson" id="superconducting" data-title="Superconducting transmons">
+          <h3><span class="num">A2</span>Superconducting transmons</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 640 190" role="img" aria-label="A DAC drives a transmon through coax; a readout tone enters a resonator and returns to an ADC">
+              <rect x="10" y="40" width="96" height="40" rx="6" fill="#fbe2cf" stroke="#c4622d" /><text x="58" y="65" text-anchor="middle" font-size="14">DAC (drive)</text>
+              <rect x="10" y="110" width="96" height="40" rx="6" fill="#fbe2cf" stroke="#c4622d" /><text x="58" y="135" text-anchor="middle" font-size="14">DAC (tone)</text>
+              <rect x="534" y="110" width="96" height="40" rx="6" fill="#d9ecf5" stroke="#3a7ea3" /><text x="582" y="135" text-anchor="middle" font-size="14">ADC</text>
+              <path d="M106 60 H330" stroke="#b4692a" stroke-width="3" fill="none" /><text x="200" y="52" font-size="12" fill="#5a6c6f">coax · ≈ 200 mm/ns</text>
+              <path d="M106 130 H300" stroke="#b4692a" stroke-width="3" fill="none" />
+              <path d="M330 130 H534" stroke="#b4692a" stroke-width="3" fill="none" stroke-dasharray="7 4" />
+              <rect x="280" y="20" width="160" height="150" rx="10" fill="#eef3f6" stroke="#b8c8d2" stroke-dasharray="5 3" /><text x="360" y="186" text-anchor="middle" font-size="12" fill="#5a6c6f">chip at ≈ 10 mK</text>
+              <path d="M352 44h16v16h16v16h-16v16h-16v-16h-16v-16h16z" fill="#e3b23c" stroke="#7a5a10" /><text x="400" y="72" font-size="13">transmon</text>
+              <path d="M300 130 l8 -14 l8 28 l8 -28 l8 28 l8 -28 l8 28 l8 -14" fill="none" stroke="#4f8fd1" stroke-width="2.5" /><text x="370" y="150" font-size="13">resonator</text>
+              <path d="M360 92 V112" stroke="#4f8fd1" stroke-width="1.5" stroke-dasharray="3 3" />
+            </svg>
+            <figcaption>A drive pulse reaches the qubit through coax. A readout tone reflects off the qubit's resonator, whose frequency depends on the qubit's state, and returns to an ADC.</figcaption>
+          </figure>
+          <p>
+            A transmon is a superconducting circuit with a Josephson junction, operated at about 10 mK. Its two lowest levels form the qubit,
+            separated by a microwave frequency of a few GHz. Control is electrical:
+          </p>
+          <ul>
+            <li><b>One-qubit gates</b> are microwave pulses at the qubit frequency, tens of ns long. Here the RISC-Q example calibration gives 35 ns for <code>x90</code> and 70 ns for <code>x</code>. A Z rotation is a <em>frame update</em>: a phase change of later pulses, with no pulse played.</li>
+            <li><b>Two-qubit gates.</b> The ring here plays a 400 ns CZ as one tone on each qubit's drive line.</li>
+            <li><b>Readout is dispersive.</b> A tone into the qubit's readout resonator returns with a phase that depends on the qubit's state. The ADC samples it and a demodulation window integrates it into one bit. A readout is about 500 ns (Google Quantum AI, Nature 614, 676 (2023), Fig. 1).</li>
+            <li><b>Wiring.</b> Every signal crosses metres of coax at about 200 mm/ns, so it reaches the chip several ns after it leaves the DAC. The ring here assumes 1050 mm of coax (Krinner et al. 2019, Table 1) at 0.7 c.</li>
+          </ul>
+          <p>
+            The machine in the examples is the eight-transmon ring of RISC-Q's example calibration on the RISC-Q <code>x6y3</code> build:
+            500 MHz controller clock, 8 GS/s DACs and 2 GS/s ADCs. You can redraw it, or build your own, in the design editor (<a href="#e2">E2</a>).
+          </p>
+          <div class="opens">
+            <a class="open" href="/riscq-studio?example=superconducting-feedforward&amp;outcome=c=1">Open the Bell program →</a>
+            <a class="open" href="/riscq-design">Open the design editor →</a>
+          </div>
+          <p class="incourse">In the course: <a href="/course/C1">C1 Superconducting: from OpenQASM to microwaves</a></p>
+        </section>
+
+        <section class="lesson" id="trapped-ion" data-title="Trapped ions in a QCCD machine">
+          <h3><span class="num">A3</span>Trapped ions in a QCCD machine</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 640 170" role="img" aria-label="A QCCD trap: rails of electrodes, sites in zones, ions, a gate laser and a detection beam with fluorescence into a PMT">
+              <rect x="40" y="60" width="560" height="56" rx="28" fill="#efeafb" />
+              <path d="M70 88 H570" stroke="#e8a0a8" stroke-width="5" />
+              <g fill="#e7ebee" stroke="#c9d1d6">
+                <rect x="80" y="64" width="22" height="8" rx="4" /><rect x="120" y="64" width="22" height="8" rx="4" /><rect x="160" y="64" width="22" height="8" rx="4" /><rect x="200" y="64" width="22" height="8" rx="4" /><rect x="240" y="64" width="22" height="8" rx="4" /><rect x="280" y="64" width="22" height="8" rx="4" /><rect x="320" y="64" width="22" height="8" rx="4" /><rect x="360" y="64" width="22" height="8" rx="4" /><rect x="400" y="64" width="22" height="8" rx="4" /><rect x="440" y="64" width="22" height="8" rx="4" /><rect x="480" y="64" width="22" height="8" rx="4" /><rect x="520" y="64" width="22" height="8" rx="4" />
+                <rect x="80" y="104" width="22" height="8" rx="4" /><rect x="120" y="104" width="22" height="8" rx="4" /><rect x="160" y="104" width="22" height="8" rx="4" /><rect x="200" y="104" width="22" height="8" rx="4" /><rect x="240" y="104" width="22" height="8" rx="4" /><rect x="280" y="104" width="22" height="8" rx="4" /><rect x="320" y="104" width="22" height="8" rx="4" /><rect x="360" y="104" width="22" height="8" rx="4" /><rect x="400" y="104" width="22" height="8" rx="4" /><rect x="440" y="104" width="22" height="8" rx="4" /><rect x="480" y="104" width="22" height="8" rx="4" /><rect x="520" y="104" width="22" height="8" rx="4" />
+              </g>
+              <rect x="110" y="80" width="56" height="16" rx="8" fill="#c9cdd2" /><rect x="290" y="80" width="56" height="16" rx="8" fill="#58b8ac" /><rect x="470" y="80" width="56" height="16" rx="8" fill="#f2c94c" />
+              <circle cx="138" cy="88" r="8" fill="#26324a" /><circle cx="308" cy="88" r="8" fill="#26324a" /><circle cx="328" cy="88" r="8" fill="#26324a" />
+              <path d="M318 10 L310 80 L326 80 Z" fill="#5b8cff" opacity=".35" /><text x="336" y="24" font-size="12">gate laser</text>
+              <path d="M138 88 L110 150 L166 150 Z" fill="#8f6cff" opacity=".18" /><rect x="112" y="148" width="52" height="16" rx="3" fill="#26324a" /><text x="138" y="160" text-anchor="middle" font-size="10" fill="#fff">PMT</text>
+              <text x="138" y="54" text-anchor="middle" font-size="12">storage</text><text x="318" y="140" text-anchor="middle" font-size="12">gate zone</text><text x="498" y="54" text-anchor="middle" font-size="12">load</text>
+              <text x="52" y="40" font-size="12" fill="#5a6c6f">electrodes along the rail · voltages move the ions</text>
+            </svg>
+            <figcaption>Drawn in QCCD Studio's style: a rail with electrodes, sites coloured by zone, ions as dark discs. A gate laser addresses the gate zone; fluorescence from a detected ion is collected into a photon counter.</figcaption>
+          </figure>
+          <p>
+            An ion's qubit is two of its internal levels. Ions are held above a surface trap by RF and DC electrode voltages. In a QCCD
+            (quantum charge-coupled device) machine the trap has many zones, and ions are moved between them:
+          </p>
+          <ul>
+            <li><b>Transport.</b> DAC waveforms on the DC electrodes move an ion along a segment, split or merge chains, and pass junctions. Pino et al. (Nature 592, 209 (2021), Table II) report 58 µs for an intrazone shift of 110 µm, 283 µs between zones, 128 µs to split or combine, 200 µs to swap, plus about 10% for interpolation and electronics. An X junction costs 120 µs (Murali et al., ISCA 2020).</li>
+            <li><b>Gates.</b> Laser pulses on ions in a gate zone. A one-qubit rotation is about 5 µs and a two-qubit Mølmer–Sørensen (MS) gate about 25 µs (Pino et al., Table III). MS uses the shared motion of the ions in one zone.</li>
+            <li><b>Cooling.</b> Transport heats the ions' motion. A Doppler cooling stage takes about 550 µs (Pino et al., Table III).</li>
+            <li><b>Detection.</b> A resonant beam makes a bright ion fluoresce; a dark ion stays dark. Photons collected by an objective are counted by a photomultiplier (PMT). Detection takes about 120 µs. Here a bright ion gives 10 photons per window on average and counts as bright above 1 (a composite of Wright et al. 2019 and Egan et al. 2021).</li>
+          </ul>
+          <p>
+            The trap geometry and the program come from <a href="https://www.qccd.academy/studio.html#design" target="_blank" rel="noopener">QCCD Studio</a>,
+            which states for every cycle which ions move over which edges and which electrode channels act. This project replays that, one
+            DAC channel per Studio electrode control channel, one core per gate zone with laser modulators and a photon counter, and one
+            core for light shared by the whole trap.
+          </p>
+          <div class="opens">
+            <a class="open" href="/riscq-studio?example=qccd-ghz3&amp;outcome=q0=1&amp;outcome=q2=1">Open the GHZ run →</a>
+            <a class="open" href="/qccd-studio">Open the H2 replay →</a>
+          </div>
+          <p class="incourse">In the course: <a href="/course/C2">C2 Trapped ions: shuttling is a waveform</a></p>
+        </section>
+
+        <section class="lesson" id="neutral-atom" data-title="Neutral atoms in optical tweezers">
+          <h3><span class="num">A4</span>Neutral atoms in optical tweezers</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 640 200" role="img" aria-label="A zoned atom array: storage zone, entanglement zone with Rydberg beams, an AOD tweezer carrying an atom">
+              <rect x="0" y="0" width="640" height="200" rx="8" fill="#0f161c" />
+              <rect x="30" y="20" width="270" height="160" rx="6" fill="none" stroke="#4a6a7a" stroke-dasharray="4 3" /><text x="40" y="38" font-size="12" fill="#9fb8c4">storage zone</text>
+              <rect x="350" y="20" width="260" height="160" rx="6" fill="#2a2148" stroke="#6b5aa8" stroke-dasharray="4 3" /><text x="360" y="38" font-size="12" fill="#c9bdf0">entanglement zone</text>
+              <g fill="#ffb45c"><circle cx="70" cy="70" r="5" /><circle cx="110" cy="70" r="5" /><circle cx="150" cy="70" r="5" /><circle cx="70" cy="110" r="5" /><circle cx="150" cy="110" r="5" /><circle cx="190" cy="110" r="5" /><circle cx="110" cy="150" r="5" /><circle cx="230" cy="150" r="5" /></g>
+              <g fill="none" stroke="#3d5260"><circle cx="190" cy="70" r="5" /><circle cx="230" cy="70" r="5" /><circle cx="110" cy="110" r="5" /><circle cx="230" cy="110" r="5" /><circle cx="70" cy="150" r="5" /><circle cx="150" cy="150" r="5" /><circle cx="190" cy="150" r="5" /></g>
+              <rect x="350" y="95" width="260" height="22" fill="#3b6dff" opacity=".35" /><rect x="350" y="99" width="260" height="14" fill="#c0392b" opacity=".35" />
+              <text x="600" y="90" text-anchor="end" font-size="11" fill="#c9d6ff">Rydberg beams 420 nm + 1013 nm</text>
+              <g fill="#ffb45c"><circle cx="420" cy="106" r="5" /><circle cx="440" cy="106" r="5" /><circle cx="520" cy="106" r="5" /><circle cx="540" cy="106" r="5" /></g>
+              <path d="M310 0 L296 120 L324 120 Z" fill="#ff7a5c" opacity=".45" /><circle cx="310" cy="120" r="6" fill="#fff2d0" />
+              <path d="M310 135 H345" stroke="#ff7a5c" stroke-width="1.5" marker-end="url(#arr)" /><text x="268" y="150" font-size="11" fill="#ffc6b5">AOD tweezer carries an atom</text>
+              <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#ff7a5c" /></marker></defs>
+            </svg>
+            <figcaption>Static traps hold atoms in storage. A moving tweezer, steered by AOD tones, carries atoms into the entanglement zone, where Rydberg beams entangle neighbouring pairs.</figcaption>
+          </figure>
+          <p>
+            Each qubit is one neutral atom, such as rubidium-87, held at the focus of a laser beam: an <b>optical tweezer</b>. Two kinds of tweezer are combined:
+          </p>
+          <ul>
+            <li><b>Static traps</b>, often from a spatial light modulator (SLM): a fixed grid of foci where atoms are stored.</li>
+            <li><b>Moving tweezers</b> from crossed acousto-optic deflectors (AODs). Each RF tone on an AOD deflects the beam by an angle proportional to its frequency (<a href="#d3">D3</a>), so a column tone and a row tone place a tweezer at their crossing. Changing a tone's frequency moves every tweezer on that column or row. An atom is picked up by ramping the tone's power up, carried, and dropped by ramping it down.</li>
+          </ul>
+          <p>
+            Gates use light, too. Two-qubit gates excite neighbouring atoms to Rydberg states, whose strong interaction blocks double
+            excitation (the Rydberg blockade). In rubidium experiments this is a two-photon transition with 420 nm and 1013 nm lasers
+            (Evered et al., Nature 622, 268 (2023)), applied globally to an entanglement zone, so every close pair in that zone is gated
+            at once. One-qubit gates use a Raman laser. The architecture here has a storage zone and an entanglement zone. Its file states
+            a Rydberg pulse of 0.36 µs, a one-qubit gate of 52 µs and an atom transfer of 15 µs.
+          </p>
+          <p>
+            Programs come from the <a href="https://github.com/UCLA-VAST/ZAC" target="_blank" rel="noopener">ZAC</a> compiler (Lin, Tan, Cong,
+            HPCA 2025), which schedules gates and rearrangement jobs for a zoned architecture. Moves follow ZAC's constant-acceleration law with
+            2750 m/s². The controller here has one core per AOD with one RF tone channel per row and column, and one laser core.
+          </p>
+          <div class="note bound">ZAC does not say which beams address single atoms, so a one-qubit instruction is played as one global pulse. Atoms are assumed to follow their tones. Loss, heating and imaging are not modeled.</div>
+          <a class="open" href="/riscq-studio?example=neutral-bv14">Open the ZAC program →</a>
+          <p class="incourse">In the course: <a href="/course/C3">C3 Neutral atoms: tones carry atoms</a></p>
+        </section>
+
+        <section class="lesson" id="a5" data-title="Measurement, feed-forward and decoding">
+          <h3><span class="num">A5</span>Measurement, feed-forward and decoding</h3>
+          <p>
+            Many programs act on a measured bit before the qubits decohere: teleportation, state injection, error correction. In
+            <b>feed-forward</b> one bit chooses a later gate. In <b>error correction</b> many syndrome bits go to a <b>decoder</b>, which
+            infers the likely error; the correction is often applied by updating a <b>Pauli frame</b>, a classical record of pending X and
+            Z flips, instead of playing a pulse.
+          </p>
+          <p>Both are races against the clock. In the ring here (one measured bit conditioning an X on another core):</p>
+          <div class="tbl"><table>
+            <tr><th>Event after the readout window closes</th><th>Time in the model</th></tr>
+            <tr><td>Result at the measuring core</td><td>34 ns</td></tr>
+            <tr><td>Bit at the board hub</td><td>70 ns</td></tr>
+            <tr><td>Bit at every core</td><td>86 ns</td></tr>
+            <tr><td>Conditioned pulse opens</td><td>344 ns</td></tr>
+          </table></div>
+          <p>
+            Decoders can run on the control cores. The C program of the <a href="https://github.com/NamiLiy/Helios_scalable_QEC" target="_blank" rel="noopener">Helios</a>
+            union-find decoder is compiled here for a RISC-Q core and matches Helios's own test vectors. As firmware on a soft core it takes
+            17 µs to 58 µs at distance 3 in the model. The same algorithm in FPGA logic is reported at 56 ns (Liu et al., arXiv:2603.16203).
+            That gap is the point of the comparison: it shows what decoding in control-core software costs.
+          </p>
+          <div class="opens">
+            <a class="open" href="/riscq-studio?example=superconducting-feedforward&amp;outcome=c=1&amp;step=410">The measured bit at the hub →</a>
+            <a class="open" href="/riscq-studio?example=superconducting-repetition&amp;outcome=s0=1&amp;step=803">A decoder core and a Pauli frame →</a>
+            <a class="open" href="/riscq-studio?example=decoder-helios-d3">Helios on a control core →</a>
+          </div>
+          <p class="incourse">In the course: <a href="/course/E1">E1 Feedback latency</a> · <a href="/course/E2">E2 System calls</a> · <a href="/course/E3">E3 A real decoder on a control core</a></p>
+        </section>
+
+        <section class="lesson" id="a6" data-title="Time scales, side by side">
+          <h3><span class="num">A6</span>Time scales, side by side</h3>
+          <p>The three platforms differ by about three orders of magnitude in operation time. These are the values the models here use, with their sources.</p>
+          <div class="tbl"><table>
+            <tr><th>Operation</th><th>Transmons</th><th>Trapped ions</th><th>Neutral atoms</th></tr>
+            <tr><td>One-qubit gate</td><td>35 ns (x90), 70 ns (x)</td><td>5 µs</td><td>52 µs (architecture file)</td></tr>
+            <tr><td>Two-qubit gate</td><td>400 ns (CZ)</td><td>25 µs (MS)</td><td>0.36 µs Rydberg pulse</td></tr>
+            <tr><td>Measurement</td><td>≈ 500 ns readout</td><td>120 µs detection</td><td>not modeled</td></tr>
+            <tr><td>Moving a qubit</td><td>—</td><td>58 µs per shift, 283 µs between zones</td><td>15 µs transfer, moves of tens of µs</td></tr>
+            <tr><td>Controller clock (one batch)</td><td>500 MHz (2 ns)</td><td>100 MHz (10 ns)</td><td>100 MHz (10 ns)</td></tr>
+          </table></div>
+          <p class="src">Sources: RISC-Q example calibration (transmons); Pino et al., Nature 592, 209 (2021) (ions); the ZAC architecture file and Lin, Tan, Cong, HPCA 2025 (atoms). All are listed in <code>riscq/standards.mjs</code> or the run's <code>machine.provenance</code>.</p>
+          <p class="incourse">In the course: <a href="/course/C4">C4 The same controller everywhere</a></p>
+        </section>
+
+        <!-- ═══════════════════════════ PART B ═══════════════════════════ -->
+        <header class="part-head" id="part-b" data-part="B" data-title="The control stack" data-kicker="k-b"
+          data-desc="An overview of the stack from program to pulse, the parts of the controller, and what is proved, tested or assumed about it.">
+          <div class="kicker k-b">Part B</div>
+          <h2>The control stack</h2>
+          <p>How a program becomes timed register writes, and how this project executes them.</p>
+        </header>
+
+        <section class="lesson" id="b1" data-title="Five levels from a program to a pulse">
+          <h3><span class="num">B1</span>Five levels from a program to a pulse</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 660 130" role="img" aria-label="Source to hardware instructions to firmware to execution to debugger">
+              <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#00695d" /></marker></defs>
+              <g font-size="13" text-anchor="middle">
+                <rect x="4" y="30" width="112" height="64" rx="8" fill="#e4f1ec" stroke="#00695d" /><text x="60" y="56" font-weight="600">Source</text><text x="60" y="76" font-size="11" fill="#33494c">QASM · ZAC · calls</text>
+                <rect x="140" y="30" width="112" height="64" rx="8" fill="#e4f1ec" stroke="#00695d" /><text x="196" y="56" font-weight="600">Hardware</text><text x="196" y="76" font-size="11" fill="#33494c">timed operations</text>
+                <rect x="276" y="30" width="112" height="64" rx="8" fill="#e4f1ec" stroke="#00695d" /><text x="332" y="56" font-weight="600">Firmware</text><text x="332" y="76" font-size="11" fill="#33494c">RV32I per core</text>
+                <rect x="412" y="30" width="112" height="64" rx="8" fill="#e4f1ec" stroke="#00695d" /><text x="468" y="56" font-weight="600">Execution</text><text x="468" y="76" font-size="11" fill="#33494c">Lean model → trace</text>
+                <rect x="548" y="30" width="108" height="64" rx="8" fill="#e4f1ec" stroke="#00695d" /><text x="602" y="56" font-weight="600">Debugger</text><text x="602" y="76" font-size="11" fill="#33494c">3D · layers</text>
+              </g>
+              <g stroke="#00695d" stroke-width="2" marker-end="url(#ar2)"><path d="M116 62 H138" /><path d="M252 62 H274" /><path d="M388 62 H410" /><path d="M524 62 H546" /></g>
+              <text x="330" y="120" text-anchor="middle" font-size="12" fill="#5a6c6f">every picture in the debugger is derived from the trace frames</text>
+            </svg>
+          </figure>
+          <ol>
+            <li><b>Source.</b> OpenQASM, a QCCD Studio program or design, a compiled ZAC program, or a list of fault-tolerance system calls (<code>gate</code>, <code>measure</code>, <code>decode_syndrome</code>, <code>pauli_frame_update</code>).</li>
+            <li><b>Hardware instructions.</b> One physical operation each, with a start time and a duration: <code>x90</code>, <code>cz</code>, <code>transport</code>, <code>ms</code>, <code>move</code>, <code>rydberg</code>…</li>
+            <li><b>Firmware.</b> The RV32I program of each control core. It issues timed register writes to its channels.</li>
+            <li><b>Execution.</b> A Lean 4 model of the RISC-Q controller runs the firmware and emits a trace.</li>
+            <li><b>Debugger.</b> The browser steps through the trace. The 3D scene, the program layers and the inspector are rebuilt from the frames and nothing else.</li>
+          </ol>
+          <a class="open" href="/riscq-studio?example=superconducting-feedforward&amp;outcome=c=1">See the four layers side by side →</a>
+          <p class="incourse">In the course: <a href="/course/A1">A1 The stack in one picture</a> · <a href="/course/A3">A3 Following one pulse</a></p>
+        </section>
+
+        <section class="lesson" id="b2" data-title="Hardware instructions per platform">
+          <h3><span class="num">B2</span>Hardware instructions per platform</h3>
+          <div class="tbl"><table>
+            <tr><th>Platform</th><th>Source</th><th>Hardware instructions</th><th>What a control core drives</th></tr>
+            <tr><td>Transmons</td><td>OpenQASM 3, system calls</td><td><code>x90</code>, <code>x</code>, <code>frame</code> (virtual Z), <code>cz</code>, <code>measure</code>, scheduled as soon as their qubits are free</td><td>One core per qubit: a drive channel, one drive channel per CZ partner, a readout tone and a demodulation window</td></tr>
+            <tr><td>Trapped ions</td><td>OpenQASM via QCCD Studio's compiler, Studio programs or designs</td><td>The cycles of Studio's replay: <code>transport</code>, <code>rotate</code>, <code>ms</code>, <code>measure</code>, <code>cool</code>, <code>frame</code></td><td>Transport cores with one DAC channel per electrode control channel; one core per gate zone with laser modulators and a photon counter; one core for broadcast light</td></tr>
+            <tr><td>Neutral atoms</td><td>A compiled ZAC program</td><td><code>pickup</code>, <code>move</code>, <code>drop</code>, <code>raman</code>, <code>rydberg</code>, at ZAC's times</td><td>One core per AOD with one RF tone channel per row and column; one laser core</td></tr>
+          </table></div>
+          <p>
+            Standard gates are decomposed into native ones; for transmons into <code>x90</code>, <code>x</code> and frame updates, checked
+            as 2×2 matrices up to a global phase. A measurement whose bit conditions a later gate ends a <b>segment</b>: the bit is
+            published through the board hub, all cores meet at a barrier, and the conditioned gate runs in the next segment.
+          </p>
+          <p class="incourse">In the course: <a href="/course/C4">C4 The same controller everywhere</a></p>
+        </section>
+
+        <section class="lesson" id="b3" data-title="The RISC-Q controller">
+          <h3><span class="num">B3</span>The RISC-Q controller</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 660 170" role="img" aria-label="Host, hub, cores, posted links, channels and converters">
+              <g font-size="12" text-anchor="middle">
+                <rect x="10" y="64" width="70" height="40" rx="6" fill="#273439" /><text x="45" y="88" fill="#fff">host</text>
+                <polygon points="130,62 150,50 170,62 170,98 150,110 130,98" fill="#d2ac60" /><text x="150" y="128">hub</text>
+                <rect x="220" y="20" width="70" height="36" rx="5" fill="#1f3a5f" /><text x="255" y="43" fill="#fff">core 0</text>
+                <rect x="220" y="112" width="70" height="36" rx="5" fill="#1f3a5f" /><text x="255" y="135" fill="#fff">core 1</text>
+                <rect x="340" y="16" width="60" height="44" rx="5" fill="#58b8ac" /><text x="370" y="42">link</text>
+                <rect x="340" y="108" width="60" height="44" rx="5" fill="#58b8ac" /><text x="370" y="134">link</text>
+                <rect x="450" y="10" width="90" height="26" rx="4" fill="#26785e" /><text x="495" y="28" fill="#fff">pulse ch.</text>
+                <rect x="450" y="40" width="90" height="26" rx="4" fill="#6c5a94" /><text x="495" y="58" fill="#fff">demod ch.</text>
+                <rect x="450" y="118" width="90" height="26" rx="4" fill="#26785e" /><text x="495" y="136" fill="#fff">pulse ch.</text>
+                <rect x="580" y="10" width="62" height="26" rx="4" fill="#d2ac60" /><text x="611" y="28">DAC</text>
+                <rect x="580" y="40" width="62" height="26" rx="4" fill="#6aa0c8" /><text x="611" y="58">ADC</text>
+                <rect x="580" y="118" width="62" height="26" rx="4" fill="#d2ac60" /><text x="611" y="136">DAC</text>
+              </g>
+              <g stroke="#55747a" stroke-width="2" fill="none"><path d="M80 84 H130" /><path d="M170 74 L220 38" /><path d="M170 88 L220 130" /><path d="M290 38 H340" /><path d="M290 130 H340" /><path d="M400 30 L450 23" /><path d="M400 44 L450 53" /><path d="M400 130 H450" /><path d="M540 23 H580" /><path d="M540 53 H580" /><path d="M540 131 H580" /></g>
+            </svg>
+          </figure>
+          <ul>
+            <li><b>Core.</b> An RV32I processor that runs one program from its own RAM. A store into its <em>put window</em> becomes a posted register write.</li>
+            <li><b>Posted link.</b> A pipeline that carries the write to one channel next to the converters. "Posted" means the core does not wait for it: the write travels on while the core goes on.</li>
+            <li><b>Channel.</b> Holds a <b>pulse table</b> (entries, or <em>slots</em>, of amplitude, phase, envelope address and duration), a carrier frequency, a start time and timed queues. Writing a slot number to <code>fire</code> schedules that entry at the current start time. The queues release each parameter early by exactly its pipeline latency, so the pulse opens at the converter on the scheduled batch. A pulse channel drives a DAC; a demodulation channel integrates an ADC; a digital (dio) channel sets lines.</li>
+            <li><b>Envelope.</b> The pulse shape, stored as samples in envelope memory and stretched by the channel's interpolation factor.</li>
+            <li><b>Hub.</b> Gives the cores shared bits, counted barriers that return one common time, and mailboxes. It passes one message per batch for the whole board, from queues of eight per core. A publish reaches every core 23 batches later at link depth 4.</li>
+            <li><b>Host.</b> Receives results through a write-only host window.</li>
+          </ul>
+          <a class="open" href="/riscq-studio?example=superconducting-feedforward&amp;outcome=c=1&amp;view=control">See the controller →</a>
+          <p class="incourse">In the course: <a href="/course/B1">B1 Posted writes and the pulse table</a> · <a href="/course/B3">B3 Measurement results come back</a> · <a href="/course/B4">B4 Cores meet: the board hub</a></p>
+        </section>
+
+        <section class="lesson" id="b4" data-title="Time: batches, leads and pulse windows">
+          <h3><span class="num">B4</span>Time: batches, leads and pulse windows</h3>
+          <p>
+            A <b>batch</b> is one controller clock cycle (dspClk). It carries 16 DAC samples or 4 ADC samples. Every time in the model is a
+            whole number of batches:
+          </p>
+          <div class="eq">atPs = atBatch × dspPeriodPs</div>
+          <p>
+            A <b>pulse window</b> is the interval during which a fired table entry plays on a converter: it opens on its start batch and closes
+            one duration later. A <b>binding</b> ties a channel's slot to the apparatus part it acts on (a qubit, a resonator, a trap site, a
+            beam, an AOD tone) with the delay of the path between them.
+          </p>
+          <p>
+            Firmware issues each timed write 96 batches before its start time, the lead RISC-Q's own software uses. A write that arrives
+            early enough lands exactly on its start time, whatever the link latency was. That is a theorem of the model,
+            <code>land_exact</code> in <code>QControl/RiscQ/Timing.lean</code>. A core issues one write at a time, so a burst of simultaneous
+            pulses starts its segment later; the compiler accounts for that and rejects schedules that would overflow a channel's queues.
+          </p>
+          <p class="incourse">In the course: <a href="/course/A2">A2 Batches: the clock everything runs on</a> · <a href="/course/B2">B2 Timed queues and the lead</a></p>
+        </section>
+
+        <section class="lesson" id="b5" data-title="The Lean model and the trace">
+          <h3><span class="num">B5</span>The Lean model and the trace</h3>
+          <p>
+            <code>QControl/RiscQ/Soc.lean</code> is an executable model of a RISC-Q system-on-chip; <code>Rv32.lean</code> gives the
+            instruction semantics. Execution is a discrete-event simulation with exact cycle arithmetic. Every event becomes one
+            <b>frame</b> of the trace:
+          </p>
+          <ul>
+            <li>a stable <code>id</code>, the operation <code>op</code> and its time <code>atBatch</code>, <code>atPs</code>;</li>
+            <li>the <code>part</code> it acts on and the parts it <code>targets</code>;</li>
+            <li>its causal <code>parents</code>, the firmware address <code>pc</code> and the hardware instruction <code>source</code> that caused it;</li>
+            <li>the committed <code>state</code> of its part.</li>
+          </ul>
+          <p>
+            Because each frame names its causes, any frame can be traced back to the core instruction that started it. Because each frame
+            carries its part's committed state, the machine state at any step is rebuilt by replaying frames from reset, and nothing else.
+          </p>
+          <p class="incourse">In the course: <a href="/course/A3">A3 Following one pulse</a></p>
+        </section>
+
+        <section class="lesson" id="b6" data-title="Proved, tested, assumed">
+          <h3><span class="num">B6</span>Proved, tested, assumed</h3>
+          <p>Three kinds of statement are kept apart, as the project's development rule requires:</p>
+          <ul>
+            <li><b>Proved in Lean, about the model.</b> For example <code>land_exact</code> (a write ready no later than its lead lands exactly on its start time), <code>land_late</code> (a late write lands late by exactly what it missed), and that the hub arbiter grants a waiting core in every batch.</li>
+            <li><b>Conformance tests against other people's artifacts.</b> Three unmodified RISC-Q firmware binaries reproduce what RISC-Q's RTL simulations assert. QCCD Studio's H2 replay is compared on all 947 cycles. The compiled Helios decoder matches Helios's test vectors.</li>
+            <li><b>Assumed or schematic.</b> Three latencies RISC-Q states without a number, the core's cost per instruction, the controller floorplan, the path inside an atom move, and display geometry. Each is named where it is used.</li>
+          </ul>
+          <div class="note bound">The numbers are results of the model with published values where a program states none. They are not hardware measurements and say nothing about gate fidelity.</div>
+          <a class="open" href="/validation">Open hardware validation →</a>
+        </section>
+
+        <!-- ═══════════════════════════ PART C ═══════════════════════════ -->
+        <header class="part-head" id="part-c" data-part="C" data-title="The workspace, for reference" data-kicker="k-c"
+          data-desc="The three views of one machine, the keys and the layer colours. The course teaches how to read the workspace.">
+          <div class="kicker k-c">Part C</div>
+          <h2>The workspace, for reference</h2>
+          <p>The workspace at <a href="/riscq-studio">/riscq-studio</a> shows one run on one screen. The course lesson <a href="/course/A4">A4 Reading the workspace</a> teaches it. This is the summary.</p>
+        </header>
+
+        <section class="lesson" id="c1" data-title="One machine, three views">
+          <h3><span class="num">C1</span>One machine, three views</h3>
+          <p>The workspace draws one machine. The three views only frame it differently: a part stands in the same place in each.</p>
+          <ul>
+            <li><b>Chip</b> (<kbd>1</kbd>): the apparatus, ringed by the converters and channels that drive it.</li>
+            <li><b>Control system</b> (<kbd>2</kbd>): the cores, links, inboxes, channels, hub and host.</li>
+            <li><b>Whole machine</b> (<kbd>3</kbd>): everything.</li>
+          </ul>
+          <p>
+            A part outside the frame keeps running. When it acts, a badge names it, and its instructions stay in the program column.
+            Positions are display geometry. The apparatus uses its own coordinates where the run carries them (QCCD Studio's architecture,
+            the ZAC architecture in µm, or your design in mm). The controller layout is schematic. The left rail's note says which.
+          </p>
+          <div class="opens">
+            <a class="open" href="/riscq-studio?example=qccd-ghz3&amp;outcome=q0=1&amp;outcome=q2=1&amp;view=chip">Chip view →</a>
+            <a class="open" href="/riscq-studio?example=qccd-ghz3&amp;outcome=q0=1&amp;outcome=q2=1&amp;view=control">Control-system view →</a>
+            <a class="open" href="/riscq-studio?example=qccd-ghz3&amp;outcome=q0=1&amp;outcome=q2=1&amp;view=machine">Whole machine →</a>
+          </div>
+        </section>
+
+        <section class="lesson" id="c2" data-title="Keys and layer colours">
+          <h3><span class="num">C2</span>Keys and layer colours</h3>
+          <div class="tbl"><table>
+            <tr><th>Key</th><th>Action</th></tr>
+            <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Previous and next step</td></tr>
+            <tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>Reset state, last step</td></tr>
+            <tr><td><kbd>Space</kbd></td><td>Play or pause</td></tr>
+            <tr><td><kbd>n</kbd> <kbd>p</kbd></td><td>Next hardware instruction, next pulse window</td></tr>
+            <tr><td><kbd>f</kbd> · <kbd>h</kbd></td><td>Fit the view · Explain mode</td></tr>
+            <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Chip, Control system, Whole machine</td></tr>
+          </table></div>
+          <p>
+            In the program layers, yellow marks the current step's row, blue the instructions whose pulse windows are open, and violet the
+            rows related to the row under the pointer. The address keeps the program, outcomes, step and view, so a link reopens the same moment.
+          </p>
+          <p class="incourse">In the course: <a href="/course/A4">A4 Reading the workspace</a></p>
+        </section>
+
+        <!-- ═══════════════════════════ PART D ═══════════════════════════ -->
+        <header class="part-head" id="part-d" data-part="D" data-title="Light and optics" data-kicker="k-d"
+          data-desc="Lasers, fibers, lenses, AODs and objectives; Gaussian beams; how a tone steers a tweezer; beams in the workspace.">
+          <div class="kicker k-d">Part D</div>
+          <h2>Light and optics</h2>
+          <p>Ions and atoms are controlled with light. This part gives the optics needed to read the beams in the workspace.</p>
+        </header>
+
+        <section class="lesson" id="d1" data-title="Lasers, fibers, lenses and objectives">
+          <h3><span class="num">D1</span>Lasers, fibers, lenses and objectives</h3>
+          <p>A beam's path from laser to qubit is an optical train:</p>
+          <ul>
+            <li><b>Laser.</b> Sets the wavelength λ (optical frequency ν = c/λ) and the power.</li>
+            <li><b>Modulator (AOM or AOD).</b> An RF tone from a DAC launches a sound wave in a crystal. The light diffracted by it is shifted in frequency by the RF frequency and switched by the RF amplitude. This is how a pulse window on a DAC channel becomes a light pulse.</li>
+            <li><b>Fiber.</b> Carries the beam from the optical table to the experiment and cleans its shape: a single-mode fiber emits one Gaussian mode.</li>
+            <li><b>Lenses and mirrors.</b> Steer, expand or shrink the beam. A telescope of two lenses with focal lengths f₁, f₂ magnifies the beam by f₂/f₁.</li>
+            <li><b>Objective.</b> A high-numerical-aperture lens near the qubits that focuses beams to µm spots and collects fluorescence.</li>
+          </ul>
+        </section>
+
+        <section class="lesson" id="d2" data-title="Gaussian beams">
+          <h3><span class="num">D2</span>Gaussian beams</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 640 180" role="img" aria-label="A Gaussian beam focused by a lens to a waist w0 with Rayleigh range zR">
+              <defs><linearGradient id="beamg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff7a5c" stop-opacity=".05" /><stop offset=".5" stop-color="#ff7a5c" stop-opacity=".55" /><stop offset="1" stop-color="#ff7a5c" stop-opacity=".05" /></linearGradient></defs>
+              <path d="M20 40 L180 40 C 300 40, 360 84, 420 84 C 480 84, 540 40, 620 22 L620 158 C 540 140, 480 96, 420 96 C 360 96, 300 140, 180 140 L20 140 Z" fill="url(#beamg)" />
+              <ellipse cx="180" cy="90" rx="8" ry="62" fill="#d9ecf5" stroke="#3a7ea3" /><text x="180" y="170" text-anchor="middle" font-size="12">lens f</text>
+              <path d="M420 70 V110" stroke="#152b2d" stroke-dasharray="3 3" /><text x="428" y="66" font-size="12">waist w₀</text>
+              <path d="M360 120 H480" stroke="#1f3a5f" stroke-width="1.5" /><path d="M360 114 V126 M480 114 V126" stroke="#1f3a5f" /><text x="420" y="138" text-anchor="middle" font-size="12">2 z_R</text>
+              <path d="M40 40 V140" stroke="#152b2d" stroke-dasharray="3 3" /><text x="48" y="36" font-size="12">input radius w</text>
+            </svg>
+            <figcaption>A collimated beam of radius w is focused by a lens of focal length f to a waist w₀ ≈ λf/(πw). Within ±z_R of the focus the beam stays narrow.</figcaption>
+          </figure>
+          <p>A laser beam is well described by a Gaussian: its intensity falls off as exp(−2r²/w²) from the axis, where w is the beam radius. Along the axis, around its narrowest point (the waist w₀):</p>
+          <div class="eq">w(z) = w₀ √(1 + (z/z_R)²),&nbsp;&nbsp;&nbsp; z_R = π w₀² / λ,&nbsp;&nbsp;&nbsp; θ = λ / (π w₀)</div>
+          <p>
+            z_R is the Rayleigh range, over which the beam area doubles, and θ the far-field half-angle. A lens of focal length f focuses a
+            collimated beam of radius w to
+          </p>
+          <div class="eq">w₀ ≈ λ f / (π w),&nbsp;&nbsp;&nbsp; peak intensity I₀ = 2P / (π w₀²)</div>
+          <p>
+            For illustration: λ = 800 nm, w = 2 mm and f = 10 mm give w₀ ≈ 1.3 µm and z_R ≈ 6 µm, a tweezer. Through lenses and free space a
+            Gaussian beam stays Gaussian; its complex beam parameter is propagated by the ABCD matrices of the elements. An elliptical beam,
+            as made by cylindrical lenses for a light sheet, has a separate w for each transverse axis.
+          </p>
+          <div class="note bound">This is paraxial optics: thin lenses, no aberrations, no polarization. It describes beam sizes and focus positions well; it does not predict the exact trap depth of a real objective.</div>
+        </section>
+
+        <section class="lesson" id="d3" data-title="Acousto-optic deflectors steer tweezers">
+          <h3><span class="num">D3</span>Acousto-optic deflectors steer tweezers</h3>
+          <figure class="fig">
+            <svg viewBox="0 0 640 170" role="img" aria-label="An AOD deflects a beam by an angle proportional to its RF frequency; an objective turns the angle into a position">
+              <rect x="150" y="50" width="90" height="70" rx="4" fill="#d9ecf5" stroke="#3a7ea3" /><text x="195" y="140" text-anchor="middle" font-size="12">AOD crystal</text>
+              <path d="M150 120 v12 h90 v-12" fill="none" stroke="#c4622d" /><text x="195" y="160" text-anchor="middle" font-size="12" fill="#c4622d">RF tone f from a DAC</text>
+              <path d="M20 85 H150" stroke="#ff7a5c" stroke-width="5" />
+              <path d="M240 85 L470 85" stroke="#ff7a5c" stroke-width="3" opacity=".35" /><text x="300" y="80" font-size="11" fill="#5a6c6f">undeflected</text>
+              <path d="M240 85 L470 45" stroke="#ff7a5c" stroke-width="4" /><text x="330" y="52" font-size="12">θ = λ f / v</text>
+              <ellipse cx="480" cy="70" rx="7" ry="50" fill="#d9ecf5" stroke="#3a7ea3" /><text x="480" y="140" text-anchor="middle" font-size="12">objective</text>
+              <path d="M487 45 L600 70" stroke="#ff7a5c" stroke-width="3" /><circle cx="600" cy="70" r="5" fill="#fff2d0" stroke="#c4622d" /><text x="596" y="96" text-anchor="end" font-size="12">x ∝ f</text>
+            </svg>
+            <figcaption>The deflection angle is proportional to the RF frequency; the objective maps angle to position in its focal plane. A frequency change moves the tweezer.</figcaption>
+          </figure>
+          <p>
+            In an AOD an RF tone of frequency f launches a sound wave of speed v in the crystal. Light is diffracted by an angle
+          </p>
+          <div class="eq">θ = λ f / v</div>
+          <p>
+            and the objective maps the angle to a position in its focal plane, so the tweezer position is linear in the tone frequency. Several
+            tones on one AOD make several tweezers along that axis; two crossed AODs make a grid at the crossings of column and row tones.
+            The model here uses a linear calibration of 188 kHz per µm, derived from Endres et al. (Science 354, 1024 (2016)), around an 80 MHz
+            centre. A new frequency takes effect only after the sound has crossed the beam, about 6.2 µs for a 4 mm beam at 650 m/s.
+          </p>
+          <p>
+            The controller drives each tone as a pulse channel. A pickup ramps the tone's amplitude up, a move steps its frequency every 2 µs
+            along ZAC's path, and a drop ramps it down. The atom position in the workspace is read back from the carrier updates in the trace
+            through the same calibration: atoms follow their tones because the tones are what the trace contains.
+          </p>
+          <a class="open" href="/riscq-studio?example=neutral-bv14&amp;view=chip">Watch tones carry atoms →</a>
+        </section>
+
+        <section class="lesson" id="d4" data-title="Light on each platform">
+          <h3><span class="num">D4</span>Light on each platform</h3>
+          <div class="tbl"><table>
+            <tr><th>Platform</th><th>Beams and what switches them</th></tr>
+            <tr><td>Transmons</td><td>No light reaches the qubits. Microwave pulses travel on coax; their arrival delay is the routed length over the signal speed.</td></tr>
+            <tr><td>Trapped ions</td><td>A cooling beam shared by the trap (one broadcast channel). Gate beams on each gate zone, switched by that zone's laser modulators for rotations and MS gates. A detection beam per zone; the fluorescence of bright ions is collected onto per-ion photon-counter lines that a core counts.</td></tr>
+            <tr><td>Neutral atoms</td><td>Static trap light. Moving tweezers through two crossed AODs and an objective, set by the tone channels. A global Raman beam for one-qubit gates and Rydberg beams over the entanglement zone, each switched by a laser-core channel.</td></tr>
+          </table></div>
+          <p>In every case, light is on exactly while the pulse window of its channel is open in the trace, after the delay of the path to the apparatus.</p>
+        </section>
+
+        <section class="lesson" id="d5" data-title="Beams in the workspace">
+          <h3><span class="num">D5</span>Beams in the workspace</h3>
+          <p>
+            In the workspace a beam is an object of its own, drawn as translucent light rather than as a wire. It follows the optical train of
+            its platform's bench, and it is lit only while its channel's window is open. Hover a beam to read its wavelength, optical frequency,
+            power, waist and the window that switched it on. The bench of each platform, with the source of every number, is shown on hover.
+          </p>
+          <div class="note bound">Beam sizes near the qubits are µm and the optical table is cm to m. The two cannot share one scale on screen, so the drawing states the scale of each region. The optics are computed in physical units either way.</div>
+          <div class="opens">
+            <a class="open" href="/riscq-studio?example=neutral-bv14">Atom array →</a>
+            <a class="open" href="/riscq-studio?example=qccd-ghz3&amp;outcome=q0=1&amp;outcome=q2=1">Ion trap →</a>
+          </div>
+        </section>
+
+        <!-- ═══════════════════════════ PART E ═══════════════════════════ -->
+        <header class="part-head" id="part-e" data-part="E" data-title="Designing hardware" data-kicker="k-e"
+          data-desc="Where each platform's design comes from, the editor in brief, the rules and the document format.">
+          <div class="kicker k-e">Part E</div>
+          <h2>Designing hardware</h2>
+          <p>A machine can be a document you edit, not code. Where that document comes from depends on the platform.</p>
+        </header>
+
+        <section class="lesson" id="e1" data-title="Where each platform's design comes from">
+          <h3><span class="num">E1</span>Where each platform's design comes from</h3>
+          <div class="tbl"><table>
+            <tr><th>Platform</th><th>The design</th><th>Where to edit it</th></tr>
+            <tr><td>Superconducting</td><td>A <code>riscq-design</code> document: board, cores, DACs, ADCs, stages, qubits, resonators, channels, routed wires, calibration</td><td><a href="/riscq-design">The design editor</a> on this site, or the JSON file</td></tr>
+            <tr><td>Trapped-ion QCCD</td><td>A QCCD Studio architecture: sites, junctions, segments, loops and zones, and its control block</td><td><a href="https://www.qccd.academy/studio.html#design" target="_blank" rel="noopener">QCCD Studio's design page ↗</a>. This site replays Studio designs and programs; it has no QCCD editor.</td></tr>
+            <tr><td>Neutral atoms</td><td>A ZAC architecture file: storage and entanglement zones with their trap grids, AODs, Rydberg range and operation durations</td><td>The file <code>validation/neutral/zac/full_architecture_2aod.json</code> and the compiled ZAC program. No in-browser editor yet.</td></tr>
+          </table></div>
+        </section>
+
+        <section class="lesson" id="e2" data-title="The design editor in brief">
+          <h3><span class="num">E2</span>The design editor in brief</h3>
+          <p>
+            <a href="/riscq-design">/riscq-design</a> edits a <code>riscq-design</code> document. Place components from the palette, join them
+            with the <b>Wire</b> tool (<kbd>w</kbd>), drag parts in plan, side, front or 3D projection (<kbd>1</kbd>–<kbd>4</kbd>), and edit the
+            selection in the inspector. The server checks every edit, and <b>Signal timing</b> lists every wire's delay. <b>Run on this
+            hardware</b> opens the run in the workspace, and its <b>Edit this hardware</b> button brings you back.
+          </p>
+          <a class="open" href="/riscq-design">Open the design editor →</a>
+          <p class="incourse">In the course: <a href="/course/D1">D1 A machine is a document</a> · <a href="/course/D3">D3 Who drives what</a></p>
+        </section>
+
+        <section class="lesson" id="e3" data-title="Rules and wire delays">
+          <h3><span class="num">E3</span>Rules and wire delays</h3>
+          <ul>
+            <li>One control board; 1 to 64 cores, each with 1 to 16 channels of distinct names.</li>
+            <li>A pulse channel names a DAC and a demodulation channel an ADC; every DAC and ADC has its own index 0–63.</li>
+            <li>Each wire starts and ends within 0.5 mm of the parts it joins.</li>
+            <li>Every qubit has a wired path from its drive DAC, from its readout DAC to its resonator, and from the resonator back to its ADC. Every coupler pulse has a wired path to its qubit.</li>
+            <li>A readout whose tone returns after its acquisition window opens is a warning.</li>
+          </ul>
+          <p>A wire's delay is its routed length over the signal speed of its medium, rounded up to a ps:</p>
+          <div class="eq">delay = length / speed;&nbsp;&nbsp; coax 200 mm/ns, planar 125, fiber 204, free-space beam 299.79</div>
+          <p>
+            So the floor plan matters: moving the chip 2 m farther delays every arrival by 10 ns and changes nothing at the converters. A
+            pulse's delay is that of the fastest wired path from its converter, through stages, to the part it acts on.
+          </p>
+          <div class="note bound">Loss, dispersion and crosstalk are not modeled. A qubit or coupler added in the editor starts with a copy of an existing calibration: a starting value, not a measured one.</div>
+          <p class="incourse">In the course: <a href="/course/D2">D2 Wire length is latency</a> · <a href="/course/D4">D4 When a design breaks a rule</a></p>
+        </section>
+
+        <section class="lesson" id="e4" data-title="The design document">
+          <h3><span class="num">E4</span>The design document</h3>
+          <p>Lengths are mm, times ns, frequencies Hz, amplitudes a fraction of DAC full scale, phases rad.</p>
+          <pre class="cmd">{ "kind": "riscq-design", "version": 1, "name": "…",
+  "board":     { "dspHz", "linkStages", "memWords", "queueDepth", "envDepth" },
+  "parts":     [{ "id", "type", "centerMm": [x, y, z], "index"? }],
+  "channels":  [{ "id", "core", "name", "kind": "pulse" | "demod" | "dio", "converter"?, "slots"?, "interp"? }],
+  "wires":     [{ "id", "from", "to", "medium", "routeMm": [[x, y, z], …] }],
+  "qubits":    [{ "part", "resonator", "gate", "ro", "demod", "freqHz", "x90", "x", "readout" }],
+  "couplings": [{ "qubits": [i, j], "freqHz", "durNs", "pulses": […], "virtualZ": […] }],
+  "decoder":   "id of a core" }</pre>
+          <p>A program addresses a qubit by its index in <code>qubits</code>. <b>Save</b> in the editor writes this file; the command line runs it (<a href="#f1">F1</a>).</p>
+        </section>
+
+        <!-- ═══════════════════════════ PART F ═══════════════════════════ -->
+        <header class="part-head" id="part-f" data-part="F" data-title="Without a browser" data-kicker="k-f"
+          data-desc="The command line, the run bundle, and the modules a script or agent can call to see what the page shows.">
+          <div class="kicker k-f">Part F</div>
+          <h2>Without a browser</h2>
+          <p>A person on the page and a script replaying the same program inspect the same result.</p>
+        </header>
+
+        <section class="lesson" id="f1" data-title="The command line">
+          <h3><span class="num">F1</span>The command line</h3>
+          <pre class="cmd">npm ci
+npm start                                                  # builds the Lean model, serves http://127.0.0.1:7432
+node riscq/cli.mjs --list                                  # the reference programs
+node riscq/cli.mjs --example superconducting-feedforward --outcome c=1 --out run.json
+node riscq/cli.mjs --example qccd-ghz3 --trace full        # every instruction, not only control-register ones
+node riscq/cli.mjs --qasm circuit.qasm --platform qccd     # OpenQASM through QCCD Studio's compiler
+node riscq/cli.mjs --calls program.json --outcome s0=1     # system calls on the transmon ring
+node riscq/cli.mjs --ring-design &gt; machine.json            # the ring as an editable design
+node riscq/cli.mjs --design machine.json --qasm circuit.qasm
+node riscq/cli.mjs --verify run.json                       # re-execute a saved run in Lean</pre>
+          <p>A run prints a summary; the exit code is 2 when a run reports a fault. The QCCD paths need Python 3.10+ and the QCCD Studio checkout in a sibling folder named <code>QCCD</code>.</p>
+        </section>
+
+        <section class="lesson" id="f2" data-title="The run bundle">
+          <h3><span class="num">F2</span>The run bundle</h3>
+          <p><code>--out</code> and the server's <code>/api/riscq/run</code> return the same JSON (<code>kind: "riscq-run"</code>):</p>
+          <div class="tbl"><table>
+            <tr><th>Field</th><th>Holds</th></tr>
+            <tr><td><code>source</code></td><td>The program text and its language (and the TSIR program for QCCD runs)</td></tr>
+            <tr><td><code>hardware</code></td><td>Segments of hardware instructions with start times and durations</td></tr>
+            <tr><td><code>program</code></td><td>The Lean program: each core's RAM image, source map and the channel bindings</td></tr>
+            <tr><td><code>system</code></td><td>Parts and links of the controller and apparatus</td></tr>
+            <tr><td><code>frames</code></td><td>The trace (<a href="#b5">B5</a>)</td></tr>
+            <tr><td><code>summary</code></td><td>Status, elapsed time, every pulse window and carrier update, faults</td></tr>
+            <tr><td><code>machine</code></td><td>Name, cores, clock period, provenance of every assumed value, apparatus geometry, and the design for design runs</td></tr>
+            <tr><td><code>derived</code></td><td>Measured bits, ion moves, tone positions</td></tr>
+          </table></div>
+        </section>
+
+        <section class="lesson" id="f3" data-title="Modules for agents">
+          <h3><span class="num">F3</span>Modules for agents</h3>
+          <p>The page computes nothing a script cannot. These functions take a run bundle:</p>
+          <pre class="cmd">import * as model from "./studio/riscq-model.js";
+import * as layers from "./studio/riscq-layers.js";
+model.stateAt(bundle, 403);                 // the machine state the page shows at step 404
+layers.focusAt(bundle, 403);                // source lines, TSIR lines, hardware instruction, core, firmware row
+layers.ionPositions(bundle, atBatch);       // or atomPositions: what the chip view draws
+layers.viewParts(bundle, "chip");           // which parts a view frames
+
+import * as D from "./studio/riscq-design-doc.js";      // the design editor's edits
+import { designService } from "./riscq/design-service.mjs";
+const doc = D.firstQubits(designService("/").design, 3);
+designService("/check", {}, doc);           // { errors, warnings, wires, pulses, build }</pre>
+          <p>Details: <a href="/docs/riscq-workspace.md">workspace notes</a> and <a href="/docs/riscq-controller.md">controller model notes</a>.</p>
+        </section>
+      </main>
+    </div>
+    <footer class="foot">
+      <p>Something unclear or wrong? The repository's documents state every assumption with its source.</p>
+      <p><a href="/">Home</a> · <a href="/riscq-studio">Workspace</a> · <a href="/riscq-design">Design</a> · <a href="/validation">Validation</a></p>
+    </footer>
+    <script>
+      // Overview cards and the side table of contents, built from the lessons themselves so they cannot disagree.
+      const icons = {
+        A: '<svg viewBox="0 0 54 54" width="54" height="54"><circle cx="27" cy="27" r="16" fill="none" stroke="#2f6fb8" stroke-width="4"/><circle cx="27" cy="11" r="5" fill="#e3b23c"/><circle cx="41" cy="35" r="5" fill="#26324a"/><circle cx="13" cy="35" r="5" fill="#ffb45c"/></svg>',
+        B: '<svg viewBox="0 0 54 54" width="54" height="54"><rect x="6" y="8" width="42" height="38" rx="6" fill="none" stroke="#c4622d" stroke-width="4"/><path d="M14 20h16M14 28h22M14 36h12" stroke="#c4622d" stroke-width="4"/><path d="M38 16l6 6-6 6" stroke="#152b2d" stroke-width="3" fill="none"/></svg>',
+        C: '<svg viewBox="0 0 54 54" width="54" height="54"><rect x="5" y="9" width="44" height="34" rx="5" fill="none" stroke="#00695d" stroke-width="4"/><rect x="11" y="15" width="20" height="22" rx="2" fill="#58b8ac"/><path d="M35 17h8M35 24h8M35 31h8" stroke="#00695d" stroke-width="3"/></svg>',
+        D: '<svg viewBox="0 0 54 54" width="54" height="54"><path d="M4 18 C 20 18, 24 25, 30 27 C 24 29, 20 36, 4 36 Z" fill="#b0428a" opacity=".5"/><ellipse cx="30" cy="27" rx="4" ry="16" fill="none" stroke="#b0428a" stroke-width="3"/><path d="M34 27 L50 20 M34 27 L50 34" stroke="#b0428a" stroke-width="3"/></svg>',
+        E: '<svg viewBox="0 0 54 54" width="54" height="54"><rect x="6" y="6" width="42" height="42" rx="6" fill="none" stroke="#8a6a10" stroke-width="4"/><path d="M15 15h10v10H15z" fill="#1f3a5f"/><path d="M33 33l6-6 6 6-6 6z" fill="#e3b23c"/><path d="M25 20h10v10" stroke="#b4692a" stroke-width="3" fill="none"/></svg>',
+        F: '<svg viewBox="0 0 54 54" width="54" height="54"><rect x="5" y="9" width="44" height="36" rx="5" fill="#172c32"/><path d="M12 20l7 6-7 6" stroke="#92f4c9" stroke-width="3" fill="none"/><path d="M23 33h14" stroke="#92f4c9" stroke-width="3"/></svg>',
+      };
+      const overview = document.getElementById("overview"), toc = document.getElementById("toc");
+      const tocLinks = [];
+      for (const head of document.querySelectorAll(".part-head")) {
+        const lessons = [];
+        for (let n = head.nextElementSibling; n && !n.classList.contains("part-head"); n = n.nextElementSibling)
+          if (n.classList.contains("lesson")) lessons.push(n);
+        const card = document.createElement("div");
+        card.className = "part-card";
+        const list = lessons.map((l) => `<li><span>${l.querySelector(".num").textContent}</span><a href="#${l.id}">${l.dataset.title}</a></li>`).join("");
+        card.innerHTML = `${icons[head.dataset.part]}<div><div class="kicker ${head.dataset.kicker}">Part ${head.dataset.part} · ${lessons.length} sections</div>
+          <h3><a href="#${head.id}" style="color:inherit;text-decoration:none">${head.dataset.title}</a></h3><p>${head.dataset.desc}</p><ol>${list}</ol></div>`;
+        overview.append(card);
+        const b = document.createElement("b");
+        b.textContent = "Part " + head.dataset.part + " · " + head.dataset.title;
+        toc.append(b);
+        for (const l of lessons) {
+          const a = document.createElement("a");
+          a.href = "#" + l.id;
+          a.textContent = l.querySelector(".num").textContent + " " + l.dataset.title;
+          toc.append(a);
+          tocLinks.push([l, a]);
+        }
+      }
+      // Mark the lesson in view.
+      const seen = new IntersectionObserver((entries) => {
+        for (const e of entries) if (e.isIntersecting) for (const [l, a] of tocLinks) a.classList.toggle("on", l === e.target);
+      }, { rootMargin: "-10% 0px -80% 0px" });
+      for (const [l] of tocLinks) seen.observe(l);
+    </script>
+    <script type="module" src="/site-nav.js"></script>
+  </body>
+</html>

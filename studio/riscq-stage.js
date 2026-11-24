@@ -1,26 +1,32 @@
-// 3D stage of the RISC-Q workspace. It draws one of three views of a run (riscq-layers.js VIEWS):
+// 3D stage of the RISC-Q workspace. It builds ONE world per run (riscq-world.js): the
+// apparatus, the converters and channels that drive it, the controller and, for laser
+// platforms, the optical table. The three views (riscq-layers.js VIEWS) frame that world and
+// fade the parts they do not emphasise. They never rebuild or move a part, so switching views
+// shows the same machine.
 //
-//   chip     the apparatus at its chip layout, ringed by the converters and channels that drive it
-//   control  the controller at its schematic floorplan
-//   machine  every part at its floorplan position
-//
-// Parts that a view leaves out keep running: the page lists them as off view when they act.
-// Every position is display geometry. Floorplan positions are the bundle's `system.parts`
-// positions (tenths of a clock region, schematic). Chip positions come from
-// riscq-layers.js `chipLayout`, whose `note` says what they are. Nothing is computed here
-// about timing: the page passes the state riscq-model.js rebuilt from the frames.
+// The apparatus is drawn in the convention of its field:
+//   qccd           QCCD Studio's map: pink rails, capsule sites coloured by zone, rows of
+//                  electrodes along the rails, ions as numbered navy discs
+//   neutral        the figures of neutral-atom papers: a dark array, zones outlined, static
+//                  traps as faint dots, atoms as glowing points, tweezers and sheet beams as light
+//   superconducting a sapphire die with transmon crosses, meander resonators and couplers;
+//                  microwave pulses run along the coax as bright packets
+// Light (beams, fluorescence) and signals are objects of riscq-light.js with their own hover
+// cards. Everything moving is passed in by the page, derived from the trace; this module
+// computes no timing.
 import * as T from "three";
 import { OrbitControls } from "/three/OrbitControls.js";
 import { createStage, box, surface } from "./scene.js";
 import * as layers from "./riscq-layers.js";
+import { worldLayout, viewOf, R, RINGS } from "./riscq-world.js";
+import { lightMaterial, envelopeTube, focusedSamples, glowSprite, signalPacket, wavelengthRgb } from "./riscq-light.js";
 
 const graphite = surface(0x273439), silver = surface(0xb8c4c7, 0.54), gold = surface(0xd2ac60, 0.5),
   ceramic = surface(0xb4a284), teal = surface(0x58b8ac), slab = surface(0x24493f, 0.1, 0.8),
   channelBase = surface(0x26785e), demodBase = surface(0x6c5a94, 0.2), dioBase = surface(0x4f6a82, 0.2),
   memory = surface(0x3f9a72), adcBody = surface(0x6aa0c8, 0.3), apparatus = surface(0xb096ca, 0.44),
   wire = surface(0x55747a, 0.2), sapphire = surface(0x9fb4c8, 0.15, 0.3), niobium = surface(0xc9d2d6, 0.7, 0.35),
-  trapGold = surface(0xc9a456, 0.6, 0.35), trapDie = surface(0x3b4a4f, 0.2, 0.6), glass = surface(0x24343b, 0.1, 0.4),
-  coax = surface(0x8a9aa0, 0.5, 0.4);
+  coax = surface(0x8a9aa0, 0.5, 0.4), table = surface(0x2b3437, 0.3, 0.7), steel = surface(0x9aa6aa, 0.7, 0.35);
 function glow(color, emissive) {
   const material = new T.MeshStandardMaterial({ color, metalness: 0.05, roughness: 0.45 });
   material.emissive.setHex(emissive);
@@ -29,10 +35,18 @@ function glow(color, emissive) {
 // These colours match the legend in riscq-studio.css.
 const actingMat = glow(0x92f4c9, 0x1d6b52), targetMat = glow(0xffd46c, 0x7a5310), pathMat = glow(0x8fe6ff, 0x1c5f78),
   openMat = glow(0xf2a36b, 0x6b3410), faultMat = glow(0xf1583a, 0x7a1d0c), chosenMat = glow(0xf1ffed, 0x666666),
-  ionMat = glow(0x7fe7ff, 0x1d7a93), movingMat = glow(0xffb45c, 0x8a4a0c), atomMat = glow(0xc7a7ff, 0x4b2d86),
-  toneOn = glow(0xff8a65, 0x8a2c10), toneOff = surface(0x6b7f86, 0.2, 0.6), hoverMat = glow(0xe8fff7, 0x2c5a4c);
+  movingMat = glow(0xffb45c, 0x8a4a0c), hoverMat = glow(0xe8fff7, 0x2c5a4c);
+// QCCD Studio's palette.
+const studio = {
+  die: surface(0xf6f7fb, 0, 0.9), rail: surface(0xf2b4b8, 0, 0.8), electrode: surface(0xdfe3ec, 0.1, 0.6), electrodeOn: glow(0xffb26b, 0xb35a10),
+  data: surface(0x8f98a6, 0.1, 0.6), gate: surface(0x5fb3a6, 0.1, 0.6), load: surface(0xf1c24d, 0.1, 0.6), aux: surface(0xb7bdc8, 0.1, 0.6),
+  ion: surface(0x243063, 0.1, 0.5), ionMoving: glow(0xffa24a, 0x8a4a0c),
+};
+// Neutral-atom figure palette.
+const array = { die: surface(0x05070d, 0, 0.95), storage: surface(0x0c1a2c, 0, 0.9), entangle: surface(0x1d1030, 0, 0.9), readout: surface(0x10261c, 0, 0.9),
+  edge: new T.LineBasicMaterial({ color: 0x5f86b0, transparent: true, opacity: 0.6 }), trap: new T.MeshBasicMaterial({ color: 0x3f6f9f }) };
 const round = new T.CylinderGeometry(1, 1, 1, 16), hexagon = new T.CylinderGeometry(1, 1, 1, 6),
-  ball = new T.SphereGeometry(1, 18, 12), cone = new T.ConeGeometry(1, 1, 14);
+  ball = new T.SphereGeometry(1, 18, 12), cone = new T.ConeGeometry(1, 1, 14), capsule = new T.CapsuleGeometry(1, 2, 4, 12);
 
 function solid(parent, geometry, x, y, z, sx, sy, sz, material) {
   const mesh = new T.Mesh(geometry, material);
@@ -54,8 +68,9 @@ function beam(parent, a, b, width, material) {
   mesh.quaternion.setFromUnitVectors(new T.Vector3(0, 0, 1), b.clone().sub(a).normalize());
   return mesh;
 }
+const V = (p) => new T.Vector3(p[0], p[1], p[2]);
 
-// One recognizable shape per controller part kind, in floorplan units. Each returns its height.
+// One recognizable shape per controller part kind. Each returns its height.
 // The same shapes as the detailed debugger (riscq.js), so a part looks the same on both pages.
 export const shapes = {
   host(g) {
@@ -127,97 +142,85 @@ export const shapes = {
     return 2.7;
   },
 };
-const tier = (kind) => (["dac", "adc", "pins"].includes(kind) ? 4 : kind === "device" ? 8 : 0);
 
-// Apparatus shapes of the chip view, in chip units (one transmon or site pitch ≈ 10).
-const chipShapes = {
+// Apparatus shapes, in units of the part's own size.
+const apparatusShapes = {
   qubit(g) {
-    // A transmon cross with a small junction pad.
     box(g, 0, 0.3, 0, 7, 0.6, 1.6, niobium);
     box(g, 0, 0.3, 0, 1.6, 0.6, 7, niobium);
     box(g, 0, 0.8, 0, 1.4, 0.5, 1.4, gold);
     return 1.2;
   },
   resonator(g) {
-    // A meander of four lines.
     for (let k = 0; k < 4; k++) box(g, -2.4 + k * 1.6, 0.25, 0, 0.5, 0.5, 4.5, niobium);
     box(g, 0, 0.25, 2.3, 5.3, 0.5, 0.5, niobium);
     return 0.8;
   },
-  site(g) {
-    box(g, 0, 0.25, 0, 5.2, 0.5, 3.2, trapGold);
-    box(g, 0, 0.6, 0, 3.4, 0.3, 1.2, glass);
-    return 1;
-  },
-  electrodes(g) {
-    for (const x of [-2.2, 0, 2.2]) box(g, x, 0.2, 0, 1.8, 0.4, 1.4, trapGold);
-    return 0.6;
-  },
-  bank(g) {
-    box(g, 0, 0.3, 0, 2.2, 0.6, 3.5, trapGold);
-    return 0.8;
-  },
+  // A laser head: the end of a fibre with its focusing optics, pointing at the apparatus.
   light(g) {
-    solid(g, round, 0, 2, 0, 1.6, 4, 1.6, glass);
-    solid(g, cone, 0, 4.6, 0, 1.6, 1.4, 1.6, gold);
-    return 5.5;
+    barrel(g, 0, 1.6, 0, 1.4, 4.5, steel);
+    barrel(g, 2.6, 1.6, 0, 1.1, 0.8, surface(0x9fd6ff, 0.1, 0.1));
+    box(g, -0.6, 0.5, 0, 3.4, 1, 2.6, graphite);
+    return 3;
   },
+  // An AOD: a crystal with its RF transducer.
   tone(g) {
-    // A tone has no body. The line across the array is drawn by `show`; this is its transducer.
-    box(g, 0, 0.6, 0, 3, 1.2, 3, coax);
-    return 1.4;
+    box(g, 0, 1, 0, 3.4, 2, 2.4, surface(0xcfe3ea, 0.1, 0.15));
+    box(g, 0, 2.2, 0, 3.4, 0.4, 2.4, gold);
+    return 2.6;
   },
 };
-function chipShapeOf(id) {
-  if (/^qubit\d+$/.test(id)) return "qubit";
-  if (/^resonator\d+$/.test(id)) return "resonator";
-  if (/^site:/.test(id)) return "site";
-  if (/^electrodes:zone\./.test(id)) return "electrodes";
-  if (/^electrodes:/.test(id)) return "bank";
-  if (/^(light|beam):/.test(id)) return "light";
-  if (/^aod\d+:[xy]\d+$/.test(id)) return "tone";
-  return null;
-}
 
 /**
  * Create the stage in `host`. `hooks.pick(id)` selects a part, `hooks.hover(id | null, x, y)`
- * reports the part under the pointer in client coordinates. IDs of moving bodies are
- * "ion:<name>" and "atom:<n>".
+ * reports what is under the pointer in client coordinates: a part id, "ion:<name>",
+ * "atom:<n>", "beam:<id>", "signal:<id>", "coupler:…", "trapsite:…" or "zone:…".
  */
 export function createWorkspaceStage(host, hooks) {
-  const { world, renderer, canvas } = createStage(host, "Orbitable 3D view of a RISC-Q run: apparatus, converters, channels and controller");
-  const root = new T.Group(), overlay = new T.Group(), bodies = new T.Group();
-  world.add(root, overlay, bodies);
-  const camera = new T.OrthographicCamera(-200, 200, 120, -120, 0.1, 9000);
+  const { world: scene, renderer, canvas } = createStage(host, "Orbitable 3D view of a RISC-Q run: apparatus, light, converters, channels and controller");
+  const root = new T.Group(), overlay = new T.Group(), bodies = new T.Group(), light = new T.Group();
+  scene.add(root, overlay, bodies, light);
+  const camera = new T.OrthographicCamera(-200, 200, 120, -120, 0.1, 12000);
   const controls = new OrbitControls(camera, canvas);
   controls.minZoom = 0.3;
-  controls.maxZoom = 60;
+  controls.maxZoom = 120;
   controls.maxPolarAngle = Math.PI * 0.49;
   const ray = new T.Raycaster(), ndc = new T.Vector2(), vec = new T.Vector3();
   const labelLayer = host.querySelector(".labels");
-  const parts = new Map(), lit = new Set(), bounds = new T.Box3(), target = new T.Vector3();
+  const parts = new Map(), lit = new Set(), target = new T.Vector3();
   const ring = new T.Mesh(new T.TorusGeometry(1, 0.07, 8, 40), chosenMat);
   ring.rotation.x = -Math.PI / 2;
   ring.visible = false;
-  world.add(ring);
-  let run = null, view = "chip", unit = 6, fitWidth = 200, fitHeight = 120, width = 1, height = 1;
-  let tags = [], pinned = [], hovered = null, chip = null, ionMeshes = new Map(), atomMeshes = new Map(), toneMeshes = new Map();
+  scene.add(ring);
+  let run = null, view = "chip", w = null, emphasis = new Set(), width = 1, height = 1, fitWidth = 200, fitHeight = 120;
+  let tags = [], pinned = [], hovered = null, platform = null;
+  const faded = new Map();
+  const fadedOf = (material) => {
+    if (!faded.has(material)) {
+      const copy = material.clone();
+      copy.transparent = true;
+      copy.opacity = 0.18;
+      copy.depthWrite = false;
+      faded.set(material, copy);
+    }
+    return faded.get(material);
+  };
 
   function render() {
-    renderer.render(world, camera);
+    renderer.render(scene, camera);
     labelLayer.replaceChildren();
     const placed = [];
     const all = [...tags];
-    if (hovered && !all.some((t) => t[0] === hovered)) all.push([hovered, hovered, "hover"]);
+    if (hovered && !all.some((t) => t[0] === hovered)) all.push([hovered, hovered.replace(/^(beam|signal):/, ""), "hover"]);
     all.push(...pinned);
     for (const [id, text, kind] of all) {
-      const anchor = parts.get(id)?.top ?? bodyTop(id);
+      const anchor = parts.get(id)?.top ?? platform?.anchor?.(id);
       if (!anchor) continue;
       vec.copy(anchor).project(camera);
       const x = ((vec.x + 1) * width) / 2, y = ((1 - vec.y) * height) / 2;
       if (x < 16 || x > width - 16 || y < 16 || y > height - 16) continue;
-      const span = kind === "pin" ? 26 : 84;
-      if (placed.some((p) => Math.abs(x - p[0]) < span && Math.abs(y - p[1]) < (kind === "pin" ? 12 : 20))) continue;
+      const span = kind.startsWith("pin") ? 22 : 84;
+      if (placed.some((p) => Math.abs(x - p[0]) < span && Math.abs(y - p[1]) < (kind.startsWith("pin") ? 11 : 20))) continue;
       const tag = document.createElement("span");
       tag.className = "annotation " + kind;
       tag.textContent = text;
@@ -226,10 +229,6 @@ export function createWorkspaceStage(host, hooks) {
       labelLayer.append(tag);
       placed.push([x, y]);
     }
-  }
-  function bodyTop(id) {
-    const mesh = ionMeshes.get(id) ?? atomMeshes.get(id);
-    return mesh ? mesh.position.clone().add(new T.Vector3(0, 4, 0)) : null;
   }
   function resize() {
     width = Math.max(1, host.clientWidth);
@@ -243,31 +242,38 @@ export function createWorkspaceStage(host, hooks) {
     renderer.setSize(width, height, false);
     render();
   }
+  /** Camera direction of a view: QCCD Studio's map is read from above, the others obliquely. */
+  function direction() {
+    if (view === "chip" && run?.platform === "qccd") return new T.Vector3(0, 1, 0.32);
+    if (view === "chip" && run?.platform === "neutral") return new T.Vector3(0.18, 0.82, 0.78);
+    if (view === "chip") return new T.Vector3(0.05, 1, 0.62);
+    return new T.Vector3(0.12, 0.9, 0.8);
+  }
   function home() {
+    const frame = w ? viewOf(run, view).frame : { center: [0, 0, 0], half: [200, 200] };
+    target.set(...frame.center);
     camera.zoom = 1;
     controls.target.copy(target);
-    const direction = view === "chip" ? new T.Vector3(0.05, 1, 0.62) : new T.Vector3(0.14, 0.86, 0.95);
-    camera.position.copy(target).add(direction.normalize().multiplyScalar(3000));
+    camera.position.copy(target).add(direction().normalize().multiplyScalar(4000));
     controls.update();
     camera.updateMatrixWorld();
+    const inverse = camera.matrixWorldInverse, centre = target.clone().applyMatrix4(inverse);
     let widest = 30, tallest = 20;
-    if (!bounds.isEmpty())
-      for (const x of [bounds.min.x, bounds.max.x])
-        for (const y of [bounds.min.y, bounds.max.y])
-          for (const z of [bounds.min.z, bounds.max.z]) {
-            vec.set(x, y, z).applyMatrix4(camera.matrixWorldInverse);
-            widest = Math.max(widest, Math.abs(vec.x - target.clone().applyMatrix4(camera.matrixWorldInverse).x));
-            tallest = Math.max(tallest, Math.abs(vec.y - target.clone().applyMatrix4(camera.matrixWorldInverse).y));
-          }
-    fitWidth = widest * 1.08;
-    fitHeight = tallest * 1.12;
+    for (const x of [-1, 1]) for (const z of [-1, 1]) for (const y of [0, 30]) {
+      vec.set(frame.center[0] + x * frame.half[0], y, frame.center[2] + z * frame.half[1]).applyMatrix4(inverse);
+      widest = Math.max(widest, Math.abs(vec.x - centre.x));
+      tallest = Math.max(tallest, Math.abs(vec.y - centre.y));
+    }
+    fitWidth = widest * 1.04;
+    fitHeight = tallest * 1.06;
     resize();
   }
 
-  function addPart(part, position, scale, shape) {
+  function addPart(part, position, scale, shape, angle = 0) {
     const group = new T.Group();
     group.position.copy(position);
     group.scale.setScalar(scale);
+    group.rotation.y = angle;
     group.userData.part = part.id;
     const height = shape(group);
     const meshes = [];
@@ -283,197 +289,413 @@ export function createWorkspaceStage(host, hooks) {
     const anchor = group.position.clone();
     anchor.y += 0.25 * scale;
     parts.set(part.id, { part, group, meshes, top, anchor });
-    bounds.expandByPoint(group.position).expandByPoint(top);
     return parts.get(part.id);
   }
+  const restOf = (id, mesh) => (emphasis.has(id) || !parts.has(id) ? mesh.userData.base : fadedOf(mesh.userData.base));
 
-  /** Floorplan layout of the parts in `ids` (control and machine views). */
-  function buildFloorplan(ids) {
-    const shown = run.system.parts.filter((p) => ids.has(p.id));
-    const xs = shown.map((p) => p.position[0]), ys = shown.map((p) => p.position[1]);
-    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
-    unit = Math.min(6, 1000 / Math.max(maxX - minX, maxY - minY, 1));
-    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-    const taken = new Map(), ground = new T.Box3();
-    for (const part of shown) {
-      const key = tier(part.kind) + "/" + part.position.join("/");
-      const level = taken.get(key) ?? 0;
-      taken.set(key, level + 1);
-      const base = (tier(part.kind) + level * 2.4) * unit;
-      const entry = addPart(part, new T.Vector3((part.position[0] - cx) * unit, base, (part.position[1] - cy) * unit), unit, shapes[part.kind] ?? shapes.device);
-      if (base > 0) solid(root, round, entry.group.position.x, base / 2, entry.group.position.z, 0.1 * unit, base, 0.1 * unit, graphite);
-      else ground.expandByPoint(entry.group.position);
-    }
-    if (!ground.isEmpty()) {
-      const size = ground.getSize(new T.Vector3()), mid = ground.getCenter(new T.Vector3());
-      const board = box(root, mid.x, -0.45 * unit, mid.z, size.x + 12 * unit, 0.6 * unit, size.z + 10 * unit, slab);
-      board.receiveShadow = true;
-      board.userData.ground = true;
-    }
-    for (const link of run.system.links ?? []) {
-      const a = parts.get(link.from), b = parts.get(link.to);
-      if (a && b) beam(root, a.anchor, b.anchor, 0.16 * unit, wire);
-    }
-  }
+  // ───────────────────────────── the world ─────────────────────────────
 
-  /**
-   * Chip layout: the apparatus inside a disc of radius 100, the converters on a ring at 150
-   * and the channels on a ring at 200, each at the angle of the apparatus it drives.
-   */
-  function buildChip(ids) {
-    chip = layers.chipLayout(run);
-    const R = 100;
-    // Points of the apparatus in layout coordinates, to fit them into the disc.
-    const points = chip.focus?.length ? chip.focus : [...chip.devices.values(), ...(chip.sites?.values() ?? [])];
-    const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
-    const mid = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
-    // A single site or a row of atoms still gets a sensible size.
-    const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), chip.platform === "neutral" ? 20 : chip.platform === "qccd" ? 2 : 1e-9);
-    const scale = (1.7 * R) / span;
-    chip.toWorld = (p) => new T.Vector3((p[0] - mid[0]) * scale, 0, (p[1] - mid[1]) * scale);
-    chip.scale = scale;
-    const onDie = (v) => Math.abs(v.x) <= 1.12 * R && Math.abs(v.z) <= 1.12 * R;
-    const clampToDie = (v) => v.set(Math.max(-1.1 * R, Math.min(1.1 * R, v.x)), v.y, Math.max(-1.1 * R, Math.min(1.1 * R, v.z)));
-    // Zones of an atom array, cut to the die.
-    for (const zone of chip.zones ?? []) {
-      const a = clampToDie(chip.toWorld(zone.origin)), b = clampToDie(chip.toWorld([zone.origin[0] + zone.size[0], zone.origin[1] + zone.size[1]]));
-      if (Math.abs(b.x - a.x) < 1 || Math.abs(b.z - a.z) < 1) continue;
-      const mesh = box(root, (a.x + b.x) / 2, 0.05, (a.z + b.z) / 2, Math.abs(b.x - a.x), 0.1, Math.abs(b.z - a.z), zone.kind === "entanglement" ? surface(0x4a3a6a, 0.1, 0.7) : surface(0x2f4750, 0.1, 0.7));
-      mesh.userData.part = "zone:" + zone.id;
-      mesh.userData.zone = zone;
-    }
-    // The die.
-    const die = chip.platform === "superconducting" ? sapphire : chip.platform === "qccd" ? trapDie : glass;
-    const plate = box(root, 0, -1, 0, 2.3 * R, 2, 2.3 * R, die);
-    plate.receiveShadow = true;
-    plate.userData.ground = true;
-    // Size of one apparatus part: a transmon cross fills about a quarter of the qubit spacing.
-    const pitch = chip.platform === "neutral" ? 2.2 : chip.platform === "superconducting" ? Math.max(1, Math.min(5, scale * 0.07))
-      : Math.max(0.9, Math.min(2.6, (scale * 0.8) / 10));
-    // Sites and segments of a trap, as far as they fall on the die.
-    if (chip.sites)
-      for (const [id, p] of chip.sites) {
-        const at = chip.toWorld(p);
-        if (!onDie(at)) continue;
-        const pad = box(root, at.x, 0.1, at.z, 5 * pitch, 0.2, 5 * pitch, glass);
-        pad.userData.part = "trapsite:" + id;
-      }
-    for (const [a, b] of chip.edges ?? []) {
-      const pa = chip.sites.get(a), pb = chip.sites.get(b);
-      if (!pa || !pb) continue;
-      const wa = chip.toWorld(pa), wb = chip.toWorld(pb);
-      if (onDie(wa) || onDie(wb)) beam(root, clampToDie(wa).add(new T.Vector3(0, 0.3, 0)), clampToDie(wb).add(new T.Vector3(0, 0.3, 0)), 1.2 * pitch, trapGold);
-    }
-    for (const [a, b, offered] of chip.couplers ?? []) {
-      const pa = chip.devices.get(chip.qubitParts?.[a] ?? "qubit" + a), pb = chip.devices.get(chip.qubitParts?.[b] ?? "qubit" + b);
-      if (pa && pb) {
-        const wa = chip.toWorld(pa), wb = chip.toWorld(pb);
-        const mesh = beam(root, wa.clone().lerp(wb, 0.22).setY(0.4), wa.clone().lerp(wb, 0.78).setY(0.4), 1.1 * pitch, offered === false ? graphite : niobium);
-        mesh.userData.base = mesh.material;
-        mesh.userData.part = "coupler:" + a + "-" + b + (offered === false ? ":not offered" : "");
-        chip.couplerMeshes = (chip.couplerMeshes ?? new Map()).set([a, b].sort((x, y) => x - y).join("-"), { meshes: [mesh] });
-      }
-    }
-    for (const part of run.system.parts) {
-      if (!ids.has(part.id) || part.kind !== "device") continue;
-      const p = chip.devices.get(part.id);
-      const name = chip.types?.get(part.id) ?? chipShapeOf(part.id);
-      if (!p && name === "tone") continue;
-      addPart(part, clampToDie(chip.toWorld(p ?? [0, 0])), pitch, chipShapes[name] ?? shapes.device);
-    }
-    // Tones: one long bar across the array per tone, moved by `show`.
-    if (chip.tones)
-      for (const part of run.system.parts.filter((p) => /^aod\d+:[xy]\d+$/.test(p.id))) {
-        const along = /:x/.test(part.id) ? "x" : "y";
-        const mesh = box(bodies, 0, 1.2, 0, along === "x" ? 0.8 : 2.3 * R, 0.4, along === "x" ? 2.3 * R : 0.8, toneOff);
-        mesh.userData.part = part.id;
-        mesh.visible = false;
-        toneMeshes.set(part.id, { mesh, axis: along });
-        // The transducer sits at the edge of the die, where the tone enters.
-        const edge = along === "x" ? new T.Vector3(0, 0, -1.2 * R) : new T.Vector3(-1.2 * R, 0, 0);
-        addPart(part, edge, 2.2, chipShapes.tone);
-      }
-    // The ring of converters and channels.
-    const driven = layers.drivenBy(run), converter = layers.converterOf(run);
-    // A converter sits at the angle of the parts it drives. One that drives parts all around
-    // the chip (a shared readout feedline) has no such angle and joins the free ones.
-    const angleOf = (devicesList) => {
-      const pts = [...new Set(devicesList ?? [])].map((d) => chip.devices.get(d)).filter(Boolean).map(chip.toWorld);
-      if (!pts.length) return null;
-      const c = pts.reduce((a, b) => a.add(b), new T.Vector3()).multiplyScalar(1 / pts.length);
-      return pts.length > 2 && c.length() < 0.3 * R ? null : Math.atan2(c.z, c.x);
-    };
-    const channels = run.system.parts.filter((p) => ids.has(p.id) && ["pulse", "demod", "dio"].includes(p.kind));
-    const byConverter = new Map();
-    for (const ch of channels) {
-      const conv = converter.get(ch.id) ?? ch.id;
-      if (!byConverter.has(conv)) byConverter.set(conv, []);
-      byConverter.get(conv).push(ch);
-    }
-    const groups = [...byConverter].map(([conv, list]) => {
-      const devs = list.flatMap((ch) => driven.get(ch.id) ?? []);
-      return { conv, list, devs, angle: angleOf(devs) };
-    });
-    // Converters with no apparatus fill the gaps in order.
-    const free = groups.filter((g) => g.angle === null);
-    free.forEach((g, k) => (g.angle = Math.PI / 2 + ((k + 0.5) / Math.max(1, free.length)) * 0.9 - 0.45));
-    groups.sort((a, b) => a.angle - b.angle);
-    // Spread converters that would overlap: at least 7 degrees apart.
-    const minGap = Math.min((2 * Math.PI) / Math.max(groups.length, 1), (7 * Math.PI) / 180);
-    for (let k = 1; k < groups.length; k++) if (groups[k].angle - groups[k - 1].angle < minGap) groups[k].angle = groups[k - 1].angle + minGap;
-    const s = Math.min(6, (2 * Math.PI * 150) / Math.max(1, groups.length) / 6.5);
-    for (const g of groups) {
-      const dir = new T.Vector3(Math.cos(g.angle), 0, Math.sin(g.angle));
-      const convPart = run.system.parts.find((p) => p.id === g.conv);
-      let convEntry = null;
-      if (convPart && ids.has(convPart.id)) {
-        convEntry = addPart(convPart, dir.clone().multiplyScalar(150), s, shapes[convPart.kind] ?? shapes.dac);
-        convEntry.group.rotation.y = -g.angle + Math.PI;
-        // Coax to every apparatus part this converter drives.
-        for (const d of new Set(g.devs)) {
-          const at = parts.get(d)?.anchor ?? (chip.devices.get(d) && chip.toWorld(chip.devices.get(d)));
-          if (at) beam(root, convEntry.anchor.clone().setY(1), at.clone().setY(1), new Set(g.devs).size > 2 ? 0.3 : 0.7, coax);
-        }
-      }
-      g.list.forEach((ch, k) => {
-        const spread = (k - (g.list.length - 1) / 2) * Math.min(0.06, minGap / Math.max(1, g.list.length));
-        const d = new T.Vector3(Math.cos(g.angle + spread), 0, Math.sin(g.angle + spread));
-        const entry = addPart(ch, d.multiplyScalar(200 + (k % 2) * 16), s, shapes[ch.kind]);
-        entry.group.rotation.y = -g.angle + Math.PI / 2;
-        if (convEntry) beam(root, entry.anchor, convEntry.anchor, 0.5, wire);
-      });
-    }
-    // Converters that no shown channel names (e.g. pins of a digital channel) are already placed with it.
-    for (const part of run.system.parts)
-      if (ids.has(part.id) && !parts.has(part.id) && ["dac", "adc", "pins"].includes(part.kind)) addPart(part, new T.Vector3(0, 0, 240), s, shapes[part.kind]);
-    const plate2 = box(root, 0, -2.4, 0, 2 * 235, 1, 2 * 235, slab);
-    plate2.userData.ground = true;
-    bounds.expandByPoint(new T.Vector3(-235, 0, -235)).expandByPoint(new T.Vector3(235, 0, 235));
-  }
-
-  function rebuild() {
+  function buildWorld() {
     root.clear();
     overlay.clear();
     bodies.clear();
+    light.clear();
     parts.clear();
     lit.clear();
-    ionMeshes = new Map();
-    atomMeshes = new Map();
-    toneMeshes = new Map();
     tags = [];
     pinned = [];
     hovered = null;
-    chip = null;
+    platform = null;
     ring.visible = false;
-    bounds.makeEmpty();
-    if (!run?.system?.parts?.length) return home();
-    const ids = layers.viewParts(run, view);
-    const hasApparatus = run.system.parts.some((p) => p.kind === "device");
-    if (view === "chip" && hasApparatus) buildChip(ids);
-    else buildFloorplan(ids);
-    bounds.getCenter(target);
-    target.y = 0;
+    if (!run?.system?.parts?.length) return;
+    w = worldLayout(run);
+    // Floors: the disc of the apparatus and its drive, the controller annulus, the bus ring.
+    const floor = solid(root, round, 0, -3, 0, RINGS.channel + 36, 1, RINGS.channel + 36, slab);
+    floor.userData.ground = true;
+    const annulus = new T.Mesh(new T.RingGeometry(RINGS.core - 22, RINGS.bus + 12, 96), surface(0x1e3a33, 0.1, 0.85));
+    annulus.rotation.x = -Math.PI / 2;
+    annulus.position.y = -2.6;
+    root.add(annulus);
+    const bus = new T.Mesh(new T.TorusGeometry(RINGS.bus, 1.1, 8, 160), teal);
+    bus.rotation.x = -Math.PI / 2;
+    bus.position.y = 0.8;
+    bus.userData.part = "bus";
+    root.add(bus);
+    // The apparatus in its field's convention.
+    platform = run.platform === "qccd" ? trapMap() : run.platform === "neutral" ? atomArray() : run.platform === "superconducting" ? transmonChip() : null;
+    // Drive and control parts at their world positions, facing the centre.
+    for (const [id, p] of w.parts) {
+      if (p.kind === "device" || parts.has(id)) continue;
+      const part = run.system.parts.find((x) => x.id === id);
+      addPart(part, V(p.at), p.size * (p.region === "control" ? 1.15 : 1), shapes[p.kind] ?? shapes.device, -p.angle + Math.PI / 2);
+    }
+    // Wires: coax from converters to apparatus, plain wires elsewhere, spokes to the bus.
+    for (const wire0 of w.wires) {
+      if (wire0.kind === "bus") {
+        const angle = wire0.angle, inner = parts.get(wire0.from)?.anchor ?? new T.Vector3(Math.cos(angle) * RINGS.bus, 0.8, Math.sin(angle) * RINGS.bus);
+        const outer = parts.get(wire0.to)?.anchor ?? new T.Vector3(Math.cos(angle) * RINGS.bus, 0.8, Math.sin(angle) * RINGS.bus);
+        beam(root, inner.clone().setY(0.8), outer.clone().setY(0.8), 0.9, teal);
+        continue;
+      }
+      const a = parts.get(wire0.from)?.anchor ?? (w.parts.get(wire0.from) && V(w.parts.get(wire0.from).at)), b = parts.get(wire0.to)?.anchor ?? (w.parts.get(wire0.to) && V(w.parts.get(wire0.to).at));
+      if (!a || !b) continue;
+      const mesh = beam(root, a.clone().setY(1), b.clone().setY(1), wire0.kind === "coax" ? (wire0.shared ? 0.35 : 0.7) : 0.45, wire0.kind === "coax" ? coax : wire);
+      if (mesh) {
+        mesh.userData.base = mesh.material;
+        mesh.userData.wire = wire0;
+      }
+    }
+    if (w.table && platform?.table) platform.table();
+  }
+
+  /** Apply a view: fade the parts it does not emphasise and frame it. */
+  function applyView() {
+    emphasis = w ? viewOf(run, view).emphasis : new Set();
+    for (const [id, entry] of parts) for (const mesh of entry.meshes) if (!lit.has(id)) mesh.material = restOf(id, mesh);
     home();
+  }
+
+  // ───────────────────────────── trapped ions: QCCD Studio's map ─────────────────────────────
+
+  function trapMap() {
+    const chip = w.chip, s = w.scale;
+    const inside = (v) => Math.abs(v.x) <= 1.12 * R && Math.abs(v.z) <= 1.12 * R;
+    const sites = new Map(), siteMeta = new Map((run.machine.geometry?.sites ?? []).map((x) => [x.id, x]));
+    for (const [id, p] of chip.sites ?? []) sites.set(id, V(w.toWorld(p)));
+    // The canvas of the map: the drawn part of the architecture with a margin, as QCCD Studio frames it.
+    const shown = [...sites.values()].filter(inside);
+    const minX = Math.max(-1.15 * R, Math.min(...shown.map((v) => v.x)) - 0.25 * R), maxX = Math.min(1.15 * R, Math.max(...shown.map((v) => v.x)) + 0.25 * R);
+    const minZ = Math.max(-1.15 * R, Math.min(...shown.map((v) => v.z)) - 0.25 * R), maxZ = Math.min(1.15 * R, Math.max(...shown.map((v) => v.z)) + 0.25 * R);
+    const die = shown.length ? box(root, (minX + maxX) / 2, -1, (minZ + maxZ) / 2, maxX - minX, 2, maxZ - minZ, studio.die) : box(root, 0, -1, 0, 2.3 * R, 2, 2.3 * R, studio.die);
+    die.userData.ground = true;
+    // Pitch: the median rail on the die decides the size of sites and electrodes.
+    const lengths = (chip.edges ?? []).filter(([a, b]) => sites.has(a) && sites.has(b) && (inside(sites.get(a)) || inside(sites.get(b))))
+      .map(([a, b]) => sites.get(a).distanceTo(sites.get(b))).filter((d) => d > 0).sort((x, y) => x - y);
+    let pitch = lengths.length ? lengths[Math.floor(lengths.length / 2)] : 0.5 * s;
+    pitch = Math.max(12, Math.min(60, pitch));
+    const railWidth = 0.13 * pitch, electrodes = new Map();
+    for (const [a, b] of chip.edges ?? []) {
+      const pa = sites.get(a), pb = sites.get(b);
+      if (!pa || !pb || (!inside(pa) && !inside(pb))) continue;
+      const rail = beam(root, pa.clone().setY(0.2), pb.clone().setY(0.2), railWidth, studio.rail);
+      if (rail) rail.scale.y = 0.15 * rail.scale.x;
+      // Rows of electrodes on both sides of the rail, as QCCD Studio draws them.
+      const along = pb.clone().sub(pa), length = along.length(), unit = along.clone().normalize(), across = new T.Vector3(-unit.z, 0, unit.x);
+      const count = Math.max(2, Math.round(length / (0.11 * pitch)));
+      for (let k = 0; k < count; k++)
+        for (const side of [-1, 1]) {
+          const at = pa.clone().addScaledVector(unit, ((k + 0.5) / count) * length).addScaledVector(across, side * 0.2 * pitch);
+          const pill = solid(root, capsule, at.x, 0.3, at.z, 0.03 * pitch, 0.03 * pitch, 0.03 * pitch, studio.electrode);
+          pill.rotation.x = Math.PI / 2;
+          pill.rotation.z = Math.atan2(across.z, across.x);
+          pill.userData.base = studio.electrode;
+          for (const site of [a, b]) {
+            if (!electrodes.has(site)) electrodes.set(site, []);
+            electrodes.get(site).push(pill);
+          }
+        }
+    }
+    for (const [id, at] of sites) {
+      if (!inside(at)) continue;
+      const zone = siteMeta.get(id)?.zone ?? "";
+      const material = siteMeta.get(id)?.gate ? studio.gate : /load/.test(zone) ? studio.load : /aux|conveyor/.test(zone) ? studio.aux : studio.data;
+      const pad = solid(root, capsule, at.x, 0.5, at.z, 0.07 * pitch, 0.07 * pitch, 0.07 * pitch, material);
+      pad.rotation.z = Math.PI / 2;
+      pad.scale.set(0.07 * pitch, 0.1 * pitch, 0.07 * pitch);
+      pad.userData.part = "trapsite:" + id;
+      pad.userData.base = material;
+    }
+    // Apparatus parts: a site's light lands on its site; a zone's electrodes are its rows.
+    // Ions float 70 µm above the surface (Pino et al. 2021), to the map's scale.
+    const ionHeight = (70 * s) / (run.machine.geometry?.units?.micrometresPerUnit ?? 750);
+    for (const part of run.system.parts.filter((p) => p.kind === "device")) {
+      const site = part.id.replace(/^(?:site|electrodes):(?:zone\.)?/, "");
+      if (/^site:/.test(part.id) && sites.has(site)) {
+        const entry = addPart(part, sites.get(site).clone().setY(0.6), 0.07 * pitch, (g) => {
+          const halo = solid(g, round, 0, 0.1, 0, 2.2, 0.2, 2.2, new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 }));
+          void halo;
+          return 1.4;
+        });
+        entry.top = sites.get(site).clone().setY(ionHeight + 0.1 * pitch);
+      } else if (/^electrodes:/.test(part.id) && sites.has(site)) {
+        const entry = addPart(part, sites.get(site).clone().setY(0.3), 1, () => 0.5);
+        entry.meshes.push(...(electrodes.get(site) ?? []));
+        entry.top = sites.get(site).clone().add(new T.Vector3(0, 0.3 * pitch, 0.25 * pitch));
+      } else {
+        // Broadcast light and banks without a site: a laser head at the edge of the trap.
+        const p = w.parts.get(part.id);
+        const at = V(p.at);
+        if (!at.length()) at.set(-1.15 * R, 0, -0.9 * R);
+        addPart(part, at, 0.06 * pitch, apparatusShapes.light, Math.atan2(at.z, -at.x));
+      }
+    }
+    const ions = new Map();
+    return {
+      pitch, ionHeight, scale: s, sites,
+      anchor: (id) => (ions.get(id)?.visible ? ions.get(id).position.clone().add(new T.Vector3(0, 0.12 * pitch, 0)) : null),
+      bodies(extra) {
+        const seen = new Set(), radius = 0.045 * pitch;
+        for (const ion of extra.ions ?? []) {
+          if (!ion.at) continue;
+          const id = "ion:" + ion.ion;
+          seen.add(id);
+          let mesh = ions.get(id);
+          if (!mesh) {
+            mesh = solid(bodies, round, 0, 0, 0, radius, 0.4 * radius, radius, studio.ion);
+            mesh.userData.part = id;
+            ions.set(id, mesh);
+          }
+          const same = (extra.ions ?? []).filter((o) => !o.moving && o.site === ion.site && o.at);
+          const k = ion.moving ? 0 : same.indexOf(ion) - (same.length - 1) / 2;
+          mesh.position.copy(V(w.toWorld(ion.at))).add(new T.Vector3(k * radius * 2.6, ionHeight, 0));
+          mesh.material = ion.moving ? studio.ionMoving : studio.ion;
+          mesh.visible = true;
+          pinned.push([id, ion.ion.replace(/^q/, ""), "pin ion"]);
+        }
+        for (const [id, mesh] of ions) if (!seen.has(id)) mesh.visible = false;
+      },
+      table: () => opticalTable(),
+    };
+  }
+
+  // ───────────────────────────── neutral atoms: a paper figure ─────────────────────────────
+
+  function atomArray() {
+    const chip = w.chip, geo = run.machine.geometry ?? {}, s = w.scale;
+    const die = box(root, 0, -1, 0, 2.3 * R, 2, 2.3 * R, array.die);
+    die.userData.ground = true;
+    const clampX = (v) => Math.max(-1.12 * R, Math.min(1.12 * R, v));
+    for (const zone of geo.zones ?? chip.zones ?? []) {
+      const a = V(w.toWorld(zone.origin)), b = V(w.toWorld([zone.origin[0] + zone.size[0], zone.origin[1] + zone.size[1]]));
+      const x0 = clampX(Math.min(a.x, b.x)), x1 = clampX(Math.max(a.x, b.x)), z0 = clampX(Math.min(a.z, b.z)), z1 = clampX(Math.max(a.z, b.z));
+      if (x1 - x0 < 1 || z1 - z0 < 1) continue;
+      const fill = box(root, (x0 + x1) / 2, 0.02, (z0 + z1) / 2, x1 - x0, 0.04, z1 - z0, zone.kind === "entanglement" ? array.entangle : zone.kind === "readout" ? array.readout : array.storage);
+      fill.userData.part = "zone:" + zone.id;
+      fill.userData.zone = zone;
+      const edge = new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(x1 - x0, 0.1, z1 - z0)), array.edge);
+      edge.position.set((x0 + x1) / 2, 0.1, (z0 + z1) / 2);
+      root.add(edge);
+    }
+    // Static traps: one faint dot per trap of the architecture that falls on the die.
+    const dots = [];
+    for (const trap of geo.traps ?? [])
+      for (let r = 0; r < trap.rows; r++)
+        for (let c = 0; c < trap.columns; c++) {
+          const at = w.toWorld([trap.origin[0] + c * trap.pitch[0], trap.origin[1] + r * trap.pitch[1]]);
+          if (Math.abs(at[0]) <= 1.12 * R && Math.abs(at[2]) <= 1.12 * R) dots.push(at);
+        }
+    if (dots.length) {
+      const dotR = Math.max(0.25, Math.min(0.9, 0.5 * s));
+      const instanced = new T.InstancedMesh(new T.CylinderGeometry(dotR, dotR, 0.05, 8), array.trap, dots.length);
+      const m = new T.Matrix4();
+      dots.forEach((at, k) => instanced.setMatrixAt(k, m.makeTranslation(at[0], 0.08, at[2])));
+      instanced.userData.part = "zone:traps";
+      root.add(instanced);
+    }
+    // Light heads and AOD crystals at the edge of the array.
+    for (const part of run.system.parts.filter((p) => p.kind === "device")) {
+      const p = w.parts.get(part.id), at = V(p.at);
+      if (/^aod\d+:/.test(part.id)) {
+        const k = Number(/^aod(\d+)/.exec(part.id)[1]), x = /:x/.test(part.id);
+        const index = Number(/(\d+)$/.exec(part.id)[1]);
+        const pos = x ? new T.Vector3(-0.9 * R + 14 * k + 4 * index, 0, -1.22 * R) : new T.Vector3(-1.22 * R, 0, -0.9 * R + 14 * k + 4 * index);
+        addPart(part, pos, 1.1, apparatusShapes.tone);
+      } else {
+        const head = /rydberg/.test(part.id) ? new T.Vector3(-1.25 * R, 0, 0.55 * R) : new T.Vector3(1.25 * R, 0, -0.95 * R);
+        addPart(part, head, 2, apparatusShapes.light, Math.atan2(head.z, -head.x));
+      }
+    }
+    // The objective above the array, through which every tweezer is focused.
+    // Drawn as a glass element so the array stays visible beneath it.
+    const objectiveHeight = 0.9 * R;
+    const glassMat = new T.MeshPhysicalMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.16, roughness: 0.05, metalness: 0, depthWrite: false });
+    const lens = solid(root, ball, 0, objectiveHeight, 0, 0.3 * R, 0.05 * R, 0.3 * R, glassMat);
+    lens.userData.part = "optic:objective";
+    const rim = new T.Mesh(new T.TorusGeometry(0.31 * R, 0.012 * R, 8, 64), surface(0x8a98a0, 0.7, 0.3));
+    rim.rotation.x = -Math.PI / 2;
+    rim.position.y = objectiveHeight;
+    rim.userData.part = "optic:objective";
+    root.add(rim);
+    const atoms = new Map(), halos = new Map();
+    const tones = new Map();
+    return {
+      objectiveHeight, scale: s,
+      anchor: (id) => (atoms.get(id)?.visible ? atoms.get(id).position.clone().add(new T.Vector3(0, 3, 0)) : null),
+      bodies(extra) {
+        const seen = new Set(), radius = Math.max(0.5, Math.min(2.2, 0.9 * s));
+        for (const atom of extra.atoms ?? []) {
+          const id = "atom:" + atom.atom;
+          seen.add(id);
+          let mesh = atoms.get(id);
+          if (!mesh) {
+            mesh = solid(bodies, ball, 0, 0, 0, radius, radius, radius, new T.MeshBasicMaterial({ color: 0xfff1c9 }));
+            mesh.userData.part = id;
+            atoms.set(id, mesh);
+            const h = glowSprite([1, 0.78, 0.42], radius * 7, 0.85);
+            h.userData.part = id;
+            bodies.add(h);
+            halos.set(id, h);
+          }
+          mesh.position.copy(V(w.toWorld(atom.at))).setY(radius + 0.2);
+          mesh.material.color.setHex(atom.carried ? 0xffc27a : 0xfff1c9);
+          mesh.visible = true;
+          const h = halos.get(id);
+          h.position.copy(mesh.position);
+          h.material = glowSprite(atom.carried ? [1, 0.55, 0.25] : [1, 0.78, 0.42], 1).material;
+          h.scale.setScalar(radius * (atom.carried ? 9 : 7));
+          h.visible = true;
+          pinned.push([id, String(atom.atom), "pin atom"]);
+        }
+        for (const [id, mesh] of atoms) if (!seen.has(id)) {
+          mesh.visible = false;
+          halos.get(id).visible = false;
+        }
+        // RF tones: a faint line on the array where each tone's deflected beam would land.
+        const open = new Set(extra.openParts ?? []);
+        for (const [part, um] of extra.tones ?? []) {
+          let line = tones.get(part);
+          const axis = /\.x/.test(part) ? "x" : "y";
+          if (!line) {
+            line = box(bodies, 0, 0.15, 0, axis === "x" ? 0.25 : 2.3 * R, 0.05, axis === "x" ? 2.3 * R : 0.25, lightMaterial([1, 0.35, 0.25], 0.18));
+            line.userData.part = part.replace(".", ":");
+            tones.set(part, line);
+          }
+          const at = V(w.toWorld(axis === "x" ? [um, 0] : [0, um]));
+          if (axis === "x") line.position.x = at.x;
+          else line.position.z = at.z;
+          line.material = lightMaterial([1, 0.35, 0.25], open.has(part) ? 0.28 : 0.1);
+          line.visible = true;
+        }
+        for (const [part, line] of tones) if (!(extra.tones ?? new Map()).has(part)) line.visible = false;
+      },
+      table: () => opticalTable(),
+    };
+  }
+
+  // ───────────────────────────── superconducting: the chip ─────────────────────────────
+
+  function transmonChip() {
+    const chip = w.chip;
+    const die = box(root, 0, -1, 0, 2.3 * R, 2, 2.3 * R, sapphire);
+    die.userData.ground = true;
+    const pitch = Math.max(1, Math.min(5, w.scale * 0.07));
+    const couplerMeshes = new Map();
+    for (const [a, b, offered] of chip.couplers ?? []) {
+      const pa = chip.devices.get(chip.qubitParts?.[a] ?? "qubit" + a), pb = chip.devices.get(chip.qubitParts?.[b] ?? "qubit" + b);
+      if (!pa || !pb) continue;
+      const wa = V(w.toWorld(pa)), wb = V(w.toWorld(pb));
+      const mesh = beam(root, wa.clone().lerp(wb, 0.22).setY(0.4), wa.clone().lerp(wb, 0.78).setY(0.4), 1.1 * pitch, offered === false ? graphite : niobium);
+      mesh.userData.base = mesh.material;
+      mesh.userData.part = "coupler:" + a + "-" + b + (offered === false ? ":not offered" : "");
+      couplerMeshes.set([a, b].sort((x, y) => x - y).join("-"), mesh);
+    }
+    for (const part of run.system.parts.filter((p) => p.kind === "device")) {
+      const kind = chip.types?.get(part.id) ?? (/^resonator/.test(part.id) ? "resonator" : "qubit");
+      addPart(part, V(w.parts.get(part.id).at), pitch, apparatusShapes[kind] ?? shapes.device);
+    }
+    return {
+      couplerMeshes,
+      anchor: () => null,
+      bodies() {
+        for (const [id] of chip.devices) if (/^qubit/.test(id) || chip.types?.get(id) === "qubit") pinned.push([id, id.replace(/^qubit/, "Q"), "pin"]);
+      },
+    };
+  }
+
+  // ───────────────────────────── optical table ─────────────────────────────
+
+  /** The bench of a laser platform beside the controller: `extra.bench` elements drawn by `show`. */
+  function opticalTable() {
+    const t = w.table;
+    const plate = box(root, t.at[0], -2, t.at[2], t.size[0], 4, t.size[1], table);
+    plate.userData.part = "optic:table";
+    plate.userData.ground = true;
+    // Mounting holes on a 25 mm grid, drawn every 20 world units.
+    const holes = new T.InstancedMesh(new T.CylinderGeometry(0.6, 0.6, 0.2, 6), surface(0x1a2022), Math.floor(t.size[0] / 20) * Math.floor(t.size[1] / 20));
+    let n = 0;
+    const m = new T.Matrix4();
+    for (let x = -t.size[0] / 2 + 10; x < t.size[0] / 2; x += 20) for (let z = -t.size[1] / 2 + 10; z < t.size[1] / 2; z += 20) holes.setMatrixAt(n++, m.makeTranslation(t.at[0] + x, 0.1, t.at[2] + z));
+    holes.count = n;
+    root.add(holes);
+  }
+
+  // ───────────────────────────── light and signals ─────────────────────────────
+
+  /**
+   * Draw the live beams and signals. Each beam: { id, lambdaNm, opacity?, samples: [{ at: [x, y, z]
+   * world, rx, ry }] } or { id, lambdaNm, focused: { focus: [x, y, z] world, dir, w0x, w0y, zRx, zRy,
+   * before, after } }, plus glow: [{ at, size, rgb }]. Each signal: { id, from: [x,y,z], to, t, rgb }.
+   */
+  function drawLight(extra) {
+    light.clear();
+    for (const b of extra.beams ?? []) {
+      const rgb = b.rgb ?? (Array.isArray(b.colour) ? b.colour : wavelengthRgb(b.lambdaNm ?? 600));
+      const material = lightMaterial(rgb, b.opacity ?? 0.32);
+      const pieces = b.focused ? [focusedSamples({ ...b.focused, focus: V(b.focused.focus), dir: V(b.focused.dir) })] : (b.paths ?? [b.samples]).filter(Boolean).map((list) => list.map((x) => ({ ...x, at: V(x.at) })));
+      for (const samples of pieces) {
+        const mesh = envelopeTube(samples, material);
+        if (!mesh) continue;
+        mesh.userData.part = "beam:" + b.id;
+        light.add(mesh);
+        // A brighter core so a thin beam stays visible from afar.
+        if (b.core === false) continue;
+        const core = envelopeTube(samples.map((x) => ({ ...x, rx: Math.max(0.12, x.rx * 0.25), ry: Math.max(0.12, x.ry * 0.25) })), lightMaterial(rgb, Math.min(0.9, (b.opacity ?? 0.32) * 1.8)), 8);
+        if (core) {
+          core.userData.part = "beam:" + b.id;
+          light.add(core);
+        }
+      }
+      for (const g of b.glow ?? []) {
+        const sprite = glowSprite(g.rgb ?? rgb, g.size, g.opacity ?? 0.9);
+        sprite.position.copy(V(g.at));
+        sprite.userData.part = "beam:" + b.id;
+        light.add(sprite);
+      }
+    }
+    // The optical bench on its table: every element, and the path of every live beam through it.
+    if (extra.table) {
+      const opticMats = { source: surface(0x3a4a52, 0.4, 0.4), laser: surface(0x3a4a52, 0.4, 0.4), aod: surface(0xcfe3ea, 0.1, 0.15), aom: surface(0xcfe3ea, 0.1, 0.15),
+        fiber: surface(0xf0c060, 0.2, 0.5), lens: new T.MeshPhysicalMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.55, roughness: 0.05 }),
+        cylLens: new T.MeshPhysicalMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.55, roughness: 0.05 }), mirror: surface(0xdfe7ea, 0.9, 0.1),
+        objective: surface(0x2b3a44, 0.6, 0.35), beamSplitter: surface(0x9fd6ff, 0.2, 0.1), dichroic: surface(0x9fd6ff, 0.2, 0.1) };
+      for (const e of extra.table.elements) {
+        const at = V(e.world), m = opticMats[e.kind] ?? steel;
+        const mesh = e.kind === "lens" || e.kind === "cylLens" || e.kind === "objective" ? solid(light, round, at.x, at.y + 4, at.z, e.kind === "objective" ? 7 : 5.5, e.kind === "objective" ? 9 : 1, e.kind === "objective" ? 7 : 5.5, m)
+          : e.kind === "source" || e.kind === "laser" ? box(light, at.x, at.y + 4, at.z, 16, 8, 8, m) : box(light, at.x, at.y + 3.5, at.z, 6.5, 7, 6.5, m);
+        if (e.kind === "lens" || e.kind === "cylLens") mesh.rotation.x = Math.PI / 2;
+        mesh.userData.part = "optic:" + e.label;
+      }
+      const marker = solid(light, round, extra.table.sample[0], 2, extra.table.sample[2], 6, 1, 6, surface(0xb096ca, 0.3, 0.5));
+      marker.userData.part = "optic:sample";
+      for (const p of extra.table.paths) {
+        const mesh = envelopeTube(p.samples.map((x) => ({ ...x, at: V(x.at).setY(V(x.at).y + 3.5) })), lightMaterial(wavelengthRgb(p.lambdaNm), 0.7), 10);
+        if (!mesh) continue;
+        mesh.userData.part = "beam:" + p.id;
+        light.add(mesh);
+      }
+    }
+    for (const sgl of extra.signals ?? []) {
+      const a = V(sgl.from), b = V(sgl.to);
+      const material = lightMaterial(sgl.rgb ?? [0.5, 0.85, 1], 0.95);
+      const length = Math.max(6, a.distanceTo(b) * 0.14);
+      const packet = signalPacket([a, b], Math.min(1, sgl.t), length, 2.2, material);
+      if (packet) {
+        packet.userData.part = "signal:" + sgl.id;
+        light.add(packet);
+      }
+      // The part of the line the signal has filled.
+      const filled = envelopeTube([{ at: a, rx: 1.1, ry: 1.1 }, { at: a.clone().lerp(b, Math.max(0.02, Math.min(1, sgl.t))), rx: 1.1, ry: 1.1 }], lightMaterial(sgl.rgb ?? [0.5, 0.85, 1], 0.55), 8);
+      if (filled) {
+        filled.userData.part = "signal:" + sgl.id;
+        light.add(filled);
+      }
+      if (sgl.t >= 1 && sgl.glowAt) {
+        const sprite = glowSprite(sgl.rgb ?? [0.5, 0.85, 1], sgl.glowSize ?? 10, 0.8);
+        sprite.position.copy(V(sgl.glowAt));
+        sprite.userData.part = "signal:" + sgl.id;
+        light.add(sprite);
+      }
+    }
   }
 
   function paint(id, material) {
@@ -484,11 +706,16 @@ export function createWorkspaceStage(host, hooks) {
   }
 
   /**
-   * Show one step. `extra` carries what the page derived for the apparatus:
-   * { active: Map(device → [{ window, binding }]), ions, atoms, tones: Map(part → µm) }.
+   * Show one step. `extra` carries what the page derived from the trace: { active: Map(device →
+   * [{ window, binding }]), hint, ions, atoms, tones: Map(part → µm), openParts, beams, signals }.
    */
   function show(frame, state, path, chosen, fault, extra = {}) {
-    for (const id of lit) for (const mesh of parts.get(id)?.meshes ?? chip?.couplerMeshes?.get(id)?.meshes ?? []) mesh.material = mesh.userData.base;
+    for (const id of lit) {
+      const entry = parts.get(id);
+      if (entry) for (const mesh of entry.meshes) mesh.material = restOf(id, mesh);
+      const coupler = platform?.couplerMeshes?.get(id);
+      if (coupler) coupler.material = coupler.userData.base;
+    }
     lit.clear();
     overlay.clear();
     tags = [];
@@ -498,20 +725,19 @@ export function createWorkspaceStage(host, hooks) {
       paint(window.converter, openMat);
     }
     for (const [device, list] of extra.active ?? []) {
-      paint(device, openMat);
+      // Electrodes glow orange while their transport waveform plays; other apparatus lights up.
+      paint(device, /^electrodes:/.test(device) ? studio.electrodeOn : openMat);
       for (const { binding } of list)
-        if (binding.detail?.pair && chip?.couplerMeshes) {
-          const key = binding.detail.pair.slice().sort((a, b) => a - b).join("-"), entry = chip.couplerMeshes.get(key);
-          if (entry) {
-            for (const mesh of entry.meshes) mesh.material = openMat;
+        if (binding.detail?.pair && platform?.couplerMeshes) {
+          const key = binding.detail.pair.slice().sort((a, b) => a - b).join("-"), mesh = platform.couplerMeshes.get(key);
+          if (mesh) {
+            mesh.material = openMat;
             lit.add(key);
-            chip.couplerMeshes.set(key, entry);
           }
         }
     }
-    // Parts of the instruction or line under the pointer in the program column.
     for (const id of extra.hint ?? []) paint(id, hoverMat);
-    const raise = new T.Vector3(0, (view === "chip" ? 2 : 0.55 * unit), 0);
+    const raise = new T.Vector3(0, 2, 0);
     for (const hop of path) {
       const from = parts.get(hop.from), to = parts.get(hop.to);
       if (!from || !to) continue;
@@ -521,13 +747,13 @@ export function createWorkspaceStage(host, hooks) {
         paint(hop.to, pathMat);
       }
       const a = from.anchor.clone().add(raise), b = to.anchor.clone().add(raise), material = own ? targetMat : pathMat;
-      const w = view === "chip" ? 1.6 : 0.42 * unit;
-      if (hop.link) beam(overlay, a, b, w, material);
+      const wd = 1.6;
+      if (hop.link) beam(overlay, a, b, wd, material);
       else {
-        const dashes = Math.max(3, Math.round(a.distanceTo(b) / (4 * w)));
-        for (let k = 0; k < dashes; k++) beam(overlay, a.clone().lerp(b, k / dashes), a.clone().lerp(b, (k + 0.55) / dashes), w, material);
+        const dashes = Math.max(3, Math.round(a.distanceTo(b) / (4 * wd)));
+        for (let k = 0; k < dashes; k++) beam(overlay, a.clone().lerp(b, k / dashes), a.clone().lerp(b, (k + 0.55) / dashes), wd, material);
       }
-      const head = solid(overlay, cone, 0, 0, 0, 1.8 * w, 4 * w, 1.8 * w, material);
+      const head = solid(overlay, cone, 0, 0, 0, 1.8 * wd, 4 * wd, 1.8 * wd, material);
       head.position.copy(a).lerp(b, 0.6);
       head.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), b.clone().sub(a).normalize());
     }
@@ -539,7 +765,8 @@ export function createWorkspaceStage(host, hooks) {
       paint(frame.part, fault ? faultMat : actingMat);
       tags.unshift([frame.part, frame.part + " · " + frame.op, "active"]);
     }
-    if (chip) updateBodies(extra);
+    platform?.bodies(extra);
+    drawLight(extra);
     const picked = parts.get(chosen);
     ring.visible = Boolean(picked);
     if (picked) {
@@ -551,72 +778,16 @@ export function createWorkspaceStage(host, hooks) {
     render();
   }
 
-  function updateBodies(extra) {
-    const radius = chip.platform === "neutral" ? 3.2 : Math.max(2.2, Math.min(5, chip.scale * 0.11));
-    if (extra.ions) {
-      const seen = new Set();
-      extra.ions.forEach((ion) => {
-        if (!ion.at) return;
-        const id = "ion:" + ion.ion;
-        seen.add(id);
-        let mesh = ionMeshes.get(id);
-        if (!mesh) {
-          mesh = solid(bodies, ball, 0, 0, 0, radius, radius, radius, ionMat);
-          mesh.userData.part = id;
-          ionMeshes.set(id, mesh);
-        }
-        // Ions of one site sit side by side along the trap axis.
-        const sameSite = extra.ions.filter((o) => !o.moving && o.site === ion.site && o.at);
-        const k = ion.moving ? 0 : sameSite.indexOf(ion) - (sameSite.length - 1) / 2;
-        mesh.position.copy(chip.toWorld(ion.at)).add(new T.Vector3(k * radius * 2.4, 3.5 + radius, 0));
-        mesh.material = ion.moving ? movingMat : ionMat;
-        mesh.visible = true;
-        pinned.push([id, ion.ion, "pin"]);
-      });
-      for (const [id, mesh] of ionMeshes) if (!seen.has(id)) mesh.visible = false;
-    }
-    if (extra.atoms) {
-      const seen = new Set();
-      for (const atom of extra.atoms) {
-        const id = "atom:" + atom.atom;
-        seen.add(id);
-        let mesh = atomMeshes.get(id);
-        if (!mesh) {
-          mesh = solid(bodies, ball, 0, 0, 0, radius, radius, radius, atomMat);
-          mesh.userData.part = id;
-          atomMeshes.set(id, mesh);
-        }
-        mesh.position.copy(chip.toWorld(atom.at)).setY(radius + (atom.carried ? 4 : 1));
-        mesh.material = atom.carried ? movingMat : atomMat;
-        mesh.visible = true;
-        pinned.push([id, String(atom.atom), "pin"]);
-      }
-      for (const [id, mesh] of atomMeshes) if (!seen.has(id)) mesh.visible = false;
-    }
-    if (extra.tones) {
-      const open = new Set(extra.openParts ?? []);
-      for (const [part, { mesh, axis }] of toneMeshes) {
-        const um = extra.tones.get(part.replace(":", "."));
-        mesh.visible = um !== undefined;
-        if (um === undefined) continue;
-        const at = chip.toWorld(axis === "x" ? [um, 0] : [0, um]);
-        if (axis === "x") mesh.position.x = at.x;
-        else mesh.position.z = at.z;
-        mesh.material = open.has(part.replace(":", ".")) ? toneOn : toneOff;
-      }
-    }
-    if (chip.platform === "superconducting" || chip.platform === "qccd")
-      for (const [id] of chip.devices) if (/^(qubit\d+|site:.+)$/.test(id)) pinned.push([id, id.replace(/^qubit/, "Q").replace(/^site:/, ""), "pin"]);
-  }
-
   function partAt(e) {
     const r = canvas.getBoundingClientRect();
     ndc.set((2 * (e.clientX - r.left)) / r.width - 1, 1 - (2 * (e.clientY - r.top)) / r.height);
     ray.setFromCamera(ndc, camera);
-    for (const hit of ray.intersectObjects([...bodies.children, ...root.children], true)) {
-      if (!hit.object.visible) continue;
-      for (let node = hit.object; node; node = node.parent) if (node.userData.part) return node.userData.part;
-    }
+    // Light first: a beam in front of a part is what the pointer is on.
+    for (const group of [light, bodies, root])
+      for (const hit of ray.intersectObjects(group.children, true)) {
+        if (!hit.object.visible) continue;
+        for (let node = hit.object; node; node = node.parent) if (node.userData.part) return node.userData.part;
+      }
     return null;
   }
   let down = null, pending = null;
@@ -654,22 +825,26 @@ export function createWorkspaceStage(host, hooks) {
   new ResizeObserver(resize).observe(host);
   home();
   return {
-    /** Load a run and draw it in `nextView` (the current view when omitted). */
+    /** Load a run: build its world once and show it in `nextView`. */
     setRun(bundle, nextView = view) {
       run = bundle;
       view = nextView;
-      rebuild();
+      buildWorld();
+      applyView();
     },
+    /** Change the view: the same world, framed and emphasised differently. */
     setView(next) {
       view = next;
-      rebuild();
+      applyView();
     },
     get view() {
       return view;
     },
-    /** Parts this view draws. */
-    shows: (id) => parts.has(id) || ionMeshes.has(id) || atomMeshes.has(id),
-    chip: () => chip,
+    /** Whether a part is emphasised in this view. Every part is in the world. */
+    shows: (id) => emphasis.has(id) || /^(ion|atom|beam|signal):/.test(id),
+    world: () => w,
+    platform: () => platform,
+    chip: () => w?.chip ?? null,
     show,
     home,
   };

@@ -20,11 +20,33 @@ In every layer, yellow marks the row of the current step and blue marks instruct
 
 ## Views
 
-The views only choose which parts are drawn. Every part keeps running in every view, and its instructions stay in the program column.
+The three views show **one world** ([studio/riscq-world.js](../studio/riscq-world.js)), built once per run. A view chooses the camera frame and fades the parts it does not focus on. It never moves or rebuilds a part, so the chip, the control system and the whole machine are the same machine.
 
-- **Chip.** The apparatus in the centre. Its converters sit on a ring around it and its channels on an outer ring, each at the angle of the apparatus it drives. Coax lines join each converter to its parts. A converter that drives parts all around the chip, such as the shared readout line, has no such angle and is placed in a free gap. Ions move between sites and atoms move with their AOD tones as the trace advances.
-- **Control system.** Host, hub, cores, links, inboxes, channels and converters at their schematic floorplan positions.
-- **Whole machine.** Every part at its floorplan position.
+The world, from the centre out:
+
+| Ring | Parts | Placement |
+| --- | --- | --- |
+| Apparatus, radius 100 | The chip, trap or atom array | Chip layout coordinates fitted to what the program uses |
+| 150 | Converters (DAC, ADC, digital pins) | At the angle of the apparatus each drives. A shared feedline goes in a free gap at the back |
+| 200 | Channels | Beside their converter |
+| 275, 300, 325 | Cores, then their inboxes and posted links | At the circular mean angle of the core's channels |
+| 350 | A bus ring | Joins every link to the hub |
+| Outside the bus | Hub and host | At the front |
+| Left of the controller | The optical table of a laser platform | |
+
+- **Chip.** Frames the apparatus with its converters and channels.
+- **Control system.** Frames the controller and fades the apparatus.
+- **Whole machine.** Frames everything, including the optical table.
+
+Parts outside a view's focus keep running, and their instructions stay in the program column.
+
+The apparatus is drawn in its field's convention:
+
+- **Trapped ions** follow QCCD Studio's map: pink rails, capsule sites coloured by zone, rows of electrodes along the rails, and ions as numbered navy discs. A zone's electrodes glow orange while its transport waveform plays.
+- **Neutral atoms** follow neutral-atom paper figures: a dark array, outlined zones, static traps as faint dots, atoms as glowing points, and a glass objective above the array.
+- **Superconducting** shows a sapphire die with transmon crosses, meander resonators and couplers.
+
+Electrical signals are objects ([studio/riscq-light.js](../studio/riscq-light.js), from `signalsAt` in riscq-world.js). A pulse leaves its converter when its window opens. It reaches its part after the binding's wire delay, drawn as a bright packet. An acquisition window carries the returning signal back to the ADC. Hovering a packet shows its window, delay, elapsed time and codes.
 
 ## Where each picture comes from
 
