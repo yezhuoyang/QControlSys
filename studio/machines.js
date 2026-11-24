@@ -1031,10 +1031,12 @@ $("file").onchange = action(async () => {
   }
 });
 function chooseExample(id) {
-  if(id==="measured-case")return;
+  if(id==="measured-case" || id==="lesson-build")return;
+  $("example").querySelector('option[value="lesson-build"]')?.remove();
   $("example").querySelector('option[value="measured-case"]')?.remove();
   const url = new URL(location.href);
   url.searchParams.delete("boardCase");
+  url.searchParams.delete("lesson");
   url.searchParams.delete("row");
   url.searchParams.delete("inspect");
   const platform = Object.keys(platforms).find((k) => platforms[k] === id);
@@ -1061,6 +1063,27 @@ await action(async () => {
     Object.keys(palette).map((t) => [t, t]),
   );
   const params=new URL(location.href).searchParams;
+  if (params.has("lesson")) {
+    const {activities,settingsFor}=await import("/course/labs/activities.mjs");
+    const {machineDocument}=await import("/course/labs/platform.mjs");
+    const id=params.get("lesson"), spec=activities[id];
+    if(!spec || !["waveform","electrode","strobe"].includes(spec.engine)) throw Error("Unknown machine lesson.");
+    const options=spec.build(settingsFor(id,params));
+    const doc=await machineDocument(spec.engine,options,async url=>{
+      const response=await fetch(url);
+      if(!response.ok)throw Error(await response.text());
+      return response.json();
+    });
+    $("example").append(new Option(spec.title,"lesson-build",true,true));
+    await load(doc);
+    const index=Number(params.get("event"));
+    if(replay && params.has("event") && Number.isInteger(index) && replay.trace.frames[index]){
+      cursor=index+1;
+      selected=doc.design.parts.find(p=>p.id===params.get("probe"))?.id??replay.trace.frames[index].part;
+      show();
+    }
+    return;
+  }
   if (params.has("boardCase")) {
     const query=new URLSearchParams({case:params.get("boardCase"),row:params.get("row")??"0"});
     const res=await fetch("/api/board-validation/design?"+query);

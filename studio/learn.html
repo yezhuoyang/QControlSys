@@ -18,7 +18,7 @@
 <nav class="job-nav" aria-label="Control functions"><a href="#physical-job">Hold and move the carrier</a><a href="#signal-job">Generate and deliver a field</a><a href="#read-job">Observe the result</a><a href="#logic-job">Time the action with programmable logic</a><a href="#decision-job">Decode and act before the deadline</a><a href="#evidence-job">Reproduce a published machine</a></nav>
 <section class="job-section" id="physical-job">
 <h2>Hold and move the carrier</h2><p class="q">Where does the information live?</p><p>A qubit is a physical system with two states we can distinguish and control. Manila uses a circuit fixed to a cold chip. H2 holds a charged atom in an electric well. A neutral-atom machine holds an atom in focused light. Think of sliding a bowl under a marble. The bowl can be made from voltages or light, and moving it too suddenly can leave the marble bouncing.</p>
-<ul class="reading-links"><li><a href="/course/P1">Start with a qubit</a></li><li><a href="/course/P2">Compare transport</a></li><li><a href="/course/S5">Trap electrodes</a></li><li><a href="/course/S7">Optical tweezer</a></li><li><a href="/course/S4">Beam deflector</a></li><li><a href="/course/background/qubits">Physics chapter</a></li></ul>
+<ul class="reading-links"><li><a href="/course/P2#workshop">Try the lab · Move a pair of atoms</a></li><li><a href="/course/P1">Start with a qubit</a></li><li><a href="/course/P2">Compare transport</a></li><li><a href="/course/S5">Trap electrodes</a></li><li><a href="/course/S7">Optical tweezer</a></li><li><a href="/course/S4">Beam deflector</a></li><li><a href="/course/background/qubits">Physics chapter</a></li></ul>
 <h3>Technical reference</h3>
 <details class="reference-detail" id="superconducting"><summary>Superconducting transmons</summary>
           <figure class="fig">
@@ -160,7 +160,7 @@
 </section>
 <section class="job-section" id="signal-job">
 <h2>Generate and deliver a field</h2><p class="q">What crosses the last gap?</p><p>A qubit cannot read a number. A converter changes a number into a voltage. A series of voltages can move an electric well, drive a microwave cable, or set the direction of a laser beam. Keep three questions in mind as you follow the wire. What sets the height of the signal? What sets its rhythm? What determines where it arrives?</p>
-<ul class="reading-links"><li><a href="/course/S1">Voltage converter (DAC)</a></li><li><a href="/course/S2">Digital oscillator</a></li><li><a href="/course/S8">Waveform generator</a></li><li><a href="/course/S6">Gate laser</a></li><li><a href="/course/S3">Signal mixer</a></li><li><a href="/course/P3">How pulses make gates</a></li><li><a href="/course/background/control">Signals and optics chapter</a></li></ul>
+<ul class="reading-links"><li><a href="/course/S1#workshop">Try the lab · Wire a converter to a scope</a></li><li><a href="/course/S1">Voltage converter (DAC)</a></li><li><a href="/course/S2">Digital oscillator</a></li><li><a href="/course/S8">Waveform generator</a></li><li><a href="/course/S6">Gate laser</a></li><li><a href="/course/S3">Signal mixer</a></li><li><a href="/course/P3">How pulses make gates</a></li><li><a href="/course/background/control">Signals and optics chapter</a></li></ul>
 <h3>Technical reference</h3>
 <details class="reference-detail" id="d1"><summary>Lasers, fibers, lenses and objectives</summary>
           <p>A beam's path from laser to qubit is an optical train:</p>
@@ -269,12 +269,12 @@
 </section>
 <section class="job-section" id="read-job">
 <h2>Observe the result</h2><p class="q">What does the detector actually see?</p><p>On a superconducting chip, the state changes a returning microwave tone. In a trap, one internal state can scatter much more light than another. The first detector records voltages and the second counts photons. In both cases the controller needs a calibrated rule to turn an imperfect observation into a bit. To judge a gate, repeat the experiment and change the question the final measurement asks.</p>
-<ul class="reading-links"><li><a href="/course/R4">Readout resonator</a></li><li><a href="/course/R1">Voltage sampler (ADC)</a></li><li><a href="/course/R2">State discriminator</a></li><li><a href="/course/R3">Photon counter</a></li><li><a href="/course/P4">Gate verification and benchmarking</a></li></ul>
+<ul class="reading-links"><li><a href="/course/R2#workshop">Try the lab · Classify two readout signals</a></li><li><a href="/course/R4">Readout resonator</a></li><li><a href="/course/R1">Voltage sampler (ADC)</a></li><li><a href="/course/R2">State discriminator</a></li><li><a href="/course/R3">Photon counter</a></li><li><a href="/course/P4">Gate verification and benchmarking</a></li></ul>
 
 </section>
 <section class="job-section" id="logic-job">
 <h2>Time the action with programmable logic</h2><p class="q">Which edge makes the command take effect?</p><p>A chip can contain many small circuits that operate at once. A field-programmable gate array, usually shortened to FPGA, lets an engineer choose those circuits and their connections after manufacture. Begin with four stored answers, a wire that selects one, and a clock edge that captures it. Follow the same idea out to a package pin on a published control board.</p>
-<ul class="reading-links"><li><a href="/course/F5">Clock and synchronization</a></li><li><a href="/course/F6">Command FIFO</a></li><li><a href="/course/F1">Lookup tables and switches</a></li><li><a href="/course/F2">Clocked storage lab</a></li><li><a href="/course/F3">Program an FPGA board</a></li><li><a href="/course/F4">Queues and pin interfaces</a></li><li><a href="/course/background/timing">Timing contracts</a></li><li><a href="/course/background/riscq">RISC-Q architecture</a></li></ul>
+<ul class="reading-links"><li><a href="/course/F2#workshop">Try the lab · Capture and hold one bit</a></li><li><a href="/course/F5">Clock and synchronization</a></li><li><a href="/course/F6">Command FIFO</a></li><li><a href="/course/F1">Lookup tables and switches</a></li><li><a href="/course/F2">Clocked storage lab</a></li><li><a href="/course/F3">Program an FPGA board</a></li><li><a href="/course/F4">Queues and pin interfaces</a></li><li><a href="/course/background/timing">Timing contracts</a></li><li><a href="/course/background/riscq">RISC-Q architecture</a></li></ul>
 <h3>Technical reference</h3>
 <details class="reference-detail" id="a1"><summary>What a control system does</summary>
           <p>
@@ -387,7 +387,7 @@
 </section>
 <section class="job-section" id="decision-job">
 <h2>Decode and act before the deadline</h2><p class="q">Which later instruction depends on this result?</p><p>A measured bit can select a later pulse. An error-correcting machine also compares groups of measurements to infer where an error may have occurred. That computation is decoding. Follow a two-bit lookup before opening Helios, where many local decisions contribute to one result. Trace the delay from the last required input to the first usable output.</p>
-<ul class="reading-links"><li><a href="/course/K1">Syndrome lookup</a></li><li><a href="/course/K2">Distributed decoding</a></li><li><a href="/course/K3">Helios gate-level debugger</a></li><li><a href="/course/E1">Feedback latency</a></li><li><a href="/course/E3">Helios reference code</a></li><li><a href="/course/background/qec">Error correction chapter</a></li></ul>
+<ul class="reading-links"><li><a href="/course/K1#workshop">Try the lab · Run a syndrome through the decoder</a></li><li><a href="/course/K1">Syndrome lookup</a></li><li><a href="/course/K2">Distributed decoding</a></li><li><a href="/course/K3">Helios gate-level debugger</a></li><li><a href="/course/E1">Feedback latency</a></li><li><a href="/course/E3">Helios reference code</a></li><li><a href="/course/background/qec">Error correction chapter</a></li></ul>
 <h3>Technical reference</h3>
 <details class="reference-detail" id="a5"><summary>Measurement, feed-forward and decoding</summary>
           <p>
@@ -420,7 +420,7 @@
 </section>
 <section class="job-section" id="evidence-job">
 <h2>Reproduce a published machine</h2><p class="q">Which observation could someone else reproduce?</p><p>IBM’s archive tells you when each channel is commanded. The moving-atom paper gives positions, pulses and a phase-sensitive measurement. Quantinuum released circuit settings and shot strings. Each starting point lets you check a different part of a reconstruction. Compare those records with the inspectable state of the replay.</p>
-<ul class="reading-links"><li><a href="/course/M1">IBM Quantum Manila</a></li><li><a href="/course/M2">Lukin group atom transport</a></li><li><a href="/course/M3">Quantinuum H2</a></li><li><a href="/course/background/simulator">Model and evidence</a></li><li><a href="/course/background/numbers">Parameter reference</a></li><li><a href="/course/background/glossary">Glossary</a></li></ul>
+<ul class="reading-links"><li><a href="/course/M3#workshop">Try the lab · Replay a Quantinuum parity measurement</a></li><li><a href="/course/M1">IBM Quantum Manila</a></li><li><a href="/course/M2">Lukin group atom transport</a></li><li><a href="/course/M3">Quantinuum H2</a></li><li><a href="/course/background/simulator">Model and evidence</a></li><li><a href="/course/background/numbers">Parameter reference</a></li><li><a href="/course/background/glossary">Glossary</a></li></ul>
 <h3>Technical reference</h3>
 <details class="reference-detail" id="b5"><summary>The Lean model and the trace</summary>
           <p>
@@ -564,5 +564,9 @@ designService("/check", {}, doc);           // { errors, warnings, wires, pulses
   }
   addEventListener("hashchange", revealReference);
   revealReference();
+</script>
+<script type="module">
+  import {guideFigures} from "/course/labs/figure-guide.js";
+  guideFigures(document);
 </script>
 </body></html>

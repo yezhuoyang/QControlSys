@@ -14,7 +14,7 @@
           <div><p class="kicker">QuantumOS Learn</p>
           <h1>What happens between a line of code and a qubit?</h1>
           <p class="lead">In the picture, two atoms that began side by side end up far apart. How did a number in a computer move them? How could anyone tell if the information they carried survived?</p>
-          <p>Start with what the apparatus must do. Learn how it holds a qubit, delivers a pulse, listens for a response and decides what to do next. Then open the machines and follow a real program.</p>
+          <p>Wire a voltage probe, capture a bit on a clock edge, and steer a pair of atoms. Each component lesson gives you a working experiment. Change its inputs, follow the signal and test your result against a target.</p>
           <a class="btn" id="resume" href="/course/P1">Start with the first experiment</a>
           <a class="btn alt" href="/learn">Browse Background by function</a></div>
           <figure class="paper-figure"><a href="/course/figures/atom-transport.png" aria-label="Enlarge figure"><img src="/course/figures/atom-transport.png" alt="An array of atoms is rearranged. The experimental panels show images of atom positions and measurements after transport."></a><figcaption>Panel b shows the same pairs before and after transport. Look at their separation, then at the measurements alongside them. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Nature 604 (2022), Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
@@ -57,6 +57,10 @@
     <script type="module">
       import { course, solved, el } from "/course/course.js";
       const curriculum = await course();
+      function labLabel(id) {
+        try { if(localStorage.getItem("quantumos-lab-"+id)==="passed")return "Lab completed ✓"; } catch {}
+        return "Open lab";
+      }
       const totals = { exercises: 0, stars: 0 };
       const render = () => {
         const partsBox = document.getElementById("parts");
@@ -76,7 +80,8 @@
             if (!next && mine.exercises < Math.max(1, total)) next = lesson;
             const finished = total > 0 && mine.exercises >= total;
             return el("li", {}, el("span", { class: "id", text: lesson.id }),
-              el("span", {}, el("a", { href: lesson.href, text: lesson.title })),
+              el("span", {}, el("a", { href: lesson.href, text: lesson.title }),
+                /^[PSRFKM]\d+$/.test(lesson.id) ? el("a", {class:"course-lab-link",href:lesson.href+"#workshop",text:labLabel(lesson.id)}) : null),
               el("span", { class: "st" + (finished ? " done" : ""), text: finished ? "✓ done" : total ? mine.exercises + "/" + total + " · " + "★".repeat(Math.min(3, mine.stars)) + "☆".repeat(Math.max(0, Math.min(3, (lesson.stars ?? total) - mine.stars))) : "" }));
           });
           if (partEx && partDone >= partEx) { badges++; earned.add(part.id); }

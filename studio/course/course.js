@@ -342,6 +342,12 @@ export async function course({ answers = {} } = {}) {
     const crumb = el("div", { class: "crumb" }, el("a", { href: "/course/", text: "Course" }), " › ",
       el("a", { href: "/course/#part-" + lesson.part.id, text: "Part " + lesson.part.id + " · " + lesson.part.title }), " › " + lesson.id);
     article.prepend(crumb);
+    if (/^[PSRFKM]\d+$/.test(lesson.id)) {
+      const {mountActivity} = await import("./labs/activity-view.js");
+      const {guideFigures} = await import("./labs/figure-guide.js");
+      guideFigures(article);
+      mountActivity(article,lesson.id);
+    }
     const boxes = exercises(answers);
     const meter = el("div", { class: "meter" }, el("i"));
     const count = el("div", { class: "src" });

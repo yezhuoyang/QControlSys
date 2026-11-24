@@ -78,7 +78,7 @@ for (const box of document.querySelectorAll("[data-replay]")) {
       }
     }
   }
-  async function execute() {
+  async function execute(selection) {
     const token=++runNumber;
     try {
       const p=JSON.parse(input.value);
@@ -89,11 +89,19 @@ for (const box of document.querySelectorAll("[data-replay]")) {
       if (result.referenceComparison) showParity(result.referenceComparison);
       if(!parts.length)for(const part of run.machine.parts)parts.add(new Option(part.id+" · "+part.kind,part.id));
       parts.value=({cell:"q",lukin:"atom1",manila:"d0",helios:"is_fully_grown"})[name];
+      if(selection && run.machine.parts.some(p=>p.id===selection.part)){
+        parts.value=selection.part;
+        range.value=Math.min(selection.step,run.frames.length-1);
+      }
       message.textContent="Program loaded.";
       paint();
     } catch(e){if(token===runNumber)message.textContent="Program error. "+e.message+(run?" Showing the last successful replay.":"");}
   }
   get("[data-run]").onclick=execute;
+  box.addEventListener("lesson-program",event=>{
+    input.value=JSON.stringify(event.detail.program,null,2);
+    execute(event.detail);
+  });
   get("[data-prev]").onclick=()=>{range.stepDown();paint();};
   get("[data-next]").onclick=()=>{range.stepUp();paint();};
   range.oninput=parts.onchange=paint;

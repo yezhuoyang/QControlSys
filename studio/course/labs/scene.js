@@ -17,6 +17,9 @@ export function drawScene(canvas, machine, pick) {
   const transistor = new THREE.BoxGeometry(0.46,0.28,0.58);
   const register = new THREE.BoxGeometry(0.44,0.52,0.44);
   const pin = new THREE.CylinderGeometry(0.18,0.18,0.34,12);
+  const legGeometry=new THREE.BoxGeometry(0.22,0.13,0.09);
+  const metal=new THREE.MeshStandardMaterial({color:0xc1c9cd,metalness:0.55,roughness:0.4});
+  const glass=new THREE.MeshStandardMaterial({color:0x215b62,roughness:0.25});
   const gate = new THREE.BoxGeometry(0.43,0.26,0.43);
   const labels = new THREE.Group();
   scene.add(labels);
@@ -42,6 +45,15 @@ export function drawScene(canvas, machine, pick) {
     const obj = new THREE.Mesh(geometry,new THREE.MeshStandardMaterial());
     obj.position.fromArray(part.position);
     obj.userData.id=part.id;
+    if(part.model==="probe"){
+      const screen=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.5,0.12),glass);
+      obj.scale.set(1.45,1.4,1);screen.position.set(0,0.27,0.18);obj.add(screen);
+    }else if(part.model || /register|converter|multiplier|memory|storage word|pointer/i.test(part.kind)){
+      for(const side of [-1,1]) for(const offset of [-0.22,-0.07,0.07,0.22]){
+        const leg=new THREE.Mesh(legGeometry,metal);
+        leg.position.set(side*0.39,-0.1,offset);obj.add(leg);
+      }
+    }
     if (part.kind === "Transmon") {
       // Two capacitor pads joined across a narrow gap. Layout is schematic.
       obj.scale.set(0.5,0.35,1.3);
@@ -79,6 +91,9 @@ export function drawScene(canvas, machine, pick) {
   const dependencies = new THREE.LineSegments(new THREE.BufferGeometry(),
     new THREE.LineBasicMaterial({color:0xc16722}));
   scene.add(dependencies);
+  const wires=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x65928e}));
+  scene.add(wires);
+  let wiredMachine;
   let angle=0.35, origin;
   function paint() {
     const w=canvas.clientWidth,h=canvas.clientHeight;
@@ -100,12 +115,25 @@ export function drawScene(canvas, machine, pick) {
       const box=canvas.getBoundingClientRect(), ray=new THREE.Raycaster();
       ray.setFromCamera({x:2*(e.clientX-box.left)/box.width-1,y:1-2*(e.clientY-box.top)/box.height},camera);
       const hit=ray.intersectObjects([...objects.values()])[0];
-      if(hit) pick(hit.object.userData.id);
+      if(hit){
+        let root=hit.object;
+        while(root && !root.userData.id)root=root.parent;
+        if(root)pick(root.userData.id);
+      }
     }
     origin=null;
   };
   canvas.onpointercancel=()=>{origin=null;};
-  return (frame,selected,currentMachine)=>{
+  return (frame,selected,currentMachine,eventLocations)=>{
+    if(wiredMachine!==currentMachine){
+      const ends=[];
+      for(const link of currentMachine.wires??[]){
+        const a=objects.get(link.src.part),b=objects.get(link.dst.part);
+        if(a && b)ends.push(a.position,b.position);
+      }
+      wires.geometry.dispose();wires.geometry=new THREE.BufferGeometry().setFromPoints(ends);
+      wiredMachine=currentMachine;
+    }
     const changed=new Set(frame.events.filter(e=>JSON.stringify(e.before)!==JSON.stringify(e.after)).map(e=>e.part));
     for(const [id,obj] of objects) {
       const value=frame.state[id];
@@ -120,7 +148,7 @@ export function drawScene(canvas, machine, pick) {
     const points = [];
     for (const event of frame.events.filter(e => e.part === selected)) {
       for (const cause of event.causes) {
-        const source = objects.get(cause.split("/")[1]);
+        const source = objects.get(eventLocations?.get(cause)?.event.part ?? cause.split("/")[1]);
         if (source && source !== objects.get(selected)) points.push(source.position, objects.get(selected).position);
       }
     }
