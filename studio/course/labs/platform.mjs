@@ -74,8 +74,10 @@ export async function runNative(engine, options, request) {
   const parts=r.system.parts.map(p=>({...p,position:p.centerMm.map(n=>n/130)}));
   // Analysis follows execution. Its index orders observations without assigning
   // a fictitious physical time to fitting or comparison.
-  return project(r.system.name,"step",[...r.trace.frames,...r.analysisSteps],parts,{},{
+  const result=project(r.system.name,"step",[...r.trace.frames,...r.analysisSteps],parts,{},{
     document:program,comparison:{observed:r.observed,predicted:r.predicted,unit:r.source.unit},
     workspace:"/validation?"+new URLSearchParams(program)
   });
+  if(engine==="h2")result.machine.apparatus="h2";
+  return result;
 }

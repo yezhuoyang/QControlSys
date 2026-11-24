@@ -47,7 +47,7 @@ export function runManila(program, {conf, defs, props}) {
     const z = {drive:-2,measure:2,acquire:3.5,control:a<b?-0.8:0.8}[ch.type];
     parts.push({id, kind:ch.purpose, position:[(x-2)*2,0.25,z], qubits:ch.operates.qubits});
   }
-  const machine = {name:"IBM Quantum Manila", unit:"dt", dtNs:conf.dt, parts};
+  const machine = {name:"IBM Quantum Manila", apparatus:"manila", unit:"dt", dtNs:conf.dt, parts};
   let start = 0, previousGate = [];
   const tasks = [];
   for (const [index, call] of program.entries()) {

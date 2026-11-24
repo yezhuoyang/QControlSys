@@ -6,9 +6,30 @@ import {runCell} from "../studio/course/labs/cell.mjs";
 import {runManila, manilaProgram, sampleEnvelope} from "../studio/course/labs/manila.mjs";
 import {runTransport, transportProgram, compareParity} from "../studio/course/labs/lukin.mjs";
 import {linkProgram, runLink} from "../studio/course/labs/helios.mjs";
+import {apparatusMarkers} from "../studio/course/labs/published-layout.mjs";
 
 const read = name => readFileSync(new URL("../studio/course/labs/manila/"+name+"_manila.json", import.meta.url));
 const archive = Object.fromEntries(["conf","props","defs"].map(k => [k,JSON.parse(read(k))]));
+
+test("Manila figure highlights hardware addressed by pulse instructions and excludes delays",()=>{
+  const {machine,frames}=runManila([{gate:"sx",qubits:[3]},{gate:"measure",qubits:[0]}],archive);
+  const dots=apparatusMarkers(machine,frames[0],"d3");
+  assert.deepEqual(dots.filter(d=>d.selected&&d.active).map(d=>d.id),["q3"]);
+  const waiting=frames.find(f=>f.state.m0?.instruction?.name==="delay" && f.state.acquire0?.signal==="idle");
+  assert.ok(waiting);
+  assert.equal(apparatusMarkers(machine,waiting,"m0").find(d=>d.id==="q0").active,false);
+});
+
+test("transport overlay preserves the paper scale through a move and a stationary control",()=>{
+  for(const moving of [false,true]){
+    const {machine,frames}=runTransport({...transportProgram,moving});
+    for(const f of [frames[0],frames.at(-1)]){
+      const [lower,upper]=apparatusMarkers(machine,f,"atom1");
+      assert.equal(upper.selected,true);
+      assert.ok(Math.abs((lower.y-upper.y)*110/240-(f.state.atom1.yUm-f.state.atom0.yUm))<1e-10);
+    }
+  }
+});
 
 function verifyTrace({machine, frames}) {
   const parts = new Set(machine.parts.map(p => p.id)), seen = new Set(), state = {};

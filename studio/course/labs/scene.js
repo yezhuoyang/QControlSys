@@ -1,8 +1,34 @@
 import * as THREE from "/three/three.module.js";
+import {drawPublishedScene} from "./published-scene.js";
 
 // All positions in this cutaway are schematic display coordinates. Each object
 // carries the stable ID of the part in the executable machine.
 export function drawScene(canvas, machine, pick) {
+  if(!machine.apparatus)return drawControlScene(canvas,machine,pick);
+  const published=drawPublishedScene(canvas,machine,pick);
+  const other=document.createElement("canvas"),button=document.createElement("button");
+  other.setAttribute("aria-label","Schematic control hardware");other.hidden=true;
+  canvas.setAttribute("aria-label","Rotatable published apparatus with trace overlays");
+  button.type="button";button.textContent="Show schematic control hardware";
+  const note=document.createElement("p");note.className="src";
+  note.textContent=machine.apparatus==="h2"?
+    "The gold pairs mark the sites illustrated in Fig. 2d. Their height uses the 70 µm dimension in Fig. 2c and the 750 µm gate spacing. Bead size is enlarged.":
+    "The published panel sets the floor plan. Overlay height and thickness are for display.";
+  canvas.after(other,button,note);
+  let cutaway,last;
+  function paint(){if(last)(canvas.hidden?cutaway:published)(...last);}
+  button.onclick=()=>{
+    const showControl=other.hidden;
+    if(showControl && !cutaway)cutaway=drawControlScene(other,machine,pick);
+    canvas.hidden=showControl;other.hidden=!showControl;
+    note.hidden=showControl;
+    button.textContent=showControl?"Show published apparatus":"Show schematic control hardware";
+    paint();
+  };
+  return (...args)=>{last=args;paint();};
+}
+
+function drawControlScene(canvas, machine, pick) {
   const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   const scene = new THREE.Scene();

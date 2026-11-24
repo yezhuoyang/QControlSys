@@ -216,6 +216,23 @@ summary { cursor:pointer; color:var(--navy); }
 .lab-diagram text { font:13px var(--sans); fill:#173631; }
 .lab-diagram .wire { fill:none; stroke:#527771; stroke-width:1.5; }
 .lab-block .lab-port-note { margin:8px 0 14px; }
+.apparatus-figure { margin:0 0 12px; padding:12px; border:1px solid var(--line); border-radius:6px; background:white; }
+.apparatus-figure h4 { margin:0 0 10px; font-size:15px; }
+.apparatus-figure svg { display:block; width:100%; height:auto; }
+.apparatus-figure svg text { font:17px var(--sans); fill:#174843; }
+.apparatus-figure figcaption { font-size:13px; color:#3b4e56; }
+.apparatus-figure .apparatus-reading { font-family:var(--mono); color:#174843; }
+.apparatus-figure g[role=button] { cursor:pointer; }
+.apparatus-figure .target { fill:transparent; }
+.apparatus-figure rect.target { fill:none; stroke:transparent; stroke-width:32; pointer-events:stroke; }
+.apparatus-figure .model-atom { fill:#145952; }
+.apparatus-figure .activity-ring,.apparatus-figure .selection-ring { fill:none; stroke:none; pointer-events:none; vector-effect:non-scaling-stroke; }
+.apparatus-figure [data-active=true] .activity-ring { stroke:#16786e; stroke-width:3; }
+.apparatus-figure [aria-pressed=true] .selection-ring,.apparatus-figure g:focus-visible .selection-ring { stroke:#bd5d17; stroke-width:2; }
+.apparatus-figure .model-axis { stroke:#86a49e; fill:none; stroke-dasharray:4 3; }
+.apparatus-figure .paper-feature { fill:#ffc95025; stroke:#a54b0b; stroke-width:2; vector-effect:non-scaling-stroke; }
+.lab-diagram .signal-detail { padding:0 10px; margin:0; }
+.lab-scene canvas[hidden],.replay-lab canvas[hidden] { display:none; }
 .lab-probe { display:flex; gap:8px; align-items:center; font-size:13px; }
 .lab-reading,.lab-time { display:block; font-family:var(--mono); overflow-wrap:anywhere; }
 .lab-reading { font-weight:600; margin:8px 0; }

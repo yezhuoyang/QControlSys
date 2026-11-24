@@ -1,5 +1,6 @@
 import {activities,circuits,settingsFor,executeActivity} from "./activities.mjs";
 import {el} from "../course.js";
+import {publishedView} from "./published-view.js";
 
 const fmt=v=>typeof v==="number" ? Number(v.toPrecision(6)).toString() : String(v);
 const svg=(name,attrs={})=>{
@@ -101,6 +102,8 @@ export function mountActivity(article,id) {
   const sourceBox=el("details",{},el("summary",{text:"Read the executable program"}),source,
     el("p",{class:"src",text:"Download the experiment to replay it from the project folder with node studio/course/labs/run.mjs experiment <file.json>. Machine and validation experiments use the running QuantumOS server."}));
   const diagram=el("div",{class:"lab-diagram",tabindex:0});
+  const apparatus=el("div");
+  let paperView;
   const description=el("p",{class:"lab-port-note"});
   const range=el("input",{type:"range",min:0,max:0,value:0,"aria-label":"Trace step"});
   const time=el("output",{class:"lab-time"});
@@ -116,7 +119,8 @@ export function mountActivity(article,id) {
   const sceneStatus=el("p",{class:"src"});
   const scene=el("details",{class:"lab-scene"},el("summary",{text:"Locate this component in 3D"}),canvas,sceneStatus);
   const data=el("details",{},el("summary",{text:"Inspect the state and its inputs"}),causes,raw);
-  const traceBox=el("section",{class:"lab-block"},el("h3",{text:"Read the signal path"}),diagram,description,
+  const traceTitle=el("h3",{text:"Read the signal path"});
+  const traceBox=el("section",{class:"lab-block"},traceTitle,apparatus,diagram,description,
     el("label",{class:"lab-probe"},"Probe ",select),reading,plot,traceControls,time,data,scene);
   const verdict=el("strong"),evidence=el("p"),compare=el("p",{class:"lab-previous"});
   const grade=el("div",{class:"lab-eval","aria-live":"polite"},verdict,evidence,compare);
@@ -158,6 +162,7 @@ export function mountActivity(article,id) {
   function paint(){
     if(!execution || dirty)return;
     const {run}=execution,f=run.frames[step];
+    paperView?.update(f,part);
     const meta=run.machine.parts.find(p=>p.id===part), p=circuit.ports.find(p=>p.id===part);
     const read=p?.read??(v=>typeof v==="number"?v:null);
     const origin=selectedEvent ? locations.get(selectedEvent) : lastEvent(part,step);
@@ -220,7 +225,14 @@ export function mountActivity(article,id) {
       for(const p of run.machine.parts)select.add(new Option(p.id+" · "+p.kind,p.id));
       locations=new Map(run.frames.flatMap((f,index)=>f.events.map(event=>[event.id,{event,index}])));
       step=evaluation.index;part=spec.focus;selectedEvent=null;select.value=part;range.max=run.frames.length-1;
-      diagram.replaceChildren(signalDiagram(circuit,probe,program.connected));traceBox.hidden=false;
+      const signal=signalDiagram(circuit,probe,program.connected);
+      if(run.machine.apparatus){
+        traceTitle.textContent="Read the published apparatus";
+        paperView=publishedView(run.machine,probe);
+        apparatus.replaceChildren(paperView.element);
+        diagram.replaceChildren(el("details",{class:"signal-detail"},el("summary",{text:"Inspect the control signal path"}),signal));
+      }else diagram.replaceChildren(signal);
+      traceBox.hidden=false;
       paint();ensureScene();
       status.textContent=manual?"Build executed.":"Starter trace loaded.";
       verdict.textContent=evaluation.pass?"Target met":"Target missed";grade.dataset.pass=String(evaluation.pass);

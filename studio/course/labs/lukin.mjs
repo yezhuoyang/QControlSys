@@ -20,7 +20,7 @@ export function compareParity(data) {
     transportedRmse:Math.sqrt(mean(rows.map(row=>(row.transported-row.predicted)**2)))};
 }
 export const transportMachine = {
-  name:"Bluvstein moving-atom apparatus",unit:"µs",
+  name:"Bluvstein moving-atom apparatus",apparatus:"lukin",unit:"µs",
   calibration:{staticWavelengthNm:830,mobileWavelengthNm:828,ramanWavelengthNm:795,rabiMHz:1},
   parts:[
     {id:"awg",kind:"Spectrum M4i.6631-x8 waveform source",position:[-4,0,-2]},
@@ -59,5 +59,5 @@ export function runTransport(program) {
     set("raman",{axis:pulse?.axis ?? "off"},[]);
     frames.push({at,label:pulse ? "Protect the phase · "+pulse.axis+" pulse" : "Transport interval",state,events});
   }
-  return {machine:{...transportMachine,displayUmPerUnit:Math.max(14,a/8,b/8)},frames};
+  return {machine:{...transportMachine,transportSpanUm:Math.max(a,moving?b:a),displayUmPerUnit:Math.max(14,a/8,b/8)},frames};
 }
