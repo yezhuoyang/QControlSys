@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RISC-Q hardware design · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/riscq-studio.css" />
+    <link rel="stylesheet" href="/riscq-design.css" />
+  </head>
+  <body>
+    <header class="head">
+      <div class="brand"><i aria-hidden="true"></i>QControl <span>Studio</span></div>
+      <nav class="modes" aria-label="Workspace" data-explain="modes">
+        <a href="/riscq-design" aria-current="page">Design</a><a id="toDebug" href="/riscq-studio" title="Step through a run in the debugger">Debug</a>
+      </nav>
+      <label class="program-pick" title="A design to start from. Your edits are kept in this browser until you start again or open a file."
+        ><span>Start from</span><select id="template" aria-label="Design to start from">
+          <option value="chain3">Three transmons of the x6y3 ring</option>
+          <option value="ring">x6y3 ring · 8 transmons</option>
+          <option value="ring-decoder">x6y3 ring with a decoder core</option>
+          <option value="mine" hidden>Your design</option>
+        </select></label>
+      <div class="metrics" id="metrics" aria-label="Design summary" data-explain="metrics"></div>
+      <nav class="actions" aria-label="Design actions">
+        <button id="undo" title="Undo (Ctrl+Z)" disabled>Undo</button
+        ><button id="redo" title="Redo (Ctrl+Y)" disabled>Redo</button
+        ><button id="explain" aria-pressed="false" title="Label the parts of the screen (h)">Explain</button
+        ><button id="open" title="Open a design document (riscq/cli.mjs --ring-design writes one)">Open</button
+        ><button id="save" title="Save the design document. node riscq/cli.mjs --design file.json --qasm program.qasm runs it from a shell.">Save</button
+        ><button id="runIt" class="primary" title="Compile the program for this hardware, run the firmware in the Lean model, and open the run in the debugger">Run on this hardware ▶</button>
+      </nav>
+    </header>
+    <div id="alert" role="alert" hidden></div>
+    <div class="row" id="row">
+      <aside class="rail" aria-label="Components and design outline">
+        <section class="pal" data-explain="palette">
+          <h4>Components</h4>
+          <p class="hint">The parts a design may contain. Click one, then click on the canvas to place it. Hover to learn what it is.</p>
+          <div id="palette" class="palette"></div>
+        </section>
+        <section class="pal" data-explain="build">
+          <h4>Build</h4>
+          <div class="build">
+            <button id="addQubit" title="A qubit and its readout resonator, a core with drive, readout and acquisition channels, two DACs, an ADC and three coax lines">+ Qubit with readout</button>
+            <div class="tool" role="radiogroup" aria-label="Tool">
+              <button id="toolSelect" role="radio" aria-checked="true" title="Select and drag parts and waypoints (v)">Select</button
+              ><button id="toolWire" role="radio" aria-checked="false" title="Click a part, then another part, to join them with a wire (w)">Wire</button>
+              <select id="medium" aria-label="Medium of new wires" title="Medium of new wires. Its signal speed sets the delay per mm."></select>
+            </div>
+          </div>
+        </section>
+        <section class="pal grow" data-explain="outline">
+          <h4>Design</h4>
+          <div id="outline" class="outline"></div>
+        </section>
+      </aside>
+      <section class="stage" aria-label="Hardware layout">
+        <div class="ctool">
+          <div class="views" role="tablist" aria-label="Projection" data-explain="projection">
+            <button role="tab" data-proj="plan" aria-selected="true" title="Top view: x right, y up. Drag moves parts in x and y.">Plan x–y</button
+            ><button role="tab" data-proj="side" title="Side view: x right, z up. Drag moves parts in x and z.">Side x–z</button
+            ><button role="tab" data-proj="front" title="Front view: y right, z up. Drag moves parts in y and z.">Front y–z</button
+            ><button role="tab" data-proj="iso" title="Isometric view of all three axes. Drag moves parts in x and y at their height.">3D</button>
+          </div>
+          <span class="fit">Fit <button data-fit="all">All</button><button data-fit="chip" title="The qubits and resonators">Chip</button><button data-fit="control" title="The board, cores and converters">Controller</button></span>
+          <label class="check" title="Snap dragged parts and waypoints to the grid. Hold Alt while dragging to place freely."><input type="checkbox" id="snap" checked /> Snap</label>
+          <output id="cursor" class="cursor"></output>
+        </div>
+        <div class="canvas" id="canvas" data-explain="canvas">
+          <svg id="svg" aria-label="Hardware layout. Drag to pan, scroll to zoom."></svg>
+          <div class="scalebar" id="scalebar"></div>
+          <div class="toolhint" id="toolhint"></div>
+        </div>
+        <div class="dock" id="dock">
+          <div class="tabs" role="tablist">
+            <button role="tab" data-tab="rules" aria-selected="true">Rules <b id="ruleCount"></b></button
+            ><button role="tab" data-tab="timing">Signal timing</button
+            ><button role="tab" data-tab="program">Program</button
+            ><button role="tab" data-tab="doc">Document</button>
+            <button class="fold" id="foldDock" title="Fold the dock">▾</button>
+          </div>
+          <div class="pane" data-pane="rules" id="rules" data-explain="rules"></div>
+          <div class="pane" data-pane="timing" id="timing" hidden></div>
+          <div class="pane" data-pane="program" hidden>
+            <p class="hint">OpenQASM 3 to run on this hardware. A qubit is addressed by its index in the design's qubit list. A two-qubit gate needs a coupler between its qubits.</p>
+            <textarea id="qasm" spellcheck="false" aria-label="OpenQASM program"></textarea>
+          </div>
+          <div class="pane" data-pane="doc" hidden>
+            <p class="hint">The design as the server receives it (kind <code>riscq-design</code>, riscq/design.mjs). Lengths in mm, times in ns, frequencies in Hz.</p>
+            <pre id="docText" class="doctext"></pre>
+          </div>
+        </div>
+      </section>
+      <div class="grip" id="grip" role="separator" aria-orientation="vertical" title="Drag to resize the inspector"></div>
+      <section class="progcol inspect" aria-label="Inspector" data-explain="inspector">
+        <div class="colhead"><h3>Inspector</h3><button id="remove" class="danger" disabled title="Remove the selection (Delete)">Remove</button></div>
+        <div id="inspector" class="inspector"></div>
+      </section>
+    </div>
+    <div class="hovercard" id="hovercard" role="tooltip" hidden></div>
+    <input type="file" id="designFile" accept=".json,application/json" hidden />
+    <script type="module" src="/riscq-design.js"></script>
+  </body>
+</html>

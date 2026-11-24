@@ -29,6 +29,10 @@ const routes = new Map([
   ["/riscq-layers.js", "studio/riscq-layers.js"],
   ["/riscq-disasm.js", "studio/riscq-disasm.js"],
   ["/riscq-glossary.js", "studio/riscq-glossary.js"],
+  ["/riscq-design", "studio/riscq-design.html"],
+  ["/riscq-design.js", "studio/riscq-design.js"],
+  ["/riscq-design.css", "studio/riscq-design.css"],
+  ["/riscq-design-doc.js", "studio/riscq-design-doc.js"],
   ["/model/RiscQ/Soc.lean", "QControl/RiscQ/Soc.lean"],
   ["/model/RiscQ/Timing.lean", "QControl/RiscQ/Timing.lean"],
   ["/model/RiscQ/Rv32.lean", "QControl/RiscQ/Rv32.lean"],
@@ -352,6 +356,16 @@ if (
         const { examples } = await import("./riscq/examples.mjs");
         return reply(res, 200, "application/json", JSON.stringify(
           examples.map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
+      }
+      if (url.pathname.startsWith("/api/riscq/design")) {
+        // Hardware designs (riscq/design.mjs). GET /api/riscq/design?template=ring|ring-decoder
+        // gives a design to edit and the program the editor runs on it, GET …/rules the allowed
+        // components and wire media, and POST …/check a design's rule check, its derived wire
+        // timing and, when it breaks no rule, the delay of every calibrated pulse.
+        const { designService } = await import("./riscq/design-service.mjs");
+        const body = req.method === "POST" ? JSON.parse(await readInput(req, 4 * 1024 * 1024)) : undefined;
+        return reply(res, 200, "application/json", JSON.stringify(
+          designService(url.pathname.slice("/api/riscq/design".length) || "/", Object.fromEntries(url.searchParams), body)));
       }
       if (url.pathname === "/api/riscq/run" && ["GET", "POST"].includes(req.method)) {
         // GET ?example=<id>&outcome=<bit>=<0|1>… runs a reference program. POST takes

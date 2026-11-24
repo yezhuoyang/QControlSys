@@ -87,6 +87,14 @@ Board A digitizes a readout and sends two bits over fiber. Board B samples them 
 
 <http://127.0.0.1:7432/feedforward>
 
+### Your own hardware · design editor
+
+![A hardware design in 3D: control cores and converters on a board, coax routed to a transmon chip](docs/media/riscq-design.png)
+
+Place boards, cores, DACs, ADCs, qubits and resonators, then route the wires in 3D. Each wire's delay follows from its routed length. Rules are checked on every edit. Then run a program on the result.
+
+<http://127.0.0.1:7432/riscq-design> → **Run on this hardware**
+
 ### Also runnable
 
 ```sh
@@ -116,7 +124,7 @@ node riscq/cli.mjs --list
 node riscq/cli.mjs --example superconducting-feedforward --outcome c=1 --out run.json
 ```
 
-Pages: `/` machine workbench · `/riscq-studio` RISC-Q workspace · `/riscq` controller debugger · `/qccd-studio` · `/qccd` · `/neutral` · `/feedforward` · `/controller` · `/validation` · `/board-validation`
+Pages: `/` machine workbench · `/riscq-studio` RISC-Q workspace · `/riscq-design` hardware design editor · `/riscq` controller debugger · `/qccd-studio` · `/qccd` · `/neutral` · `/feedforward` · `/controller` · `/validation` · `/board-validation`
 
 ## How it works
 

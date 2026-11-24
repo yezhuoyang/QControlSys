@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RISC-Q workspace · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/riscq-studio.css" />
+    <script type="importmap">
+      { "imports": { "three": "/three/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="head">
+      <div class="brand"><i aria-hidden="true"></i>QControl <span>Studio</span></div>
+      <label class="program-pick" title="Reference program. Each one runs on the server, down to firmware executed by the Lean model."
+        ><span>Program</span><select id="example" aria-label="Reference program" disabled></select
+      ></label>
+      <div class="metrics" id="metrics" aria-label="Run summary"></div>
+      <div class="views" role="tablist" aria-label="View">
+        <button role="tab" data-view="chip" data-explain="view-chip" aria-selected="true">Chip</button
+        ><button role="tab" data-view="control" data-explain="view-control">Control system</button
+        ><button role="tab" data-view="machine" data-explain="view-machine">Whole machine</button>
+      </div>
+      <nav class="actions" aria-label="Run actions">
+        <a id="designLink" href="/riscq-design" title="Edit the hardware in the design editor: parts, positions, channels, wires and calibration">Design hardware</a
+        ><button id="explain" aria-pressed="false" title="Label the parts of the screen (h)">Explain</button
+        ><button id="open" title="Open a run saved by riscq/cli.mjs --out">Open run</button
+        ><button id="export" disabled title="Save this run as the server sent it">Export</button
+        ><a id="classic" href="/riscq" title="The same run in the detailed debugger: channel timeline, register file and full inspector">Detailed debugger</a>
+      </nav>
+    </header>
+    <div id="alert" role="alert" hidden></div>
+    <div class="row" id="row">
+      <aside class="rail" aria-label="Parts of this run">
+        <section class="pal">
+          <h4 data-explain="parts">Parts of this run</h4>
+          <p class="hint">Hover a kind to learn what it is. Click to select its parts one after another.</p>
+          <div id="kinds"></div>
+        </section>
+        <section class="pal">
+          <h4>Highlights</h4>
+          <ul class="legend">
+            <li><i class="sw acting"></i>Acting part of this step</li>
+            <li><i class="sw target"></i>Target of this step</li>
+            <li><i class="sw path"></i>Causal path back to a core instruction</li>
+            <li><i class="sw open"></i>Pulse window open, or apparatus driven</li>
+            <li><i class="sw moving"></i>Ion or atom in transit</li>
+            <li><i class="sw fault"></i>Fault</li>
+          </ul>
+        </section>
+        <section class="pal" id="chipNotePal">
+          <h4>Display geometry</h4>
+          <p class="hint" id="chipNote"></p>
+        </section>
+        <section class="pal sticky" id="selection" aria-live="polite">
+          <h4>Selection</h4>
+          <p class="hint">Nothing selected. Click a part on the stage, or a kind above, to see its details here.</p>
+        </section>
+      </aside>
+      <section class="stage" aria-label="Animation">
+        <div class="viewport" id="viewport">
+          <div class="labels"></div>
+          <div class="now" id="now" data-explain="now" aria-live="polite"></div>
+          <div class="offview" id="offview" data-explain="offview"></div>
+          <div class="viewhint">Drag to orbit · scroll to zoom · hover a part to learn what it is · click to select</div>
+          <button class="home" id="home" title="Fit the view (f)">Fit</button>
+        </div>
+        <canvas class="track" id="track" data-explain="track" aria-label="Hardware instructions over time. Click to seek."></canvas>
+        <div class="transport">
+          <button id="first" title="Reset state (Home)">⏮</button
+          ><button id="back" title="Previous step (←)">‹ Step</button
+          ><button id="play" class="primary" title="Play or pause (space)">Play</button
+          ><button id="next" title="Next step (→)">Step ›</button
+          ><button id="nextInstruction" title="First frame of the next hardware instruction (n)">Next instruction</button
+          ><button id="nextPulse" title="Next pulse window (p)">Next pulse</button
+          ><button id="nextFault" title="Next fault">Next fault</button>
+          <input id="step" type="range" min="0" max="0" value="0" aria-label="Trace step" />
+          <output id="counter">—</output>
+          <select id="speed" aria-label="Playback speed" title="Real-time playback moves ions and atoms smoothly between steps. Step playback advances a fixed number of trace steps.">
+            <option value="time:60">Whole run in 60 s</option>
+            <option value="time:30" selected>Whole run in 30 s</option>
+            <option value="time:10">Whole run in 10 s</option>
+            <option value="5">5 steps/s</option>
+            <option value="25">25 steps/s</option>
+            <option value="100">100 steps/s</option>
+            <option value="500">500 steps/s</option>
+          </select>
+        </div>
+        <div class="dock" id="dock">
+          <div class="tabs" role="tablist">
+            <button role="tab" data-tab="inspector" aria-selected="true">Step</button
+            ><button role="tab" data-tab="machine">Machine state</button
+            ><button role="tab" data-tab="trace">Trace</button
+            ><button role="tab" data-tab="write">Write a program</button>
+            <button class="fold" id="foldDock" title="Fold the dock to give the stage its height">▾</button>
+          </div>
+          <div class="pane" data-pane="inspector" id="inspector"></div>
+          <div class="pane" data-pane="machine" id="machineState" hidden></div>
+          <div class="pane" data-pane="trace" hidden>
+            <div class="vhead trace-row" aria-hidden="true">
+              <span>Step</span><span>Batch</span><span>Time</span><span>Operation</span><span>Part</span><span>Source</span><span>Frame ID</span>
+            </div>
+            <div class="vlist" id="trace" tabindex="0" aria-label="Execution trace"></div>
+          </div>
+          <div class="pane" data-pane="write" hidden>
+            <p class="hint" id="writeNote"></p>
+            <textarea id="sourceEdit" spellcheck="false" aria-label="Program source"></textarea>
+            <div class="row-buttons"><button id="runSource" class="primary">Compile and run</button><button id="resetSource">Restore this run's source</button></div>
+            <pre id="sourceError" role="alert" hidden></pre>
+          </div>
+        </div>
+      </section>
+      <div class="grip" id="grip" role="separator" aria-orientation="vertical" title="Drag to resize the program column"></div>
+      <section class="progcol" aria-label="Program layers">
+        <div class="colhead">
+          <h3>Program layers</h3>
+          <label class="check" title="Keep the executing line of every layer in view"><input type="checkbox" id="follow" checked /> Follow</label>
+        </div>
+        <div class="layer" id="layerSource" data-explain="source">
+          <div class="lhead"><b>Source</b><span id="sourceLanguage"></span></div>
+          <div class="vlist code" id="sourceList" tabindex="0"></div>
+        </div>
+        <div class="arrow" id="arrowIr">compiled to</div>
+        <div class="layer" id="layerIr" data-explain="ir">
+          <div class="lhead"><b>Intermediate</b><span id="irLanguage"></span></div>
+          <div class="vlist code" id="irList" tabindex="0"></div>
+        </div>
+        <div class="arrow" id="arrowHw">scheduled as</div>
+        <div class="layer" id="layerHw" data-explain="hardware">
+          <div class="lhead"><b>Hardware instructions</b><span id="hwNote"></span></div>
+          <div class="vlist code" id="hwList" tabindex="0"></div>
+        </div>
+        <div class="arrow">lowered to RV32I firmware on</div>
+        <div class="layer" id="layerFw" data-explain="firmware">
+          <div class="lhead"><b>Control firmware</b
+            ><select id="fwCore" aria-label="Core whose firmware is shown" title="The core whose firmware is listed. Follow shows the core of the acting part."></select
+            ><span id="fwNote"></span></div>
+          <div class="vlist code" id="fwList" tabindex="0"></div>
+        </div>
+      </section>
+    </div>
+    <div class="hovercard" id="hovercard" role="tooltip" hidden></div>
+    <input type="file" id="runFile" accept=".json,application/json" hidden />
+    <script type="module" src="/riscq-studio.js"></script>
+  </body>
+</html>
