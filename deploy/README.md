@@ -1,9 +1,33 @@
 # Deploying QuantumOS at quantumos.it.com
 
 QuantumOS runs on the qccd.academy droplet (165.232.55.161, 2 vCPUs, about 4 GB, Ubuntu with
-nginx 1.18), beside QCCD Studio, in the same way as QCCD Studio's official service: the image is
-built on a development machine and loaded with `docker load`, a container listens on
-`127.0.0.1` only, and the host's nginx terminates HTTPS and proxies to it.
+nginx 1.18), beside QCCD Studio.
+
+## How the live site runs today
+
+- A checkout of `github.com/yezhuoyang/QControlSys` in `/opt/quantumos/app`, owned by the user `quantumos`.
+- A systemd service, `quantumos.service`, runs `node server.mjs` on `127.0.0.1:8500`, capped at 900 MB of
+  memory and 150% CPU. QCCD Studio is checked out in `/opt/quantumos/QCCD`, and its compiler is
+  `/opt/quantumos/bin/qccdc_cli`.
+- nginx (`/etc/nginx/sites-enabled/quantumos.it.com`, HTTPS by certbot) proxies both names to that port.
+
+To update it, push to `main`, then on the droplet:
+
+```sh
+ssh root@qccd.academy /opt/quantumos/update.sh            # or: update.sh <commit>
+```
+
+The script checks out the commit, runs `npm ci`, installs Lean only for `lake build qcontrol` and removes it
+again, because the disk is nearly full. Then it restarts the service and prints the local status, which should
+be 200. To roll back, run `update.sh <previous commit>`. To read the logs, use `journalctl -u quantumos -n 50`.
+
+The Docker files below are an alternative, for another host or for a move away from systemd.
+
+## Docker alternative
+
+The image is built on a development machine and loaded with `docker load`. A container listens on
+`127.0.0.1` only, and the host's nginx terminates HTTPS and proxies to it. This is the way QCCD
+Studio's official service runs.
 
 | File | What it is |
 | --- | --- |
