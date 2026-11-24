@@ -11,7 +11,7 @@
       { "imports": { "three": "/three/three.module.js" } }
     </script>
   </head>
-  <body data-panels="workspace" data-col="470" data-present-hint="space plays · ← → step · drag to orbit">
+  <body data-panels="workspace-columns" data-col="52vw" data-present-hint="space plays · ← → step · drag to orbit">
     <header class="head">
       <div class="brand"><i aria-hidden="true"></i>QuantumOS</div>
       <label class="program-pick" title="Reference program. Each one runs on the server, down to firmware executed by the Lean model."
@@ -112,12 +112,13 @@
           </div>
         </div>
       </section>
-      <div class="grip" id="grip" role="separator" aria-orientation="vertical" title="Drag to resize the program column"></div>
+      <div class="grip" id="grip" role="separator" aria-orientation="vertical" title="Drag to resize the program layers"></div>
       <section class="progcol" aria-label="Program layers">
         <div class="colhead">
           <h3>Program layers</h3>
           <label class="check" title="Keep the executing line of every layer in view"><input type="checkbox" id="follow" checked /> Follow</label>
         </div>
+        <div class="layers" id="layers">
         <div class="layer" id="layerSource" data-explain="source">
           <div class="lhead"><b>Source</b><span id="sourceLanguage"></span></div>
           <div class="vlist code" id="sourceList" tabindex="0"></div>
@@ -138,6 +139,7 @@
             ><select id="fwCore" aria-label="Core whose firmware is shown" title="The core whose firmware is listed. Follow shows the core of the acting part."></select
             ><span id="fwNote"></span></div>
           <div class="vlist code" id="fwList" tabindex="0"></div>
+        </div>
         </div>
       </section>
     </div>

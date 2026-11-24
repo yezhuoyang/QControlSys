@@ -157,6 +157,26 @@ textarea#sourceEdit { width: 100%; height: calc(100% - 70px); min-height: 90px; 
 .arrow::before { content: "↓ "; color: var(--green); font-weight: 700; }
 .arrow[hidden] { display: none; }
 
+/* The layers side by side, one column each, read left to right. */
+.layers { flex: 1 1 auto; min-height: 0; display: flex; overflow-x: auto; }
+.layers .layer { flex: 1 1 0; min-width: 160px; container-type: inline-size; }
+.layers #layerSource { flex-grow: 0.8; } .layers #layerIr { flex-grow: 1; } .layers #layerHw { flex-grow: 1.15; } .layers #layerFw { flex-grow: 1.2; }
+.layers .arrow { flex: 0 0 20px; display: flex; align-items: center; justify-content: center; gap: 6px; writing-mode: vertical-rl;
+  padding: 0; white-space: nowrap; overflow: hidden; }
+.layers .arrow::before { content: "→"; text-orientation: upright; }
+.layers .arrow[hidden] { display: none; }
+/* A narrow column keeps the cells that identify a line and drops the rest. */
+@container (max-width: 330px) {
+  .hw-row { grid-template-columns: 62px 62px minmax(0, 1fr) 58px; gap: 6px; }
+  .hw-row span:nth-child(5) { display: none; }
+  .fw-row { grid-template-columns: 74px minmax(0, 1fr); }
+  .fw-row span:nth-child(2), .fw-row span:nth-child(4) { display: none; }
+}
+@container (max-width: 250px) {
+  .hw-row { grid-template-columns: 62px minmax(0, 1fr) 58px; }
+  .hw-row span:nth-child(3) { display: none; }
+}
+
 /* Virtual lists */
 .vlist { position: relative; overflow: auto; flex: 1 1 auto; min-height: 0; }
 .vlist .spacer { width: 1px; }

@@ -17,7 +17,9 @@ const dock = document.getElementById("dock");
 const head = document.querySelector(".head");
 
 const KEY = "quantumos-panels:" + (body.dataset.panels || location.pathname);
-const DEFAULTS = { rail: 236, col: Number(body.dataset.col) || 470, dock: 0, showRail: true, showCol: true, showDock: true };
+// data-col is a width in px, or a share of the window such as "52vw".
+const colDefault = (v = "") => (v.endsWith("vw") ? Math.round((innerWidth * parseFloat(v)) / 100) : Number(v)) || 470;
+const DEFAULTS = { rail: 236, col: colDefault(body.dataset.col), dock: 0, showRail: true, showCol: true, showDock: true };
 const state = { ...DEFAULTS, ...read() };
 let present = false;
 
