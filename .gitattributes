@@ -1,3 +1,13 @@
 # Preserve byte identities of native artifacts that are bound to upstream SHA-256 digests.
 validation/qccd/h2-theta1.tsir.json -text
 validation/neutral/zac/** -text
+# RISC-Q firmware fixtures are pinned by SHA-256 in validation/riscq/README.md.
+validation/riscq/firmware/*.elf binary
+# RISC-Q's firmware runtime and the Helios decoder files keep their upstream bytes.
+# The decoder images are pinned by SHA-256 in validation/decoders/helios/images.json.
+validation/riscq/fw/** -text
+validation/decoders/helios/union_find.c -text
+validation/decoders/helios/*.txt -text
+validation/decoders/helios/*.elf binary
+# README animations, rebuilt by docs/media/capture.mjs.
+*.gif binary

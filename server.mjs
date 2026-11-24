@@ -18,6 +18,21 @@ const executable = path.join(
   process.platform === "win32" ? "qcontrol.exe" : "qcontrol",
 );
 const routes = new Map([
+  ["/riscq", "studio/riscq.html"],
+  ["/riscq.js", "studio/riscq.js"],
+  ["/riscq-model.js", "studio/riscq-model.js"],
+  ["/riscq.css", "studio/riscq.css"],
+  ["/riscq-studio", "studio/riscq-studio.html"],
+  ["/riscq-studio.js", "studio/riscq-studio.js"],
+  ["/riscq-studio.css", "studio/riscq-studio.css"],
+  ["/riscq-stage.js", "studio/riscq-stage.js"],
+  ["/riscq-layers.js", "studio/riscq-layers.js"],
+  ["/riscq-disasm.js", "studio/riscq-disasm.js"],
+  ["/riscq-glossary.js", "studio/riscq-glossary.js"],
+  ["/model/RiscQ/Soc.lean", "QControl/RiscQ/Soc.lean"],
+  ["/model/RiscQ/Timing.lean", "QControl/RiscQ/Timing.lean"],
+  ["/model/RiscQ/Rv32.lean", "QControl/RiscQ/Rv32.lean"],
+  ["/docs/riscq-controller.md", "docs/riscq-controller.md"],
   ["/machines", "studio/machines.html"],
   ["/machines.js", "studio/machines.js"],
   ["/machine-scene.js", "studio/machine-scene.js"],
@@ -91,6 +106,8 @@ const mime = {
   ".js": "text/javascript",
   ".css": "text/css",
   ".json": "application/json",
+  ".md": "text/markdown",
+  ".lean": "text/plain",
 };
 
 function jsonProcess(command, args, input, options) {
@@ -330,6 +347,21 @@ if (
           ["-B", "-X", "utf8", path.join(root, "validation", "run.py"), "--replay"], input,
           {timeout: 90000, maxBuffer: 16000000});
         return reply(res, 200, "application/json", JSON.stringify(result));
+      }
+      if (url.pathname === "/api/riscq/examples" && req.method === "GET") {
+        const { examples } = await import("./riscq/examples.mjs");
+        return reply(res, 200, "application/json", JSON.stringify(
+          examples.map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
+      }
+      if (url.pathname === "/api/riscq/run" && ["GET", "POST"].includes(req.method)) {
+        // GET ?example=<id>&outcome=<bit>=<0|1>… runs a reference program. POST takes
+        // { example }, { platform: "superconducting" | "qccd", qasm } or
+        // { platform: "superconducting", calls } with optional outcomes and trace.
+        const { run } = await import("./riscq/examples.mjs");
+        const request = req.method === "POST" ? JSON.parse(await readInput(req, 4 * 1024 * 1024))
+          : { example: url.searchParams.get("example"), trace: url.searchParams.get("trace") ?? undefined,
+              outcomes: Object.fromEntries(url.searchParams.getAll("outcome").map((o) => [o.split("=")[0], Number(o.split("=")[1])])) };
+        return reply(res, 200, "application/json", JSON.stringify(await run(request)));
       }
       if (req.method === "POST" && url.pathname === "/api/run") {
         const result = await simulate(await readInput(req, 1024 * 1024));

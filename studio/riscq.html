@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RISC-Q controller debugger · QControl Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/riscq.css" />
+    <script type="importmap">
+      { "imports": { "three": "/three/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <i class="brand-mark" aria-hidden="true"></i>QControl
+        <span>Studio</span>
+      </div>
+      <nav aria-label="Run actions">
+        <select id="bench" aria-label="Choose bench">
+          <option value="/riscq-studio">RISC-Q workspace (3D, real time)</option>
+          <option value="/riscq" selected>RISC-Q controller</option>
+          <option value="/machines">Machine workbench</option>
+          <option value="/feedforward">Feed-forward</option>
+          <option value="/qccd">QCCD broadcast</option>
+          <option value="/controller">FPGA waveform controller</option>
+          <option value="/validation">Hardware validation</option>
+          <option value="/qccd-studio">QCCD Studio replay</option>
+          <option value="/neutral">Neutral-atom AOD</option>
+        </select>
+        <button id="open">Open run</button
+        ><button id="export" disabled>Export run</button>
+      </nav>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <h1>RISC-Q controller debugger</h1>
+          <p id="programTitle">Loading the reference programs…</p>
+        </div>
+        <div id="runState" class="run-state" role="status">Loading…</div>
+      </div>
+      <div id="alert" role="alert" hidden></div>
+      <div class="system-tools">
+        <label
+          >Program
+          <select id="example" aria-label="Reference program" disabled></select
+        ></label>
+        <span id="outcomes" class="outcomes"></span>
+        <label class="check"
+          ><input type="checkbox" id="fullTrace" /> Trace every
+          instruction</label
+        >
+      </div>
+      <div class="workbench">
+        <section class="physical" aria-label="Controller schematic and stepping">
+          <div class="viewport" id="viewport">
+            <div class="viewbar">
+              <span class="view-title">Controller schematic</span>
+              <div><button id="resetView">Reset view</button></div>
+            </div>
+            <div id="labels"></div>
+            <div class="legend" aria-label="Highlight colours">
+              <span>Acting part</span><span>Target</span
+              ><span>Causal path</span><span>Open window</span>
+            </div>
+            <div class="viewhint">
+              Drag to orbit · Scroll to zoom · Click a part to inspect
+            </div>
+            <div class="basis" id="basis"></div>
+          </div>
+          <div class="transport">
+            <div class="buttons">
+              <button
+                id="back"
+                disabled
+                title="Previous step (Left arrow)"
+                aria-label="Previous step"
+              >
+                ‹</button
+              ><button id="play" disabled title="Play or pause (Space)">
+                Play</button
+              ><button
+                id="next"
+                disabled
+                title="Next step (Right arrow)"
+                aria-label="Next step"
+              >
+                ›
+              </button>
+            </div>
+            <input
+              id="step"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+              disabled
+              aria-label="Trace step"
+            /><output id="counter">—</output>
+          </div>
+          <div class="transport stops">
+            <button id="prevPulse" disabled>Previous pulse</button
+            ><button id="nextPulse" disabled>Next pulse</button
+            ><button id="nextFault" disabled>Next fault</button
+            ><button id="nextInstruction" disabled>Next instruction</button>
+            <label
+              >Play at
+              <select id="speed" aria-label="Playback speed">
+                <option value="5">5 steps/s</option>
+                <option value="25" selected>25 steps/s</option>
+                <option value="100">100 steps/s</option>
+                <option value="500">500 steps/s</option>
+              </select></label
+            >
+          </div>
+        </section>
+        <aside aria-label="Step inspector">
+          <div class="inspector-scroll">
+            <div class="panel-label">Step inspector</div>
+            <div class="event-time" id="eventTime">—</div>
+            <p class="subtle" id="eventBatch"></p>
+            <h2 id="eventTitle">No run loaded</h2>
+            <p class="description" id="description"></p>
+            <div class="inspector-section">
+              <h3>Frame</h3>
+              <dl id="frameFields" class="fields"></dl>
+            </div>
+            <div class="inspector-section">
+              <h3>State fields of this frame</h3>
+              <dl id="stateFields" class="fields"></dl>
+            </div>
+            <div class="inspector-section">
+              <h3>Causes</h3>
+              <div id="causes"></div>
+              <div id="chain" class="subtle"></div>
+            </div>
+            <div class="inspector-section">
+              <h3>Hardware selection</h3>
+              <div id="selection"></div>
+            </div>
+            <div class="inspector-section">
+              <h3 id="stateTitle">Reconstructed state</h3>
+              <p class="subtle" id="stateNote"></p>
+              <div id="partState" class="state"></div>
+            </div>
+            <div class="inspector-section">
+              <h3>Machine at this step</h3>
+              <div id="machineState" class="state"></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <section class="instrument" id="timelinePanel">
+        <div class="instrument-head">
+          <div>
+            <h2>Channel timeline</h2>
+            <p>
+              Pulse windows, digital updates and carrier updates of the run
+              summary. Scroll to zoom, drag to pan, click to seek.
+            </p>
+          </div>
+          <div class="config">
+            <output id="timelineRange"></output
+            ><button id="timelineFit">Show whole run</button>
+          </div>
+        </div>
+        <canvas id="timeAxis" aria-hidden="true"></canvas>
+        <div class="lanes-scroll">
+          <canvas
+            id="lanes"
+            aria-label="Timeline with one lane per channel. Select a time to go to the last step at or before it."
+          ></canvas>
+        </div>
+        <div class="key">
+          <span class="k-pulse">Pulse window</span
+          ><span class="k-demod">Demodulation window</span
+          ><span class="k-dio">Digital update</span
+          ><span class="k-late">Late, misaligned or overlapping</span
+          ><span class="k-tone">Carrier update</span
+          ><span class="k-fault">Fault</span>
+        </div>
+        <h3 class="sub">Faults</h3>
+        <div id="faults" class="faults"></div>
+      </section>
+      <section class="instrument" id="platformPanel">
+        <div class="instrument-head">
+          <div>
+            <h2 id="platformTitle">Apparatus</h2>
+            <p id="platformNote"></p>
+          </div>
+          <output id="bits" class="bits"></output>
+        </div>
+        <div id="platformView"></div>
+        <h3 class="sub">Apparatus parts and the effects that reached them</h3>
+        <div id="devices" class="chips"></div>
+      </section>
+      <section class="instrument" id="programPanel">
+        <div class="instrument-head">
+          <div>
+            <h2>Program</h2>
+            <p id="sourceNote"></p>
+          </div>
+          <div class="config links">
+            <a href="/docs/riscq-controller.md" target="_blank" rel="noopener"
+              >Model and lowering notes</a
+            ><a href="/model/RiscQ/Soc.lean" target="_blank" rel="noopener"
+              >Execution rules</a
+            >
+          </div>
+        </div>
+        <div class="program-grid">
+          <div>
+            <h3 class="sub" id="sourceLanguage">Source</h3>
+            <pre id="sourceText" class="listing"></pre>
+            <button id="sourceAll" hidden>Show the whole source</button>
+            <details id="tsir" hidden>
+              <summary>Compiled TSIR program</summary>
+              <pre id="tsirText" class="listing"></pre>
+            </details>
+            <details id="qasmEditor" hidden>
+              <summary>Edit OpenQASM</summary>
+              <textarea
+                id="qasmText"
+                spellcheck="false"
+                aria-label="OpenQASM program"
+              ></textarea>
+              <div class="config">
+                <button id="runQasm">Compile and run</button
+                ><button id="resetQasm">Restore this run's source</button>
+              </div>
+              <pre id="qasmError" role="alert" hidden></pre>
+            </details>
+          </div>
+          <div>
+            <h3 class="sub">Hardware instructions</h3>
+            <p class="subtle" id="hardwareNote"></p>
+            <div class="vwrap">
+              <div class="vhead instruction-row" aria-hidden="true">
+                <span>ID</span><span>Operation</span><span>Operands</span
+                ><span>Start</span><span>Duration</span><span>Origin</span>
+              </div>
+              <div
+                id="instructions"
+                class="vlist"
+                tabindex="0"
+                aria-label="Hardware instructions"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <h3 class="sub">Firmware</h3>
+        <div class="trace-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Core</th>
+                <th>Firmware words</th>
+                <th>Timed writes</th>
+                <th>Measured bits</th>
+                <th>Instructions retired</th>
+                <th>Stopped</th>
+              </tr>
+            </thead>
+            <tbody id="firmware"></tbody>
+          </table>
+        </div>
+        <p class="subtle" id="provenance"></p>
+      </section>
+      <section class="trace-panel">
+        <div class="trace-head">
+          <h2>Execution trace</h2>
+          <output class="subtle" id="traceNote"></output>
+        </div>
+        <div class="vwrap">
+          <div class="vhead trace-row" aria-hidden="true">
+            <span>Step</span><span>Batch</span><span>Time</span
+            ><span>Operation</span><span>Part</span><span>Source</span
+            ><span>Frame ID</span>
+          </div>
+          <div
+            id="trace"
+            class="vlist"
+            tabindex="0"
+            aria-label="Execution trace"
+          ></div>
+        </div>
+        <p class="subtle">
+          The same run is available without a browser:
+          <code>node riscq/cli.mjs --example &lt;id&gt; --out run.json</code>.
+          <code>studio/riscq-model.js</code> reconstructs the state shown here
+          from that file.
+        </p>
+      </section>
+    </main>
+    <input type="file" id="runFile" accept=".json,application/json" hidden />
+    <script type="module" src="/riscq.js"></script>
+  </body>
+</html>

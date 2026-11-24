@@ -1,0 +1,29 @@
+{
+ "compiler": "clang version 20.1.4",
+ "images": [
+  {
+   "distance": 3,
+   "image": "uf-d3.elf",
+   "bytes": 14328,
+   "sha256": "8c96ae8fefdb76be1f2789289b2a7de67c5b180ec3bf3f76b5f9b33107438511",
+   "cases": 14,
+   "command": "clang --target=riscv32-unknown-elf -march=rv32i_zmmul -mabi=ilp32 -O2 -fwrapv -nostdlib -ffreestanding -mno-relax -Werror=implicit-function-declaration -fuse-ld=lld -I. -w -T link.ld -o main.elf start.S muldiv.c rq_input.c rq_libc.c union_find.c"
+  },
+  {
+   "distance": 5,
+   "image": "uf-d5.elf",
+   "bytes": 15364,
+   "sha256": "c645255d9738be701989e9931c3a42524a12d05206aad738d2670d66bc654d88",
+   "cases": 9,
+   "command": "clang --target=riscv32-unknown-elf -march=rv32i_zmmul -mabi=ilp32 -O2 -fwrapv -nostdlib -ffreestanding -mno-relax -Werror=implicit-function-declaration -fuse-ld=lld -I. -w -T link.ld -o main.elf start.S muldiv.c rq_input.c rq_libc.c union_find.c"
+  },
+  {
+   "distance": 7,
+   "image": "uf-d7.elf",
+   "bytes": 17172,
+   "sha256": "7f3e45bd5c140fb023d5676d3acdb75933cb0b2ee598bf85fffa37ed0f0cece0",
+   "cases": 7,
+   "command": "clang --target=riscv32-unknown-elf -march=rv32i_zmmul -mabi=ilp32 -O2 -fwrapv -nostdlib -ffreestanding -mno-relax -Werror=implicit-function-declaration -fuse-ld=lld -I. -w -T link.ld -o main.elf start.S muldiv.c rq_input.c rq_libc.c union_find.c"
+  }
+ ]
+}

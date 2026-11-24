@@ -1,0 +1,1195 @@
+import Lean
+import QControl.RiscQ.Rv32
+import QControl.RiscQ.Timing
+
+/-! Executable model of a RISC-Q system-on-chip.
+
+    Each core runs RV32I firmware out of its own RAM. A store into the put window becomes a
+    posted register write that travels a pipelined link to one channel at the converter edge.
+    The channel holds a pulse table and timed queues. A fire releases its entry at the
+    scheduled batch, which opens a pulse window on a DAC, a demodulation window on an ADC, or
+    updates sixteen digital lines. Reports travel back to core-local sinks that firmware reads.
+    A board hub provides shared bits, counted barriers and mailboxes between cores.
+
+    Execution is a discrete-event simulation with exact cycle arithmetic. Every event is one
+    trace frame with a stable ID, the scene part it acts on, its causal parents and the
+    committed state of that part. At equal cycles, converter-edge and link events apply before
+    a core retires an instruction, and cores retire in index order.
+
+    Units: `atBatch` counts dspClk cycles from reset release. `atPs = atBatch · dspPeriodPs`.
+    Boundaries, each also listed in `docs/riscq-controller.md`:
+    * Core timing is a cost model: one cycle per instruction, a refill after a taken control
+      transfer, an extra cycle for a load or store. Converter timing does not depend on it
+      while the lead-time margin holds (`land_exact`).
+    * Carrier synthesis is its latency. A pulse frame reports the scheduled codes.
+    * No quantum state. Readout results and digital input edges are supplied by the program.
+    * Link, hub and report latencies are parameters with RISC-Q's documented stage counts. -/
+namespace QControl.RiscQ
+open Lean
+
+structure ChannelSpec where
+  name : String
+  kind : String
+  slots : Nat
+  envDepth : Nat
+  interp : Nat
+  dac? : Option Nat := none
+  adc? : Option Nat := none
+  deriving FromJson, ToJson, Inhabited
+
+/-- Source operation that owns the words from `pc` up to the next entry. An empty source ends
+    a range. Instructions are attributed by their own address. An instruction without a source
+    takes the source of the last tagged data word its core loaded. -/
+structure SourceEntry where
+  pc : Nat
+  source : String
+  deriving FromJson, ToJson, Inhabited
+
+structure CoreSpec where
+  name : String
+  memWords : Nat
+  withMul : Bool
+  queueDepth : Nat
+  channels : Array ChannelSpec
+  image : Array Nat
+  sourceMap : Array SourceEntry
+  deriving FromJson, ToJson, Inhabited
+
+/-- Latencies in dspClk cycles. Stage counts follow RISC-Q `docs/soc`. -/
+structure Model where
+  /-- Register stages of the posted link, per direction. -/
+  linkPipe : Nat
+  /-- Store to the first link stage (`PutBridge`). -/
+  bridge : Nat
+  /-- Fire beat to timed-queue push (`fired`, `outParamFlow`). -/
+  fireToPush : Nat
+  /-- Frequency write to timed-queue push. -/
+  freqToPush : Nat
+  /-- The core's time register reads the converter-edge time minus this lag. -/
+  coreTimeLag : Nat
+  /-- `waitTimeCmp` releases once `time + waitSlack ≥ timeCmp`. -/
+  waitSlack : Nat
+  /-- Register stages from a pulse generator to its DAC port. -/
+  dacPipe : Nat
+  /-- Extra cycles after a taken branch or jump. -/
+  redirectPenalty : Nat
+  /-- Extra cycles for a load or store. The execute stage halts until the bus responds. -/
+  busPenalty : Nat
+  /-- System put: store to hub dispatch. -/
+  hubDown : Nat
+  /-- Hub dispatch to a core's inbox register. -/
+  hubUp : Nat
+  /-- Channel report to its core-local sink. -/
+  reportUp : Nat
+  /-- Decoder pipeline: a window edge at the carrier reaches the integrator this much later. -/
+  decoder : Nat
+  /-- Entries a FIFO sink holds before it drops. -/
+  sinkDepth : Nat
+  /-- System puts one source may have waiting at the hub arbiter before one is dropped. -/
+  hubQueue : Nat
+  deriving FromJson, ToJson
+
+/-- Result of one demodulation window. Windows of a channel consume their entries in order. -/
+structure Readout where
+  core : Nat
+  channel : Nat
+  res : Nat
+  real : Int
+  imag : Int
+  deriving FromJson, ToJson
+
+/-- The sixteen input lines of a digital channel take `levels` at cycle `atBatch`. -/
+structure DioEdge where
+  atBatch : Nat
+  core : Nat
+  channel : Nat
+  levels : Nat
+  deriving FromJson, ToJson
+
+/-- One change of the sixteen input lines, `after` cycles after the pulse that causes it. -/
+structure ResponseEdge where
+  after : Nat
+  levels : Nat
+  deriving FromJson, ToJson
+
+/-- What the apparatus sends back when a pulse reaches it: the `occurrence`-th window of a
+    channel drives the input lines of a digital channel, for example photon clicks during a
+    detection pulse. The response is supplied by the program. No device state is simulated. -/
+structure Response where
+  core : Nat
+  channel : Nat
+  occurrence : Nat
+  toCore : Nat
+  toChannel : Nat
+  edges : Array ResponseEdge
+  deriving FromJson, ToJson
+
+/-- What a fired slot does to the apparatus. `delayPs` is the path from the converter or pin
+    to the device. `detail` is carried to the effect frame unchanged. -/
+structure Binding where
+  core : Nat
+  channel : Nat
+  slot : Nat
+  id : String
+  part : String
+  delayPs : Nat
+  detail : Json
+  deriving FromJson, ToJson
+
+structure Program where
+  kind : String
+  version : Nat
+  name : String
+  dspPeriodPs : Nat
+  timeOffset : Nat
+  model : Model
+  cores : Array CoreSpec
+  readouts : Array Readout
+  dioInputs : Array DioEdge
+  responses : Array Response
+  bindings : Array Binding
+  trace : String
+  maxBatches : Nat
+  maxEvents : Nat
+  maxSteps : Nat
+  deriving FromJson, ToJson
+
+def ramBase : UInt32 := 0x80000000
+def putWindow : Nat := 0x10000
+def localNodes : Nat := 16
+def groupNodes : Nat := 4
+def barrierIds : Nat := 16
+def inboxNode0 : Nat := localNodes + groupNodes + barrierIds
+def sinkBase : Nat := 0x4200
+def sinkStride : Nat := 0x20
+def hostWindow : Nat := 0x40000000
+
+def kinds : List String := ["pulse", "demod", "dio"]
+
+def ChannelSpec.lanes (c : ChannelSpec) : Nat :=
+  if c.kind == "pulse" then 16 else if c.kind == "demod" then 4 else 0
+
+def ChannelSpec.envBits (c : ChannelSpec) : Nat := if c.kind == "dio" then 1 else log2Up (max c.envDepth 2)
+
+def Program.validate (p : Program) : Except String Unit := do
+  unless p.kind == "riscq-soc" && p.version == 1 do throw "Unknown RISC-Q program version."
+  unless 0 < p.dspPeriodPs && p.dspPeriodPs ≤ 1000000 && p.timeOffset < 4294967296 do
+    throw "Use a dspClk period of 1 ps to 1 µs and a 32-bit time offset."
+  unless ["full", "io"].contains p.trace do throw "Trace detail is full or io."
+  unless 0 < p.maxEvents && p.maxEvents ≤ 400000 && 0 < p.maxSteps && p.maxSteps ≤ 20000000 &&
+      0 < p.maxBatches && p.maxBatches ≤ 2000000000 do throw "Run budget is out of range."
+  let m := p.model
+  unless m.linkPipe ≤ 64 && m.bridge ≤ 8 && m.fireToPush ≤ 8 && m.freqToPush ≤ 8 && m.coreTimeLag ≤ 256 &&
+      m.waitSlack ≤ 16 && m.dacPipe ≤ 64 && m.redirectPenalty ≤ 16 && m.busPenalty ≤ 8 &&
+      m.hubDown ≤ 256 && m.hubUp ≤ 256 && m.reportUp ≤ 256 && m.decoder ≤ 256 &&
+      0 < m.sinkDepth && m.sinkDepth ≤ 1024 && 0 < m.hubDown && 0 < m.hubQueue && m.hubQueue ≤ 64 do
+    throw "A latency parameter is out of range."
+  unless 0 < p.cores.size && p.cores.size ≤ 64 do throw "Use 1–64 cores."
+  for c in p.cores do
+    unless 0 < c.memWords && c.memWords ≤ 16384 && c.image.size ≤ c.memWords do
+      throw s!"Core {c.name}: the image must fit a RAM of at most 16384 words."
+    unless c.image.all (· < 4294967296) do throw s!"Core {c.name}: image words are 32 bits."
+    unless 0 < c.queueDepth && c.queueDepth ≤ 32 do throw s!"Core {c.name}: queue depth is 1–32."
+    unless 0 < c.channels.size && c.channels.size ≤ localNodes do
+      throw s!"Core {c.name}: use 1–16 channels."
+    unless c.sourceMap.all (fun e ↦ e.pc % 4 == 0 && e.pc / 4 < c.memWords) do
+      throw s!"Core {c.name}: a source map entry is outside the RAM."
+    for ch in c.channels do
+      unless kinds.contains ch.kind do throw s!"Channel {c.name}.{ch.name}: unknown kind {ch.kind}."
+      -- The table must end below the start-time register (`decode_layout`).
+      unless 0 < ch.slots && (ch.slots + 1) * 16 ≤ 0x4100 do
+        throw s!"Channel {c.name}.{ch.name}: use 1–1039 pulse-table entries."
+      unless ch.envDepth ≤ 65536 && 0 < ch.interp && ch.interp ≤ 16 do
+        throw s!"Channel {c.name}.{ch.name}: envelope depth or interpolation is out of range."
+      unless (ch.kind == "pulse") == ch.dac?.isSome && (ch.kind == "demod") == ch.adc?.isSome do
+        throw s!"Channel {c.name}.{ch.name}: a pulse channel names a DAC and a demod channel an ADC."
+      unless (ch.dac?.getD 0) < 64 && (ch.adc?.getD 0) < 64 do
+        throw s!"Channel {c.name}.{ch.name}: converter index is out of range."
+  let channel? := fun (core channel : Nat) ↦ (p.cores[core]?).bind (·.channels[channel]?)
+  for r in p.readouts do
+    unless (channel? r.core r.channel).any (·.kind == "demod") && r.res ≤ 1 &&
+        r.real.natAbs < 2147483648 && r.imag.natAbs < 2147483648 do
+      throw "A readout names a demod channel, a result bit and 32-bit integrals."
+    -- The decoder's bit is the sign of its real integral.
+    unless (r.res == 1) == decide (r.real < 0) do
+      throw "A readout result bit is the sign of its real integral."
+  let mut last := 0
+  for e in p.dioInputs do
+    unless (channel? e.core e.channel).any (·.kind == "dio") && e.levels < 65536 && last ≤ e.atBatch do
+      throw "Digital inputs name a dio channel, 16 levels and nondecreasing times."
+    last := e.atBatch
+  for r in p.responses do
+    unless (channel? r.core r.channel).any (·.kind != "dio") && (channel? r.toCore r.toChannel).any (·.kind == "dio") &&
+        r.edges.all (·.levels < 65536) do
+      throw "A response is caused by a pulse or demod channel and drives 16 lines of a dio channel."
+  for b in p.bindings do
+    unless (channel? b.core b.channel).any (b.slot < ·.slots) do
+      throw s!"Binding {b.id} names a missing channel or pulse-table entry."
+
+/-- One timed queue: the pop cycle of its newest entry and the pops still ahead. -/
+structure Queue where
+  lastPop : Option Nat := none
+  pending : List Nat := []
+  deriving Inhabited
+
+/-- Push at cycle `push`. A full queue drops the entry, as a posted write does. -/
+def Queue.push (q : Queue) (depth offset push startTime lead : Nat) : Queue × Option Nat :=
+  let waiting := q.pending.filter (push ≤ ·)
+  -- The registered head stage holds one entry beyond the FIFO depth.
+  if waiting.length > depth then ({ q with pending := waiting }, none)
+  else
+    let pop := popCycle offset push startTime lead q.lastPop
+    ({ lastPop := some pop, pending := waiting ++ [pop] }, some pop)
+
+structure ChannelState where
+  buffer : Buffer := {}
+  amp : Queue := {}
+  phase : Queue := {}
+  addr : Queue := {}
+  dur : Queue := {}
+  freqCarrier : Queue := {}
+  freqPhasor : Queue := {}
+  /-- Carrier frequency code in effect at the converter. -/
+  freqNow : Nat := 0
+  /-- Cycle at which the last scheduled carrier update takes effect. -/
+  freqLands : Option Nat := none
+  /-- Cycle after the last scheduled window of this channel. -/
+  windowEnd : Nat := 0
+  windows : Nat := 0
+  dout : Nat := 0
+  din : Nat := 0
+  deriving Inhabited
+
+structure FifoEvent where
+  word : UInt32 := 0
+  time : UInt32 := 0
+  seq : Nat := 0
+  deriving Inhabited
+
+structure SinkState where
+  kind : String := "result"
+  channel : Nat := 0
+  valid : Bool := false
+  res : UInt32 := 0
+  real : UInt32 := 0
+  imag : UInt32 := 0
+  events : Array FifoEvent := #[]
+  popped : FifoEvent := {}
+  nextSeq : Nat := 0
+  deriving Inhabited
+
+/-- A read that stalls the core until its sink or timer is ready. -/
+inductive Wait where
+  | none
+  | timeCmp (rd : Nat)
+  | result (sink rd : Nat)
+  | fifo (sink rd : Nat)
+  | release (rd : Nat)
+  | mailbox (index rd : Nat)
+  deriving Inhabited, BEq
+
+structure CoreState where
+  cpu : Cpu := ⟨ramBase, Array.replicate 32 0⟩
+  mem : Array UInt32 := #[]
+  /-- Next cycle at which the core acts. `none` while stalled on a sink or stopped. -/
+  readyAt : Option Nat := some 0
+  wait : Wait := .none
+  /-- Address of the stalled read and the instruction that issued it. -/
+  waitAddress : UInt32 := 0
+  waitPc : UInt32 := 0
+  stopped : Option String := none
+  timeCmp : UInt32 := 0
+  done : Bool := false
+  retired : Nat := 0
+  channels : Array ChannelState := #[]
+  sinks : Array SinkState := #[]
+  board : Array UInt32 := Array.replicate groupNodes 0
+  releaseBox : Option UInt32 := none
+  mailboxes : Array (Option UInt32) := Array.replicate 2 none
+  /-- Last frame this core emitted, and the frame that ended its stall. -/
+  lastFrame : String := ""
+  wakeFrame : String := ""
+  sources : Array String := #[]
+  /-- Source of the last tagged data word the core loaded. It names the operation that
+      untagged instructions, such as a table-driven loop, are working on. -/
+  dataSource : String := ""
+
+instance : Inhabited CoreState := ⟨{}⟩
+
+/-- Where the four parameters of one fire take effect, in cycles. -/
+structure Landing where
+  amp : Option Nat
+  phase : Option Nat
+  addr : Option Nat
+  dur : Nat
+
+inductive Action where
+  | put (core channel : Nat) (offset data : UInt32)
+  | pulse (core channel : Nat) (fired : Fired) (phaseCode : Nat) (land : Landing)
+  | freq (core channel code : Nat)
+  | dioOut (core channel slot startTime mask value : Nat)
+  | dioIn (core channel levels : Nat)
+  | sinkClear (core sink : Nat)
+  | sinkSettle (core sink : Nat) (res real imag : UInt32)
+  | sinkEvent (core sink : Nat) (word time : UInt32)
+  | hub (core node : Nat) (offset data : UInt32)
+  | board (core group : Nat) (word : UInt32)
+  | releaseBox (core : Nat) (t0 : UInt32)
+  | mailbox (core index : Nat) (word : UInt32)
+  | effect (binding : Nat)
+  | hubServe
+
+structure Item where
+  cycle : Nat
+  seq : Nat
+  cause : String
+  pc : Option Nat
+  source : Option String
+  action : Action
+
+/-- A system put waiting at the hub for the arbiter. -/
+structure Beat where
+  item : Item
+  core : Nat
+  node : Nat
+  offset : UInt32
+  data : UInt32
+  /-- Cycle at which the put would be dispatched if the arbiter were free. -/
+  arrived : Nat
+  /-- A `wait` frame has reported this put. -/
+  announced : Bool := false
+
+/-- The board hub. Every core's system puts pass one arbiter, one per cycle. -/
+structure HubState where
+  groups : Array UInt32 := Array.replicate groupNodes 0
+  arrivers : Array (List Nat) := Array.replicate barrierIds []
+  expected : Array Nat := Array.replicate barrierIds 0
+  countMismatch : Bool := false
+  /-- Waiting system puts, one queue per source core, oldest first. -/
+  queues : Array (List Beat) := #[]
+  /-- The source granted last. The next scan starts after it. -/
+  granted : Option Nat := none
+  /-- An arbiter cycle is on the agenda. -/
+  serving : Bool := false
+  /-- Barrier id of the put granted last and the cycle of that grant. -/
+  lastBarrier : Option (Nat × Nat) := none
+  served : Nat := 0
+  maxWait : Nat := 0
+  peakWaiting : Nat := 0
+
+/-- Round-robin grant (PutHub.md): the first source with a waiting put, scanning from the
+    source after the one granted last. With no earlier grant the scan starts at source 0. -/
+def nextSource (waiting : Array Bool) (granted : Option Nat) : Option Nat :=
+  let start := match granted with
+    | some g => g + 1
+    | none => 0
+  ((List.range waiting.size).map fun k ↦ (start + k) % waiting.size).find? fun i ↦ waiting.getD i false
+
+/-- The arbiter grants only a source that has a put waiting. -/
+theorem nextSource_waiting {waiting : Array Bool} {granted : Option Nat} {i : Nat}
+    (h : nextSource waiting granted = some i) : waiting.getD i false = true := by
+  exact List.find?_some (p := fun j ↦ waiting.getD j false) h
+
+/-- While any source has a put waiting, the arbiter grants one every cycle. -/
+theorem nextSource_isSome {waiting : Array Bool} (granted : Option Nat) {i : Nat}
+    (hi : i < waiting.size) (h : waiting.getD i false = true) : (nextSource waiting granted).isSome := by
+  unfold nextSource
+  rw [List.find?_isSome]
+  refine ⟨i, ?_, h⟩
+  rw [List.mem_map]
+  generalize (match granted with | some g => g + 1 | none => 0) = start
+  generalize waiting.size = n at hi
+  have hs : start % n < n := Nat.mod_lt _ (by omega)
+  refine ⟨(i + n - start % n) % n, List.mem_range.mpr (Nat.mod_lt _ (by omega)), ?_⟩
+  calc (start + (i + n - start % n) % n) % n
+      = (start % n + (i + n - start % n)) % n := by
+        rw [Nat.add_mod start, Nat.mod_mod, Nat.add_mod (start % n) (i + n - start % n), Nat.mod_mod]
+    _ = (i + n) % n := by congr 1; omega
+    _ = i := by rw [Nat.add_mod_right]; exact Nat.mod_eq_of_lt hi
+
+structure Frame where
+  id : String
+  atBatch : Nat
+  atPs : Nat
+  op : String
+  part : String
+  targets : List String
+  parents : List String
+  pc? : Option Nat := none
+  source? : Option String := none
+  state : Json
+  deriving ToJson
+
+structure World where
+  cores : Array CoreState
+  hub : HubState := {}
+  agenda : List Item := []
+  seq : Nat := 0
+  frames : Array Frame := #[]
+  pulses : Array Json := #[]
+  tones : Array Json := #[]
+  faults : Array Json := #[]
+  host : Array Json := #[]
+
+/-- Value of the 32-bit batch-time register at a cycle. -/
+def Program.timeReg (p : Program) (cycle : Nat) : Nat := (cycle + p.timeOffset) % 4294967296
+
+/-- The core-local copy lags the converter-edge time by the link. -/
+def Program.coreTime (p : Program) (cycle : Int) : UInt32 :=
+  ofInt (cycle + p.timeOffset - p.model.coreTimeLag)
+
+def World.schedule (w : World) (cycle : Nat) (cause : String) (pc : Option Nat) (source : Option String)
+    (action : Action) : World :=
+  let item : Item := ⟨cycle, w.seq, cause, pc, source, action⟩
+  let rec insert : List Item → List Item
+    | [] => [item]
+    | x :: rest => if x.cycle ≤ cycle then x :: insert rest else item :: x :: rest
+  { w with agenda := insert w.agenda, seq := w.seq + 1 }
+
+def World.emit (w : World) (p : Program) (f : Frame) : World :=
+  { w with frames := w.frames.push { f with atPs := f.atBatch * p.dspPeriodPs } }
+
+def World.fault (w : World) (cycle : Nat) (part reason : String) : World :=
+  { w with faults := w.faults.push (Json.mkObj [("atBatch", cycle), ("part", part), ("reason", reason)]) }
+
+private def partOf (p : Program) (core : Nat) : String := (p.cores[core]?.map (·.name)).getD s!"core{core}"
+
+private def channelPart (p : Program) (core channel : Nat) : String :=
+  let name := ((p.cores[core]?).bind (·.channels[channel]?)).map (·.name) |>.getD s!"ch{channel}"
+  s!"{partOf p core}.{name}"
+
+private def converterPart (spec : ChannelSpec) (fallback : String) : String :=
+  match spec.dac?, spec.adc? with
+  | some d, _ => s!"dac{d}"
+  | _, some a => s!"adc{a}"
+  | _, _ => s!"{fallback}.pins"
+
+private def slotJson (s : Slot) : Json :=
+  Json.mkObj [("phase", s.phase), ("amp", s.amp), ("env", s.env), ("dur", s.dur)]
+
+private def bufferJson (b : Buffer) : Json :=
+  Json.mkObj [("startTime", b.startTime), ("freq", b.freq), ("dcOffset", b.dcOffset),
+    ("phaseOffset", b.phaseOffset), ("table", toJson (b.table.map slotJson))]
+
+private def sinkJson (s : SinkState) : Json :=
+  if s.kind == "result" then
+    Json.mkObj [("kind", s.kind), ("valid", s.valid), ("res", s.res.toNat), ("real", toJson (toSigned s.real)),
+      ("imag", toJson (toSigned s.imag))]
+  else
+    Json.mkObj [("kind", s.kind), ("count", s.events.size), ("nextSeq", s.nextSeq),
+      ("events", toJson (s.events.map fun e ↦ Json.mkObj [("word", e.word.toNat), ("time", e.time.toNat), ("seq", e.seq)]))]
+
+/-- Let a stalled core retry its read on the cycle after its sink changed. -/
+private def wake (core : CoreState) (cycle : Nat) (frame : String) (waitsFor : Wait → Bool) : CoreState :=
+  if core.stopped.isNone && waitsFor core.wait then
+    { core with readyAt := some (cycle + 1), wakeFrame := frame }
+  else core
+
+private def setCore (w : World) (i : Nat) (core : CoreState) : World :=
+  { w with cores := w.cores.set! i core }
+
+private def modifyChannel (core : CoreState) (channel : Nat) (f : ChannelState → ChannelState) : CoreState :=
+  { core with channels := core.channels.modify channel f }
+
+/-- Apply one posted write at a channel and schedule what its fire releases. -/
+private def applyPut (p : Program) (w : World) (t : Nat) (item : Item) (ci ch : Nat) (offset data : UInt32) : World :=
+  Id.run do
+  let some coreSpec := p.cores[ci]? | return w
+  let some spec := coreSpec.channels[ch]? | return w
+  let core := w.cores[ci]!
+  let state := core.channels[ch]!
+  let part := channelPart p ci ch
+  let id := s!"e{item.seq}"
+  let cmd := decodeCmd spec.slots spec.envBits offset.toNat data.toNat
+  let (buffer, fired) := state.buffer.apply cmd
+  let mut state := { state with buffer }
+  let mut w := w
+  let d : Datapath := {}
+  let depth := coreSpec.queueDepth
+  let off := p.timeOffset
+  let mut op := "write"
+  let mut detail : List (String × Json) := []
+  match cmd with
+  | .unmapped =>
+    op := "ignored"
+    w := w.fault t part s!"write to unmapped channel offset {offset.toNat}"
+  | .setFreq code =>
+    if spec.kind != "dio" then
+      let push := t + p.model.freqToPush
+      -- The frequency rides its own queues against the start time already in the buffer.
+      let (qc, popC) := state.freqCarrier.push depth off push state.buffer.startTime d.leadFreqCarrier
+      let (qp, popP) := state.freqPhasor.push depth off push state.buffer.startTime (d.leadFreqPhasor spec.lanes)
+      state := { state with freqCarrier := qc, freqPhasor := qp }
+      match popC, popP with
+      | some c, some ph =>
+        let land := max (c + d.leadFreqCarrier) (ph + d.leadFreqPhasor spec.lanes)
+        -- Phasors regenerate serially. A second update inside that window restarts the
+        -- regeneration, so the first frequency never reaches the carrier.
+        if state.freqLands.any (fun previous ↦ land < previous + d.regenCycles spec.lanes) then
+          w := w.fault t part "carrier update lands before the previous phasor regeneration finished"
+        state := { state with freqLands := some land }
+        w := w.schedule land id item.pc item.source (.freq ci ch code)
+        detail := [("freqLands", toJson land)]
+      | _, _ =>
+        op := "drop"
+        w := w.fault t part "frequency update dropped by a full timed queue"
+  | .fire slot =>
+    let some f := fired | pure ()
+    op := "fire"
+    if slot ≥ spec.slots then
+      op := "drop"
+      w := w.fault t part s!"fire of pulse-table entry {slot} outside the table"
+    else if spec.kind == "dio" then
+      let push := t + p.model.fireToPush
+      let (q, pop) := state.dur.push depth off push f.startTime 1
+      state := { state with dur := q }
+      match pop with
+      | some c =>
+        w := w.schedule (c + 1) id item.pc item.source (.dioOut ci ch slot f.startTime f.entry.phase f.entry.amp)
+        detail := [("slot", toJson slot), ("startTime", toJson f.startTime), ("lands", toJson (c + 1))]
+      | none =>
+        op := "drop"
+        w := w.fault t part "digital update dropped by a full timed queue"
+    else
+      let push := t + p.model.fireToPush
+      let (qa, popA) := state.amp.push depth off push f.startTime d.leadAmp
+      let (qp, popP) := state.phase.push depth off push f.startTime d.leadPhase
+      let (qe, popE) := state.addr.push depth off push f.startTime d.leadAddr
+      let (qd, popD) := state.dur.push depth off push f.startTime d.leadDur
+      state := { state with amp := qa, phase := qp, addr := qe, dur := qd }
+      -- The virtual-Z offset is added at the generator's phase input when the entry is fired.
+      let phaseCode := (f.entry.phase + state.buffer.phaseOffset) % 65536
+      match popD with
+      | some c =>
+        let land : Landing := ⟨popA.map (· + d.leadAmp), popP.map (· + d.leadPhase), popE.map (· + d.leadAddr), c + d.leadDur⟩
+        w := w.schedule land.dur id item.pc item.source (.pulse ci ch f phaseCode land)
+        detail := [("slot", toJson slot), ("startTime", toJson f.startTime), ("lands", toJson land.dur)]
+        if popA.isNone || popP.isNone || popE.isNone then
+          w := w.fault t part "a pulse parameter was dropped by a full timed queue"
+      | none =>
+        op := "drop"
+        w := w.fault t part "pulse dropped by a full timed queue"
+  | _ => pure ()
+  let core := modifyChannel core ch fun _ ↦ state
+  w := setCore w ci core
+  return w.emit p {
+    id, atBatch := t, atPs := 0, op, part, targets := [], parents := [item.cause],
+    pc? := item.pc, source? := item.source,
+    state := Json.mkObj ([("offset", toJson offset.toNat), ("data", toJson data.toNat),
+      ("buffer", bufferJson state.buffer)] ++ detail) }
+
+/-- Dispatch one system put at the board hub. -/
+private def applyHub (p : Program) (w : World) (t : Nat) (item : Item) (ci node : Nat) (offset data : UInt32)
+    (cause : String) (waited waiting : Nat) : World :=
+  Id.run do
+  let id := s!"e{item.seq}"
+  let mut w := w
+  let mut hub := w.hub
+  let mut op := "dispatch"
+  let mut detail : List (String × Json) := [("from", toJson (partOf p ci)), ("node", toJson node),
+    ("waited", toJson waited), ("waiting", toJson waiting)]
+  let up := t + p.model.hubUp
+  if node < localNodes + groupNodes then
+    let g := node - localNodes
+    let slot := (data.toNat / 2) % 32
+    let bit := data &&& 1
+    let word := hub.groups[g]!
+    let word := (word &&& ~~~((1 : UInt32) <<< slot.toUInt32)) ||| (bit <<< slot.toUInt32)
+    hub := { hub with groups := hub.groups.set! g word }
+    op := "publish"
+    detail := detail ++ [("group", toJson g), ("slot", toJson slot), ("bit", toJson bit.toNat), ("word", toJson word.toNat)]
+    for target in [0:p.cores.size] do
+      w := w.schedule up id item.pc item.source (.board target g word)
+  else if node < inboxNode0 then
+    let b := node - localNodes - groupNodes
+    let arrived := hub.arrivers[b]!
+    let expected := if arrived.isEmpty then data.toNat else hub.expected[b]!
+    let mismatch := hub.countMismatch || data.toNat != expected
+    let arrived := if arrived.contains ci then arrived else arrived ++ [ci]
+    op := "arrive"
+    detail := detail ++ [("barrier", toJson b), ("arrived", toJson arrived.length), ("expected", toJson expected)]
+    if arrived.length ≥ expected then
+      -- The last arrival releases every arriver with the hub's own time.
+      let t0 := (p.timeReg t).toUInt32
+      for target in arrived do
+        w := w.schedule up id item.pc item.source (.releaseBox target t0)
+      hub := { hub with arrivers := hub.arrivers.set! b [], expected := hub.expected.set! b 0, countMismatch := mismatch }
+      op := "release"
+      detail := detail ++ [("t0", toJson t0.toNat)]
+    else
+      hub := { hub with
+        arrivers := hub.arrivers.set! b arrived, expected := hub.expected.set! b expected,
+        countMismatch := mismatch }
+  else
+    let target := node % 256 - inboxNode0
+    let address := sinkBase + offset.toNat
+    let index := (address - 0x4340) / sinkStride
+    if node / 256 == 0 && node % 256 ≥ inboxNode0 && target < p.cores.size && address ≥ 0x4340 &&
+        (address - 0x4340) % sinkStride == 0 && index < 2 then
+      op := "signal"
+      detail := detail ++ [("to", toJson (partOf p target)), ("mailbox", toJson index), ("word", toJson data.toNat)]
+      w := w.schedule up id item.pc item.source (.mailbox target index data)
+    else
+      op := "ignored"
+      w := w.fault t "hub" s!"system put to unknown node {node} offset {offset.toNat}"
+  w := { w with hub }
+  return w.emit p {
+    id, atBatch := t, atPs := 0, op, part := "hub", targets := [], parents := [cause],
+    pc? := item.pc, source? := item.source, state := Json.mkObj detail }
+
+/-- A system put reaches the hub and joins the queue of its source (depth `hubQueue`). A put
+    into a full queue is dropped, as on the posted link. -/
+private def hubArrive (p : Program) (w : World) (t : Nat) (item : Item) (ci node : Nat) (offset data : UInt32) : World :=
+  Id.run do
+  let queues := if w.hub.queues.size < p.cores.size then Array.replicate p.cores.size [] else w.hub.queues
+  let queue := queues.getD ci []
+  if queue.length ≥ p.model.hubQueue then
+    let w := w.fault t "hub" s!"the hub queue of {partOf p ci} is full: its system put to node {node} is dropped"
+    return w.emit p {
+      id := s!"e{item.seq}", atBatch := t, atPs := 0, op := "drop", part := "hub", targets := [],
+      parents := [item.cause], pc? := item.pc, source? := item.source,
+      state := Json.mkObj [("from", toJson (partOf p ci)), ("node", toJson node), ("queued", toJson queue.length)] }
+  let beat : Beat := { item, core := ci, node, offset, data, arrived := t }
+  let mut w := { w with hub := { w.hub with queues := queues.set! ci (queue ++ [beat]) } }
+  unless w.hub.serving do
+    w := { w with hub := { w.hub with serving := true } }
+    w := w.schedule t "hub" none none .hubServe
+  return w
+
+/-- One arbiter cycle. The next waiting put in round-robin order is dispatched. A barrier put
+    directly behind one for the same barrier waits one cycle for that barrier's state
+    (PutHub.md). Every put that stays behind is reported once by a `wait` frame, before the
+    dispatch it waits behind. `waiting` in a hub frame counts the reported puts still held. -/
+private def hubServe (p : Program) (w : World) (t : Nat) : World := Id.run do
+  let mut w := w
+  let some ci := nextSource (w.hub.queues.map fun q ↦ !q.isEmpty) w.hub.granted
+    | return { w with hub := { w.hub with serving := false } }
+  let queue := w.hub.queues.getD ci []
+  let some beat := queue.head? | return { w with hub := { w.hub with serving := false } }
+  let barrier : Option Nat :=
+    if localNodes + groupNodes ≤ beat.node && beat.node < inboxNode0 then some (beat.node - localNodes - groupNodes)
+    else none
+  let held := match barrier, w.hub.lastBarrier with
+    | some b, some (b', cycle) => b == b' && cycle + 1 == t
+    | _, _ => false
+  let mut waiting := w.hub.queues.foldl (fun n q ↦ n + (q.filter (·.announced)).length) 0
+  let mut queues := if held then w.hub.queues else w.hub.queues.set! ci queue.tail
+  for i in [0:queues.size] do
+    let mut seen : List Beat := []
+    for b in queues[i]! do
+      seen := seen ++ [{ b with announced := true }]
+      unless b.announced do
+        waiting := waiting + 1
+        w := w.emit p {
+          id := s!"e{b.item.seq}.wait", atBatch := t, atPs := 0, op := "wait", part := "hub", targets := [],
+          parents := [b.item.cause], pc? := b.item.pc, source? := b.item.source,
+          state := Json.mkObj [("from", toJson (partOf p b.core)), ("node", toJson b.node), ("waiting", toJson waiting)] }
+    queues := queues.set! i seen
+  w := { w with hub := { w.hub with queues, peakWaiting := max w.hub.peakWaiting waiting } }
+  if !held then
+    w := { w with hub := { w.hub with
+      granted := some ci, lastBarrier := barrier.map (·, t), served := w.hub.served + 1,
+      maxWait := max w.hub.maxWait (t - beat.arrived) } }
+    let cause := if beat.announced then s!"e{beat.item.seq}.wait" else beat.item.cause
+    let left := if beat.announced then waiting - 1 else waiting
+    w := applyHub p w t beat.item beat.core beat.node beat.offset beat.data cause (t - beat.arrived) left
+  if queues.any (!·.isEmpty) then return w.schedule (t + 1) "hub" none none .hubServe
+  return { w with hub := { w.hub with serving := false } }
+
+/-- Apply one scheduled converter-edge, link or hub event. -/
+def applyItem (p : Program) (w : World) (item : Item) : World := Id.run do
+  let t := item.cycle
+  let id := s!"e{item.seq}"
+  let frame := fun (op part : String) (targets : List String) (state : Json) ↦
+    ({ id, atBatch := t, atPs := 0, op, part, targets, parents := [item.cause], pc? := item.pc,
+       source? := item.source, state } : Frame)
+  match item.action with
+  | .put ci ch offset data => return applyPut p w t item ci ch offset data
+  | .hub ci node offset data => return hubArrive p w t item ci node offset data
+  | .hubServe => return hubServe p w t
+  | .pulse ci ch f phaseCode land =>
+    let some spec := (p.cores[ci]?).bind (·.channels[ch]?) | return w
+    let core := w.cores[ci]!
+    let state := core.channels[ch]!
+    let part := channelPart p ci ch
+    let dur := f.entry.dur
+    let aligned := land.amp == some land.dur && land.phase == some land.dur && land.addr == some land.dur
+    let onTime := p.timeReg t == f.startTime
+    let overlap := decide (t < state.windowEnd)
+    let window := state.windows
+    let converter := converterPart spec part
+    let atConverter := if spec.kind == "pulse" then t + p.model.dacPipe else t
+    let record := Json.mkObj [
+      ("id", id), ("core", ci), ("channel", ch), ("part", part), ("kind", spec.kind), ("converter", converter),
+      ("slot", f.slot), ("startTime", f.startTime), ("opens", t), ("closes", t + dur), ("atConverter", atConverter),
+      ("dur", dur), ("amp", f.entry.amp), ("phase", phaseCode), ("env", f.entry.env), ("freq", state.freqNow),
+      ("dcOffset", state.buffer.dcOffset), ("aligned", aligned), ("onTime", onTime), ("overlap", overlap),
+      ("ampLands", toJson land.amp), ("phaseLands", toJson land.phase), ("envLands", toJson land.addr),
+      ("source", toJson item.source)]
+    let mut w := w
+    if !onTime then w := w.fault t part s!"pulse opened at batch time {p.timeReg t}, scheduled for {f.startTime}"
+    if !aligned then w := w.fault t part "pulse parameters did not land on the same batch"
+    if overlap then w := w.fault t part "pulse window opened before the previous one closed"
+    let core := modifyChannel core ch fun s ↦ { s with windowEnd := t + dur, windows := window + 1 }
+    w := setCore w ci core
+    w := { w with pulses := w.pulses.push record }
+    w := w.emit p (frame "pulse" part [converter] record)
+    for (b, bi) in p.bindings.zipIdx do
+      if b.core == ci && b.channel == ch && b.slot == f.slot then
+        w := w.schedule atConverter id item.pc item.source (.effect bi)
+    for r in p.responses do
+      if r.core == ci && r.channel == ch && r.occurrence == window then
+        for e in r.edges do
+          w := w.schedule (atConverter + e.after) id item.pc item.source (.dioIn r.toCore r.toChannel e.levels)
+    if spec.kind == "demod" then
+      -- Firing the demodulation carrier is the readout. Its window drives the decoder.
+      let sink := ((p.cores[ci]!.channels.toList.take ch).filter (fun c ↦ c.kind != "pulse")).length
+      let outcome := (p.readouts.toList.filter fun r ↦ r.core == ci && r.channel == ch)[window]?
+      let res := (outcome.map (·.res)).getD 0
+      let real := (outcome.map (·.real)).getD 0
+      let imag := (outcome.map (·.imag)).getD 0
+      w := w.schedule (t + p.model.decoder + p.model.reportUp) id item.pc item.source (.sinkClear ci sink)
+      w := w.schedule (t + dur + p.model.decoder + p.model.reportUp) id item.pc item.source
+        (.sinkSettle ci sink res.toUInt32 (ofInt real) (ofInt imag))
+    return w
+  | .freq ci ch code =>
+    let core := modifyChannel w.cores[ci]! ch fun s ↦ { s with freqNow := code }
+    let part := channelPart p ci ch
+    let record := Json.mkObj [("id", id), ("core", ci), ("channel", ch), ("part", part), ("kind", "freq"),
+      ("opens", t), ("freq", code), ("source", toJson item.source)]
+    let w := { w with tones := w.tones.push record }
+    return (setCore w ci core).emit p (frame "freq" part [] record)
+  | .dioOut ci ch slot startTime mask value =>
+    let core := w.cores[ci]!
+    let before := core.channels[ch]!.dout
+    let after := (before &&& (65535 ^^^ mask)) ||| (value &&& mask)
+    let core := modifyChannel core ch fun s ↦ { s with dout := after }
+    let part := channelPart p ci ch
+    let mut w := setCore w ci core
+    let onTime := p.timeReg t == startTime
+    let record := Json.mkObj [("id", id), ("core", ci), ("channel", ch), ("part", part), ("kind", "dio"),
+      ("converter", s!"{part}.pins"), ("slot", slot), ("startTime", startTime), ("opens", t), ("atConverter", t),
+      ("mask", mask), ("value", value), ("levels", after), ("onTime", onTime), ("source", toJson item.source)]
+    if !onTime then w := w.fault t part s!"digital update applied at batch time {p.timeReg t}, scheduled for {startTime}"
+    w := { w with pulses := w.pulses.push record }
+    w := w.emit p (frame "dio" part [s!"{part}.pins"] record)
+    for (b, bi) in p.bindings.zipIdx do
+      if b.core == ci && b.channel == ch && b.slot == slot then
+        w := w.schedule t id item.pc item.source (.effect bi)
+    return w
+  | .dioIn ci ch levels =>
+    let core := w.cores[ci]!
+    let before := core.channels[ch]!.din
+    let changed := before ^^^ levels
+    let core := modifyChannel core ch fun s ↦ { s with din := levels }
+    let part := channelPart p ci ch
+    let mut w := setCore w ci core
+    if changed != 0 then
+      let sink := ((p.cores[ci]!.channels.toList.take ch).filter (fun c ↦ c.kind != "pulse")).length
+      let word := (changed * 65536 + levels).toUInt32
+      w := w.schedule (t + p.model.reportUp) id item.pc item.source (.sinkEvent ci sink word (p.timeReg t).toUInt32)
+    let edge := frame "edge" s!"{part}.pins" [part]
+      (Json.mkObj [("levels", levels), ("changed", changed), ("time", p.timeReg t)])
+    -- A scripted input has no cause inside the model. A response descends from its pulse.
+    return w.emit p { edge with parents := if item.cause == "" then [] else [item.cause] }
+  | .sinkClear ci k =>
+    let core := w.cores[ci]!
+    let core := { core with sinks := core.sinks.modify k fun s ↦ { s with valid := false } }
+    return (setCore w ci core).emit p (frame "clear" s!"{partOf p ci}.inbox" [] (sinkJson core.sinks[k]!))
+  | .sinkSettle ci k res real imag =>
+    let core := w.cores[ci]!
+    let core := { core with sinks := core.sinks.modify k fun s ↦ { s with valid := true, res, real, imag } }
+    let core := wake core t id fun wait ↦ match wait with | .result s _ => s == k | _ => false
+    return (setCore w ci core).emit p (frame "result" s!"{partOf p ci}.inbox" [partOf p ci] (sinkJson core.sinks[k]!))
+  | .sinkEvent ci k word time =>
+    let core := w.cores[ci]!
+    let sink := core.sinks[k]!
+    let full := decide (sink.events.size ≥ p.model.sinkDepth)
+    let sink := if full then { sink with nextSeq := sink.nextSeq + 1 }
+      else { sink with events := sink.events.push ⟨word, time, sink.nextSeq⟩, nextSeq := sink.nextSeq + 1 }
+    let core := { core with sinks := core.sinks.set! k sink }
+    let core := wake core t id fun wait ↦ match wait with | .fifo s _ => s == k | _ => false
+    let w := if full then w.fault t s!"{partOf p ci}.inbox" "input event dropped by a full sink" else w
+    return (setCore w ci core).emit p (frame (if full then "drop" else "event") s!"{partOf p ci}.inbox"
+      [partOf p ci] (sinkJson sink))
+  | .board ci g word =>
+    let core := w.cores[ci]!
+    let core := { core with board := core.board.set! g word }
+    return (setCore w ci core).emit p (frame "board" s!"{partOf p ci}.inbox" []
+      (Json.mkObj [("group", g), ("word", word.toNat)]))
+  | .releaseBox ci t0 =>
+    let core := { w.cores[ci]! with releaseBox := some t0 }
+    let core := wake core t id fun wait ↦ match wait with | .release _ => true | _ => false
+    return (setCore w ci core).emit p (frame "released" s!"{partOf p ci}.inbox" [partOf p ci]
+      (Json.mkObj [("t0", t0.toNat)]))
+  | .mailbox ci m word =>
+    let core := w.cores[ci]!
+    let core := { core with mailboxes := core.mailboxes.set! m (some word) }
+    let core := wake core t id fun wait ↦ match wait with | .mailbox i _ => i == m | _ => false
+    return (setCore w ci core).emit p (frame "mail" s!"{partOf p ci}.inbox" [partOf p ci]
+      (Json.mkObj [("mailbox", m), ("word", word.toNat)]))
+  | .effect bi =>
+    let some b := p.bindings[bi]? | return w
+    return w.emit p (frame "effect" b.part [] (Json.mkObj [("binding", b.id),
+      ("arrivesPs", t * p.dspPeriodPs + b.delayPs), ("detail", b.detail)]))
+
+/-- Outcome of a core-local read. -/
+inductive Loaded where
+  | value (v : UInt32) (core : CoreState) (name : String)
+  | stall (wait : Wait) (until? : Option Nat) (name : String)
+  | bad (reason : String)
+
+/-- Read one control-block register. Halting reads stall until their sink is ready. -/
+def loadIo (p : Program) (t : Nat) (core : CoreState) (address : UInt32) (rd : Nat) : Loaded :=
+  let a := address.toNat
+  if a == 0xBFF8 then .value (p.coreTime t) core "time"
+  else if a == 0x4000 then .value core.timeCmp core "timeCmp"
+  else if a == 0x4010 then .value (if core.done then 1 else 0) core "done"
+  else if a == 0x2000 then .value 0 core "fromHost"
+  else if a == 0x4008 then
+    -- The compare is registered, so the flag seen at cycle t reflects cycle t − 1.
+    let distance := toSigned (core.timeCmp - (p.coreTime ((t : Int) - 1) + p.model.waitSlack.toUInt32))
+    if distance ≤ 0 then .value 0 core "waitTimeCmp" else .stall (.timeCmp rd) (some (t + distance.toNat)) "waitTimeCmp"
+  else if a ≥ sinkBase && a < sinkBase + sinkStride * core.sinks.size then
+    let k := (a - sinkBase) / sinkStride
+    let word := (a - sinkBase) % sinkStride
+    let sink := core.sinks[k]!
+    if sink.kind == "result" then
+      if word == 0 then (if sink.valid then .value sink.res core "res" else .stall (.result k rd) none "res")
+      else if word == 4 then .value sink.real core "real"
+      else if word == 8 then .value sink.imag core "imag"
+      else .bad s!"read of unmapped result register 0x{String.ofList (Nat.toDigits 16 a)}"
+    else
+      if word == 0 then
+        match sink.events[0]? with
+        | some e =>
+          let sink := { sink with events := sink.events.extract 1 sink.events.size, popped := e }
+          .value e.word { core with sinks := core.sinks.set! k sink } "popEvent"
+        | none => .stall (.fifo k rd) none "popEvent"
+      else if word == 4 || word == 8 then .value 0 core "eventWord"
+      else if word == 0x10 then .value sink.popped.time core "eventTime"
+      else if word == 0x14 then .value sink.popped.seq.toUInt32 core "eventSeq"
+      else if word == 0x18 then .value sink.events.size.toUInt32 core "eventCount"
+      else .bad s!"read of unmapped event register 0x{String.ofList (Nat.toDigits 16 a)}"
+  else if a ≥ 0x4300 && a < 0x4300 + 4 * groupNodes && a % 4 == 0 then
+    .value core.board[(a - 0x4300) / 4]! core "board"
+  else if a == 0x4320 then
+    match core.releaseBox with
+    | some v => .value v { core with releaseBox := none } "release"
+    | none => .stall (.release rd) none "release"
+  else if a == 0x4340 || a == 0x4360 then
+    let m := (a - 0x4340) / sinkStride
+    match core.mailboxes[m]! with
+    | some v => .value v { core with mailboxes := core.mailboxes.set! m none } "mailbox"
+    | none => .stall (.mailbox m rd) none "mailbox"
+  else .bad s!"load from unmapped address 0x{String.ofList (Nat.toDigits 16 a)}"
+
+def readRam (mem : Array UInt32) (op : LdOp) (address : UInt32) : Option UInt32 :=
+  let offset := address - ramBase
+  match mem[(offset >>> 2).toNat]? with
+  | none => none
+  | some word =>
+    let shift := (offset &&& 3) <<< 3
+    match op with
+    | .lw => if offset &&& 3 == 0 then some word else none
+    | .lh => if offset &&& 1 == 0 then some (signExtend (word >>> shift) 16) else none
+    | .lhu => if offset &&& 1 == 0 then some ((word >>> shift) &&& 0xFFFF) else none
+    | .lb => some (signExtend (word >>> shift) 8)
+    | .lbu => some ((word >>> shift) &&& 0xFF)
+
+def writeRam (mem : Array UInt32) (op : StOp) (address value : UInt32) : Option (Array UInt32) :=
+  let offset := address - ramBase
+  let index := (offset >>> 2).toNat
+  match mem[index]? with
+  | none => none
+  | some word =>
+    let shift := (offset &&& 3) <<< 3
+    match op with
+    | .sw => if offset &&& 3 == 0 then some (mem.set! index value) else none
+    | .sh => if offset &&& 1 == 0 then
+        some (mem.set! index ((word &&& ~~~((0xFFFF : UInt32) <<< shift)) ||| ((value &&& 0xFFFF) <<< shift)))
+      else none
+    | .sb => some (mem.set! index ((word &&& ~~~((0xFF : UInt32) <<< shift)) ||| ((value &&& 0xFF) <<< shift)))
+
+/-- A word read returns what a word write stored. -/
+theorem readRam_writeRam_word (mem mem' : Array UInt32) (address value : UInt32)
+    (stored : writeRam mem .sw address value = some mem') :
+    readRam mem' .lw address = some value := by
+  dsimp only [writeRam] at stored
+  dsimp only [readRam]
+  generalize ((address - ramBase) >>> 2).toNat = index at *
+  generalize address - ramBase = offset at *
+  cases found : mem[index]? with
+  | none => simp [found] at stored
+  | some word =>
+    have inRange : index < mem.size := by
+      obtain ⟨h, _⟩ := Array.getElem?_eq_some_iff.mp found
+      exact h
+    simp only [found] at stored
+    split at stored
+    · rename_i aligned
+      injection stored with written
+      subst written
+      simp [aligned, inRange]
+    · simp at stored
+
+private def isRam (core : CoreState) (address : UInt32) : Bool :=
+  address ≥ ramBase && ((address - ramBase) >>> 2).toNat < core.mem.size
+
+private def rdOf : Instr → Option Nat
+  | .lui rd _ | .auipc rd _ | .jal rd _ | .jalr rd _ _ | .opImm _ rd _ _ | .op _ rd _ _ | .mulOp _ rd _ _ => some rd
+  | _ => none
+
+private def hex32 (v : UInt32) : String := "0x" ++ String.ofList (Nat.toDigits 16 v.toNat)
+
+/-- Retire one instruction of core `ci`, or finish its stalled read. -/
+def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
+  let spec := p.cores[ci]!
+  let core := w.cores[ci]!
+  -- Take the core out of the array so its RAM is updated in place.
+  let mut w := setCore w ci default
+  let name := spec.name
+  let id := s!"{name}:{core.retired}"
+  let pc := if core.wait != .none then core.waitPc else core.cpu.pc
+  let source := (core.sources[((pc - ramBase) >>> 2).toNat]?.filter (· != "")).orElse
+    fun _ ↦ if core.dataSource == "" then none else some core.dataSource
+  let parents := [core.lastFrame, core.wakeFrame].filter (· != "")
+  let full := p.trace == "full"
+  let frame := fun (op : String) (targets : List String) (state : List (String × Json)) ↦
+    ({ id, atBatch := t, atPs := 0, op, part := name, targets, parents, pc? := some pc.toNat, source? := source,
+       state := Json.mkObj ([("pc", toJson pc.toNat)] ++ state) } : Frame)
+  let stop := fun (w : World) (core : CoreState) (op reason : String) ↦
+    let core := { core with stopped := some reason, readyAt := none, lastFrame := id }
+    (setCore w ci core).emit p (frame op [] [("reason", reason)])
+  -- A stalled read completes here once its sink is ready.
+  if core.wait != .none then
+    let rd := match core.wait with
+      | .timeCmp rd | .result _ rd | .fifo _ rd | .release rd | .mailbox _ rd => rd
+      | .none => 0
+    match loadIo p t core core.waitAddress rd with
+    | .value v core register =>
+      -- The stalled read keeps its instruction number. Its completion is a second frame.
+      let resumed := s!"{id}.resume"
+      let core := { core with
+        cpu := core.cpu.setReg rd v, wait := .none, readyAt := some (t + 1),
+        retired := core.retired + 1, lastFrame := resumed, wakeFrame := "" }
+      return (setCore w ci core).emit p { (frame "resume" [] [("register", register), ("rd", rd), ("value", v.toNat)]) with id := resumed }
+    | .stall wait until? _ =>
+      return setCore w ci { core with wait, readyAt := until? }
+    | .bad reason => return stop w core "fault" reason
+  let some word := readRam core.mem .lw pc | return stop w core "fault" s!"program counter {hex32 pc} is outside RAM"
+  let instr := decode word spec.withMul
+  if instr.isSelfJump then return stop w core "park" "parked in a self jump"
+  let step := exec core.cpu instr
+  let cost := 1 + (if step.redirect then p.model.redirectPenalty else 0)
+  -- Built only for an instruction that is recorded: most instructions of a long program are not.
+  let base := fun (_ : Unit) ↦ ([("word", toJson word.toNat), ("text", toJson instr.text)] : List (String × Json))
+  match step.access with
+  | .stop reason => return stop w core "fault" reason
+  | .none =>
+    let core := { core with cpu := step.cpu, readyAt := some (t + cost), retired := core.retired + 1 }
+    if !full then return setCore w ci core
+    let write := match rdOf instr with
+      | some rd => if rd == 0 then [] else [("rd", toJson rd), ("value", toJson (step.cpu.reg rd).toNat)]
+      | none => []
+    return (setCore w ci { core with lastFrame := id, wakeFrame := "" }).emit p (frame "exec" [] (base () ++ write))
+  | .load op rd address =>
+    if isRam core address then
+      let some v := readRam core.mem op address | return stop w core "fault" s!"misaligned load at {hex32 address}"
+      let tag := (core.sources[((address - ramBase) >>> 2).toNat]?).getD ""
+      let core := { core with
+        cpu := step.cpu.setReg rd v, readyAt := some (t + cost + p.model.busPenalty),
+        retired := core.retired + 1, dataSource := if tag == "" then core.dataSource else tag }
+      if !full then return setCore w ci core
+      return (setCore w ci { core with lastFrame := id, wakeFrame := "" }).emit p
+        (frame "exec" [] (base () ++ [("address", toJson address.toNat), ("rd", toJson rd), ("value", toJson v.toNat)]))
+    if op != .lw || address &&& 3 != 0 then return stop w core "fault" s!"control registers take aligned word loads ({hex32 address})"
+    match loadIo p t { core with cpu := step.cpu } address rd with
+    | .value v core register =>
+      let core := { core with
+        cpu := core.cpu.setReg rd v, readyAt := some (t + cost + p.model.busPenalty),
+        retired := core.retired + 1, lastFrame := id, wakeFrame := "" }
+      return (setCore w ci core).emit p (frame "read" [] (base () ++
+        [("register", toJson register), ("address", toJson address.toNat), ("rd", toJson rd), ("value", toJson v.toNat)]))
+    | .stall wait until? register =>
+      let core := { core with
+        cpu := step.cpu, wait, waitAddress := address, waitPc := pc, readyAt := until?,
+        lastFrame := id, wakeFrame := "" }
+      return (setCore w ci core).emit p (frame "wait" [] (base () ++
+        [("register", toJson register), ("address", toJson address.toNat), ("until", toJson until?)]))
+    | .bad reason => return stop w core "fault" reason
+  | .store op address value =>
+    let a := address.toNat
+    if isRam core address then
+      -- Detach the RAM from the core record, so that the store updates the array in place
+      -- and does not copy it.
+      let ram := core.mem
+      let core := { core with mem := #[] }
+      let some mem := writeRam ram op address value
+        | return stop w { core with mem := ram } "fault" s!"misaligned store at {hex32 address}"
+      let core := { core with cpu := step.cpu, mem, readyAt := some (t + cost + p.model.busPenalty), retired := core.retired + 1 }
+      if !full then return setCore w ci core
+      return (setCore w ci { core with lastFrame := id, wakeFrame := "" }).emit p
+        (frame "exec" [] (base () ++ [("address", toJson a), ("store", toJson value.toNat)]))
+    let core := { core with
+      cpu := step.cpu, readyAt := some (t + cost + p.model.busPenalty), retired := core.retired + 1,
+      lastFrame := id, wakeFrame := "" }
+    let detail := base () ++ [("address", toJson a), ("store", toJson value.toNat)]
+    if a ≥ hostWindow && a < hostWindow + 16777216 then
+      -- The host window is write only and takes byte, half and word stores.
+      let (bytes, stored) := match op with
+        | .sb => (1, value &&& 0xFF) | .sh => (2, value &&& 0xFFFF) | .sw => (4, value)
+      w := { w with host := w.host.push (Json.mkObj [("core", ci), ("offset", a - hostWindow), ("bytes", bytes),
+        ("value", stored.toNat), ("atBatch", t), ("frame", id)]) }
+      return (setCore w ci core).emit p (frame "host" ["host"] (detail ++ [("offset", toJson (a - hostWindow))]))
+    if op != .sw || address &&& 3 != 0 then
+      return stop w { core with retired := core.retired - 1 } "fault" s!"control registers take aligned word stores ({hex32 address})"
+    if a == 0x4000 then
+      return (setCore w ci { core with timeCmp := value }).emit p (frame "write" [] (detail ++ [("register", toJson "timeCmp")]))
+    if a == 0x4010 then
+      if value &&& 1 == 0 then return (setCore w ci core).emit p (frame "write" [] (detail ++ [("register", toJson "done")]))
+      -- The flag is sticky. The model stops stepping a core once its program has finished.
+      let core := { core with done := true, stopped := some "done", readyAt := none }
+      return (setCore w ci core).emit p (frame "done" ["host"] (detail ++ [("register", toJson "done")]))
+    if a ≥ putWindow && a < putWindow + 4096 * 65536 then
+      let node := (a - putWindow) / 65536
+      let offset := ((a - putWindow) % 65536).toUInt32
+      w := setCore w ci core
+      if node < localNodes then
+        if node < spec.channels.size then
+          w := w.schedule (t + p.model.bridge + p.model.linkPipe) id (some pc.toNat) source (.put ci node offset value)
+          return w.emit p (frame "put" [s!"{name}.link", channelPart p ci node]
+            (detail ++ [("channel", toJson node), ("offset", toJson offset.toNat)]))
+        w := w.fault t name s!"put to missing channel {node}"
+        return w.emit p (frame "put" [s!"{name}.link"] (detail ++ [("channel", toJson node), ("dropped", true)]))
+      w := w.schedule (t + p.model.hubDown) id (some pc.toNat) source (.hub ci node offset value)
+      return w.emit p (frame "put" [s!"{name}.link", "hub"] (detail ++ [("node", toJson node), ("offset", toJson offset.toNat)]))
+    return stop w { core with retired := core.retired - 1 } "fault" s!"store to unmapped address {hex32 address}"
+
+/-- Reset state. Every core starts at the base of its RAM with zeroed registers. -/
+def initial (p : Program) : World :=
+  let cores := p.cores.map fun c ↦
+    let mem : Array UInt32 := c.image.map Nat.toUInt32 ++ Array.replicate (c.memWords - c.image.size) (0 : UInt32)
+    let sinks := c.channels.zipIdx.filterMap fun (ch, i) ↦
+      if ch.kind == "demod" then some ({ kind := "result", channel := i } : SinkState)
+      else if ch.kind == "dio" then some ({ kind := "fifo", channel := i } : SinkState) else none
+    let sources := Id.run do
+      let mut table := Array.replicate c.memWords ""
+      let mut current := ""
+      let mut next := 0
+      for i in [0:c.image.size] do
+        while next < c.sourceMap.size && c.sourceMap[next]!.pc / 4 ≤ i do
+          current := c.sourceMap[next]!.source
+          next := next + 1
+        table := table.set! i current
+      return table
+    ({ mem, sinks, sources,
+       channels := c.channels.map fun ch ↦ { buffer := { table := Array.replicate ch.slots {} } } } : CoreState)
+  let w : World := { cores }
+  p.dioInputs.foldl (fun w e ↦ w.schedule e.atBatch "" none none (.dioIn e.core e.channel e.levels)) w
+
+/-- Next core to act: the earliest ready cycle, lowest index first. -/
+private def nextCore (w : World) : Option (Nat × Nat) := Id.run do
+  let mut best : Option (Nat × Nat) := none
+  for (core, i) in w.cores.zipIdx do
+    if core.stopped.isNone then
+      if let some r := core.readyAt then
+        if best.all (r < ·.1) then best := some (r, i)
+  return best
+
+/-- Schematic placement on the two-region floorplan RISC-Q documents: cores in the left
+    column, converter-edge channels in the DSP columns, converters at the right edge and the
+    bound apparatus parts beyond it. Coordinates are tenths of a clock region of that
+    floorplan, not millimetres. Each core takes a row tall enough for its converters, and the
+    converter column lies beyond the widest core, so no two parts share a position. -/
+def system (p : Program) : Json := Id.run do
+  let mut parts : Array Json := #[]
+  let mut links : Array Json := #[]
+  let part := fun (id kind label : String) (x y : Int) ↦
+    Json.mkObj [("id", id), ("kind", kind), ("label", label), ("position", toJson [x, y])]
+  parts := parts.push (part "host" "host" "Host processor and result memory" (-15) 0)
+  parts := parts.push (part "hub" "hub" "Board hub: groups, barriers, mailboxes" 6 (-10))
+  let widest := p.cores.foldl (fun n c ↦ max n c.channels.size) 1
+  let converterX : Int := 15 + 8 * widest + 4
+  let mut converters : Array String := #[]
+  let mut y : Int := 0
+  for c in p.cores do
+    parts := parts.push (part c.name "core" s!"RV32I core {c.name}" 0 y)
+    parts := parts.push (part s!"{c.name}.link" "link" s!"Posted link, {p.model.linkPipe} stages each way" 6 y)
+    parts := parts.push (part s!"{c.name}.inbox" "inbox" "Core-local sinks and mailboxes" 3 (y + 3))
+    links := links.push (Json.mkObj [("id", s!"{c.name}.put"), ("from", c.name), ("to", s!"{c.name}.link")])
+    links := links.push (Json.mkObj [("id", s!"{c.name}.hub"), ("from", s!"{c.name}.link"), ("to", "hub")])
+    for (ch, j) in c.channels.zipIdx do
+      let id := s!"{c.name}.{ch.name}"
+      let x : Int := 15 + 8 * j
+      parts := parts.push (part id ch.kind s!"{ch.kind} channel {ch.name}: {ch.slots} entries" x y)
+      links := links.push (Json.mkObj [("id", s!"{id}.cmd"), ("from", s!"{c.name}.link"), ("to", id)])
+      let converter := converterPart ch id
+      if !converters.contains converter then
+        converters := converters.push converter
+        let kind := if ch.dac?.isSome then "dac" else if ch.adc?.isSome then "adc" else "pins"
+        parts := parts.push (part converter kind converter converterX (y + 2 * j))
+      links := links.push (Json.mkObj [("id", s!"{id}.out"), ("from", id), ("to", converter)])
+      if ch.kind != "pulse" then
+        links := links.push (Json.mkObj [("id", s!"{id}.report"), ("from", id), ("to", s!"{c.name}.inbox")])
+    y := y + max 10 (2 * c.channels.size + 2)
+  let mut devices : Array String := #[]
+  for b in p.bindings do
+    unless devices.contains b.part || converters.contains b.part do
+      parts := parts.push (part b.part "device" b.part (converterX + 15) (3 * devices.size))
+      devices := devices.push b.part
+  return Json.mkObj [("basis", "schematic two-region floorplan, tenths of a clock region"),
+    ("parts", toJson parts), ("links", toJson links)]
+
+/-- Run until every core has stopped and no event is pending, or a budget is spent. -/
+def run (p : Program) : Json := Id.run do
+  let mut w := initial p
+  let mut status := "quiescent"
+  let mut now := 0
+  let mut steps := 0
+  for _ in [0:p.maxSteps] do
+    steps := steps + 1
+    let core := nextCore w
+    let item := w.agenda.head?
+    -- Converter-edge and link events apply before a core acts on the same cycle.
+    let useItem : Bool := match item, core with
+      | some it, some (r, _) => decide (it.cycle ≤ r)
+      | some _, none => true
+      | none, _ => false
+    let cycle := if useItem then (item.map (·.cycle)).getD 0 else (core.map (·.1)).getD 0
+    if item.isNone && core.isNone then break
+    if cycle > p.maxBatches then
+      status := "time limit"
+      break
+    if w.frames.size ≥ p.maxEvents then
+      status := "event limit"
+      break
+    now := max now cycle
+    if useItem then
+      let some it := item | break
+      w := applyItem p { w with agenda := w.agenda.tail } it
+    else
+      let some (r, i) := core | break
+      w := stepCore p w r i
+    if steps == p.maxSteps then status := "step limit"
+  let cores := w.cores.zipIdx.map fun ((c : CoreState), (i : Nat)) ↦ Json.mkObj [
+    ("name", partOf p i), ("retired", c.retired), ("pc", c.cpu.pc.toNat), ("done", c.done),
+    ("stopped", toJson c.stopped),
+    ("waiting", c.stopped.isNone && c.wait != Wait.none),
+    ("regs", toJson (c.cpu.regs.map UInt32.toNat)),
+    ("channels", toJson (c.channels.zipIdx.map fun ((ch : ChannelState), (j : Nat)) ↦ Json.mkObj [
+      ("part", channelPart p i j), ("buffer", bufferJson ch.buffer), ("freq", ch.freqNow),
+      ("windows", ch.windows), ("dout", ch.dout), ("din", ch.din)])),
+    ("sinks", toJson (c.sinks.map sinkJson))]
+  let summary := Json.mkObj [
+    ("status", status), ("elapsedBatches", now), ("elapsedPs", now * p.dspPeriodPs), ("steps", steps),
+    ("cores", toJson cores), ("pulses", toJson w.pulses), ("tones", toJson w.tones),
+    ("faults", toJson w.faults), ("host", toJson w.host),
+    ("hub", Json.mkObj [("groups", toJson (w.hub.groups.map UInt32.toNat)), ("countMismatch", w.hub.countMismatch),
+      ("served", w.hub.served), ("maxWait", w.hub.maxWait), ("peakWaiting", w.hub.peakWaiting)])]
+  let start := Json.mkObj [("pc", ramBase.toNat), ("timeRegister", p.timeOffset),
+    ("coreTime", (p.coreTime 0).toNat)]
+  return Json.mkObj [("program", toJson p), ("system", system p), ("initial", start),
+    ("frames", toJson w.frames), ("summary", summary)]
+
+end QControl.RiscQ

@@ -4,6 +4,7 @@ import QControl.StudioPlacement
 import QControl.Controller
 import QControl.Fabric
 import QControl.Validation
+import QControl.RiscQ.Soc
 open Lean QControl
 
 private def readProgram (document : Json) : Except String Program := do
@@ -29,6 +30,11 @@ private def runDocument (doc : Json) : Except String Json := do
       let p : Fabric.Program ← fromJson? doc
       unless doc == toJson p do throw "Unexpected component machine field."
       return ← Fabric.run p
+    if kind == toJson "riscq-soc" then
+      let p : RiscQ.Program ← fromJson? doc
+      unless doc == toJson p do throw "Unexpected RISC-Q program, core or channel field."
+      p.validate
+      return RiscQ.run p
     if kind == toJson "waveform-controller" then
       let p ← readController doc
       let system ← Json.parse (include_str "physical/qccd-installation.json")

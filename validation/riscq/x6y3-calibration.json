@@ -1,0 +1,582 @@
+{
+ "source": "RISC-Q examples/cal-config-x6y3.yaml, commit 243d814dc2bdb323dbca891f6c6a263d18ab853f",
+ "sampleRate": {
+  "ADC": 2000000000.0,
+  "DAC": 8000000000.0
+ },
+ "passiveResetDelay": 0.0005,
+ "qubits": [
+  {
+   "qubit": 0,
+   "freq": 5498857081.66909,
+   "T1": 5e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.10560383,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     0.0055315388,
+     0.0055315388
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.10674013,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6555406453.21587,
+    "amp": 0.014866665,
+    "time": 5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 3.9857e-07,
+     "time": 6.5667e-07,
+     "phase": -54.25607
+    }
+   }
+  },
+  {
+   "qubit": 1,
+   "freq": 5380124639.107,
+   "T1": 7.4e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.11476381,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     -0.1020165,
+     -0.1020165
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.10118512,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6559392422.19159,
+    "amp": 0.027277777,
+    "time": 6.5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 4.5333e-07,
+     "time": 7.5167e-07,
+     "phase": -109.86014
+    }
+   }
+  },
+  {
+   "qubit": 2,
+   "freq": 5234452622.1978,
+   "T1": 9.6e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.04940274,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     0.081597656,
+     0.081597656
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.073383041,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6658326267.87146,
+    "amp": 0.033366668,
+    "time": 5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 3.4763e-07,
+     "time": 6.3167e-07,
+     "phase": -55.78088
+    }
+   }
+  },
+  {
+   "qubit": 3,
+   "freq": 5290895313.96261,
+   "T1": 0.000118,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.11476607,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     0.037732039,
+     0.037732039
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.12326903,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6700654740.5311,
+    "amp": 0.016666667,
+    "time": 6.5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 3.3523e-07,
+     "time": 8.35e-07,
+     "phase": -42.45681
+    }
+   }
+  },
+  {
+   "qubit": 4,
+   "freq": 5441800584.03149,
+   "T1": 9.2e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.12806386,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     0.0076524301,
+     0.0076524301
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.13645859,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6710826172.81216,
+    "amp": 0.0195,
+    "time": 7.5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 5.7476e-07,
+     "time": 6.8333e-07,
+     "phase": 31.16847
+    }
+   }
+  },
+  {
+   "qubit": 5,
+   "freq": 5613031635.34607,
+   "T1": 5.12e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.15033405,
+    "phase": -0.00664,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     -0.0099299721,
+     -0.0099299721
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.14980522,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6710646907.236,
+    "amp": 0.0115,
+    "time": 7.5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 7.5e-07,
+     "time": 5.9e-07,
+     "phase": -21.56369
+    }
+   }
+  },
+  {
+   "qubit": 6,
+   "freq": 5913995129.95466,
+   "T1": 4.9e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.12570427,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     0.042922622,
+     0.0080109992
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.13326979,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6783857956.90706,
+    "amp": 0.023916668,
+    "time": 7e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 3.8e-07,
+     "time": 7.3667e-07,
+     "phase": 39.0365
+    }
+   }
+  },
+  {
+   "qubit": 7,
+   "freq": 5339891733.09346,
+   "T1": 2.4e-05,
+   "X90": {
+    "time": 3.5e-08,
+    "amp": 0.12323566,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": [
+     -0.0062652056,
+     -0.0062652056
+    ]
+   },
+   "X": {
+    "time": 7e-08,
+    "amp": 0.11697139,
+    "phase": 0.0,
+    "env": "FAST_DRAG",
+    "virtualZ": []
+   },
+   "readout": {
+    "freq": 6836353100.57111,
+    "amp": 0.052,
+    "time": 5e-07,
+    "env": "cosine_square",
+    "demod": {
+     "delay": 3.8905e-07,
+     "time": 6.0833e-07,
+     "phase": -23.76158
+    }
+   }
+  }
+ ],
+ "pairs": [
+  {
+   "pair": [
+    0,
+    1
+   ],
+   "freq": 5332714541.64417,
+   "pulses": [
+    {
+     "qubit": 0,
+     "time": 4e-07,
+     "amp": 0.3939014,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 1,
+     "time": 4e-07,
+     "amp": 0.3939014,
+     "phase": 0.26676295,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 0,
+     "phase": 1.46689
+    },
+    {
+     "qubit": 1,
+     "phase": 1.99361
+    },
+    {
+     "qubit": 2,
+     "phase": 0.086491601
+    }
+   ],
+   "sandwich": []
+  },
+  {
+   "pair": [
+    1,
+    2
+   ],
+   "freq": 5153421243.75925,
+   "pulses": [
+    {
+     "qubit": 1,
+     "time": 4e-07,
+     "amp": 0.23961423,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 2,
+     "time": 4e-07,
+     "amp": 0.23961423,
+     "phase": 2.2905,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 1,
+     "phase": -0.5484445
+    },
+    {
+     "qubit": 2,
+     "phase": -1.6767
+    },
+    {
+     "qubit": 0,
+     "phase": 0.018396482
+    },
+    {
+     "qubit": 3,
+     "phase": 0.48982301
+    }
+   ],
+   "sandwich": []
+  },
+  {
+   "pair": [
+    2,
+    3
+   ],
+   "freq": 5210200000.0,
+   "pulses": [
+    {
+     "qubit": 2,
+     "time": 4e-07,
+     "amp": 0.55565827,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 3,
+     "time": 4e-07,
+     "amp": 0.55565827,
+     "phase": -1.38251,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 2,
+     "phase": -2.62363
+    },
+    {
+     "qubit": 3,
+     "phase": -1.11691
+    },
+    {
+     "qubit": 1,
+     "phase": 1.77137
+    },
+    {
+     "qubit": 4,
+     "phase": -1.33248
+    }
+   ],
+   "sandwich": []
+  },
+  {
+   "pair": [
+    3,
+    4
+   ],
+   "freq": 5338228019.06514,
+   "pulses": [
+    {
+     "qubit": 3,
+     "time": 4e-07,
+     "amp": 0.68916186,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 4,
+     "time": 4e-07,
+     "amp": 0.68916186,
+     "phase": -1.7986,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 3,
+     "phase": -2.42796
+    },
+    {
+     "qubit": 4,
+     "phase": 1.90822
+    },
+    {
+     "qubit": 5,
+     "phase": -0.3374
+    }
+   ],
+   "sandwich": []
+  },
+  {
+   "pair": [
+    4,
+    5
+   ],
+   "freq": 5415962659.80958,
+   "pulses": [
+    {
+     "qubit": 4,
+     "time": 4e-07,
+     "amp": 0.38818912,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 5,
+     "time": 4e-07,
+     "amp": 0.38818912,
+     "phase": 0.964644,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 4,
+     "phase": 2.90585
+    },
+    {
+     "qubit": 5,
+     "phase": -0.20998963
+    },
+    {
+     "qubit": 3,
+     "phase": -0.10286
+    }
+   ],
+   "sandwich": []
+  },
+  {
+   "pair": [
+    5,
+    6
+   ],
+   "freq": 5567933333.33333,
+   "pulses": [
+    {
+     "qubit": 5,
+     "time": 4e-07,
+     "amp": 0.25170367,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 6,
+     "time": 4e-07,
+     "amp": 0.25170367,
+     "phase": 0.67218792,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 5,
+     "phase": 2.16687
+    },
+    {
+     "qubit": 6,
+     "phase": -0.20503361
+    }
+   ],
+   "sandwich": [
+    "single_qubit/6/EF/X/pulse",
+    "single_qubit/6/EF/X/pulse"
+   ]
+  },
+  {
+   "pair": [
+    6,
+    7
+   ],
+   "freq": 5480000000.0,
+   "pulses": [
+    {
+     "qubit": 6,
+     "time": 4e-07,
+     "amp": 0.36847,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 7,
+     "time": 4e-07,
+     "amp": 0.36847,
+     "phase": -2.24219,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 6,
+     "phase": -0.85615
+    },
+    {
+     "qubit": 7,
+     "phase": 1.6168
+    }
+   ],
+   "sandwich": [
+    "single_qubit/6/EF/X/pulse",
+    "single_qubit/6/EF/X/pulse"
+   ]
+  },
+  {
+   "pair": [
+    7,
+    0
+   ],
+   "freq": 5422500000.0,
+   "pulses": [
+    {
+     "qubit": 7,
+     "time": 4e-07,
+     "amp": 0.43883,
+     "phase": 0.0,
+     "env": "cosine_square"
+    },
+    {
+     "qubit": 0,
+     "time": 4e-07,
+     "amp": 0.43883,
+     "phase": -3.36743,
+     "env": "cosine_square"
+    }
+   ],
+   "virtualZ": [
+    {
+     "qubit": 7,
+     "phase": 0.7971
+    },
+    {
+     "qubit": 0,
+     "phase": 2.29038
+    }
+   ],
+   "sandwich": []
+  }
+ ]
+}
