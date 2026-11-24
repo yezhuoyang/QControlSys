@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Give a fast wave a shape · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="S3">
+<article>
+<h1>Give a fast wave a shape</h1>
+<p class="lead">A radio can carry slow changes on a rapid oscillation. A qubit drive uses the same idea. Follow the pulse shape through a memory, a mixer and an output cable.</p>
+
+<h2>Store the outline</h2>
+<p>A bell-shaped pulse needs small samples near its ends and larger samples at its middle. A device that plays a chosen list of samples on cue is an <b>arbitrary waveform generator</b> (AWG). Its memory stores the outline, its clock spaces the samples, and its converter makes the voltage. Reusing one outline saves memory when the frequency or phase changes.</p>
+
+<h2>Turn two knobs</h2>
+<p>A <b>mixer</b> multiplies signals. Pick two references a quarter-cycle apart, a cosine and a sine. Multiplying each by its own slow envelope and adding the results gives control of both amplitude and phase. The envelopes are often named I and Q. In one common convention the voltage is I cos(ωt) − Q sin(ωt). Sign conventions matter when copying a calibration.</p>
+
+<h2>Trace the shape on two controllers</h2>
+<p>Find the envelope buffer in the QubiC drawing and follow its output to the converter. Then inspect the archived IBM pulse in M1. Its shape parameters include a duration in sample ticks and a complex amplitude, a pair of numbers that sets both quadratures. A filter and cable can change the shape before it arrives. Cryoscope used a qubit itself to measure distortion along a control line. <a href="/course/M1">Inspect the IBM drive</a> · <a href="https://arxiv.org/abs/1907.04818">Rol et al., Cryoscope</a>.</p>
+<figure class="paper-figure"><a href="/course/figures/qubic-logic.png" aria-label="Enlarge figure"><img src="/course/figures/qubic-logic.png" alt="QubiC diagram with pulse synthesis at the top and processing of the returning samples below."></a><figcaption>Find the outgoing arrow to the voltage converter at the upper right. The lower path processes the signal that comes back. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., QubiC, Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+
+<div class="ex" data-id="S3.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>For the given voltage convention, what happens when both envelopes are zero?</p>
+  <ol class="choices"><li data-k="0">The output drive is zero</li><li data-k="1">The carrier frequency doubles</li></ol>
+  <div class="why">Both products in the sum vanish even if the reference oscillator keeps running.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>The envelope holds the shape, the oscillator holds the phase, and the mixer combines them. The receiving chip sees the signal after the delivery line.</p><p>Next, identify the laser that carries a control signal to an atom.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

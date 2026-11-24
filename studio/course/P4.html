@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How would you know the gate worked? · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="P4">
+<article>
+<h1>How would you know the gate worked?</h1>
+<p class="lead">A correctly timed voltage is encouraging. To learn what it did to the qubit, use repeated trials, a calibration sweep, and sequences that should return you to a known state.</p>
+
+<h2>Find the rotation</h2>
+<p>Prepare 0, apply a pulse, measure, and repeat. Sweep its amplitude at fixed duration. Under ideal resonant drive the probability of 1 is sin²(angle/2). The rise and fall are called <b>Rabi oscillations</b>. A first maximum identifies a candidate π pulse. Repeating the test at another setting checks whether the calibration predicts something new.</p>
+<p>Labranca and colleagues recorded a microwave emission signal as they swept the drive. In the QuantumOS comparison the measured quantity is receiver cross-power, with an offset and contrast fitted on calibration points. Check the prediction at the held-out settings. <a href="/validation?platform=superconducting">Inspect the comparison</a> · <a href="https://doi.org/10.1088/1367-2630/ade736">Labranca et al., Fig. 6</a>.</p>
+
+<h2>Test a whole sequence</h2>
+<figure class="paper-figure"><a href="/course/figures/qubic-benchmark.png" aria-label="Enlarge figure"><img src="/course/figures/qubic-benchmark.png" alt="Measured expectation values for single- and two-qubit sequences, with fitted decay curves."></a><figcaption>Compare dots at the same sequence length. The spread is visible even when the fitted curve looks smooth. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., QubiC, Fig. 5</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>One way to benchmark gates is to apply a random sequence followed by its ideal inverse and count how often the system returns to its starting state. QubiC’s streamlined experiment plots an expectation value, a signed average formed from repeated outcomes. Read the horizontal axis as the number of Clifford gates in the sequence. Each dot summarizes repeated trials of one circuit. Fitting the decay over many lengths estimates an average error under the protocol’s assumptions. Preparation and readout also affect the vertical scale. <a href="https://arxiv.org/abs/1009.3639">Magesan et al., randomized benchmarking</a>.</p>
+
+<h2>Test the property you care about</h2>
+<p>For the moving pair in P1, returning the right population would miss a loss of phase. Vary the phase of the last pulse, then compare the fractions of even and odd pairs of answers. Their difference is <b>parity</b>. The oscillation contrast, together with population measurements, tests entanglement. Quantinuum released analogous phase-dependent results for 32 ions. <a href="/course/M3">Inspect the H2 evidence</a>.</p>
+
+<div class="ex" data-id="P4.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>What would a proof that a pulse starts on time establish?</p>
+  <ol class="choices"><li data-k="0">That every physical gate has high fidelity</li><li data-k="1">A timing property of the specified controller model</li></ol>
+  <div class="why">Gate fidelity asks about qubit states on hardware and needs a quantum measurement protocol.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A sweep calibrates a pulse. Random sequences estimate average performance. A phase-sensitive measurement asks whether a particular state retained coherence.</p><p>Next, follow the digital number that sets the pulse height.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Decode two clues about three qubits · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="K1">
+<article>
+<h1>Decode two clues about three qubits</h1>
+<p class="lead">You have three stored bits and permission to ask whether neighbours agree. Use just those two clues to locate one flip, then see why real decoders need a model of what can go wrong.</p>
+
+<h2>Ask about agreement</h2>
+<p>Encode a classical bit as 000 or 111. Form two check bits, left XOR middle and middle XOR right. A check gives 1 when its pair disagrees. Quantum error-correcting circuits use auxiliary qubits to measure analogous joint properties without directly reading each data qubit. The pattern of check results is a <b>syndrome</b>.</p>
+
+<h2>Fill all four cases</h2>
+<p>With perfect checks and at most one data-bit flip, syndrome 00 requests no correction, 10 identifies the left bit, 11 the middle bit and 01 the right bit (left check written first). A decoder maps the clues to a proposed correction. Program the AND table in F2 and feed it the two checks. The captured output implements the middle-bit flag. Two simultaneous flips can produce exactly the same syndrome as a different single flip.</p>
+
+<h2>Choose what changes next</h2>
+<p>A physical correction plays a pulse. A <b>Pauli frame</b> records a known correction in classical memory so later operations or readout can account for it. Run the QuantumOS repetition example with both checks equal to 1 and find the conditional pulse. Its other branches demonstrate frame updates. <a href="/riscq-studio?example=superconducting-repetition&amp;outcome=s0=1&amp;outcome=s1=1">Run the three-bit lookup</a>.</p>
+
+<div class="ex" data-id="K1.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>If both checks disagree, which bit would you correct under the single-flip assumption?</p>
+  <ol class="choices"><li data-k="0">Middle</li><li data-k="1">Left</li></ol>
+  <div class="why">The middle bit participates in both neighbouring checks.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Checks reveal relationships. The decoder’s answer depends on the assumed errors. A subsequent control action can be a pulse or a change in classical bookkeeping.</p><p>Next, replace the four-row table with the Helios decoder.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

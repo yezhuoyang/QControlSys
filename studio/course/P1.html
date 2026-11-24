@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What can a machine ask a qubit to do? · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="P1">
+<article>
+<h1>What can a machine ask a qubit to do?</h1>
+<p class="lead">Start with two photographs of the same experiment. By the end you can point to three different jobs in the pictures: holding an atom, changing the information it carries, and finding out what happened.</p>
+
+<h2>Read the picture before the labels</h2>
+<figure class="paper-figure"><a href="/course/figures/atom-transport.png" aria-label="Enlarge figure"><img src="/course/figures/atom-transport.png" alt="An array of atoms is rearranged. The experimental panels show images of atom positions and measurements after transport."></a><figcaption>Start at the left of panel b. Follow the spots as partners separate. Panel c asks whether their quantum relationship survived the journey. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Nature 604 (2022), Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>In panel b each small spot marks an atom seen by a camera. Imagine sliding two cups apart with a marble in each. A photograph can tell you where each marble ended up. What observation could tell you what happened to the information inside an atom?</p>
+
+<h2>One object, two possible answers</h2>
+<p>An atom has distinct internal energy levels. Choose two long-lived levels and give them the names 0 and 1. This pair forms a <b>qubit</b>. A measurement in this pair returns one of the two labels. Between measurements its state has amplitudes for both answers, including a relative phase. Phase describes how the two contributions line up when another pulse brings them together.</p>
+<p>Prepare the same initial state many times. Apply a short burst of light each time, then count how often 1 occurs. Changing the burst can change that fraction. A reproducible transformation of the state is a <b>gate</b>. A measurement that reads out the result completes a trial, often called a shot.</p>
+
+<h2>Who does which job?</h2>
+<p>In the moving-atom experiment one beam holds an atom in place, other beams drive internal transitions, and collected light forms the image. In an electrical quantum chip a cable delivers a microwave burst to a small circuit. Both machines need a classical controller that sets the burst and records when it happened. Panel c checks what the camera positions alone could never show. The team varies the phase of a last pulse and counts joint outcomes.</p>
+
+<div class="ex" data-id="P1.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>Which observation tests something beyond the atoms’ final positions?</p>
+  <ol class="choices"><li data-k="0">Counting occupied spots in one image</li><li data-k="1">Changing the final pulse phase and comparing joint outcomes over many shots</li></ol>
+  <div class="why">The second observation is sensitive to the relative phase of the prepared pair.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A qubit has an address in space and a state that carries information. A successful move can preserve the address assignment yet disturb the state.</p><p>Next, compare the two ways laboratories move a physical carrier.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Count flashes from an ion · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="R3">
+<article>
+<h1>Count flashes from an ion</h1>
+<p class="lead">One internal state scatters many photons when illuminated. Learn how a detector turns individual flashes into a count, and why a dark observation is ambiguous.</p>
+
+<h2>Open a counting window</h2>
+<p>A photon is a packet of light. Tune a laser so one qubit state can repeatedly absorb and emit photons. The other state scatters much less. A lens collects a fraction of the light. A photon detector produces electrical pulses, and a counter increments while its timing window is open. The result is an integer.</p>
+
+<h2>Pick a rule from data</h2>
+<p>Prepare known bright and dark states, record many counts, and plot both distributions. A threshold selects the predicted state. Stray photons can make a dark trial look bright. Finite collection efficiency can make a bright trial look dark. Time-resolved readout also uses when the photons arrived. Myerson et al. tested that approach on trapped calcium ions. <a href="https://arxiv.org/abs/0802.1684">Myerson et al., high-fidelity readout</a>.</p>
+
+<h2>Compare a counter with a camera</h2>
+<p>A detector watching one ion can give a single stream of arrival times. A camera also tells you which region emitted light. Bluvstein’s images use that spatial information to distinguish atom positions. For H2, inspect one released 32-bit shot and ask what survives after the individual classifications. The parity calculation uses those bits and discards the original photons. <a href="/course/M3">Read an H2 parity measurement</a>.</p>
+
+<div class="ex" data-id="R3.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>What does zero detected photons in a short window establish?</p>
+  <ol class="choices"><li data-k="0">The counter registered zero during that interval</li><li data-k="1">The ion was certainly dark</li></ol>
+  <div class="why">An emitted photon can miss the lens or detector.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Photon arrival events become counts within a window. Calibration connects counts to a bright or dark label, with a measurable error rate.</p><p>Next, give input and output events a common clock.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

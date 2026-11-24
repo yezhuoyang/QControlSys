@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Decide which state produced a signal · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="R2">
+<article>
+<h1>Decide which state produced a signal</h1>
+<p class="lead">Suppose each trial gives a noisy wave. Compare it with a reference, combine the evidence across samples, and decide where to draw the boundary between two answers.</p>
+
+<h2>Line up the phases</h2>
+<p>Think of trying to hear one note in a chord. Multiply the samples by a cosine and by a sine at the note’s frequency and sum over a window. The matching frequency contributes coherently. Other frequencies tend to cancel when the window is well chosen. This is <b>demodulation</b>. It gives two coordinates, often called I and Q.</p>
+
+<h2>Learn a boundary</h2>
+<p>Prepare 0 repeatedly, then prepare 1 repeatedly. Plot the two coordinates from each shot. Two overlapping clouds appear. A <b>discriminator</b> assigns a bit by asking which side of a calibrated boundary contains the point. Its mistakes are visible in the overlap. Extending the integration window can gather more signal, while relaxation during a long window can change the state being read.</p>
+
+<h2>Close the loop</h2>
+<p>QubiC 2.0 can make a later pulse depend on a measurement taken in the same circuit. Its first requirement is that the result label reach the sequencer before the branch needs it. In the QuantumOS feed-forward example, choose c=0 and c=1 in turn. Identify the first pulse that differs. Those two runs use supplied outcome bits. <a href="https://arxiv.org/abs/2309.10333">QubiC 2.0</a> · <a href="/course/B3">Follow the returned bit</a>.</p>
+
+<div class="ex" data-id="R2.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Two clouds overlap. What happens to points in the overlap?</p>
+  <ol class="choices"><li data-k="0">A classifier can mislabel some shots</li><li data-k="1">Doubling the number of plotted trials guarantees perfect classification</li></ol>
+  <div class="why">More calibration trials reveal the overlap more precisely. They cannot uniquely assign the state of every ambiguous trial.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Demodulation extracts a tone. Integration accumulates evidence. A calibrated discriminator turns that evidence into a bit for the controller.</p><p>Next, compare microwave readout with counting light.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

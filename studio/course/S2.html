@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keep a wave in phase · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="S2">
+<article>
+<h1>Keep a wave in phase</h1>
+<p class="lead">How can a controller produce a steady tone for a million cycles and still know its phase? Build the digital equivalent of a clock hand, then locate it in QubiC.</p>
+
+<h2>Count around a circle</h2>
+<p>Divide a circle into 16 positions. Start at zero and move forward four positions per sample. The hand returns to zero after four samples. Read its vertical coordinate at each stop to make a repeating wave. The running position is <b>phase</b>. A circuit that advances this number on every tick is a <b>numerically controlled oscillator</b>, or NCO.</p>
+
+<h2>Tune the increment</h2>
+<p>For a phase register with N bits, the circle has 2ᴺ positions. At a sample rate fₛ, increment k produces k fₛ / 2ᴺ cycles per second, interpreted within the sample band. In our 16-position example at 16 million samples per second, an increment of four produces 4 MHz. Setting the increment changes frequency. Changing the initial position shifts phase.</p>
+
+<h2>Find the two independent controls</h2>
+<figure class="paper-figure"><a href="/course/figures/qubic-logic.png" aria-label="Enlarge figure"><img src="/course/figures/qubic-logic.png" alt="QubiC diagram with pulse synthesis at the top and processing of the returning samples below."></a><figcaption>Find the outgoing arrow to the voltage converter at the upper right. The lower path processes the signal that comes back. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., QubiC, Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>QubiC combines a repeating carrier with a stored pulse shape called an envelope. A short envelope turns a continuous oscillation into a burst. Keeping the oscillator phase between bursts allows the second burst to start in a predictable direction. QICK also implements digitally synthesized drive and timed readout. <a href="https://arxiv.org/abs/2110.00557">Stefanazzi et al., QICK</a>.</p>
+
+<div class="ex" data-id="S2.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>What changes when the phase starts four positions later but the increment stays the same?</p>
+  <ol class="choices"><li data-k="0">Starting angle</li><li data-k="1">Frequency</li></ol>
+  <div class="why">Successive samples remain four positions apart.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>An oscillator remembers its angle. Its increment sets frequency and its initial value sets phase.</p><p>Next, store the shape to be played on that carrier.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

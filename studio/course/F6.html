@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buffer commands in a queue · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="F6">
+<article>
+<h1>Buffer commands in a queue</h1>
+<p class="lead">A producer can briefly be faster than a consumer. Build a four-slot queue on paper and decide exactly when an entry appears, moves or waits.</p>
+
+<h2>Keep the oldest word first</h2>
+<p>Use four storage locations and two indices called read and write pointers. An accepted input writes at the write pointer and advances it modulo four. An accepted output reads the oldest word and advances the read pointer. Keep an occupancy count to distinguish full from empty when pointers coincide. A simultaneous accepted read and write keeps occupancy constant. A real design specifies its behaviour at the full and empty boundaries.</p>
+
+<h2>Count events that actually transfer</h2>
+<p>Start empty. Accept words A and B. Read A. A stalled receiver now sees B held stable at the head. A later accepted read removes B. Follow the ready and valid signals on the INO timing interface in the next lesson. In RISC-Q, timed queues also compare stored timestamps with the clock and can release parameters early enough to cross a known pipeline. <a href="https://arxiv.org/html/2505.14902v1">Liu et al., RISC-Q</a> · <a href="/course/B2">Timed queue lab</a>.</p>
+
+<div class="ex" data-id="F6.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>After accepting A and B and completing exactly one read, what is at the head?</p>
+  <ol class="choices"><li data-k="0">A</li><li data-k="1">B</li><li data-k="2">An empty slot</li></ol>
+  <div class="why">The oldest accepted entry leaves first, advancing the read pointer to B.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A queue separates production from consumption only while space remains. Trace accepted writes, accepted reads and occupancy.</p><p>Next, watch a published board consume a queued command and toggle its output strobe.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

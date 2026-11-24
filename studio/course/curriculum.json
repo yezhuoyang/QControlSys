@@ -1,6 +1,284 @@
 {
   "parts": [
     {
+      "id": "P",
+      "title": "Hold, move and drive a qubit",
+      "color": "#286c68",
+      "badge": "Qubit physics",
+      "summary": "Learn which object carries the information, which field acts on it, and what a measurement can prove.",
+      "lessons": [
+        {
+          "id": "P1",
+          "title": "What can a machine ask a qubit to do?",
+          "href": "/course/P1",
+          "hook": "Start with two photographs of the same experiment. By the end you can point to three different jobs in the pictures: holding an atom, changing the information it carries, and finding out what happened.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "P2",
+          "title": "How do you carry a qubit across a chip?",
+          "href": "/course/P2",
+          "hook": "Two laboratories need distant partners to meet. Follow the moving trap in each apparatus, identify what stays still, then decide what evidence would show a successful journey.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "P3",
+          "title": "How does a pulse become a gate?",
+          "href": "/course/P3",
+          "hook": "A burst can move a qubit all the way from 0 to 1, halfway, or back where it started. Use a swing to reason about frequency, then use two pulses to reason about phase.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "P4",
+          "title": "How would you know the gate worked?",
+          "href": "/course/P4",
+          "hook": "A correctly timed voltage is encouraging. To learn what it did to the qubit, use repeated trials, a calibration sweep, and sequences that should return you to a known state.",
+          "exercises": 1,
+          "stars": 1
+        }
+      ]
+    },
+    {
+      "id": "S",
+      "title": "Generate and deliver a signal",
+      "color": "#a1532c",
+      "badge": "Signal generation",
+      "summary": "Choose a component by its output. Make voltage samples, build a tone, then deliver it to an electrode or a beam.",
+      "lessons": [
+        {
+          "id": "S1",
+          "title": "Turn a number into a voltage",
+          "href": "/course/S1",
+          "hook": "A computer can store the number 3. An electrode responds to volts. Follow one number across that boundary, then look at a measured output to see how long the change takes.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S2",
+          "title": "Keep a wave in phase",
+          "href": "/course/S2",
+          "hook": "How can a controller produce a steady tone for a million cycles and still know its phase? Build the digital equivalent of a clock hand, then locate it in QubiC.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S8",
+          "title": "Play a waveform from memory",
+          "href": "/course/S8",
+          "hook": "How can a host computer ask for a precisely timed pulse without sending every sample at the instant it is needed? Store the shape first, then give a local player a start command.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S3",
+          "title": "Give a fast wave a shape",
+          "href": "/course/S3",
+          "hook": "A radio can carry slow changes on a rapid oscillation. A qubit drive uses the same idea. Follow the pulse shape through a memory, a mixer and an output cable.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S6",
+          "title": "Choose a laser for the job",
+          "href": "/course/S6",
+          "hook": "A machine can point several colours of light at the same atom. Read the Lukin-group apparatus as a wiring diagram and work out which beam holds the atom and which changes its internal state.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S7",
+          "title": "Hold one atom in an optical tweezer",
+          "href": "/course/S7",
+          "hook": "What keeps an atom inside a spot of light even when no gate is playing? Follow the force across the focus and predict what happens if the focus starts moving.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S4",
+          "title": "Steer light with sound",
+          "href": "/course/S4",
+          "hook": "The atoms need a moving spot of light. Learn what a lens does, why sound can steer a beam, and how a laboratory measures the distance moved per change of frequency.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "S5",
+          "title": "Shape an electric well with electrodes",
+          "href": "/course/S5",
+          "hook": "How can stationary pieces of metal carry an ion around a bend? Read the racetrack drawing, then trace the voltage command that shifts a well.",
+          "exercises": 1,
+          "stars": 1
+        }
+      ]
+    },
+    {
+      "id": "R",
+      "title": "Collect and interpret a response",
+      "color": "#345b82",
+      "badge": "Readout",
+      "summary": "Follow two kinds of evidence back from the apparatus: a returning microwave tone and a stream of photons.",
+      "lessons": [
+        {
+          "id": "R4",
+          "title": "Read a qubit through a resonator",
+          "href": "/course/R4",
+          "hook": "A cold chip can return information along a cable even while the qubit stays in place. Identify the object that rings, the wave that probes it, and the quantity that comes back.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "R1",
+          "title": "Sample a returning voltage",
+          "href": "/course/R1",
+          "hook": "A readout cable brings back a changing voltage. Learn how it becomes a list of numbers and why one number rarely identifies the state of a qubit.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "R2",
+          "title": "Decide which state produced a signal",
+          "href": "/course/R2",
+          "hook": "Suppose each trial gives a noisy wave. Compare it with a reference, combine the evidence across samples, and decide where to draw the boundary between two answers.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "R3",
+          "title": "Count flashes from an ion",
+          "href": "/course/R3",
+          "hook": "One internal state scatters many photons when illuminated. Learn how a detector turns individual flashes into a count, and why a dark observation is ambiguous.",
+          "exercises": 1,
+          "stars": 1
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "title": "Program the FPGA",
+      "color": "#5b4a8a",
+      "badge": "Programmable logic",
+      "summary": "Configure a truth table, inspect its transistor switches, capture a bit, and connect working Verilog to physical pins.",
+      "lessons": [
+        {
+          "id": "F5",
+          "title": "Give two events a common clock",
+          "href": "/course/F5",
+          "hook": "Two boards receive the same program. Will their pulses arrive together? Separate the rate of ticking, the alignment of tick zero, and the time needed to travel down a cable.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "F1",
+          "title": "Program a circuit with a truth table",
+          "href": "/course/F1",
+          "hook": "Suppose a cable carries two yes-or-no answers. Build a circuit that signals when exactly one is yes. Then change what the circuit computes by rewriting four bits.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "F2",
+          "title": "Capture one bit on a clock edge",
+          "href": "/course/F2",
+          "hook": "A detector result may change while another circuit is reading it. Build one bit of memory, change an input between clock edges, and predict which level reaches the output.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "F3",
+          "title": "Write, test and load a hardware design",
+          "href": "/course/F3",
+          "hook": "Write the clocked table as a short circuit description. Test it with artificial pins, then follow the path from named ports to a switch and a light on a real board.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "F6",
+          "title": "Buffer commands in a queue",
+          "href": "/course/F6",
+          "hook": "A producer can briefly be faster than a consumer. Build a four-slot queue on paper and decide exactly when an entry appears, moves or waits.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "F4",
+          "title": "Hand one command to a laboratory board",
+          "href": "/course/F4",
+          "hook": "The FPGA must receive commands and release them in order. Follow a command from a queue to package pins and then to an instrument connector on the INO experiment controller.",
+          "exercises": 1,
+          "stars": 1
+        }
+      ]
+    },
+    {
+      "id": "K",
+      "title": "Decode and act on errors",
+      "color": "#80601d",
+      "badge": "Decoding",
+      "summary": "Start with two clues about a flip. Work up to the Helios decoder and distinguish a result check from a latency measurement.",
+      "lessons": [
+        {
+          "id": "K1",
+          "title": "Decode two clues about three qubits",
+          "href": "/course/K1",
+          "hook": "You have three stored bits and permission to ask whether neighbours agree. Use just those two clues to locate one flip, then see why real decoders need a model of what can go wrong.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "K2",
+          "title": "How a decoder grows across a chip",
+          "href": "/course/K2",
+          "hook": "An error can leave clues separated in space or time. Follow the work of matching those clues, then compare two implementations of the Helios algorithm.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "K3",
+          "title": "Step inside a Helios decoder link",
+          "href": "/course/K3",
+          "hook": "Open a circuit taken directly from the Helios hardware design. Watch two neighbouring workers grow a shared edge, then find the clock cycle when its status becomes visible.",
+          "exercises": 1,
+          "stars": 1
+        }
+      ]
+    },
+    {
+      "id": "M",
+      "title": "Replay published machines",
+      "color": "#236954",
+      "badge": "Machine studies",
+      "summary": "Trace native IBM pulse schedules, a Harvard–MIT moving pair and Quantinuum’s 32-ion phase scan. Each case names its evidence and reconstruction.",
+      "lessons": [
+        {
+          "id": "M1",
+          "title": "IBM Quantum Manila · read a native pulse schedule",
+          "href": "/course/M1",
+          "hook": "Read an IBM pulse schedule from the first rotation to the grouped measurement on five qubits.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "M2",
+          "title": "Lukin group · carry an entangled pair",
+          "href": "/course/M2",
+          "hook": "Replay the transport interval from Bluvstein and colleagues’ 2022 experiment. Watch two atoms separate while a second set of laser pulses protects their phase, then read the evidence that the state survived.",
+          "exercises": 1,
+          "stars": 1
+        },
+        {
+          "id": "M3",
+          "title": "Quantinuum H2 · follow the 32-ion phase scan",
+          "href": "/course/M3",
+          "hook": "Start with the first interacting pair in a published 32-ion circuit. Follow the pair into a gate zone, then ask why the experiment ends with 32 measurements at each of many different phases.",
+          "exercises": 1,
+          "stars": 1
+        }
+      ]
+    },
+    {
       "id": "A",
       "title": "What you are looking at",
       "color": "#1f3a5f",

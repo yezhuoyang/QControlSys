@@ -70,6 +70,18 @@ export const examples = [
   { id: "qccd-h2", platform: "qccd", title: "H2 GHZ program, first 230 Studio cycles",
     description: "Cooling, shuttles, single-ion rotations, Mølmer–Sørensen gates and photon-counted detection on the Studio H2 machine.",
     source: { language: "QCCD Studio H2 demo", text: "" }, frames: 230 },
+  { id: "quantinuum-h2-theta1", platform: "qccd", title: "Quantinuum H2 · first entangling gate of the published GHZ32 phase scan",
+    description: "The opening 12 Studio cycles of the compiled theta1 hardware circuit. Inspect the q0–q1 interaction at DG01. Controller electronics and cycle costs are QuantumOS reconstructions.",
+    source: {language: "Compiled H2 theta1 program", text: file("validation/qccd/h2-theta1.tsir.json")}, frames: 12,
+    async studioInput() {
+      const {architecture} = await qccd.studioReplay(null, ["--demo"]);
+      return {architecture, program:this.source.text};
+    },
+    provenance: {
+      circuit: "Quantinuum GHZ_N32.json, nonadaptive theta1, revision d422a716977899d7d6603c9efadb44e89e495125",
+      compiledProgram: "validation/qccd/h2-theta1.tsir.json; compilation, certificate and hashes in validation/qccd/h2-design.json",
+      extent: "Opening 12 Studio cycles by default. Electronics and delivery times use the QuantumOS controller model."
+    } },
   { id: "decoder-helios-d3", platform: "decoder", distance: 3, title: "Helios union-find decoder, compiled C on a RISC-Q core, distance 3",
     description: "The C union-find of the Helios FPGA decoder, compiled with clang and RISC-Q's firmware runtime, decodes 14 syndromes of a distance-3 surface code over 3 rounds. Every root is compared with the reference.",
     source: { language: "C (Helios union_find.c, D = 3)", text: helios.source(3) } },
@@ -111,9 +123,10 @@ export async function run(request) {
     const qasm = request.qasm ?? example?.qasm;
     const input = qasm ? await qccd.compileQasm(qasm, request.architecture)
       : request.example === "qccd-rotation" ? { architecture: example.source.text }
-      : request.studio ?? await qccd.studioReplay(null, ["--demo"]);
+      : request.studio ?? (example?.studioInput ? await example.studioInput() : await qccd.studioReplay(null, ["--demo"]));
     const replay = await qccd.studioReplay(input);
     m = qccd.machine(replay, { frames: request.frames ?? example?.frames, unitNs: request.unitNs });
+    if (example?.provenance && !request.studio && !qasm) Object.assign(m.provenance, example.provenance);
     source = qasm ? { language: "OpenQASM 2", text: qasm, tsir: input.program, compiler: "QCCD Studio revision " + input.revision }
       : { language: example?.source.language ?? "QCCD Studio program", text: example?.source.text ?? "" };
     hardware = qccd.schedule(m);

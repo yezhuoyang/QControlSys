@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quantinuum H2 · follow the 32-ion phase scan · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="M3">
+<article>
+<h1>Quantinuum H2 · follow the 32-ion phase scan</h1>
+<p class="lead">Start with the first interacting pair in a published 32-ion circuit. Follow the pair into a gate zone, then ask why the experiment ends with 32 measurements at each of many different phases.</p>
+
+<h2>Find the first pair</h2>
+<figure class="paper-figure"><a href="/course/figures/ion-trap.png" aria-label="Enlarge figure"><img src="/course/figures/ion-trap.png" alt="Plan of the H2 racetrack with repeated electrodes and enlarged views of operating zones."></a><figcaption>Trace one straight section of the loop. Panel b enlarges the repeating metal segments that move the electric wells along it. <a href="https://doi.org/10.1103/PhysRevX.13.041052">Moses et al., A Race-Track Trapped-Ion Quantum Processor, Phys. Rev. X 13, 041052 (2023), Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>Quantinuum’s original H2 benchmark prepares a shared state across 32 ions. It begins with a superposition on ion 0, then entangles pairs in a branching tree. The released circuit first pairs q0 with q1. In the QuantumOS compiled replay the ions meet at DG01. Open the first twelve control cycles and inspect the laser pulse associated with that pair. The controller executes a reconstructed program on the RISC-Q hardware model. <a href="/riscq-studio?example=quantinuum-h2-theta1&amp;view=chip">Inspect the first gate in the workspace</a>.</p>
+
+<h2>Change the measurement question</h2>
+<p>After preparing the state, the experimenters rotate the measurement basis for every ion. For each shot, count the 1s in its 32-bit result. An even count contributes +1, an odd count −1. Average over shots at the same angle, then repeat at the next angle. A coherent 32-ion superposition produces a parity that varies as cos(32θ) in the ideal sequence. A mixture can share its populations while losing this phase dependence. <a href="/validation?platform=qccd&amp;experiment=qccd-h2">Compare the 32 phase settings with 1,600 hardware shots</a>.</p>
+
+<h2>Follow the full program</h2>
+<p>Open the compiled theta1 replay and follow an ion through transport, a gate and analysis. The site positions and durations in this replay belong to the Studio model. Quantinuum released the circuit settings and shot strings, which support a parity comparison. They do not identify a particular electrode voltage or a laser waveform inside the H2 control cabinet. From the repository root, <code>node riscq/cli.mjs --example quantinuum-h2-theta1</code> runs the workspace excerpt with the QCCD Studio checkout available. <a href="/qccd-studio?experiment=h2-parity&amp;phase=1">Full theta1 Studio replay</a> · <a href="https://github.com/Quantinuum/quantinuum-hardware-h2-benchmark/tree/d422a716977899d7d6603c9efadb44e89e495125/ghz">Quantinuum circuits and hardware results</a>.</p>
+
+<div class="ex" data-id="M3.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Why change the analysis phase before measuring all 32 ions?</p>
+  <ol class="choices"><li data-k="0">To test a joint phase relationship</li><li data-k="1">To move the four gate zones</li></ol>
+  <div class="why">The analysis pulse changes the basis observed by final detection. The oscillating joint parity reveals phase information.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A hardware shot constrains a measurable outcome. A compiled replay explains one way to organize its operations. Matching the published circuit and outcomes leaves the laboratory’s internal wiring an open question.</p><p>Continue into the workspace lessons to trace a source instruction all the way to the hardware.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

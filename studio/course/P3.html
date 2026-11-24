@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How does a pulse become a gate? · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="P3">
+<article>
+<h1>How does a pulse become a gate?</h1>
+<p class="lead">A burst can move a qubit all the way from 0 to 1, halfway, or back where it started. Use a swing to reason about frequency, then use two pulses to reason about phase.</p>
+
+<h2>Push in rhythm</h2>
+<p>Imagine giving a swing a small push each time it returns. Pushes timed to its natural rhythm accumulate. A qubit also has a preferred frequency given by the energy difference between its two levels. A field oscillating near this frequency can transfer amplitude between them. On resonance with a fixed phase, an isolated two-level model gives a rotation angle equal to the integral of the drive strength in radians per second over time in seconds.</p>
+<p>A π rotation swaps 0 and 1. Half that area gives a π/2 rotation. Starting from 0, two identical π/2 pulses give 1. Shift the second pulse by half a carrier cycle and it rotates about the opposite axis, returning the ideal state to 0. This pair can reveal a phase error that a single half-pulse measurement misses.</p>
+
+<h2>Choose the field for the object</h2>
+<p>A <b>transmon</b> is a cold electrical circuit whose two lowest energy levels can hold a qubit. An oscillating voltage supplies a microwave electric field. Atoms and ions can instead absorb light on an optical transition. For two long-lived levels close in energy, two laser beams can drive a <b>Raman transition</b>: the difference between their frequencies supplies the level spacing. Their relative phase sets the rotation axis. The trapping beam and the gate beams serve different purposes.</p>
+
+<h2>Make one qubit matter to another</h2>
+<p>In the atom array, light couples one internal level to a highly excited <b>Rydberg state</b>. One excited atom shifts the energy of a nearby atom. A calibrated pulse sequence can therefore give a pair a phase that depends on their joint state. In an ion trap a laser force can couple both ions to a shared vibration. Returning that vibration to its start can leave a joint phase on the ions. On Manila, a microwave tone applied through one qubit near its neighbour’s frequency produces a conditional interaction. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al.</a> · <a href="https://doi.org/10.1103/PhysRevX.13.041052">Moses et al.</a> · <a href="/course/M1">Manila pulse schedule</a>.</p>
+
+<div class="ex" data-id="P3.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Two resonant π/2 pulses rotate about opposite axes. Where does a qubit prepared in 0 finish in the ideal model?</p>
+  <ol class="choices"><li data-k="0">0</li><li data-k="1">1</li><li data-k="2">Both outcomes equally often</li></ol>
+  <div class="why">The second rotation undoes the first. The relative phase controls the axis.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Frequency selects a transition, pulse area sets the angle in the resonant model, and phase chooses the axis. A two-qubit gate also needs an interaction.</p><p>Next, test a pulse sequence against measurements.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

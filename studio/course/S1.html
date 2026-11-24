@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Turn a number into a voltage · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="S1">
+<article>
+<h1>Turn a number into a voltage</h1>
+<p class="lead">A computer can store the number 3. An electrode responds to volts. Follow one number across that boundary, then look at a measured output to see how long the change takes.</p>
+
+<h2>Find the outgoing wire</h2>
+<figure class="paper-figure"><a href="/course/figures/qubic-hardware.png" aria-label="Enlarge figure"><img src="/course/figures/qubic-hardware.png" alt="Electronics at left, outward and return signal paths at center, cold quantum processor at right."></a><figcaption>Follow a green arrow to the chip. The orange measurement path sends a probe and brings its response back. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., QubiC, Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>The block marked <b>DAC</b> is a digital-to-analog converter. At an update it accepts a number called a code and produces a corresponding physical level. Imagine a dimmer with eight clicks. For an ideal teaching converter with codes 0 through 7 and 0.25 volts per click, code 3 requests 0.75 V. The step size limits which voltages you can request.</p>
+
+<h2>Build a shape from steps</h2>
+<p>Send 0, 1, 3, 1, 0 one code per microsecond. The requested voltage forms a short hill. The rate is one million samples per second. Adding bits gives more available heights. Sending samples more frequently gives more instants at which you can change height. The analog output takes time to settle and the filter beyond the converter can round the corners.</p>
+
+<h2>Read a real voltage step</h2>
+<figure class="paper-figure"><a href="/course/figures/duke-step.png" aria-label="Enlarge figure"><img src="/course/figures/duke-step.png" alt="Published oscilloscope traces of the electrode module rising and falling between its output rails."></a><figcaption>Compare the time taken to cross the middle of each voltage step. The scope observes the module connector. <a href="https://arxiv.org/html/2605.01132v1#S5.SS4">Peaks, Kaarls and Noel, Fig. 8</a>. Original paper figure. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>Peaks, Kaarls and Noel switch their electrode module across its voltage range and measure at the connector. In the QuantumOS replay, trace the selected sample back to the converter write. Compare the pin estimate with the measured connector trace at its zero crossing. The authors measured the assembled output. The two internal stages are a reconstruction. <a href="/board-validation#electrode">Inspect the board and voltage trace</a> · <a href="https://arxiv.org/html/2605.01132v1#S5.SS4">Peaks et al., Fig. 8</a>.</p>
+
+<div class="ex" data-id="S1.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>With the teaching converter, which change doubles the number of update instants per second?</p>
+  <ol class="choices"><li data-k="0">One extra code bit</li><li data-k="1">Doubling the sample rate</li></ol>
+  <div class="why">Bit width changes the set of heights. Rate changes the available update times.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A DAC turns a sequence of codes into a physical signal. Specify code range, volts per code, sample rate, and where the voltage was measured.</p><p>Next, generate a repeating wave without storing every cycle.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capture one bit on a clock edge · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="F2">
+<article>
+<h1>Capture one bit on a clock edge</h1>
+<p class="lead">A detector result may change while another circuit is reading it. Build one bit of memory, change an input between clock edges, and predict which level reaches the output.</p>
+
+<h2>Two doors make one register</h2>
+<p>Call the table result D. When the clock is low the first storage node, called the master, follows D and the second holds its old value. When the clock rises the first closes and the second opens onto the captured master level. While the clock is high, further changes at D cannot pass both doors. This rising-edge storage element is a <b>flip-flop</b>. A group holding a word is a register.</p>
+
+<h2>Change a pin and step the circuit</h2>
+<p>The three digits in a row are clock, B, A. Step from 001 to 101: the clock rises with the XOR result equal to 1. Advance to 111. D falls while Q still holds 1. Inspect Q’s causes and then the disconnected master switches. Edit the four table bits to 0001 and rerun the same pins. Can you find the first step where Q differs?</p>
+<div class="replay-lab" data-replay="cell">
+<h3>One clocked logic cell</h3>
+<details><summary>Edit the program</summary><label>Program in JSON<textarea rows="9" spellcheck="false"></textarea></label><button type="button" class="btn" data-run>Run edited program</button></details>
+<canvas aria-label="Schematic 3D apparatus. Use the component selector to inspect each part."></canvas>
+<p class="src">Drag to rotate. Select a part to inspect it. Orange marks your selection and teal marks activity.</p>
+<label>Component <select></select></label>
+<div class="replay-step"><button type="button" data-prev>Previous</button><input aria-label="Debugger step" type="range" min="0" value="0"><button type="button" data-next>Next</button></div>
+<output></output><svg role="img" aria-label="Each row shows low or high at successive program steps. The orange line marks the selected step."></svg><p class="src">Each row shows low or high at successive program steps. The orange line marks the selected step.</p>
+<details><summary>Inspect state and causal events</summary><pre data-reading></pre></details><p role="status"></p>
+</div><script type="module" src="/course/labs/view.js"></script>
+
+<h2>What determines the timing on a board?</h2>
+<p>A real flip-flop needs its input stable for a short time before and after the edge, called setup and hold. Violating that window can leave the output briefly undecided. Here pin changes and edges occupy separate steps, all switches settle within a step, and Q initially holds zero. There is no conversion from those steps to nanoseconds. Replay the identical program from the repository root using <code>node studio/course/labs/run.mjs cell</code>. Add a JSON filename to use your edited program.</p>
+
+<div class="ex" data-id="F2.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>Between 101 and 111 in the default program, what happens at Q?</p>
+  <ol class="choices"><li data-k="0">It follows D immediately</li><li data-k="1">It holds the value captured at the rising edge</li></ol>
+  <div class="why">The clock is high in both rows. The master holds its previous value.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>The selected table bit is visible at D immediately in this model. Q exposes only the bit captured at the most recent rising edge.</p><p>Next, express that same behaviour in a hardware description language and map its ports to a board.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

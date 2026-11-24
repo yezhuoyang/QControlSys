@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Read a qubit through a resonator · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="R4">
+<article>
+<h1>Read a qubit through a resonator</h1>
+<p class="lead">A cold chip can return information along a cable even while the qubit stays in place. Identify the object that rings, the wave that probes it, and the quantity that comes back.</p>
+
+<h2>Listen for a small shift</h2>
+<p>An electrical resonator stores energy shared between an electric field and a magnetic field. Like a bell it responds strongly near one frequency. Couple a transmon weakly to it with the two frequencies suitably separated. The state of the transmon slightly shifts the resonator’s effective frequency. A fixed probe tone then comes back with a different amplitude or phase. This is called dispersive readout.</p>
+
+<h2>Share a cable</h2>
+<p>Heinsoo et al. assigned different resonator frequencies to five qubits. Several tones can travel down the same line and several responses can return together. A receiver separates the frequency components. Stored energy takes time to build up and leak out, so ending the commanded pulse and emptying the resonator are distinct events. Locate those two intervals in the experiment. <a href="https://arxiv.org/abs/1801.07904">Heinsoo et al., rapid multiplexed readout</a>.</p>
+
+<div class="ex" data-id="R4.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>What lets a receiver distinguish two resonators sharing a line?</p>
+  <ol class="choices"><li data-k="0">Their distinct response frequencies</li><li data-k="1">A different clock tick for every photon</li></ol>
+  <div class="why">The receiver can isolate the band associated with each resonator.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>The qubit shifts the response of a resonator. The outgoing probe and returning signal carry that information to room temperature.</p><p>Next, sample the returning voltage.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

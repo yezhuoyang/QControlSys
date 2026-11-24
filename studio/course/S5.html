@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shape an electric well with electrodes · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="S5">
+<article>
+<h1>Shape an electric well with electrodes</h1>
+<p class="lead">How can stationary pieces of metal carry an ion around a bend? Read the racetrack drawing, then trace the voltage command that shifts a well.</p>
+
+<h2>Read the track from the side</h2>
+<figure class="paper-figure"><a href="/course/figures/ion-trap.png" aria-label="Enlarge figure"><img src="/course/figures/ion-trap.png" alt="Plan of the H2 racetrack with repeated electrodes and enlarged views of operating zones."></a><figcaption>Trace one straight section of the loop. Panel b enlarges the repeating metal segments that move the electric wells along it. <a href="https://doi.org/10.1103/PhysRevX.13.041052">Moses et al., A Race-Track Trapped-Ion Quantum Processor, Phys. Rev. X 13, 041052 (2023), Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>The orange dot in panel c is above the electrode surface. Rapidly alternating voltages provide confinement transverse to the path. Slower voltages on nearby metal segments shape the well along it. Increasing one electrode alone can change both the depth and the centre. A transport waveform is a coordinated sequence for several electrodes.</p>
+
+<h2>Follow one moving minimum</h2>
+<p>Imagine progressively raising the floor on the left and lowering it on the right. The ion feels a force toward the new minimum. Moving too abruptly can excite vibration even when the ion reaches the correct destination. In the H2 conveyor section, repeated groups of electrodes share signals. Several wells can move together. Ask which other wells share a channel before treating one move as independent.</p>
+
+<h2>Probe a different point</h2>
+<p>An oscilloscope connected at a board measures volts against time. An ion image measures position. Converting one into the other needs the electrode geometry and electric potential. Use the Duke electrode module for an electrical step and the H2 replay for a logical route. These experiments used different hardware. <a href="/board-validation#electrode">Duke connector measurement</a> · <a href="/course/M3">H2 gate zones and transport</a>.</p>
+
+<div class="ex" data-id="S5.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>A voltage step reaches its target at the connector. What observation would test motional heating?</p>
+  <ol class="choices"><li data-k="0">The digital code alone</li><li data-k="1">A measurement sensitive to the ion’s vibrational state</li></ol>
+  <div class="why">A correct connector voltage constrains the electrical path. Motional excitation is a property of the trapped particle.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Electrode signals combine to shape a moving minimum. Endpoint voltage, final position and residual motion answer three different questions.</p><p>Next, listen to a resonator to find out what happened on a fixed chip.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

@@ -45,7 +45,7 @@ No quantum state is simulated. Measurement outcomes are inputs.
 
 ## Learn it
 
-[The QuantumOS course](http://127.0.0.1:7432/course/) teaches the platform from the qubit up: 20 lessons in five parts (the stack, programming the controller, the three machines, designing hardware, fault tolerance on the controller) and eight background chapters. Each of its 129 exercises is checked against the simulator: a numeric answer is computed by running the program, not written into the page.
+[QuantumOS Learn](http://127.0.0.1:7432/course/) follows the control loop from qubit physics through signal generation, readout, programmable logic and decoding. Tutorials include an editable switch-level FPGA cell, native [IBM Manila pulse schedules](http://127.0.0.1:7432/course/M1), the [Bluvstein transport experiment](http://127.0.0.1:7432/course/M2) and the [Quantinuum H2 phase scan](http://127.0.0.1:7432/course/M3). The workspace lessons retain their trace-based exercises. [Background](http://127.0.0.1:7432/learn) groups component tutorials, papers and technical references by the job they explain.
 
 ## Examples
 

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step inside a Helios decoder link · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="K3">
+<article>
+<h1>Step inside a Helios decoder link</h1>
+<p class="lead">Open a circuit taken directly from the Helios hardware design. Watch two neighbouring workers grow a shared edge, then find the clock cycle when its status becomes visible.</p>
+
+<h2>Read the interface first</h2>
+<p>A worker in Helios tracks a group of connected detection events. Its <b>root</b> is an identifier for that group. The link between two workers stores each side’s previous root, accepts a one-bit request to grow from either end, and reports when the link has reached its configured length. In the authors’ default module the length is two and each root address is 15 bits. Reset and initialization clear the stored values on a rising clock edge. <a href="https://github.com/NamiLiy/Helios_scalable_QEC/blob/622d85d/design/channels/neighbor_link.sv">Helios neighbour-link source</a>.</p>
+
+<h2>Predict two consecutive rising edges</h2>
+<p>First A requests growth, then B requests growth. At the second request the counter reaches two and the full signal goes high. The registered odd-cluster signal uses the counter value from <em>before</em> the edge. Advance one more cycle with the odd input held high and see when the output changes. Inspect a bit of <code>increased</code> to follow it back to the logic that produced its next value.</p>
+<div class="replay-lab" data-replay="helios">
+<h3>Published Helios logic, one link</h3>
+<details><summary>Edit the program</summary><label>Program in JSON<textarea rows="9" spellcheck="false"></textarea></label><button type="button" class="btn" data-run>Run edited program</button></details>
+<canvas aria-label="Schematic 3D apparatus. Use the component selector to inspect each part."></canvas>
+<p class="src">Drag to rotate. Select a part to inspect it. Orange marks your selection and teal marks activity.</p>
+<label>Component <select></select></label>
+<div class="replay-step"><button type="button" data-prev>Previous</button><input aria-label="Debugger step" type="range" min="0" value="0"><button type="button" data-next>Next</button></div>
+<output></output><svg role="img" aria-label="Each input row has a low phase and a rising edge. The upper traces are the clock and growth requests. Full and odd are the reported output bits; initial register values are unknown until reset."></svg><p class="src">Each input row has a low phase and a rising edge. The upper traces are the clock and growth requests. Full and odd are the reported output bits; initial register values are unknown until reset.</p>
+<details><summary>Inspect state and causal events</summary><pre data-reading></pre></details><p role="status"></p>
+</div><script type="module" src="/course/labs/view.js"></script>
+
+<h2>Read the same hardware two ways</h2>
+<p>The replay evaluates the gate network produced by synthesizing the authors’ SystemVerilog with Yosys 0.9. It contains 33 flip-flops and 83 combinational gates. The scene groups pins, logic gates and storage bits in schematic positions. Clock phases express evaluation order. Timing in a placed FPGA requires routing and device delays. You can inspect or edit the input rows. Omitted input fields are zero, and the first row asserts reset. <a download href="/course/labs/helios/neighbor_link.sv">Original hardware module</a> · <a href="/course/labs/helios/netlist.json">Synthesized gate network</a> · <a href="/course/labs/helios/LICENSE.txt">Source license</a>.</p>
+
+<h2>Check the output independently</h2>
+<p>Download the hardware module and testbench to one directory. Compare their five rising-edge observations with the gate inspector. The output columns are growth count, full, odd, A’s registered root and B’s registered root. The headless QuantumOS command is <code>node studio/course/labs/run.mjs helios</code>. <a download href="/course/labs/helios/link_tb.sv">Icarus Verilog testbench</a>.</p>
+<pre><code>iverilog -g2012 -s link_tb -o link.vvp neighbor_link.sv link_tb.sv</code></pre>
+<pre><code>vvp link.vvp</code></pre>
+
+<div class="ex" data-id="K3.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>When the count changes from one to two on a rising edge, why can full change before odd?</p>
+  <ol class="choices"><li data-k="0">Full compares the current count. Odd is a register updated using the old count.</li><li data-k="1">The simulator assumes a slower clock for odd.</li></ol>
+  <div class="why">Both use the same clock. The source places the odd assignment inside the clocked block and the full comparison outside it.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A diagram of two linked workers hides a counter, root registers, selectors and individual logic gates. The native hardware source and the gate replay let you check the exact edge where information passes between workers.</p><p>Next, follow the complete controller path in a published processor.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

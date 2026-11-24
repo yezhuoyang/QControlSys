@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Choose a laser for the job · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="S6">
+<article>
+<h1>Choose a laser for the job</h1>
+<p class="lead">A machine can point several colours of light at the same atom. Read the Lukin-group apparatus as a wiring diagram and work out which beam holds the atom and which changes its internal state.</p>
+
+<h2>What makes light a control signal?</h2>
+<p>A laser produces an electromagnetic wave with a well-defined frequency and phase over the time of interest. Frequency sets which atomic transitions the light can address. Power and the area of the focused spot set intensity. Polarization, the direction of the electric field’s oscillation, helps determine which transitions couple. A pulse is a controlled interval of illumination.</p>
+
+<h2>Read the wavelengths on one bench</h2>
+<p>Bluvstein et al. use 830 nm light for the static trapping pattern and 828 nm light for steerable traps. Their global single-qubit rotations use a separate 795 nm Raman system. Atoms in two internal states acquire a controllable relative amplitude through two frequency components of the light. Microwave electronics set the modulation phase, so an electrical phase change can rotate the optical gate axis. Trace those jobs in the Methods before looking at the replay. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Raman laser system</a> · <a href="/course/M2">Phase-protection sequence</a>.</p>
+
+<div class="ex" data-id="S6.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Which source in this experiment sets the axis of a single-qubit rotation?</p>
+  <ol class="choices"><li data-k="0">The phase-controlled Raman drive</li><li data-k="1">The camera exposure</li></ol>
+  <div class="why">The relative phase of the drive components controls the axis.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Name a beam by its job, wavelength, target transition and timing. Two beams illuminating the same atom can do entirely different work.</p><p>Next, focus a trapping beam tightly enough to hold one atom.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

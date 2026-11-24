@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sample a returning voltage · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="R1">
+<article>
+<h1>Sample a returning voltage</h1>
+<p class="lead">A readout cable brings back a changing voltage. Learn how it becomes a list of numbers and why one number rarely identifies the state of a qubit.</p>
+
+<h2>Take snapshots of height</h2>
+<figure class="paper-figure"><a href="/course/figures/qubic-hardware.png" aria-label="Enlarge figure"><img src="/course/figures/qubic-hardware.png" alt="Electronics at left, outward and return signal paths at center, cold quantum processor at right."></a><figcaption>Follow a green arrow to the chip. The orange measurement path sends a probe and brings its response back. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., QubiC, Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>The incoming line ends at an <b>analog-to-digital converter</b> (ADC). Like reading a ruler at regular instants, it assigns each input to one of a finite set of codes. A saturated input reaches an end code and loses information about the excess. Noise can shift a reading across a code boundary.</p>
+
+<h2>Listen to a resonator</h2>
+<p>A <b>resonator</b> stores an oscillating field, much as a bell rings near one pitch. Coupling a transmon to a resonator shifts the resonator response depending on the qubit state. Send a weak probe tone, then sample its return. The state changes the amplitude or phase of a wave. A single sample near a zero crossing can look the same for different waves.</p>
+
+<h2>Choose a window</h2>
+<p>Heinsoo et al. read five superconducting qubits through a common feedline by assigning distinct frequencies. A receiver can pick one tone out of the composite waveform. The duration of the probe pulse, the time energy remains in the resonator, and the time a classified bit becomes available have different start and end events. <a href="https://arxiv.org/abs/1801.07904">Heinsoo et al., multiplexed readout</a>.</p>
+
+<div class="ex" data-id="R1.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Which output comes directly from a voltage sampler?</p>
+  <ol class="choices"><li data-k="0">A list of voltage codes</li><li data-k="1">A guaranteed error-free qubit bit</li></ol>
+  <div class="why">Classifying a state requires interpreting the samples using a readout calibration.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Sampling gives voltage codes at known times. Their rate, range and timing determine what information reaches the receiver.</p><p>Next, turn a window of samples into one decision.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

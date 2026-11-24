@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Give two events a common clock · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="F5">
+<article>
+<h1>Give two events a common clock</h1>
+<p class="lead">Two boards receive the same program. Will their pulses arrive together? Separate the rate of ticking, the alignment of tick zero, and the time needed to travel down a cable.</p>
+
+<h2>Agree on rate and origin</h2>
+<p>A clock is a repeated electrical transition that defines when a circuit samples inputs. A 50 MHz clock has 50 million cycles per second, so adjacent rising edges are 20 ns apart. Two clocks can have the same nominal rate and start at different phases. Sharing a reference reduces relative drift. A synchronization event can establish a common origin. Neither step removes propagation time between the boards.</p>
+
+<h2>Issue the command early</h2>
+<p>ARTIQ’s real-time input/output system gives commands an intended timestamp. The program must put the event into the system while that timestamp is still in the future. If hardware time has already caught up, a command can underflow. Compare this with QuantumOS’s timed queue, where a pulse parameter needs a lead to travel through its pipeline. The model’s exact-landing and late-landing properties state their assumptions alongside the proofs. <a href="https://m-labs.hk/artiq/manual/rtio.html">ARTIQ real-time I/O</a> · <a href="/model/RiscQ/Timing.lean">Timing definitions and proofs</a>.</p>
+
+<div class="ex" data-id="F5.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Two board clocks tick at 50 MHz. What additional information is needed to compare their timestamps?</p>
+  <ol class="choices"><li data-k="0">Their relative time origin and path delay</li><li data-k="1">Only their nominal frequency</li></ol>
+  <div class="why">A shared tick period supplies a scale. Alignment and propagation determine which remote events coincide.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A timestamp needs a clock period and an origin. Delivering an event on time also needs enough lead for its route.</p><p>Next, build logic that changes state on a chosen clock edge.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

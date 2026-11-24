@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IBM Quantum Manila · read a native pulse schedule · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="M1">
+<article>
+<h1>IBM Quantum Manila · read a native pulse schedule</h1>
+<p class="lead">Follow a quarter turn, called a square-root-of-X gate, down to a particular drive channel on IBM’s five-qubit Manila chip. Then compare it with a two-qubit gate and a grouped measurement.</p>
+
+<h2>Identify the actual machine</h2>
+<p>Manila was a five-qubit Falcon processor, revision 5.11, segment L. IBM’s archived description lays the qubits in a line, with a two-qubit command available in either direction on each adjacent pair. Select a qubit in the cutaway to read its archived properties and units. Connections follow the archive. Heights, channel positions and distances in this view are schematic. <a href="https://quantum.cloud.ibm.com/docs/en/ibm-quantum-platform/retired-qpus">IBM retired processor list</a> · <a href="https://github.com/Qiskit/qiskit-ibm-runtime/tree/af979cd172392998ff7e760e8e904e308fbee69b/qiskit_ibm_runtime/fake_provider/backends/manila">Pinned Manila configuration, properties and defaults</a>.</p>
+
+<h2>Step through the published commands</h2>
+<p>The first call, <code>sx</code>, applies a quarter-turn rotation to qubit 0. Select d0, its drive channel. The archived pulse lasts 160 sample ticks, about 35.56 ns on this backend. Inspect its two amplitude components, duration, width parameter sigma, and derivative correction beta. The next call, <code>cx</code>, acts on an ordered pair. Find its simultaneous drive and control pulses. Finally select acquire0 and find where sampling begins. The archive specifies which memory slots receive data.</p>
+<div class="replay-lab" data-replay="manila">
+<h3>Manila pulse debugger</h3>
+<details><summary>Edit the program</summary><label>Program in JSON<textarea rows="9" spellcheck="false"></textarea></label><button type="button" class="btn" data-run>Run edited program</button></details>
+<canvas aria-label="Schematic 3D apparatus. Use the component selector to inspect each part."></canvas>
+<p class="src">Drag to rotate. Select a part to inspect it. Orange marks your selection and teal marks activity.</p>
+<label>Component <select></select></label>
+<div class="replay-step"><button type="button" data-prev>Previous</button><input aria-label="Debugger step" type="range" min="0" value="0"><button type="button" data-next>Next</button></div>
+<output></output><svg role="img" aria-label="The high level marks a scheduled interval on the selected channel, including an explicit delay. The horizontal axis is native sample ticks."></svg><p class="src">The high level marks a scheduled interval on the selected channel, including an explicit delay. The horizontal axis is native sample ticks.</p>
+<figure data-envelope hidden><svg viewBox="0 0 560 96" role="img" aria-label="In-phase and quadrature samples of the selected pulse"></svg><figcaption></figcaption></figure>
+<details><summary>Inspect state and causal events</summary><pre data-reading></pre></details><p role="status"></p>
+</div><script type="module" src="/course/labs/view.js"></script>
+
+<h2>Try another physical connection</h2>
+<p>Change the pair [0,1] to [1,0] and inspect the different control channel. Try [0,4] to test the chip’s connectivity. Add <code>{"gate":"rz","qubits":[0],"params":[1.57]}</code> to change the phase reference by an angle in radians. Gates run in the listed order. All command templates in this archive, including the grouped readout, are available. Run <code>node studio/course/labs/run.mjs manila</code> for the same event IDs and source parameters.</p>
+
+<h2>What the archive lets you reproduce</h2>
+<p>The envelope plot evaluates the shape at the centre of each sample tick and applies the channel’s accumulated phase. Select a drive during a pulse to see its two components. Amplitude is normalized. Measuring volts at the chip would require the gain and response of the analog path. <a href="https://github.com/Qiskit/qiskit/blob/1.2.4/qiskit/pulse/library/symbolic_pulses.py">Qiskit pulse definitions and sampling convention</a>.</p>
+<p>Native channel assignments, sample offsets, pulse parameters, grouped acquisitions and phase updates come directly from the pinned command definitions. The timing and amplitudes specify a control request. The internal controller wiring, analog transfer functions, individual shot results and current device behaviour cannot be determined from that request. The historical qubit properties appear as source metadata.</p>
+
+<div class="ex" data-id="M1.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Why does reversing a connected pair lead to a different control channel?</p>
+  <ol class="choices"><li data-k="0">The native two-qubit instruction is directional</li><li data-k="1">Every pair uses one shared microwave channel</li></ol>
+  <div class="why">The two ordered pairs have separate pulse definitions in the archive.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>You can trace a gate to a native channel, a phase and a time interval, then check them against IBM’s own schedule. Gate fidelity requires a separate physical measurement.</p><p>Next, compare a chip with fixed neighbours to a processor that physically moves them.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

@@ -11,6 +11,7 @@ const PLATFORMS = [
     how: "Microwave pulses on coax drive and read out each qubit.",
     design: [["Design editor", "/riscq-design"]],
     runs: [
+      ["IBM Quantum Manila · native pulse debugger", "/course/M1#step-through-the-published-commands"],
       ["Bell pair with feed-forward", "/riscq-studio?example=superconducting-feedforward&outcome=c=1"],
       ["The ring as an editable design", "/riscq-studio?example=superconducting-design"],
       ["Repetition code with a decoder core", "/riscq-studio?example=superconducting-repetition&outcome=s0=1"],
@@ -22,6 +23,7 @@ const PLATFORMS = [
     how: "Lasers address ions in gate zones; electrode voltages shuttle them between zones.",
     design: [["QCCD Studio design page ↗", "https://www.qccd.academy/studio.html#design"]],
     runs: [
+      ["Quantinuum H2 · published phase scan", "/course/M3"],
       ["GHZ of three ions from OpenQASM", "/riscq-studio?example=qccd-ghz3&outcome=q0=1&outcome=q2=1"],
       ["Loop rotation on a Studio design", "/riscq-studio?example=qccd-rotation"],
       ["H2 replay, physical view", "/qccd-studio"],
@@ -32,7 +34,7 @@ const PLATFORMS = [
     learn: "/learn#neutral-atom",
     how: "Optical tweezers moved by AOD tones carry atoms; Rydberg and Raman lasers drive gates.",
     design: [["ZAC architecture file (no editor yet)", "/learn#e1"]],
-    runs: [["ZAC 14-qubit program on a zoned array", "/riscq-studio?example=neutral-bv14"]],
+    runs: [["Lukin group · entanglement transport", "/course/M2"], ["ZAC 14-qubit program on a zoned array", "/riscq-studio?example=neutral-bv14"]],
   },
 ];
 
@@ -106,7 +108,9 @@ function build() {
   for (const [text, href] of LINKS) {
     if (href) {
       const a = link(text, href);
-      if (here === href || (href === "/course" && here.startsWith("/course/"))) a.setAttribute("aria-current", "page");
+      const background = here === "/course/background" || here.startsWith("/course/background/");
+      if (here === href || (href === "/course" && here.startsWith("/course/") && !background) || (href === "/learn" && background))
+        a.setAttribute("aria-current", "page");
       links.append(a);
     } else {
       toggle = element("button", { type: "button", "aria-expanded": "false", "aria-controls": "qn-platforms" }, text + " ▾");

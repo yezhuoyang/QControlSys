@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Write, test and load a hardware design · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="F3">
+<article>
+<h1>Write, test and load a hardware design</h1>
+<p class="lead">Write the clocked table as a short circuit description. Test it with artificial pins, then follow the path from named ports to a switch and a light on a real board.</p>
+
+<h2>Describe what is connected</h2>
+<p>Verilog is a hardware description language. A module names a circuit and its external ports. The two input bits select a table entry continuously. The clocked assignment copies that entry into Q on a rising edge. In a Verilog number the rightmost bit is bit zero. For the browser’s AND table 0001 in row order, write <code>4'b1000</code> in Verilog.</p>
+<pre><code>module cell_demo #(parameter [3:0] TABLE = 4'b0110)
+  (input wire clk, a, b, output reg q = 0);
+  wire d = TABLE[{b,a}];
+  always @(posedge clk) q &lt;= d;
+endmodule</code></pre>
+
+<h2>Test before fitting the chip</h2>
+<p>A testbench supplies inputs and checks outputs. Download both files to one folder. With Icarus Verilog installed, run the two commands below. The test checks capture and hold for all four input combinations. Change the table and the corresponding expected function to test another circuit. <a download href="/course/labs/cell_demo.v">Circuit</a> · <a download href="/course/labs/cell_tb.v">Testbench</a>.</p>
+<pre><code>iverilog -g2012 -s cell_tb -o cell.vvp cell_demo.v cell_tb.v
+vvp cell.vvp</code></pre>
+
+<h2>Connect the ports on a Basys 3</h2>
+<p>For a Digilent Basys 3 rev B, create a Vivado RTL project for its Artix-7 XC7A35T-1CPG236C, add the circuit as design source and the pin constraints below. With <code>cell_demo</code> as top module, run synthesis to map the truth table and register, then implementation to place them and route wires. Inspect clock timing against the 10 ns period. Generate the bitstream (configuration file), connect the board through USB-JTAG, and select Program Device in Hardware Manager. Switches 0 and 1 drive A and B. LED 0 lights when they differ after an edge. Mechanical switches are asynchronous and may bounce. This exercise observes their settled positions. <a download href="/course/labs/basys3.xdc">Pin and clock constraints</a> · <a href="https://github.com/Digilent/digilent-xdc/blob/master/Basys-3-Master.xdc">Digilent pin map</a>.</p>
+
+<div class="ex" data-id="F3.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Which file connects the logical name q to the board’s LED pin?</p>
+  <ol class="choices"><li data-k="0">The pin constraints</li><li data-k="1">The testbench stimulus</li></ol>
+  <div class="why">The constraint maps the port to package pin U16 and specifies its electrical standard.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>Verilog describes the circuit, the testbench exercises it, and the constraints connect it to a particular board. Placement, routing and timing checks precede programming.</p><p>Next, buffer a command until the laboratory instrument is ready.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

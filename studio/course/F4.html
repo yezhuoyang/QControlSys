@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hand one command to a laboratory board · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="F4">
+<article>
+<h1>Hand one command to a laboratory board</h1>
+<p class="lead">The FPGA must receive commands and release them in order. Follow a command from a queue to package pins and then to an instrument connector on the INO experiment controller.</p>
+
+<h2>Agree on when a word moves</h2>
+<p>A queue holds words in first-in, first-out order, hence <b>FIFO</b>. A sending circuit asserts valid when a word is available. A receiving circuit asserts ready when it can accept one. In a ready/valid interface, a transfer happens on a rising edge where both are high. If valid stays high and ready is low, the sender holds the same word. Counting valid alone would count a stalled word twice. <a href="https://documentation-service.arm.com/static/64819f1516f0f201aa6b963c">Arm AXI-Stream specification</a>.</p>
+
+<h2>Follow the INO output bus</h2>
+<p>The Trenkwalder controller’s timing logic takes a timestamped word from a queue. Seven address wires select a device, sixteen data wires carry a value, and a separate strobe tells the device when to capture it. In the archived logic simulation, data 10922 at address 21 precedes the rising strobe by 240 ns on a 20 ns clock grid. In the board pin map, data bit zero leaves package pin R14 and reaches connector J17.b25 through a buffer. The strobe goes from B19 to J17.b8. <a href="/machines?boardCase=rtl-bus">Inspect the same command in 3D</a> · <a href="https://github.com/INO-quantum/FPGA-SoC-experiment-control/tree/94cecd4eb9d04f4ebb957f70a5783b45cbd7a51a">INO firmware, constraints and board drawings</a>.</p>
+
+<h2>Reproduce an edge, then find a deadline</h2>
+<p>With Icarus Verilog and Python installed, run <code>python validation/board/rtl/replay.py</code> from the repository root. The harness checks the upstream timing-module digest, supplies its FIFO boundary inputs, and compares the simulated package outputs with the saved transitions. In the measurements panel, choose a burst and count the observed runs that miss a deadline. The physical data there are whole-burst completion counts. They cannot locate a stall on one particular edge. <a href="/board-validation#bandwidth">Compare burst deadlines</a>.</p>
+
+<div class="ex" data-id="F4.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>For three rising edges valid is 1 and ready is 0, 0, 1. How many words transfer?</p>
+  <ol class="choices"><li data-k="0">Three</li><li data-k="1">One</li></ol>
+  <div class="why">Only the last edge has both signals high.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A transfer has a precise acceptance edge. The FIFO handshake, the converter strobe and measured burst completion each mark a different event.</p><p>Next, turn a set of measurement bits into a correction decision.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

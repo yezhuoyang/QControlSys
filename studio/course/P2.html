@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How do you carry a qubit across a chip? · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="P2">
+<article>
+<h1>How do you carry a qubit across a chip?</h1>
+<p class="lead">Two laboratories need distant partners to meet. Follow the moving trap in each apparatus, identify what stays still, then decide what evidence would show a successful journey.</p>
+
+<h2>Move the bottom of an electric well</h2>
+<figure class="paper-figure"><a href="/course/figures/ion-trap.png" aria-label="Enlarge figure"><img src="/course/figures/ion-trap.png" alt="Plan of the H2 racetrack with repeated electrodes and enlarged views of operating zones."></a><figcaption>Trace one straight section of the loop. Panel b enlarges the repeating metal segments that move the electric wells along it. <a href="https://doi.org/10.1103/PhysRevX.13.041052">Moses et al., A Race-Track Trapped-Ion Quantum Processor, Phys. Rev. X 13, 041052 (2023), Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>An <b>ion</b> is an atom with electric charge. Metal patches called electrodes set up an electric field. Think of a marble at the bottom of a bowl. Varying several electrode voltages in order slides the bottom of the electrical bowl along the track while the metal itself stays put. An oscillating field helps confine the ions across the track. H2 brings selected ions to zones where laser beams can act on them.</p>
+
+<h2>Move the bright spot</h2>
+<figure class="paper-figure"><a href="/course/figures/atom-transport.png" aria-label="Enlarge figure"><img src="/course/figures/atom-transport.png" alt="An array of atoms is rearranged. The experimental panels show images of atom positions and measurements after transport."></a><figcaption>Start at the left of panel b. Follow the spots as partners separate. Panel c asks whether their quantum relationship survived the journey. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Nature 604 (2022), Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>A neutral atom has balanced positive and negative charge. Light slightly displaces those charges. In a suitable laser field this makes the atom seek the brightest part of a focused spot. That spot is an <b>optical tweezer</b>. Steer the spot and the atom can follow. A sudden change can leave an atom oscillating or eject it. The H2 team coordinates electrode voltages. The moving-atom team coordinates beam positions and intensities.</p>
+
+<h2>Try the same question on a fixed chip</h2>
+<p>The qubits on IBM Manila are circuits patterned on a chip. To exchange information between distant circuits a compiler can use a sequence of gates on adjacent pairs. The materials stay in place. Ask separately where the information ends up and which object actually moved. <a href="/course/M1">Inspect Manila’s published connections</a>.</p>
+
+<div class="ex" data-id="P2.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Which physical quantity changes during a neutral-atom transport?</p>
+  <ol class="choices"><li data-k="0">The position of the focused trapping light</li><li data-k="1">The position of the metal trap electrodes</li></ol>
+  <div class="why">A steerable light field changes the location of the minimum in the atom’s potential energy.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>H2 moves an electric well under a charged ion. The atom array moves an optical well. The fixed chip transfers information through connected circuits.</p><p>Next, leave the position fixed and ask how a field writes a gate.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

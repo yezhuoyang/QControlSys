@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How a decoder grows across a chip · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="K2">
+<article>
+<h1>How a decoder grows across a chip</h1>
+<p class="lead">An error can leave clues separated in space or time. Follow the work of matching those clues, then compare two implementations of the Helios algorithm.</p>
+
+<h2>Put the clues on a graph</h2>
+<p>Repeated checks can themselves be noisy. A change between successive results marks a detection event. Draw possible single faults as edges between the events they might cause or between an event and a boundary. A chain of faults can leave clues only at its ends. A decoder seeks a plausible explanation from the graph.</p>
+
+<h2>Grow and merge neighbours</h2>
+<p>In a union-find decoder, groups around unresolved events grow and join when their growing regions meet. A group with an odd number of events needs another partner or a suitable boundary. Helios maps local work to parallel processing elements, with neighbour links and logic for coordinating progress. Read the architecture drawing in the paper and trace the path from a local update to the decision that a phase has completed. <a href="https://arxiv.org/abs/2406.08491">Helios hardware architecture and decoding algorithm</a>.</p>
+
+<h2>Run the reference code on a processor</h2>
+<p>QuantumOS also runs Helios’s published C reference on a modelled RISC-V core. In E3, inspect the input syndrome, the instructions that update cluster representatives, and the final root for each node. Compare those labels with the authors’ vectors. Agreement tests the computation at this interface. The number of serial instructions on the core cannot predict the time of the parallel FPGA implementation. <a href="/course/E3">Run a distance-three case</a> · <a href="https://github.com/NamiLiy/Helios_scalable_QEC">Helios gateware, C code and vectors</a>.</p>
+
+<div class="ex" data-id="K2.1" data-stars="1" data-kind="choice" data-answer="0">
+  <p>Which comparison tests functional agreement with the reference run?</p>
+  <ol class="choices"><li data-k="0">Comparing the computed cluster roots for the same syndrome</li><li data-k="1">Equating serial instruction count with parallel FPGA clock cycles</li></ol>
+  <div class="why">The roots are comparable output data. The two implementations schedule work differently.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A useful decoder check specifies the input syndrome, expected output and implementation. Latency needs its own endpoints, clock and hardware evidence.</p><p>Next, step through the gates and registers inside one of the published Helios links.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

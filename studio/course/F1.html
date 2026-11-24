@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Program a circuit with a truth table · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="F1">
+<article>
+<h1>Program a circuit with a truth table</h1>
+<p class="lead">Suppose a cable carries two yes-or-no answers. Build a circuit that signals when exactly one is yes. Then change what the circuit computes by rewriting four bits.</p>
+
+<h2>A chip you can wire after manufacture</h2>
+<figure class="paper-figure"><a href="/course/figures/qubic-logic.png" aria-label="Enlarge figure"><img src="/course/figures/qubic-logic.png" alt="QubiC diagram with pulse synthesis at the top and processing of the returning samples below."></a><figcaption>Find the outgoing arrow to the voltage converter at the upper right. The lower path processes the signal that comes back. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., QubiC, Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>The right edge of QubiC’s pulse generator must deliver fresh samples on time even while the host computer is busy. Its designers implement many circuits side by side in a chip whose logic and connections can be configured after manufacture. This is a <b>field-programmable gate array</b> (FPGA). Its configuration describes hardware that works simultaneously. Instructions for a processor built inside it are a separate program.</p>
+
+<h2>Give every input an answer</h2>
+<p>One wire can carry a 0 or a 1. Two wires B and A have four combinations: 00, 01, 10, 11. Store an answer for each in that order. The four answers 0, 1, 1, 0 implement exclusive OR, written XOR. A <b>lookup table</b> (LUT) feeds the input bits to switches that select one answer. Three two-way selectors suffice: A selects within each pair, B selects between those two results. A six-input table in a commercial device can encode 64 answers. <a href="https://docs.amd.com/r/2025.1-English/ug953-vivado-7series-libraries/LUT6">AMD LUT6 primitive</a>.</p>
+
+<h2>Zoom in to one conducting path</h2>
+<p>In the next lab select <code>low0.n</code> and its partner <code>low0.p</code>. A transistor acts as a controlled switch. The n-type switch conducts for a high gate, the p-type for a low gate. Complementary control wires open or close the pair together. An open switch reads Z (disconnected), distinct from driving 0. The selected pair connects a stored table bit to the output wire. Each inverter also exposes its pull-up and pull-down switches.</p>
+<p>This teaching layout uses ideal switches, initialized configuration bits and storage that holds a level while disconnected. Transistor dimensions, charge leakage, propagation delays, configuration-memory write circuits and the vendor’s physical placement are outside its model. <a href="/course/F2">Step through the switches</a>.</p>
+
+<div class="ex" data-id="F1.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>Which table makes the output high only for B=1 and A=1?</p>
+  <ol class="choices"><li data-k="0">1000 in row order 00, 01, 10, 11</li><li data-k="1">0001 in row order 00, 01, 10, 11</li></ol>
+  <div class="why">Only the fourth row has two high inputs.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>The table bits configure a Boolean function. Input pins select the active row through a tree of switches.</p><p>Next, add a clock so the circuit can remember a result.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

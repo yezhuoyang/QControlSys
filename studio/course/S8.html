@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Play a waveform from memory · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="S8">
+<article>
+<h1>Play a waveform from memory</h1>
+<p class="lead">How can a host computer ask for a precisely timed pulse without sending every sample at the instant it is needed? Store the shape first, then give a local player a start command.</p>
+
+<h2>Separate loading from playing</h2>
+<p>An arbitrary waveform generator (AWG) has sample memory, a clock and a path to a voltage converter. Store a list of signed values, configure how often to read the next value, then arm the output. The trigger is the event that starts playback. A trigger can be late even when the stored list is perfect. Conversely, a correctly timed trigger can play the wrong list.</p>
+
+<h2>Read a published data path</h2>
+<p>QubiC stores a complex envelope and combines it with a carrier. The mobile-atom apparatus instead uses two channels of a commercial waveform generator to produce many tones for two deflectors. Several simultaneous tones in one channel can produce several spots. Increasing the number of tones changes the peaks of their sum, so the generated samples must fit the converter range. <a href="https://doi.org/10.1109/TQE.2021.3116540">Xu et al., Fig. 2</a> · <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., dynamic reconfiguration</a>.</p>
+
+<div class="ex" data-id="S8.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>A player holds 100 samples and emits one every 2 ns. How long do their hold intervals span?</p>
+  <ol class="choices"><li data-k="0">50 ns</li><li data-k="1">200 ns</li></ol>
+  <div class="why">Multiply the number of samples by the time for one sample.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>A waveform player needs sample values, a playback clock and a trigger. The waveform duration follows from the first two, and the start time follows from the last.</p><p>Next, put the stored envelope on a carrier with a mixer.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>

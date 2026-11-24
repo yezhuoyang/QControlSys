@@ -10,21 +10,19 @@
   <body data-index="course">
     <main class="page wide">
       <article>
-        <section class="hero">
-          <p class="kicker">The QuantumOS course</p>
-          <h1>Learn how a quantum computer is <span>controlled</span>.</h1>
-          <p class="lead">
-            A quantum program does nothing until classical hardware turns it into pulses, waveforms and laser light at the
-            right nanosecond. This course follows one path: the stack of a real machine, the controller that schedules it,
-            the three platforms it drives, the hardware you can design yourself, and what fault tolerance asks of it.
-            Every exercise is checked against the simulator, running the same firmware the lesson describes.
-          </p>
-          <p>
-            <a class="btn" id="resume" href="/course/A1">Start with A1</a>
-            <a class="btn alt" href="/course/background/">Read the background</a>
-            <a class="btn alt" href="/riscq-studio?example=qccd-ghz3&outcome=q0=1&outcome=q2=1&view=chip">Open the workspace</a>
-          </p>
+        <section class="course-opening">
+          <div><p class="kicker">QuantumOS Learn</p>
+          <h1>What happens between a line of code and a qubit?</h1>
+          <p class="lead">In the picture, two atoms that began side by side end up far apart. How did a number in a computer move them? How could anyone tell if the information they carried survived?</p>
+          <p>Start with what the apparatus must do. Learn how it holds a qubit, delivers a pulse, listens for a response and decides what to do next. Then open the machines and follow a real program.</p>
+          <a class="btn" id="resume" href="/course/P1">Start with the first experiment</a>
+          <a class="btn alt" href="/learn">Browse Background by function</a></div>
+          <figure class="paper-figure"><a href="/course/figures/atom-transport.png" aria-label="Enlarge figure"><img src="/course/figures/atom-transport.png" alt="An array of atoms is rearranged. The experimental panels show images of atom positions and measurements after transport."></a><figcaption>Panel b shows the same pairs before and after transport. Look at their separation, then at the measurements alongside them. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Nature 604 (2022), Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
         </section>
+        <nav class="job-nav" aria-label="Choose a learning path">
+          <a href="#part-P">Qubit physics</a><a href="#part-S">Signals</a><a href="#part-R">Readout</a>
+          <a href="#part-F">FPGA programming</a><a href="#part-K">Decoding</a><a href="#part-M">Published machines</a><a href="#part-A">Workspace labs</a>
+        </nav>
 
         <section class="progress" aria-label="Your progress">
           <div><span>Your progress</span><b id="level">Newcomer</b><span id="levelNote">Kept in this browser.</span></div>
@@ -33,7 +31,7 @@
           <div><b id="badgeCount">0</b><span id="badgeOf">badges</span></div>
         </section>
 
-        <h2 id="path">The path</h2>
+        <h2 id="path">Tutorials by function</h2>
         <div class="parts" id="parts"></div>
 
         <h2 id="badges">Badges</h2>
@@ -53,18 +51,19 @@
       </article>
     </main>
     <footer class="foot">
-      <p>QuantumOS simulates the classical control system of quantum computers and the operations it schedules. No quantum state is simulated; measurement outcomes are inputs.</p>
+      <p>To review a run, name the command, the physical component it reaches, the response it produces, and the evidence for that response.</p>
       <p><a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">RISC-Q</a> · <a href="https://www.qccd.academy/">QCCD studio</a> · <a href="https://github.com/UCLA-VAST/ZAC">ZAC</a></p>
     </footer>
     <script type="module">
-      import { course, solved, progress, el } from "/course/course.js";
+      import { course, solved, el } from "/course/course.js";
       const curriculum = await course();
       const totals = { exercises: 0, stars: 0 };
       const render = () => {
-        const done = progress().done;
         const partsBox = document.getElementById("parts");
         partsBox.replaceChildren();
         let badges = 0, next = null;
+        const all = {exercises:0, stars:0};
+        const earned = new Set();
         for (const part of curriculum.parts) {
           let partEx = 0, partDone = 0;
           const items = part.lessons.map((lesson) => {
@@ -72,13 +71,15 @@
             const total = lesson.exercises ?? 0;
             partEx += total;
             partDone += mine.exercises;
+            all.exercises += mine.exercises;
+            all.stars += mine.stars;
             if (!next && mine.exercises < Math.max(1, total)) next = lesson;
             const finished = total > 0 && mine.exercises >= total;
             return el("li", {}, el("span", { class: "id", text: lesson.id }),
               el("span", {}, el("a", { href: lesson.href, text: lesson.title })),
               el("span", { class: "st" + (finished ? " done" : ""), text: finished ? "✓ done" : total ? mine.exercises + "/" + total + " · " + "★".repeat(Math.min(3, mine.stars)) + "☆".repeat(Math.max(0, Math.min(3, (lesson.stars ?? total) - mine.stars))) : "" }));
           });
-          if (partEx && partDone >= partEx) badges++;
+          if (partEx && partDone >= partEx) { badges++; earned.add(part.id); }
           partsBox.append(el("section", { class: "part", id: "part-" + part.id },
             el("div", { class: "ic", style: "background:" + part.color, text: part.id }),
             el("div", {},
@@ -89,7 +90,6 @@
         }
         totals.exercises = curriculum.parts.reduce((n, p) => n + p.lessons.reduce((m, l) => m + (l.exercises ?? 0), 0), 0);
         totals.stars = curriculum.parts.reduce((n, p) => n + p.lessons.reduce((m, l) => m + (l.stars ?? 0), 0), 0);
-        const all = solved();
         document.getElementById("exCount").textContent = all.exercises;
         document.getElementById("exOf").textContent = "of " + totals.exercises + " exercises";
         document.getElementById("starCount").textContent = all.stars;
@@ -102,11 +102,14 @@
         if (next) {
           const resume = document.getElementById("resume");
           resume.href = next.href;
-          resume.textContent = (all.exercises ? "Continue with " : "Start with ") + next.id + ": " + next.title;
+          resume.textContent = all.exercises ? "Continue · " + next.title : "Start the first tutorial";
+        } else {
+          const resume = document.getElementById("resume");
+          resume.href = "#path";
+          resume.textContent = "Review the tutorials";
         }
         document.getElementById("badgeList").replaceChildren(...curriculum.parts.map((part) => {
-          const total = part.lessons.reduce((m, l) => m + (l.exercises ?? 0), 0);
-          const got = total > 0 && solved(part.id).exercises >= total;
+          const got = earned.has(part.id);
           return el("div", { class: got ? "got" : "" }, el("i", { style: got ? "background:" + part.color : "", text: part.id }),
             el("span", {}, el("b", { text: part.badge }), el("br"), "Finish Part " + part.id));
         }));

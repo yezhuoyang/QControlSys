@@ -28,7 +28,7 @@
 const STORE = "qcontrol-course-v1";
 const nav = [
   ["Course", "/course/"],
-  ["Background", "/course/background/"],
+  ["Background", "/learn"],
   ["Workspace", "/riscq-studio"],
   ["Design", "/riscq-design"],
   ["Debugger", "/riscq"],
@@ -151,6 +151,11 @@ function sideBar(article, extra) {
     return (num ? num + " · " : "") + title;
   };
   const links = heads.map((h) => el("li", {}, el("a", { href: "#" + h.id, text: label(h) })));
+  // Keep the route through a lesson available on small screens as well.
+  if (links.length && !article.closest("[data-chapter='glossary']")) {
+    article.querySelector(".lead")?.after(el("details", {class:"reading-map"},
+      el("summary", {text:"Overview of this page"}), el("ol",{},links.map(link=>link.cloneNode(true)))));
+  }
   const side = el("aside", { class: "side" }, extra, el("h5", { text: "On this page" }), el("ol", {}, links));
   // Highlight the section in view.
   const spy = new IntersectionObserver((entries) => {
@@ -188,7 +193,11 @@ async function terms() {
   const glossary = await (await fetch("/course/glossary.json")).json();
   for (const span of spans) {
     const entry = glossary[span.dataset.term];
-    if (entry) span.dataset.def = entry.short;
+    if (entry) {
+      span.dataset.def = entry.short;
+      span.tabIndex = 0;
+      span.setAttribute("aria-label", span.textContent + ". " + entry.short);
+    }
     else console.warn("No glossary entry " + span.dataset.term);
   }
 }

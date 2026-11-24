@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lukin group · carry an entangled pair · QuantumOS Learn</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+</head>
+<body data-lesson="M2">
+<article>
+<h1>Lukin group · carry an entangled pair</h1>
+<p class="lead">Replay the transport interval from Bluvstein and colleagues’ 2022 experiment. Watch two atoms separate while a second set of laser pulses protects their phase, then read the evidence that the state survived.</p>
+
+<h2>Find the two endpoints</h2>
+<figure class="paper-figure"><a href="/course/figures/atom-transport.png" aria-label="Enlarge figure"><img src="/course/figures/atom-transport.png" alt="An array of atoms is rearranged. The experimental panels show images of atom positions and measurements after transport."></a><figcaption>Start at the left of panel b. Follow the spots as partners separate. Panel c asks whether their quantum relationship survived the journey. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Nature 604 (2022), Fig. 1</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+<p>The team prepares pairs of rubidium-87 atoms separated by 3 µm. Figure 1b shows the larger separation of 110 µm after a 300 µs transport interval. The static array uses 830 nm trapping light, and mobile tweezers use 828 nm. A two-channel Spectrum M4i.6631-x8 produces signals for crossed deflectors. The 795 nm Raman system drives the qubit. These wavelengths refer to different jobs on the same apparatus. <a href="https://doi.org/10.1038/s41586-022-04592-6">Bluvstein et al., Methods</a>.</p>
+
+<h2>Move the wells while protecting the phase</h2>
+<p>The authors interpolate positions with a cubic profile. Here the two ends of a representative pair move symmetrically about their midpoint and start and finish at rest. That choice fixes the separation to a + (b − a)(3s² − 2s³), where s is elapsed time divided by duration. The atoms follow the spots ideally. The eight X and Y rotations reverse the accumulation of certain unwanted phase shifts. Their evenly spaced midpoints are a reconstruction. At the reported 1 MHz rotation frequency a π pulse takes 0.5 µs.</p>
+<div class="replay-lab" data-replay="lukin">
+<h3>Replay the transport interval</h3>
+<details><summary>Edit the program</summary><label>Program in JSON<textarea rows="9" spellcheck="false"></textarea></label><button type="button" class="btn" data-run>Run edited program</button></details>
+<canvas aria-label="Schematic 3D apparatus. Use the component selector to inspect each part."></canvas>
+<p class="src">Drag to rotate. Select a part to inspect it. Orange marks your selection and teal marks activity.</p>
+<label>Component <select></select></label>
+<div class="replay-step"><button type="button" data-prev>Previous</button><input aria-label="Debugger step" type="range" min="0" value="0"><button type="button" data-next>Next</button></div>
+<output></output><svg role="img" aria-label="The two position traces are normalized to their own maximum displacement about the midpoint. The Raman trace marks pulse windows. Inspect positions in µm and time in µs."></svg><p class="src">The two position traces are normalized to their own maximum displacement about the midpoint. The Raman trace marks pulse windows. Inspect positions in µm and time in µs.</p>
+<details><summary>Inspect state and causal events</summary><pre data-reading></pre></details><p role="status"></p>
+</div><script type="module" src="/course/labs/view.js"></script>
+
+<h2>Run the stationary comparison</h2>
+<p>Can the stationary measurements predict what the team saw after transport? Fit the offset, amplitude and phase of a two-qubit parity oscillation using only the stationary dots in Fig. 1c. Use that curve unchanged at all 41 transported settings. The comparison below uses the centres of the published figure markers. It applies to the original 300 µs experiment, including when you edit the separate transport program above.</p>
+<div class="replay-lab" id="parity-comparison"><h3>Compare the published phase scans</h3>
+<svg viewBox="0 0 550 145" role="img" aria-label="Stationary fit and transported parity observations versus phase from zero to two pi"></svg>
+<label>Analysis phase <input type="range" min="0" max="40" value="0"></label>
+<output></output><p class="src">Curve from stationary observations · orange dots from transported pairs · vertical axis from −1 to +1 · phase from 0 to 2π.</p>
+<a href="/course/labs/atom-parity.json">Inspect the digitized values and source</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div>
+<p>Set <code>moving</code> to false. The Raman pulses still run over the same interval. Compare this control with the stationary and transported data in panel c. The fitted oscillations in that figure are experimental evidence. The replay generates target positions and pulse windows. It assumes ideal transport and does not predict atom loss or the measured parity contrast. <a href="https://doi.org/10.1038/s41586-022-04592-6">Experimental comparison in Fig. 1c–d</a>.</p>
+<p>Use <code>node studio/course/labs/run.mjs lukin</code> to inspect the same trajectory from a script. A JSON file supplied after the case name replaces the default program.</p>
+
+<div class="ex" data-id="M2.1" data-stars="1" data-kind="choice" data-answer="1">
+  <p>What should persist when you switch to the stationary comparison?</p>
+  <ol class="choices"><li data-k="0">The change of pair separation</li><li data-k="1">The sequence of eight protective rotations</li></ol>
+  <div class="why">The experimental control holds the atoms in place while applying the same phase-protection sequence.</div>
+</div>
+<section class="remember"><h2>What to remember</h2><p>The commanded position and the qubit’s phase have separate controls. An image checks separation. A parity scan tests coherence.</p><p>Next, follow the comparable phase measurement on Quantinuum’s ion racetrack.</p></section>
+</article>
+<script type="module">import { course } from "/course/course.js"; await course();</script>
+</body>
+</html>
