@@ -2,11 +2,25 @@
 
 # QuantumOS
 
-**A general framework to simulate real quantum computers with control systems.**
+**Build and evaluate your fault-tolerant quantum operating system.**
 
-Give it a program. It lowers the program to timed hardware operations and to machine code for the control processors,
-runs that code in a Lean 4 model of the controller, and lets you step through the result in 3D:
-pulses on the wires, ions shuttling through a trap, atoms carried by optical tweezers.
+A fault-tolerant program reaches the hardware only through system calls: allocate ancillas, route qubits, decode syndromes, request magic states, update the Pauli frame.
+QuantumOS runs those calls on a real quantum computer, simulated down to its control system, and measures what each call costs.
+The machine can be superconducting, trapped-ion or neutral-atom.
+
+![QuantumOS architecture: fault-tolerant programs compile to system calls; the operating system schedules them against a machine's declared latencies and capacities; underneath, a quantum computer is simulated with its full control system, and measured costs flow back up](docs/media/quantumos-architecture.svg)
+
+| System call | On the hardware | In QuantumOS today |
+| --- | --- | --- |
+| `request_ancilla` / `release_ancilla` | reset pulse · re-cooling and pumping · atom reload | next |
+| `route` | couplers or SWAPs · ion shuttling · AOD tweezer moves | measured: ion shuttles 64–128 µs, AOD moves 90–145 µs |
+| `H` `CNOT` `CZ` … | microwave pulses · laser beams · Rydberg and Raman light | **runs** |
+| `measure` | readout, demodulation, threshold, publish to every core | **runs**: the bit reaches every core 86 ns after its window closes |
+| `decode_syndrome` | syndrome bits to a decoder core | **runs**: 2-bit lookup in 64 ns; Helios union-find on a core, 17–58 µs at d = 3 |
+| `request_magic` | one magic-state factory run | next |
+| `pauli_frame_update` | frame bits flip, no pulse | **runs** |
+
+Times are results of the model, read from the trace of the shipped examples, not hardware measurements.
 
 ![Ions shuttle between gate zones of a trap while the control cores around it drive the electrodes and lasers](docs/media/riscq-ions.gif)
 
@@ -16,7 +30,8 @@ pulses on the wires, ions shuttling through a trap, atoms carried by optical twe
 
 ## What you get
 
-- **Three platforms, one framework.** Superconducting transmons, trapped-ion QCCD machines, neutral-atom arrays.
+- **An operating-system interface.** Fault-tolerant programs written as system calls, each with a measured latency and the shared service it holds.
+- **Three platforms underneath.** Superconducting transmons, trapped-ion QCCD machines, neutral-atom arrays.
 - **The control system is modelled, not assumed.** Control cores that execute RV32I firmware, links, timed queues, DACs, electrode selectors, AOD tones.
 - **Real inputs.** OpenQASM, [QCCD Studio] programs, [ZAC] programs, fault-tolerance system calls, and unmodified [RISC-Q] firmware binaries.
 - **Real decoders on the controller.** The C union-find of the [Helios] decoder, compiled for a RISC-V control core, runs and matches Helios's own test vectors.

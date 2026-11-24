@@ -11,5 +11,5 @@
     "three": "0.180.0"
   },
   "license": "MIT",
-  "description": "QuantumOS: a general framework to simulate real quantum computers with control systems"
+  "description": "QuantumOS: build and evaluate your fault-tolerant quantum operating system, on simulated quantum computers with their control systems"
 }

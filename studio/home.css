@@ -81,6 +81,23 @@ a.card:hover { border-color: var(--green); box-shadow: 0 4px 16px #4338ca14; }
 .pipeline span { display: block; font-weight: 600; margin: 2px 0 4px; }
 .pipeline p { margin: 0; font-size: 13.5px; color: var(--muted); }
 
+/* Architecture figure and the system-call table */
+.arch { margin: 0 0 18px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fafbfd; }
+.arch img { display: block; width: 100%; height: auto; }
+.calls { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.calls table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
+.calls th { text-align: left; font: 600 11px "Inter", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); background: #f7f8fc; }
+.calls td { padding: 9px 12px; border-bottom: 1px solid var(--soft); vertical-align: top; color: #2d3748; }
+.calls tr:last-child td { border-bottom: 0; }
+.calls td:first-child { white-space: nowrap; }
+.calls code { background: #eef0fe; color: var(--navy); }
+.st { display: inline-block; font: 600 11px "Inter", sans-serif; letter-spacing: 0.04em; padding: 1px 8px; border-radius: 10px; margin-right: 6px; }
+.st.runs { background: #dcfce7; color: #166534; }
+.st.meas { background: #cffafe; color: #155e75; }
+.st.next { background: #f1f3f9; color: var(--muted); }
+p.note { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); max-width: 900px; }
+
 footer.foot { border-top: 1px solid var(--line); padding: 26px 0 34px; color: var(--muted); font-size: 14px; text-align: center; background: #fff; margin-top: 30px; }
 footer.foot p { margin: 4px 0; }
 

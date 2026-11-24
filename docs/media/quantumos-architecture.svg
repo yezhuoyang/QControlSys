@@ -1,0 +1,393 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="1040" viewBox="0 0 1200 1040" role="img" aria-labelledby="t d">
+<title id="t">QuantumOS: build and evaluate your fault-tolerant quantum operating system</title>
+<desc id="d">Three layers. Top: fault-tolerant programs compiled through logical measurements and lattice surgery into a listing of system calls. Middle: the operating system interface, eight system calls (request_ancilla, route, gates, measure, decode_syndrome, request_magic, pauli_frame_update, release_ancilla), a scheduler, a machine that declares a latency and a capacity per service, and a resource VM that admits or refuses a program. Bottom: a real quantum computer simulated with its control system: RISC-Q control cores running RV32I firmware, a board hub, a decoder core and converters, driving superconducting transmons, trapped ions that shuttle, and neutral atoms carried by AOD tweezers. Measured costs flow back up to calibrate the machine.</desc>
+<style>
+  svg { fill: #111827; }
+  text { font-family: Inter, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .mono { font-family: "Cascadia Code", Consolas, Menlo, "DejaVu Sans Mono", monospace; }
+  .h1 { font-size: 17px; font-weight: 700; }
+  .h2 { font-size: 14px; font-weight: 700; }
+  .grey { fill: #586174; }
+  .code { font-size: 10.5px; fill: #1f2937; }
+  .call { font-size: 10.5px; font-weight: 700; }
+  .svc { font-size: 10.5px; fill: #586174; }
+  .st { font-size: 10.5px; fill: #374151; }
+  .w { fill: #ffffff; }
+  .pale { fill: #c7d2fe; }
+  .lbl { font-size: 10.5px; fill: #cbd5e1; }
+  .kw { font-size: 11px; font-weight: 700; }
+  .flow { stroke-dasharray: 5 9; animation: flow 1.1s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -14; } }
+  .shuttle { animation: shuttle 6s ease-in-out infinite; }
+  @keyframes shuttle { 0%, 12% { transform: translateX(0); } 42%, 68% { transform: translateX(96px); } 94%, 100% { transform: translateX(0); } }
+  .laser { opacity: 0; animation: laser 6s linear infinite; }
+  @keyframes laser { 0%, 45% { opacity: 0; } 48%, 62% { opacity: 0.95; } 65%, 100% { opacity: 0; } }
+  .aod { animation: aod 6s ease-in-out infinite; }
+  @keyframes aod { 0%, 12% { transform: translateY(0); } 42%, 68% { transform: translateY(-72px); } 94%, 100% { transform: translateY(0); } }
+  .ryd { opacity: 0; animation: ryd 6s linear infinite; }
+  @keyframes ryd { 0%, 45% { opacity: 0; } 48%, 62% { opacity: 0.3; } 65%, 100% { opacity: 0; } }
+  .blink { animation: blink 2.4s ease-in-out infinite; }
+  @keyframes blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.9; } }
+  .bit { animation: bit 5s linear infinite; }
+  @keyframes bit { 0% { transform: translateX(0); opacity: 0; } 4% { opacity: 1; } 94% { opacity: 1; } 100% { transform: translateX(1059px); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .flow, .shuttle, .aod, .blink, .bit { animation: none; }
+    .laser, .ryd { animation: none; opacity: 0.5; }
+  }
+</style>
+<defs>
+  <marker id="ahI" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4338ca"/></marker>
+  <marker id="ahC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e7490"/></marker>
+  <marker id="ahS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#94a3b8"/></marker>
+  <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#818cf8" stop-opacity="0"/><stop offset="1" stop-color="#a5b4fc"/></linearGradient>
+  <radialGradient id="blobA"><stop offset="0" stop-color="#d97706" stop-opacity="0.55"/><stop offset="1" stop-color="#d97706" stop-opacity="0"/></radialGradient>
+  <symbol id="tile" viewBox="0 0 27 27" width="27" height="27">
+    <rect width="27" height="27" fill="#e2e8f0"/>
+    <rect x="0" y="0" width="9" height="9" fill="#cbd5e1"/><rect x="18" y="0" width="9" height="9" fill="#cbd5e1"/>
+    <rect x="9" y="9" width="9" height="9" fill="#cbd5e1"/><rect x="0" y="18" width="9" height="9" fill="#cbd5e1"/>
+    <rect x="18" y="18" width="9" height="9" fill="#cbd5e1"/>
+    <rect width="27" height="27" fill="none" stroke="#94a3b8"/>
+  </symbol>
+  <symbol id="xmon" viewBox="-12 -12 24 24" width="24" height="24" overflow="visible">
+    <path d="M-10 0h20M0 -10v20" stroke-width="5" stroke-linecap="round"/>
+  </symbol>
+</defs>
+
+<rect width="1200" height="1040" rx="18" fill="#fafbfd"/>
+
+<!-- ============ 1 · fault-tolerant programs ============ -->
+<rect x="16" y="16" width="1168" height="176" rx="14" fill="#ffffff" stroke="#dde1ea"/>
+<circle cx="40" cy="37" r="11" fill="#4338ca"/><text x="40" y="41.5" text-anchor="middle" class="w" font-size="12.5" font-weight="700">1</text>
+<text x="58" y="43" class="h1">Fault-tolerant programs<tspan class="grey" font-size="14" font-weight="400">  compiled down to system calls</tspan></text>
+<text x="1164" y="43" text-anchor="end" class="grey" font-size="12">algorithm → logical measurements → lattice surgery → system calls</text>
+
+<g transform="translate(36,56)">
+  <rect width="258" height="124" rx="9" fill="#f8fafc" stroke="#dde1ea"/>
+  <text x="12" y="20" font-size="12.5"><tspan class="mono" font-weight="700" fill="#4338ca">.prog</tspan><tspan class="grey">  algorithm</tspan></text>
+  <text class="mono code" x="12" y="44">program dj[q: n+1, c: n]:</text>
+  <text class="mono code" x="12" y="60">  for 0 ≤ i &lt; n:</text>
+  <text class="mono code" x="12" y="76">    <tspan fill="#2563eb">H</tspan>(i)</text>
+  <text class="mono code" x="12" y="92">  <tspan fill="#2563eb">X</tspan>(n); <tspan fill="#2563eb">H</tspan>(n)</text>
+  <text class="mono code" x="12" y="108">  djOracle(n, a)</text>
+</g>
+<path d="M297 118h12" stroke="#4338ca" stroke-width="2.5" marker-end="url(#ahI)"/>
+<g transform="translate(314,56)">
+  <rect width="258" height="124" rx="9" fill="#f8fafc" stroke="#dde1ea"/>
+  <text x="12" y="20" font-size="12.5"><tspan class="mono" font-weight="700" fill="#4338ca">.qppm</tspan><tspan class="grey">  logical measurements</tspan></text>
+  <text class="mono code" x="12" y="44">for 0 ≤ i &lt; n:</text>
+  <text class="mono code" x="12" y="60">  prepare |Y+⟩ -&gt; anc[3i]</text>
+  <text class="mono code" x="12" y="76">  <tspan fill="#b45309">measure</tspan> Z q[i] Z anc[3i]</text>
+  <text class="mono code" x="12" y="92">    -&gt; m[6i]</text>
+  <text class="mono code" x="12" y="108">  when m[6i]: <tspan fill="#b45309">frame</tspan> Z q[i]</text>
+</g>
+<path d="M575 118h12" stroke="#4338ca" stroke-width="2.5" marker-end="url(#ahI)"/>
+<g transform="translate(592,56)">
+  <rect width="258" height="124" rx="9" fill="#f8fafc" stroke="#dde1ea"/>
+  <text x="12" y="20" font-size="12.5"><tspan class="mono" font-weight="700" fill="#4338ca">.qec</tspan><tspan class="grey">  lattice surgery</tspan></text>
+  <use href="#tile" xlink:href="#tile" x="178" y="6" width="22" height="22"/>
+  <use href="#tile" xlink:href="#tile" x="222" y="6" width="22" height="22"/>
+  <rect x="200" y="13" width="22" height="8" fill="#f97316" opacity="0.8"/>
+  <text class="mono code" x="12" y="44">alloc A[3i, 3i+1)</text>
+  <text class="mono code" x="12" y="60">M0 = <tspan fill="#0e7490">merge</tspan> Z[D[i]] Z[A[3i]]</text>
+  <text class="mono code" x="12" y="76">extract M0 rounds=3</text>
+  <text class="mono code" x="12" y="92"><tspan fill="#be185d">decode</tspan> rounds=3 syndrome[…]</text>
+  <text class="mono code" x="12" y="108">Z[D[i]] Z[A[3i]] = <tspan fill="#0e7490">split</tspan> M0</text>
+</g>
+<path d="M853 118h12" stroke="#4338ca" stroke-width="2.5" marker-end="url(#ahI)"/>
+<g transform="translate(870,56)">
+  <rect width="294" height="124" rx="9" fill="#eef0fe" stroke="#4338ca" stroke-width="1.5"/>
+  <text x="12" y="20" font-size="12.5"><tspan class="mono" font-weight="700" fill="#4338ca">.sysprog</tspan><tspan class="grey">  expand · insert calls · schedule</tspan></text>
+  <text class="mono code" x="12" y="44"><tspan fill="#64748b">@0 ns    </tspan><tspan fill="#7c3aed">request_ancilla</tspan> 9</text>
+  <text class="mono code" x="12" y="60"><tspan fill="#64748b">@250 ns  </tspan><tspan fill="#2563eb">H</tspan> ancilla[a+6]</text>
+  <text class="mono code" x="12" y="76"><tspan fill="#64748b">@275 ns  </tspan><tspan fill="#0e7490">route</tspan> ancilla[a+6:a+7]</text>
+  <text class="mono code" x="12" y="92"><tspan fill="#64748b">@1275 ns </tspan><tspan fill="#2563eb">CNOT</tspan> ancilla[a+6:a+7]</text>
+  <text class="mono code" x="12" y="108"><tspan fill="#64748b">@58 µs   </tspan><tspan fill="#be185d">decode_syndrome</tspan> rounds=3</text>
+</g>
+
+<path d="M600 194v32" stroke="#4338ca" stroke-width="2.5" marker-end="url(#ahI)"/>
+<text x="614" y="216" fill="#4338ca" font-size="12">only system calls reach the machine: a program never names a physical qubit or a path</text>
+
+<!-- ============ 2 · the operating system ============ -->
+<rect x="16" y="232" width="1168" height="316" rx="14" fill="#eef0fe" stroke="#4338ca" stroke-width="2"/>
+<circle cx="40" cy="256" r="11" fill="#4338ca"/><text x="40" y="260.5" text-anchor="middle" class="w" font-size="12.5" font-weight="700">2</text>
+<text x="58" y="262" class="h1" fill="#1e1b4b">The quantum operating system<tspan fill="#4338ca" font-size="15" font-weight="600">  ·  system calls</tspan></text>
+<text x="1164" y="262" text-anchor="end" class="grey" font-size="12" font-style="italic">the program says when · the machine says how long · the VM checks</text>
+
+<!-- request_ancilla -->
+<g transform="translate(36,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#7c3aed" stroke-width="4" stroke-linecap="round"/>
+  <rect x="20" y="14" width="94" height="46" rx="6" fill="none" stroke="#7c3aed" stroke-dasharray="3 3"/>
+  <g stroke="#7c3aed"><use href="#xmon" xlink:href="#xmon" x="25" y="34"/><use href="#xmon" xlink:href="#xmon" x="55" y="34"/><use href="#xmon" xlink:href="#xmon" x="85" y="34"/></g>
+  <text x="37" y="28" text-anchor="middle" font-size="9.5" fill="#7c3aed">|0⟩</text><text x="67" y="28" text-anchor="middle" font-size="9.5" fill="#7c3aed">|0⟩</text><text x="97" y="28" text-anchor="middle" font-size="9.5" fill="#7c3aed">|0⟩</text>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#6d28d9">request_ancilla</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">qubits + ancilla prep</text>
+  <circle cx="34" cy="115" r="4.5" fill="none" stroke="#6b7280" stroke-width="1.5"/><text x="43" y="119" class="st">next</text>
+</g>
+<!-- route -->
+<g transform="translate(178,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#0891b2" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#0891b2" stroke-width="4" stroke-linecap="round"/>
+  <use href="#tile" xlink:href="#tile" x="12" y="22"/><use href="#tile" xlink:href="#tile" x="95" y="22"/>
+  <rect x="39" y="31" width="56" height="9" rx="2" fill="#22d3ee" opacity="0.45" stroke="#0891b2"/>
+  <path d="M43 35.5h48" stroke="#0e7490" stroke-width="1.5" class="flow"/>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#0e7490">route</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">routing capacity</text>
+  <circle cx="34" cy="115" r="4.5" fill="#fff" stroke="#0891b2" stroke-width="1.5"/><path d="M34 110.5a4.5 4.5 0 0 1 0 9z" fill="#0891b2"/><text x="43" y="119" class="st">measured</text>
+</g>
+<!-- gates -->
+<g transform="translate(320,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#2563eb" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12 28h110M12 52h110" stroke="#94a3b8"/>
+  <path d="M24 28Q27 14 30 28T36 28T42 28T48 28T54 28T60 28" fill="none" stroke="#2563eb" stroke-width="1.6"/>
+  <path d="M92 28v24" stroke="#2563eb" stroke-width="2"/><circle cx="92" cy="28" r="4" fill="#2563eb"/><circle cx="92" cy="52" r="4" fill="#2563eb"/>
+  <text x="102" y="44" font-size="9.5" fill="#2563eb" font-weight="700">CZ</text>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#1d4ed8">H · CNOT · CZ</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">gate slots</text>
+  <circle cx="34" cy="115" r="4.5" fill="#16a34a"/><text x="43" y="119" class="st">runs today</text>
+</g>
+<!-- measure -->
+<g transform="translate(462,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#d97706" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#d97706" stroke-width="4" stroke-linecap="round"/>
+  <path d="M10 38Q13 26 16 38T22 38T28 38T34 38T40 38T46 38" fill="none" stroke="#d97706" stroke-width="1.5"/>
+  <path d="M50 38h10" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ahS)"/>
+  <path d="M68 58h56M68 58V16" stroke="#94a3b8"/>
+  <circle cx="84" cy="44" r="13" fill="url(#blobA)"/><circle cx="108" cy="28" r="13" fill="url(#blobA)"/>
+  <path d="M86 22L104 52" stroke="#4b5563" stroke-dasharray="3 2"/>
+  <circle cx="107" cy="29" r="2.8" fill="#b45309"/>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#b45309">measure</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">classical bandwidth</text>
+  <circle cx="34" cy="115" r="4.5" fill="#16a34a"/><text x="43" y="119" class="st">runs today</text>
+</g>
+<!-- decode_syndrome -->
+<g transform="translate(604,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#db2777" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#db2777" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#cbd5e1">
+    <circle cx="16" cy="24" r="2"/><circle cx="36" cy="24" r="2"/><circle cx="46" cy="24" r="2"/><circle cx="56" cy="24" r="2"/>
+    <circle cx="16" cy="36" r="2"/><circle cx="26" cy="36" r="2"/><circle cx="56" cy="36" r="2"/>
+    <circle cx="16" cy="48" r="2"/><circle cx="26" cy="48" r="2"/><circle cx="36" cy="48" r="2"/><circle cx="46" cy="48" r="2"/>
+  </g>
+  <path d="M36 36h10M26 24l-6 0" stroke="#db2777" stroke-width="2"/>
+  <g fill="#9d174d"><circle cx="26" cy="24" r="3.2"/><circle cx="36" cy="36" r="3.2"/><circle cx="46" cy="36" r="3.2"/><circle cx="56" cy="48" r="3.2"/></g>
+  <path d="M64 36h10" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ahS)"/>
+  <rect x="80" y="20" width="40" height="32" rx="3" fill="#1f2937"/>
+  <path d="M86 20v-4M94 20v-4M102 20v-4M110 20v-4M86 52v4M94 52v4M102 52v4M110 52v4" stroke="#6b7280" stroke-width="2"/>
+  <text x="100" y="40" text-anchor="middle" class="w" font-size="10" font-weight="700">UF</text>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#be185d">decode_syndrome</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">a decoder + its input link</text>
+  <circle cx="34" cy="115" r="4.5" fill="#16a34a"/><text x="43" y="119" class="st">runs today</text>
+</g>
+<!-- request_magic -->
+<g transform="translate(746,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#059669" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+  <path d="M18 20L48 36M18 28L48 36M18 36H48M18 44L48 36M18 52L48 36" stroke="#cbd5e1"/>
+  <g fill="#ef4444"><circle cx="16" cy="20" r="2.6"/><circle cx="16" cy="28" r="2.6"/><circle cx="16" cy="36" r="2.6"/><circle cx="16" cy="44" r="2.6"/><circle cx="16" cy="52" r="2.6"/></g>
+  <rect x="48" y="26" width="36" height="20" rx="3" fill="#ecfdf5" stroke="#059669"/>
+  <text x="66" y="40" text-anchor="middle" font-size="9.5" fill="#065f46" font-weight="700">15→1</text>
+  <path d="M86 36h8" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ahS)"/>
+  <circle cx="104" cy="36" r="7" fill="#059669"/>
+  <text x="113" y="40" font-size="10" fill="#065f46">|T⟩</text>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#047857">request_magic</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">one factory run</text>
+  <circle cx="34" cy="115" r="4.5" fill="none" stroke="#6b7280" stroke-width="1.5"/><text x="43" y="119" class="st">next</text>
+</g>
+<!-- pauli_frame_update -->
+<g transform="translate(888,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#b45309" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+  <text x="26" y="22" font-size="9" class="grey">qubit</text><text x="80" y="22" font-size="9" class="grey" text-anchor="middle">X</text><text x="104" y="22" font-size="9" class="grey" text-anchor="middle">Z</text>
+  <rect x="16" y="27" width="102" height="14" fill="none" stroke="#cbd5e1"/><rect x="16" y="43" width="102" height="14" fill="none" stroke="#cbd5e1"/>
+  <text x="30" y="38" font-size="9.5" class="mono">q0</text><text x="80" y="38" font-size="9.5" class="mono" text-anchor="middle">0</text><text x="104" y="38" font-size="9.5" class="mono" text-anchor="middle">0</text>
+  <text x="30" y="54" font-size="9.5" class="mono">q1</text><text x="80" y="54" font-size="9.5" class="mono" text-anchor="middle" fill="#b45309" font-weight="700">1</text><text x="104" y="54" font-size="9.5" class="mono" text-anchor="middle">0</text>
+  <rect x="72" y="44" width="16" height="12" fill="none" stroke="#b45309" stroke-width="1.6"/>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#b45309">pauli_frame_update</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">a frame bit, no pulse</text>
+  <circle cx="34" cy="115" r="4.5" fill="#16a34a"/><text x="43" y="119" class="st">runs today</text>
+</g>
+<!-- release_ancilla -->
+<g transform="translate(1030,274)">
+  <rect width="134" height="132" rx="10" fill="#fff" stroke="#a78bfa" stroke-width="1.6"/>
+  <path d="M12 0h110" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+  <rect x="20" y="14" width="94" height="46" rx="6" fill="none" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+  <g stroke="#d1d5db"><use href="#xmon" xlink:href="#xmon" x="25" y="34"/><use href="#xmon" xlink:href="#xmon" x="55" y="34"/><use href="#xmon" xlink:href="#xmon" x="85" y="34"/></g>
+  <text x="67" y="27" text-anchor="middle" font-size="9.5" class="grey">free</text>
+  <text x="67" y="82" text-anchor="middle" class="mono call" fill="#7c3aed">release_ancilla</text>
+  <text x="67" y="99" text-anchor="middle" class="svc">qubits return</text>
+  <circle cx="34" cy="115" r="4.5" fill="none" stroke="#6b7280" stroke-width="1.5"/><text x="43" y="119" class="st">next</text>
+</g>
+
+<!-- scheduler, machine, VM -->
+<g transform="translate(36,420)">
+  <rect width="364" height="116" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="14" y="24" class="h2">Scheduler<tspan class="grey" font-size="12" font-weight="400">  earliest feasible start</tspan></text>
+  <text x="14" y="58" font-size="10.5" class="grey">decoder 1</text>
+  <rect x="78" y="46" width="112" height="16" rx="3" fill="#db2777"/><text x="88" y="58" font-size="10" class="w">decode A</text>
+  <text x="14" y="82" font-size="10.5" class="grey">next call</text>
+  <rect x="78" y="70" width="112" height="16" rx="3" fill="none" stroke="#db2777" stroke-dasharray="3 3"/>
+  <text x="88" y="82" font-size="10" fill="#be185d">waits →</text>
+  <rect x="190" y="70" width="112" height="16" rx="3" fill="#db2777"/><text x="200" y="82" font-size="10" class="w">decode B</text>
+  <text x="14" y="106" font-size="11" class="grey">A call that does not fit waits: contention becomes time.</text>
+</g>
+<g transform="translate(416,420)">
+  <rect width="368" height="116" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="14" y="24" class="h2">Machine <tspan font-style="italic" font-family="Georgia, serif">M</tspan><tspan class="grey" font-size="12" font-weight="400">  a latency λ and a capacity C per service</tspan></text>
+  <text x="14" y="48" font-size="12" font-weight="600"><tspan fill="#7c3aed">qubits</tspan><tspan class="grey"> · </tspan><tspan fill="#2563eb">gate slots</tspan><tspan class="grey"> · </tspan><tspan fill="#7c3aed">ancilla prep</tspan><tspan class="grey"> · </tspan><tspan fill="#0e7490">routing</tspan></text>
+  <text x="14" y="66" font-size="12" font-weight="600"><tspan fill="#be185d">decoders</tspan><tspan class="grey"> · </tspan><tspan fill="#047857">factories</tspan><tspan class="grey"> · </tspan><tspan fill="#b45309">classical bandwidth</tspan></text>
+  <path d="M14 104V96H70V88H130V83H170V92H230V86H290V98H340V104Z" fill="#db2777" fill-opacity="0.14" stroke="#db2777"/>
+  <path d="M14 104H344" stroke="#94a3b8"/>
+  <path d="M14 79H340" stroke="#111827" stroke-dasharray="4 3"/>
+  <text x="346" y="83" font-size="11" font-style="italic">C</text>
+</g>
+<g transform="translate(800,420)">
+  <rect width="364" height="116" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="14" y="24" class="h2">Resource VM<tspan class="grey" font-size="12" font-weight="400">  re-derives every reservation</tspan></text>
+  <rect x="14" y="40" width="96" height="26" rx="13" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="62" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">✓ admit</text>
+  <rect x="120" y="40" width="230" height="26" rx="13" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="235" y="57" text-anchor="middle" font-size="11.5" font-weight="600" fill="#991b1b">✗ refuse, naming the constraint</text>
+  <text x="14" y="90" font-size="11" class="grey">An admitted program is an upper bound</text>
+  <text x="14" y="106" font-size="11" class="grey">under the declared machine.</text>
+</g>
+
+<!-- ============ lower and evaluate ============ -->
+<path d="M120 550V630" stroke="#4338ca" stroke-width="2.5" marker-end="url(#ahI)"/>
+<text x="134" y="576" fill="#4338ca" font-size="12" font-weight="600">lower: each call → hardware operations → firmware</text>
+<path d="M1080 632V552" stroke="#0e7490" stroke-width="2.5" class="flow" marker-end="url(#ahC)"/>
+<text x="1066" y="576" text-anchor="end" fill="#0e7490" font-size="12" font-weight="600">evaluate: measured costs calibrate <tspan font-style="italic" font-family="Georgia, serif">M</tspan></text>
+<text x="600" y="576" text-anchor="middle" class="grey" font-size="11.5" font-style="italic">measured from the trace</text>
+<g font-size="11" fill="#1e1b4b">
+  <rect x="184" y="590" width="180" height="22" rx="11" fill="#fff" stroke="#d97706"/><text x="274" y="605" text-anchor="middle">measure → every core 86 ns</text>
+  <rect x="374" y="590" width="180" height="22" rx="11" fill="#fff" stroke="#db2777"/><text x="464" y="605" text-anchor="middle">2-bit lookup decode 64 ns</text>
+  <rect x="564" y="590" width="155" height="22" rx="11" fill="#fff" stroke="#db2777"/><text x="641.5" y="605" text-anchor="middle">Helios UF, d=3 17–58 µs</text>
+  <rect x="729" y="590" width="148" height="22" rx="11" fill="#fff" stroke="#0891b2"/><text x="803" y="605" text-anchor="middle">ion shuttle 64–128 µs</text>
+  <rect x="887" y="590" width="130" height="22" rx="11" fill="#fff" stroke="#0891b2"/><text x="952" y="605" text-anchor="middle">AOD move 90–145 µs</text>
+</g>
+
+<!-- ============ 3 · the simulated quantum computer ============ -->
+<rect x="16" y="636" width="1168" height="390" rx="14" fill="#12153a" stroke="#1e1b4b"/>
+<circle cx="40" cy="658" r="11" fill="#22b8cf"/><text x="40" y="662.5" text-anchor="middle" fill="#12153a" font-size="12.5" font-weight="700">3</text>
+<text x="58" y="664" class="h1 w">A real quantum computer, simulated with its full control system</text>
+<text x="1164" y="664" text-anchor="end" fill="#a5b4fc" font-size="12">executed in Lean 4 · no quantum state: outcomes are inputs</text>
+
+<rect x="28" y="678" width="1144" height="112" rx="10" fill="#1b1f4b" stroke="#2e3474"/>
+<text x="44" y="695" fill="#a5b4fc" font-size="10" font-weight="700" letter-spacing="0.06em">CLASSICAL CONTROL · RISC-Q</text>
+<g>
+  <path d="M66 760H1125" stroke="#4f5aa8" stroke-width="2"/>
+  <g stroke="#4f5aa8" stroke-width="2"><path d="M66 738v22M122 738v22M178 738v22M234 738v22M290 738v22M346 738v22M455 746v14M625 746v14M785 746v14M903 746v14M977 746v14M1051 746v14M1125 746v14"/></g>
+  <circle cx="66" cy="760" r="4" fill="#22d3ee" class="bit"/>
+</g>
+<g font-size="9" font-weight="700">
+  <g fill="#262c5c" stroke="#6366f1">
+    <rect x="44" y="704" width="44" height="34" rx="3"/><rect x="100" y="704" width="44" height="34" rx="3"/><rect x="156" y="704" width="44" height="34" rx="3"/>
+    <rect x="212" y="704" width="44" height="34" rx="3"/><rect x="268" y="704" width="44" height="34" rx="3"/><rect x="324" y="704" width="44" height="34" rx="3"/>
+  </g>
+  <text x="66" y="724" text-anchor="middle" class="w">RV32I</text><text x="122" y="724" text-anchor="middle" class="w">RV32I</text><text x="178" y="724" text-anchor="middle" class="w">RV32I</text>
+  <text x="234" y="724" text-anchor="middle" class="w">RV32I</text><text x="290" y="724" text-anchor="middle" class="w">RV32I</text><text x="346" y="724" text-anchor="middle" class="w">RV32I</text>
+</g>
+<rect x="400" y="700" width="110" height="46" rx="5" fill="#1e2550" stroke="#22d3ee"/>
+<text x="455" y="719" text-anchor="middle" class="w" font-size="11.5" font-weight="700">board hub</text>
+<text x="455" y="735" text-anchor="middle" fill="#a5f3fc" font-size="9.5">arbiter · links</text>
+<rect x="540" y="700" width="170" height="46" rx="5" fill="#2a1d45" stroke="#f472b6"/>
+<text x="625" y="719" text-anchor="middle" class="w" font-size="11.5" font-weight="700">decoder core</text>
+<text x="625" y="735" text-anchor="middle" fill="#f9a8d4" font-size="9.5">Helios union-find · C → RV32I</text>
+<rect x="730" y="700" width="110" height="46" rx="5" fill="#2d2614" stroke="#fbbf24"/>
+<text x="785" y="719" text-anchor="middle" class="w" font-size="11.5" font-weight="700">Pauli frame</text>
+<text x="785" y="735" text-anchor="middle" fill="#fde68a" font-size="9.5">words in RAM</text>
+<g fill="#1f2a44" stroke="#94a3b8">
+  <rect x="870" y="700" width="66" height="46" rx="5"/><rect x="944" y="700" width="66" height="46" rx="5"/><rect x="1018" y="700" width="66" height="46" rx="5"/><rect x="1092" y="700" width="66" height="46" rx="5"/>
+</g>
+<g text-anchor="middle">
+  <text x="903" y="720" class="w" font-size="11" font-weight="700">DAC</text><text x="903" y="736" class="pale" font-size="9">drive</text>
+  <text x="977" y="720" class="w" font-size="11" font-weight="700">ADC</text><text x="977" y="736" class="pale" font-size="9">readout</text>
+  <text x="1051" y="720" class="w" font-size="11" font-weight="700">AOD RF</text><text x="1051" y="736" class="pale" font-size="9">tones</text>
+  <text x="1125" y="720" class="w" font-size="10.5" font-weight="700">electrodes</text><text x="1125" y="736" class="pale" font-size="9">DACs</text>
+</g>
+<text x="44" y="779" class="pale" font-size="10.5">control cores: RV32I firmware, timed queues, posted writes</text>
+<text x="540" y="779" class="pale" font-size="10.5">decodes and frame updates play no pulse</text>
+<text x="870" y="779" class="pale" font-size="10.5">converters drive the wires to the qubits</text>
+
+<g stroke-width="2" class="flow">
+  <path d="M322 792v24M328 792v24M334 792v24" stroke="#fbbf24"/>
+  <path d="M708 792v24M714 792v24M720 792v24" stroke="#22d3ee"/>
+  <path d="M1094 792v24M1100 792v24M1106 792v24" stroke="#f472b6"/>
+</g>
+
+<!-- (a) superconducting -->
+<g transform="translate(28,818)">
+  <rect width="372" height="180" rx="10" fill="#1b1f4b" stroke="#2e3474"/>
+  <text x="14" y="24" class="h2 w">Superconducting transmons</text>
+  <rect x="14" y="40" width="182" height="128" rx="6" fill="#0f2233" stroke="#36597a"/>
+  <path d="M44 80H164M44 124H164M44 80V124M84 80V124M124 80V124M164 80V124" stroke="#64748b" stroke-width="2"/>
+  <circle cx="84" cy="80" r="15" fill="#fbbf24" class="blink"/>
+  <g stroke="#fbbf24">
+    <use href="#xmon" xlink:href="#xmon" x="32" y="68"/><use href="#xmon" xlink:href="#xmon" x="72" y="68"/><use href="#xmon" xlink:href="#xmon" x="112" y="68"/><use href="#xmon" xlink:href="#xmon" x="152" y="68"/>
+    <use href="#xmon" xlink:href="#xmon" x="32" y="112"/><use href="#xmon" xlink:href="#xmon" x="72" y="112"/><use href="#xmon" xlink:href="#xmon" x="112" y="112"/><use href="#xmon" xlink:href="#xmon" x="152" y="112"/>
+  </g>
+  <path d="M84 41V64" stroke="#fbbf24" stroke-width="2" class="flow"/>
+  <path d="M14 156H196" stroke="#94a3b8" stroke-width="1.5"/>
+  <path d="M164 136v6h6v-6h6v6h6v-6h6v14" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="206" y="56" class="kw" fill="#60a5fa">gate</text><text x="206" y="70" class="lbl">microwave pulse on coax</text>
+  <text x="206" y="86" class="kw" fill="#22d3ee">route</text><text x="206" y="100" class="lbl">fixed couplers, SWAP chains</text>
+  <text x="206" y="116" class="kw" fill="#fbbf24">measure</text><text x="206" y="130" class="lbl">resonator tone → ADC</text>
+  <text x="206" y="146" class="kw" fill="#a78bfa">ancilla</text><text x="206" y="160" class="lbl">active reset pulse</text>
+</g>
+<!-- (b) trapped ions -->
+<g transform="translate(414,818)">
+  <rect width="372" height="180" rx="10" fill="#1b1f4b" stroke="#2e3474"/>
+  <text x="14" y="24" class="h2 w">Trapped ions (QCCD)</text>
+  <g fill="#475569">
+    <rect x="18" y="76" width="18" height="12" rx="2"/><rect x="40" y="76" width="18" height="12" rx="2"/><rect x="62" y="76" width="18" height="12" rx="2"/><rect x="84" y="76" width="18" height="12" rx="2"/>
+    <rect x="106" y="76" width="18" height="12" rx="2"/><rect x="128" y="76" width="18" height="12" rx="2"/><rect x="150" y="76" width="18" height="12" rx="2"/><rect x="172" y="76" width="18" height="12" rx="2"/>
+    <rect x="18" y="116" width="18" height="12" rx="2"/><rect x="40" y="116" width="18" height="12" rx="2"/><rect x="62" y="116" width="18" height="12" rx="2"/><rect x="84" y="116" width="18" height="12" rx="2"/>
+    <rect x="106" y="116" width="18" height="12" rx="2"/><rect x="128" y="116" width="18" height="12" rx="2"/><rect x="150" y="116" width="18" height="12" rx="2"/><rect x="172" y="116" width="18" height="12" rx="2"/>
+  </g>
+  <rect x="14" y="90" width="182" height="24" rx="12" fill="#0f172a" stroke="#334155"/>
+  <rect x="126" y="70" width="58" height="64" rx="6" fill="none" stroke="#22d3ee" stroke-dasharray="4 3"/>
+  <rect x="134" y="40" width="10" height="62" fill="url(#beam)" class="laser"/>
+  <rect x="162" y="40" width="10" height="62" fill="url(#beam)" class="laser"/>
+  <circle cx="167" cy="102" r="10" fill="#a5f3fc" opacity="0.25"/><circle cx="167" cy="102" r="5.5" fill="#a5f3fc"/>
+  <g class="shuttle"><circle cx="43" cy="102" r="10" fill="#a5f3fc" opacity="0.25"/><circle cx="43" cy="102" r="5.5" fill="#a5f3fc"/></g>
+  <text x="155" y="150" text-anchor="middle" fill="#67e8f9" font-size="9.5">gate zone</text>
+  <text x="60" y="150" text-anchor="middle" fill="#94a3b8" font-size="9.5">storage</text>
+  <text x="206" y="56" class="kw" fill="#60a5fa">gate</text><text x="206" y="70" class="lbl">laser beams in a gate zone</text>
+  <text x="206" y="86" class="kw" fill="#22d3ee">route</text><text x="206" y="100" class="lbl">shuttling by electrode DACs</text>
+  <text x="206" y="116" class="kw" fill="#fbbf24">measure</text><text x="206" y="130" class="lbl">fluorescence on a PMT</text>
+  <text x="206" y="146" class="kw" fill="#a78bfa">ancilla</text><text x="206" y="160" class="lbl">re-cooling, optical pumping</text>
+</g>
+<!-- (c) neutral atoms -->
+<g transform="translate(800,818)">
+  <rect width="372" height="180" rx="10" fill="#1b1f4b" stroke="#2e3474"/>
+  <text x="14" y="24" class="h2 w">Neutral atoms (tweezers)</text>
+  <rect x="14" y="40" width="182" height="44" rx="6" fill="#f472b6" fill-opacity="0.06" stroke="#f472b6" stroke-opacity="0.5"/>
+  <rect x="14" y="40" width="182" height="44" rx="6" fill="#f472b6" class="ryd"/>
+  <rect x="14" y="94" width="182" height="78" rx="6" fill="none" stroke="#475569"/>
+  <text x="190" y="52" text-anchor="end" fill="#f9a8d4" font-size="9">entanglement</text>
+  <text x="190" y="104" text-anchor="end" fill="#94a3b8" font-size="9">storage</text>
+  <g fill="none" stroke="#475569">
+    <circle cx="34" cy="66" r="6"/><circle cx="62" cy="66" r="6"/><circle cx="90" cy="66" r="6"/><circle cx="118" cy="66" r="6"/><circle cx="146" cy="66" r="6"/><circle cx="174" cy="66" r="6"/>
+    <circle cx="34" cy="116" r="6"/><circle cx="62" cy="116" r="6"/><circle cx="90" cy="116" r="6"/><circle cx="118" cy="116" r="6"/><circle cx="146" cy="116" r="6"/><circle cx="174" cy="116" r="6"/>
+    <circle cx="34" cy="138" r="6"/><circle cx="62" cy="138" r="6"/><circle cx="90" cy="138" r="6"/><circle cx="118" cy="138" r="6"/><circle cx="146" cy="138" r="6"/><circle cx="174" cy="138" r="6"/>
+    <circle cx="34" cy="160" r="6"/><circle cx="62" cy="160" r="6"/><circle cx="90" cy="160" r="6"/><circle cx="118" cy="160" r="6"/><circle cx="146" cy="160" r="6"/><circle cx="174" cy="160" r="6"/>
+  </g>
+  <g fill="#fdba74">
+    <circle cx="90" cy="66" r="4"/><circle cx="146" cy="66" r="4"/>
+    <circle cx="34" cy="116" r="4"/><circle cx="90" cy="116" r="4"/><circle cx="146" cy="116" r="4"/><circle cx="174" cy="116" r="4"/>
+    <circle cx="34" cy="138" r="4"/><circle cx="90" cy="138" r="4"/><circle cx="146" cy="138" r="4"/><circle cx="174" cy="138" r="4"/>
+    <circle cx="62" cy="160" r="4"/><circle cx="118" cy="160" r="4"/><circle cx="174" cy="160" r="4"/>
+  </g>
+  <g class="aod">
+    <path d="M18 138H192M62 126V150M118 126V150" stroke="#22d3ee" stroke-opacity="0.55"/>
+    <circle cx="62" cy="138" r="7.5" fill="none" stroke="#22d3ee" stroke-width="1.5"/><circle cx="62" cy="138" r="4" fill="#fdba74"/>
+    <circle cx="118" cy="138" r="7.5" fill="none" stroke="#22d3ee" stroke-width="1.5"/><circle cx="118" cy="138" r="4" fill="#fdba74"/>
+  </g>
+  <text x="206" y="56" class="kw" fill="#60a5fa">gate</text><text x="206" y="70" class="lbl">Rydberg and Raman lasers</text>
+  <text x="206" y="86" class="kw" fill="#22d3ee">route</text><text x="206" y="100" class="lbl">AOD tweezer moves, RF tones</text>
+  <text x="206" y="116" class="kw" fill="#fbbf24">measure</text><text x="206" y="130" class="lbl">camera imaging</text>
+  <text x="206" y="146" class="kw" fill="#a78bfa">ancilla</text><text x="206" y="160" class="lbl">reload from a reservoir</text>
+</g>
+<text x="600" y="1016" text-anchor="middle" fill="#a5b4fc" font-size="11.5">Your hardware design · QCCD Studio traps · ZAC atom arrays — every operation has an ID, a 3D part, its causes and a debugger step</text>
+</svg>

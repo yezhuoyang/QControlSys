@@ -104,7 +104,7 @@ export function programLayers(bundle) {
           delete rest.init_locs;
           return { text: String(id).padStart(3) + "  " + type + "  " + brief(rest, 120), key: id };
         }) };
-    } else if (language === "FTQVM system calls") {
+    } else if (language === "System calls") {
       const program = parseLoose(text);
       source = { language, lines: (program.calls ?? []).map((c, k) => {
         const { call, ...rest } = c;

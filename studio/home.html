@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>QuantumOS · Simulate real quantum computers with their control systems</title>
+    <title>QuantumOS · Build and evaluate your fault-tolerant quantum operating system</title>
     <meta property="og:title" content="QuantumOS" />
-    <meta property="og:description" content="A general framework to simulate real quantum computers with control systems." />
+    <meta property="og:description" content="Build and evaluate your fault-tolerant quantum operating system, on simulated quantum computers with their full control systems." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/docs/media/riscq-ions.gif" />
     <meta name="theme-color" content="#4338ca" />
-    <meta name="description" content="A general framework to simulate real quantum computers with control systems: programs lowered to RISC-Q firmware, executed in a Lean model, shown driving transmons, trapped ions and neutral atoms in 3D." />
+    <meta name="description" content="Build and evaluate your fault-tolerant quantum operating system: programs written as system calls are lowered onto simulated superconducting, trapped-ion and neutral-atom machines, down to RISC-Q firmware executed in a Lean model, so the cost of every call can be measured." />
     <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/home.css" />
   </head>
@@ -18,16 +18,16 @@
       <div class="wrap hero">
         <div>
           <p class="product"><img src="/quantumos.svg" alt="" width="34" height="34" /><span>QuantumOS</span></p>
-          <h1>A general framework to simulate <em>real quantum computers</em> with control systems</h1>
+          <h1>Build and evaluate your <em>fault-tolerant quantum operating system</em></h1>
           <p class="pitch">
-            Write a program in OpenQASM, ZAC, a QCCD Studio program or fault-tolerance system calls. It is compiled to timed hardware
-            instructions, lowered to RV32I firmware for RISC-Q control cores, and executed batch by batch in a Lean 4 model of the
-            controller. Then you watch that firmware drive the machine in 3D: pulses on the coax, ions shuttling through a trap, atoms
-            carried by optical tweezers.
+            A fault-tolerant program reaches the hardware only through system calls: allocate ancillas, route qubits, decode syndromes,
+            request magic states, update the Pauli frame. QuantumOS runs those calls on a superconducting, trapped-ion or neutral-atom
+            quantum computer simulated down to its control system, so you can measure what each call costs. The firmware, the links
+            and the wires are executed in a Lean 4 model and shown in 3D.
           </p>
           <div class="ctas">
             <a class="btn primary" href="/riscq-studio">Open the workspace</a>
-            <a class="btn" href="/riscq-design">Design hardware</a>
+            <a class="btn" href="#architecture">See the architecture</a>
             <a class="btn" href="/course">Take the course</a>
           </div>
           <p class="aside">New to control systems? Read the <a href="/learn">background</a>: the physics of each platform, optics, and the control stack.</p>
@@ -44,6 +44,43 @@
           <figcaption class="cap" id="previewCap"></figcaption>
         </figure>
       </div>
+
+      <section class="block" id="architecture">
+        <div class="wrap">
+          <h2>One operating system over every kind of qubit</h2>
+          <p class="lead">
+            Programs name system calls, never physical qubits or paths. The machine declares how long each call takes and how much
+            of a shared service it holds. The scheduler turns contention into waiting, and a resource VM admits the program or names
+            the constraint it breaks. Underneath, QuantumOS simulates the machine itself with its control system, so every declared
+            cost can be measured.
+          </p>
+          <figure class="arch">
+            <img src="/docs/media/quantumos-architecture.svg" width="1200" height="1040"
+              alt="Three layers. Fault-tolerant programs compile to system calls. The operating system layer holds eight system calls, a scheduler, a machine declaration and a resource VM. The bottom layer simulates a quantum computer with its control system: RISC-Q cores, a board hub, a decoder core and converters driving transmons, trapped ions and neutral atoms." />
+          </figure>
+          <div class="calls" role="region" aria-label="System calls" tabindex="0">
+            <table>
+              <thead><tr><th>System call</th><th>What the hardware does</th><th>Holds</th><th>In QuantumOS today</th></tr></thead>
+              <tbody>
+                <tr><td><code>request_ancilla N</code></td><td>Reset N qubits to |0⟩: an active reset pulse, re-cooling and optical pumping, or atoms reloaded from a reservoir</td><td>qubits, ancilla preparation</td><td><span class="st next">next</span> No reset operation is calibrated yet</td></tr>
+                <tr><td><code>route q₁ … qₙ</code></td><td>Bring qubits together for two-qubit gates: couplers or SWAP chains, ion shuttling, AOD tweezer moves</td><td>routing</td><td><span class="st meas">measured</span> Ion shuttles 64–128 µs, AOD moves 90–145 µs, taken from the trace; not yet a call</td></tr>
+                <tr><td><code>H</code> <code>CNOT</code> <code>CZ</code> …</td><td>Pulses: microwave on coax, laser beams in a gate zone, Rydberg and Raman light</td><td>gate slots</td><td><span class="st runs">runs</span> System-call programs on the eight-transmon ring</td></tr>
+                <tr><td><code>measure q → c[i]</code></td><td>Readout window, demodulation and threshold; the bit is published to every core</td><td>classical bandwidth</td><td><span class="st runs">runs</span> The bit reaches every core 86 ns after its window closes</td></tr>
+                <tr><td><code>decode_syndrome</code></td><td>Syndrome bits cross to a decoder core, which writes the correction</td><td>a decoder and its input link</td><td><span class="st runs">runs</span> A 2-bit lookup decode takes 64 ns. Separately, Helios union-find, compiled for a core, takes 17–58 µs at d = 3</td></tr>
+                <tr><td><code>request_magic |T⟩</code></td><td>One run of a magic-state factory</td><td>a factory</td><td><span class="st next">next</span></td></tr>
+                <tr><td><code>pauli_frame_update</code></td><td>Flip frame bits; no pulse is played</td><td>classical bandwidth</td><td><span class="st runs">runs</span> A word in the decoder core's RAM</td></tr>
+                <tr><td><code>release_ancilla N</code></td><td>The qubits' capacity returns</td><td>qubits</td><td><span class="st next">next</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">
+            These are the system calls of QuantumOS. The times are results of the model, read
+            from its trace on the shipped examples (the transmon ring at 500 MHz, QCCD Studio's GHZ program, a 14-qubit ZAC program)
+            with cited constants where a program states none. They are not measurements of hardware.
+            <a href="/riscq-studio?example=superconducting-repetition&amp;outcome=s0=1">Run a decode and a frame update →</a>
+          </p>
+        </div>
+      </section>
 
       <section class="block">
         <div class="wrap">
@@ -119,7 +156,7 @@
           <h2>From a program to a pulse</h2>
           <p class="lead">Every picture in the workspace is derived from one trace. A person and a script that replay the same program see the same frames.</p>
           <div class="pipeline">
-            <div><b>1 · Source</b><span>Your program</span><p>OpenQASM, a QCCD Studio program, a ZAC program, or system calls.</p></div>
+            <div><b>1 · Source</b><span>Your program</span><p>System calls of a fault-tolerant program, OpenQASM, a QCCD Studio program or a ZAC program.</p></div>
             <div><b>2 · Hardware</b><span>Timed operations</span><p>Pulses, ion shuttles, AOD moves, each with a start and a duration.</p></div>
             <div><b>3 · Firmware</b><span>RV32I machine code</span><p>One program per RISC-Q control core, issuing timed register writes.</p></div>
             <div><b>4 · Execution</b><span>Lean 4 model</span><p>The controller runs the firmware batch by batch and emits a trace.</p></div>

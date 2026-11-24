@@ -15,7 +15,7 @@
         Error correction turns a quantum computer into a real-time classical system. Every round, thousands of measured bits have to
         reach a decoder, be turned into a correction, and be ready before the next operation that depends on them. This chapter
         follows that path from a readout window to a Pauli frame, compares published decoder latencies, and explains the
-        system-call model of the fault-tolerant virtual machine that this simulator measures.
+        system calls through which a fault-tolerant operating system asks for these services, and what this simulator measures for them.
       </p>
       <p class="pre">
         The readout chain and the board hub are explained in chapters <a href="/course/background/control">2</a> and
@@ -210,16 +210,15 @@
           workspace shows the C source, the RV32I firmware and the decoding graph as it runs. Photographed from the running workspace.</figcaption>
       </figure>
 
-      <h2 id="ftqvm"><span class="num">7</span>The system-call model</h2>
+      <h2 id="syscalls"><span class="num">7</span>The system-call model</h2>
       <p class="q">How can a scheduler reason about a million-qubit machine without simulating every pulse?</p>
-      <p class="insection"><b>In this section:</b> the fault-tolerant virtual machine's services, its rate formula, its decode duration,
-        and what this simulator measures for it.</p>
+      <p class="insection"><b>In this section:</b> the services of a fault-tolerant operating system, its rate formula, its decode duration,
+        and what this simulator measures for them.</p>
       <p>
-        The companion paper of this project describes a fault-tolerant quantum virtual machine (FTQVM). It virtualizes the resources of a
-        fault-tolerant computer behind a small set of <span class="term" data-term="system call">system calls</span>, so that one program runs on
-        superconducting, ion and atom machines alike. The paper's premise is that, to first order, each mechanism is described by <b>one
-        latency and one capacity</b>. A program obtains services only through system calls, and a machine is a declaration of their latencies
-        and capacities. The calls are:
+        QuantumOS puts the resources of a fault-tolerant computer behind a small set of
+        <span class="term" data-term="system call">system calls</span>, so that one program runs on superconducting, ion and atom machines
+        alike. The premise is that, to first order, each mechanism is described by <b>one latency and one capacity</b>. A program obtains
+        services only through system calls, and a machine is a declaration of their latencies and capacities. The calls are:
       </p>
       <div class="tw">
         <table>
@@ -246,14 +245,14 @@
       <div class="formula">δ = λ<sub>d</sub>(n) &nbsp;&nbsp;if r(n, λ<sub>d</sub>(n)) ≤ cap<br />
         δ = I + λ<sub>d</sub>(n), &nbsp;I = ⌈1000 n / cap⌉ &nbsp;&nbsp;otherwise</div>
       <p>
-        The paper's model of Gidney and Ekerå's machine splits the 10 µs reaction time into a 550 ns measurement and a 9.45 µs decoder latency
-        with b = 728 bits/µs. A decode of the 27 rounds of one lattice-surgery operation reads 19,656 bits, more than 728 bits/µs over its latency
-        allows, so it needs an input phase of exactly 27 µs, and its outcome is ready 37 µs after the last measurement starts.
+        An example: a distance-15 surface-code patch has 15² − 1 = 224 checks, so 15 rounds give 3,360 syndrome bits. Through a decoder input
+        of b = 400 bits/µs they need an input phase of ⌈1000 · 3,360 / 400⌉ = 8,400 ns, and the decoder latency comes on top of it. A larger
+        decode is limited by its input link before it is limited by the decoder.
       </p>
-      <div class="ex" data-id="qec.2" data-stars="2" data-kind="number" data-unit="bits/µs" data-answer="728">
-        <p>A decode reads 19,656 syndrome bits during an input phase of 27 µs. What rate r(N, D) does it reserve on the classical link?</p>
-        <div class="why">r = ⌈1000 · 19,656 / 27,000⌉ = ⌈728⌉ = 728 bits/µs, exactly the decoder's input bandwidth b. That is why the input phase
-          is 27 µs: it is the shortest time in which 19,656 bits fit through 728 bits/µs.</div>
+      <div class="ex" data-id="qec.2" data-stars="2" data-kind="number" data-unit="bits/µs" data-answer="400">
+        <p>A decode reads 3,360 syndrome bits during an input phase of 8.4 µs. What rate r(N, D) does it reserve on the classical link?</p>
+        <div class="why">r = ⌈1000 · 3,360 / 8,400⌉ = ⌈400⌉ = 400 bits/µs, exactly the decoder's input bandwidth b. That is why the input phase
+          is 8.4 µs: it is the shortest time in which 3,360 bits fit through 400 bits/µs.</div>
       </div>
       <h3>What the simulator realizes and measures</h3>
       <p>
@@ -280,10 +279,10 @@
       <p class="src">From <code>riscq/syscalls.mjs</code> reports on the <code>superconducting-repetition</code> and <code>neutral-bv14</code> runs,
         reproduced for this chapter, and <code>docs/riscq-controller.md</code>. Times after the close of the readout window.</p>
       <p>
-        The last row is the paper's own caveat made concrete: the FTQVM gives a route one latency regardless of distance, and atom moves whose
-        duration depends on distance are one of the two mechanisms in its corpus that one latency does not describe. The hub row shows the
-        other direction of the comparison: one bit per message is fine for a repetition code, but syndrome traffic at the rate the paper's
-        factory model needs, 132,496 bits/µs, would need a much wider path than this hub.
+        The last row shows where one latency per call stops describing the hardware: an atom move takes longer the farther it goes, so a
+        single declared route latency must be the slowest one. The hub row shows the other direction: one bit per message is fine for a
+        repetition code, but the syndrome traffic of a large surface-code machine, thousands of bits per microsecond, would need a much
+        wider path than this hub.
       </p>
       <div class="ex" data-id="qec.3" data-stars="1" data-kind="number">
         <p>Run the repetition-code example. Into how many segments does the compiler split its hardware instructions?</p>
@@ -300,7 +299,7 @@
           <li>Decoders range from lookup tables to union-find and matching. Union-find suits hardware; matching is more accurate.</li>
           <li>Throughput keeps the backlog bounded. Latency is the reaction time every decision on a decoded value waits for.</li>
           <li>Corrections are usually tracked in a Pauli frame, not played.</li>
-          <li>The FTQVM charges each call one latency and one capacity, with rate r(N, D) = ⌈1000 N / D⌉ items/µs.</li>
+          <li>The operating system charges each call one latency and one capacity, with rate r(N, D) = ⌈1000 N / D⌉ items/µs.</li>
         </ol>
       </section>
     </article>

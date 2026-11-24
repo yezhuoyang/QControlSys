@@ -69,7 +69,7 @@ test("two rounds decode from separate fields of the shared word", async () => {
     { call: "pauli_frame_update", when: tag + "e0", pauli: "X", qubit: 0 },
     { call: "pauli_frame_update", when: tag + "e2", pauli: "Z", qubit: 0 },
   ];
-  const bundle = await run({ platform: "superconducting", calls: { kind: "ftqvm-calls", version: 1, calls: [...round("a"), ...round("b")] },
+  const bundle = await run({ platform: "superconducting", calls: { kind: "system-calls", version: 1, calls: [...round("a"), ...round("b")] },
     outcomes: { a0: 1, b1: 1 } });
   assert.deepEqual(bundle.summary.faults, []);
   const bits = bundle.derived.bits;
@@ -96,14 +96,14 @@ test("the decoder takes up to eight simultaneous syndrome bits, and each decoded
 
 test("a system-call program is rejected where the machine has no realization", () => {
   const m = superconducting.machine({ decoder: true });
-  const program = (calls) => ({ kind: "ftqvm-calls", version: 1, calls });
+  const program = (calls) => ({ kind: "system-calls", version: 1, calls });
   assert.throws(() => superconducting.scheduleCalls(program([{ call: "route", qubits: [0, 1] }]), m), /realizes gate, measure, decode_syndrome and pauli_frame_update/);
   assert.throws(() => superconducting.scheduleCalls(program([{ call: "decode_syndrome", bits: ["s"], lut: [0, 1], into: ["e"] }]), m), /decode takes measured bits/);
   const measure = { call: "measure", qubit: 1, bit: "s" };
   assert.throws(() => superconducting.scheduleCalls(program([measure, { call: "decode_syndrome", bits: ["s"], lut: [0, 1, 0], into: ["e"] }]), m), /one correction word of 1 bits for each of the 2 syndromes/);
   assert.throws(() => superconducting.scheduleCalls(program([measure, { call: "pauli_frame_update", when: "e", pauli: "X", qubit: 0 }]), m), /not measured or decoded yet/);
   assert.throws(() => superconducting.scheduleCalls(program([measure, { call: "decode_syndrome", bits: ["s"], lut: [0, 1], into: ["e"] }]), superconducting.machine()), /no decoder core/);
-  assert.throws(() => superconducting.scheduleCalls({ calls: [] }, m), /ftqvm-calls/);
+  assert.throws(() => superconducting.scheduleCalls({ calls: [] }, m), /system-calls/);
 });
 
 test("the debugger rebuilds the decoder run: frame words, shared bits and every cause", async () => {

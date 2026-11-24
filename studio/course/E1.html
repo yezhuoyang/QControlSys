@@ -33,10 +33,10 @@
         (<a href="https://arxiv.org/abs/1210.4626">A. G. Fowler, "Time-optimal quantum computation", arXiv:1210.4626, 2012</a>).
       </p>
       <p>
-        The fault-tolerant virtual machine of the companion paper (the FTQVM, lesson <a href="/course/E2">E2</a>) does not model
-        this path in detail. It charges a measurement one latency, a decode another, and a frame update a third. Its model of
-        Gidney and Ekerå's RSA-2048 estimate (<a href="https://doi.org/10.22331/q-2021-04-15-433">Quantum 5, 433, 2021</a>), for
-        example, splits that estimate's 10 µs reaction time into a 550 ns measurement and a 9.45 µs decoder latency. Those are declared numbers. This lesson measures what the classical part of that path costs in a model of a real
+        The system calls of a fault-tolerant operating system (lesson <a href="/course/E2">E2</a>) do not model this path in
+        detail. They charge a measurement one latency, a decode another, and a frame update a third. Gidney and Ekerå's RSA-2048
+        estimate (<a href="https://doi.org/10.22331/q-2021-04-15-433">Quantum 5, 433, 2021</a>), for example, assumes a 10 µs
+        reaction time from a measurement to the next operation that depends on it. That is a declared number. This lesson measures what the classical part of that path costs in a model of a real
         controller, so you can see what a declared latency has to cover.
       </p>
       <div class="note"><b>Scope.</b> Everything below is the classical controller. No quantum state is simulated, the
@@ -250,8 +250,8 @@
       <p>
         One comparison is fair: the order of magnitude. On a single board the controller's share of feedback is tens to hundreds of
         nanoseconds. A software decoder on a separate computer costs tens of microseconds. That is why the Gidney–Ekerå assumption
-        of a 10 µs reaction time is a statement about the decoder, and why the companion paper finds that a fast classical path from
-        measurement to decoder to frame matters more than more factories.
+        of a 10 µs reaction time is a statement about the decoder, and why the classical path from measurement to decoder to frame
+        deserves as much design as the qubits.
       </p>
 
       <section class="remember">

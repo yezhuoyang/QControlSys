@@ -1335,7 +1335,7 @@ function show(bundle, text, keepStep) {
 }
 
 /** The source of the run is a system-call program (JSON) and not OpenQASM. */
-const isCalls = () => run?.source?.language === "FTQVM system calls";
+const isCalls = () => run?.source?.language === "System calls";
 
 /** Run a program on the server: `{ example }`, `{ platform, qasm }` or `{ platform, calls }`. Errors are shown as the server wrote them. */
 async function load(next, keepStep = false, report = note) {

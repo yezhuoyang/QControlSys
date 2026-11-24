@@ -114,7 +114,7 @@
       <h2 id="route"><span class="num">4</span>Measuring a system call: route</h2>
       <p class="insection"><b>In this section:</b> how a run gives the latency of moving qubits, and why one number per call is costly.</p>
       <p>
-        The fault-tolerant virtual machine this project serves describes each service of a quantum computer by one latency
+        A fault-tolerant quantum operating system describes each service of a quantum computer by one latency
         and one capacity. A <span class="term" data-term="system call">system call</span> such as <code>route</code>, which
         brings qubits together, is charged that latency every time. <code>riscq/syscalls.mjs</code> reads what the
         controller model actually spends. Its <code>report(run)</code> takes one route sample per transport:
@@ -137,7 +137,7 @@
           the distance, so the spread comes from the moves.</div>
       </div>
       <div class="ex" data-id="C4.5" data-stars="2" data-kind="number" data-unit="%" data-tolerance="0.1">
-        <p>If the virtual machine declares the slowest job's latency for every <code>route</code>, by how many percent does
+        <p>If the operating system declares the slowest job's latency for every <code>route</code>, by how many percent does
           it overcharge the median job?</p>
         <div class="why">145.05 / 101.17 = 1.434, an overcharge of 43.4%. A declaration per distance class, or a latency
           that depends on the distance, would charge closer to the cost. That is a design question for the virtual
@@ -205,7 +205,7 @@
           <li>A build is a clock plus cores and channels. The physics sets the durations: ns for transmons, µs to ms for ions and atoms.</li>
           <li>In every run the controller mostly waits. Readout, cooling, shuttling and atom moves dominate.</li>
           <li><code>report()</code> turns runs into system-call costs: route latency, issue rate, burst preroll, feedback.</li>
-          <li>One declared route latency overcharges the median atom job by 43%: measurement is evidence for the virtual machine's design.</li>
+          <li>One declared route latency overcharges the median atom job by 43%: measurement is evidence for the operating system's design.</li>
         </ol>
       </section>
     </article>

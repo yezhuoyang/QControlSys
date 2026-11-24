@@ -36,7 +36,7 @@ measure q -> c;
 // Three data qubits (0, 2, 4) and two ancillas (1, 3) of the ring: one round of the two parity
 // checks of a bit-flip repetition code. The syndrome s0 + 2·s1 selects the qubit to correct.
 const repetition = {
-  kind: "ftqvm-calls", version: 1,
+  kind: "system-calls", version: 1,
   calls: [
     { call: "gate", name: "cx", qubits: [0, 1] },
     { call: "gate", name: "cx", qubits: [2, 1] },
@@ -60,7 +60,7 @@ export const examples = [
     source: { language: "OpenQASM 3", text: bell }, design: () => hardwareDesign.ringDesign() },
   { id: "superconducting-repetition", platform: "superconducting", title: "Repetition-code round with a decoder core and a Pauli frame",
     description: "System calls on the transmon ring: two parity checks, a lookup decode on a decoder core, two Pauli-frame updates that play no pulse, and one correction pulse conditioned on a decoded bit.",
-    source: { language: "FTQVM system calls", text: JSON.stringify(repetition, null, 1) }, calls: repetition },
+    source: { language: "System calls", text: JSON.stringify(repetition, null, 1) }, calls: repetition },
   { id: "qccd-ghz3", platform: "qccd", title: "GHZ state of three ions, compiled from OpenQASM by QCCD Studio",
     description: "OpenQASM → TSIR on the Studio H2 machine → shuttles, rotations, Mølmer–Sørensen gates and photon-counted detection on RISC-Q cores.",
     source: { language: "OpenQASM 2", text: ghz }, qasm: ghz },
@@ -102,7 +102,7 @@ export async function run(request) {
     const calls = request.calls ?? (request.qasm === undefined ? example?.calls : undefined);
     const document = request.design ?? example?.design?.();
     m = document ? hardwareDesign.machine(document) : superconducting.machine({ decoder: calls !== undefined });
-    source = calls ? { language: "FTQVM system calls", text: JSON.stringify(calls, null, 1) }
+    source = calls ? { language: "System calls", text: JSON.stringify(calls, null, 1) }
       : { language: "OpenQASM 3", text: request.qasm ?? example.source.text };
     hardware = calls ? superconducting.scheduleCalls(calls, m) : superconducting.schedule(source.text, m, { layout: request.layout });
     lowered = superconducting.lower(hardware, m);

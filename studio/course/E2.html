@@ -25,7 +25,7 @@
       <p class="kicker">Part E · Lesson 2</p>
       <h1>System calls</h1>
       <p class="lead">
-        A fault-tolerant program asks for services: measure this, decode that, update the frame. A virtual machine charges each
+        A fault-tolerant program asks for services: measure this, decode that, update the frame. The operating system charges each
         request one latency and one share of a service. This lesson runs such a program on the controller model and measures what
         each call actually costs.
       </p>
@@ -35,15 +35,14 @@
         Pauli frame.
       </p>
 
-      <h2 id="ftqvm"><span class="num">1</span>The virtual machine and its calls</h2>
+      <h2 id="syscalls"><span class="num">1</span>The operating system and its calls</h2>
       <p class="q">How does a program for a million-qubit computer ask for a decoder?</p>
       <p>
-        The companion paper of this project describes a fault-tolerant quantum virtual machine, the FTQVM. A program never names a
-        physical path or a pulse. It names qubit addresses and record bits, and obtains every shared resource through a
+        A fault-tolerant program in QuantumOS never names a physical path or a pulse. It names qubit addresses and record bits, and obtains every shared resource through a
         <span class="term" data-term="system call">system call</span>: <code>request_ancilla</code>, <code>route</code>,
         <code>measure</code>, <code>decode_syndrome</code>, <code>pauli_frame_update</code>, <code>request_magic</code> and a few
         more. A machine is a declaration: for every call, how long it takes and how much of each shared service it holds. The
-        paper puts the division of labor in one line: the program declares when, the machine declares how long, and the VM checks.
+        division of labor fits in one line: the program says when, the machine says how long, and a checker verifies.
       </p>
       <p>
         A call that moves <i>N</i> items (bits or qubits) in <i>D</i> nanoseconds holds a rate on the service that carries them for
@@ -55,8 +54,7 @@
         <code>r(1, λm)</code> of the classical link, a decode holds the rate of its input bits, and a frame update a rate for the
         bits it reads. A decode of <i>n</i> bits also holds one decoder for its latency <code>λd(n)</code>; if the rate
         <code>r(n, λd(n))</code> exceeds what the link or the decoder's input can take, it gets an input phase of
-        <code>⌈1000 n / cap⌉</code> ns first. In the paper's text form a decode reads
-        <code>syndrome[s] -&gt; decode_syndrome rounds=1</code> and a frame update <code>c[i] -&gt; pauli_frame_update X data[1]</code>.
+        <code>⌈1000 n / cap⌉</code> ns first.
       </p>
       <p>
         Those latencies are declared, not measured. The question this lesson starts to answer is whether one latency and one
@@ -67,7 +65,7 @@
       <p class="insection"><b>In this section:</b> the JSON form of a call program, which calls the ring realizes, and which it
         refuses.</p>
       <p>
-        The eight-transmon ring accepts a program of kind <code>"ftqvm-calls"</code>, a list of calls on <b>physical</b> qubits.
+        The eight-transmon ring accepts a program of kind <code>"system-calls"</code>, a list of calls on <b>physical</b> qubits.
         The scheduler is <code>scheduleCalls</code> in <code>riscq/platforms/superconducting.mjs</code>. Four calls have a
         realization:
       </p>
@@ -88,7 +86,7 @@
         Three calls are refused with an error: <code>request_ancilla</code>, <code>route</code> and <code>request_magic</code>. The
         reasons are physical. Preparing a fresh ancilla needs a reset, and the calibration of this ring has no reset pulse. A route
         brings qubits together, and the couplers of a transmon ring are fixed. A magic state needs a factory, and an eight-qubit
-        ring has none. The checker also refuses programs that break the virtual machine's rules for records: a decode must read
+        ring has none. The checker also refuses programs that break the operating system's rules for records: a decode must read
         bits that were measured, and the bits it writes need new names, because every record is written once.
       </p>
       <div class="ex" data-id="E2.1" data-stars="1" data-kind="choice" data-answer="b">
@@ -287,15 +285,15 @@
       <p class="insection"><b>In this section:</b> what the measured times mean for the latencies and capacities a machine
         declares.</p>
       <p>
-        The FTQVM declares, among others, <code>decoder_latency_ns</code>, <code>decoder_bandwidth</code> and
+        A machine declares, among others, <code>decoder_latency_ns</code>, <code>decoder_bandwidth</code> and
         <code>pauli_frame_update_ns</code>. The run gives candidates for each on this machine, together with what a single number
         hides:
       </p>
       <ul>
         <li><b>Decode latency.</b> From the last window to the decoded bits: 176 ns, of which only 64 ns are the lookup. The rest is
           transport and a barrier. A declaration has to say which interval it means.</li>
-        <li><b>Frame update.</b> 22 ns after the decode, and it plays no pulse. The paper's sensitivity study finds that a 1 µs frame
-          update slows the Gidney–Ekerå program by 168 %, so this short interval is worth knowing.</li>
+        <li><b>Frame update.</b> 22 ns after the decode, and it plays no pulse. Every operation that reads the frame waits for it, so
+          this short interval is worth knowing.</li>
         <li><b>Input bandwidth.</b> Two bits delivered in 86 ns is about 23 bits/µs. That is not a capacity: the hub passes one bit
           per batch, 500 bits/µs at 500 MHz, and lesson <a href="/course/E4">E4</a> measures where it saturates.</li>
         <li><b>Feed-forward through a decode.</b> 490 ns to a conditioned pulse, of which 256 ns are schedule lead. A machine that
@@ -316,7 +314,7 @@
       <section class="remember">
         <h3>What to remember</h3>
         <ol>
-          <li>The FTQVM charges each system call one latency and a rate r(N, D) = ⌈1000 N / D⌉ on a shared service.</li>
+          <li>The operating system charges each system call one latency and a rate r(N, D) = ⌈1000 N / D⌉ on a shared service.</li>
           <li>The transmon ring realizes gate, measure, decode_syndrome and pauli_frame_update, and refuses ancilla, route and magic
             requests for physical reasons.</li>
           <li>Decoding and frame updates run on a ninth core in a classical segment between two barriers; a frame update plays no pulse.</li>
@@ -365,14 +363,14 @@
       // ── presets of the editor ──
       const presets = {
         repetition: null, // read from the example run
-        four: { kind: "ftqvm-calls", version: 1, calls: [
+        four: { kind: "system-calls", version: 1, calls: [
           ...[0, 1, 2, 3].map((q) => ({ call: "measure", qubit: q, bit: "s" + q })),
           { call: "decode_syndrome", bits: ["s0", "s1", "s2", "s3"], lut: Array.from({ length: 16 }, (_, s) => s), into: ["d0", "d1", "d2", "d3"] }] },
-        frame: { kind: "ftqvm-calls", version: 1, calls: [
+        frame: { kind: "system-calls", version: 1, calls: [
           { call: "gate", name: "x", qubits: [1] },
           { call: "measure", qubit: 1, bit: "s0" },
           { call: "pauli_frame_update", when: "s0", pauli: "Z", qubit: 0 }] },
-        ancilla: { kind: "ftqvm-calls", version: 1, calls: [
+        ancilla: { kind: "system-calls", version: 1, calls: [
           { call: "request_ancilla", qubit: 1 },
           { call: "measure", qubit: 1, bit: "s0" }] },
       };

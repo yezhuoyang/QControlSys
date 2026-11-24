@@ -51,6 +51,7 @@ const routes = new Map([
   ["/docs/media/riscq-feedforward.gif", "docs/media/riscq-feedforward.gif"],
   ["/docs/media/riscq-decoder.gif", "docs/media/riscq-decoder.gif"],
   ["/docs/media/riscq-design.png", "docs/media/riscq-design.png"],
+  ["/docs/media/quantumos-architecture.svg", "docs/media/quantumos-architecture.svg"],
   ["/model/RiscQ/Soc.lean", "QControl/RiscQ/Soc.lean"],
   ["/model/RiscQ/Timing.lean", "QControl/RiscQ/Timing.lean"],
   ["/model/RiscQ/Rv32.lean", "QControl/RiscQ/Rv32.lean"],

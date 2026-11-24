@@ -184,8 +184,9 @@ const PAULI = { X: 1, Z: 2, Y: 3 };
  * has no reset pulse, the couplers are fixed, and there is no factory.
  */
 export function scheduleCalls(program, m) {
-  if (program?.kind !== "ftqvm-calls" || program.version !== 1 || !Array.isArray(program.calls))
-    throw Error("A system-call program is { kind: \"ftqvm-calls\", version: 1, calls: [...] }.");
+  // "ftqvm-calls" is the kind's older name and is still accepted.
+  if (!["system-calls", "ftqvm-calls"].includes(program?.kind) || program.version !== 1 || !Array.isArray(program.calls))
+    throw Error("A system-call program is { kind: \"system-calls\", version: 1, calls: [...] }.");
   const body = [];
   program.calls.forEach((c, i) => {
     const origin = "call " + i + " · " + c.call;

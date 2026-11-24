@@ -1,7 +1,6 @@
 // Measurements for system-call calibration, taken from a run of the controller model.
 //
-// The fault-tolerant virtual machine of the companion paper charges each system call one
-// latency and one demand on a shared service, and reserves r(N, D) = ⌈1000·N / D⌉ items/µs for
+// The operating system charges each system call one latency and one demand on a shared service, and reserves r(N, D) = ⌈1000·N / D⌉ items/µs for
 // moving N items in D ns. These functions measure what the controller model actually spends,
 // so that a declared latency or capacity can be compared with it:
 //   route      time and qubit count of each qubit transport, per platform

@@ -821,7 +821,7 @@ function check(bundle) {
   return bundle;
 }
 
-const isCalls = () => run?.source?.language === "FTQVM system calls";
+const isCalls = () => run?.source?.language === "System calls";
 const editable = () => (/^OpenQASM/.test(run?.source?.language ?? "") && ["superconducting", "qccd"].includes(run.platform)) || isCalls();
 
 function show(bundle, text, keepStep) {

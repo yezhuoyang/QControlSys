@@ -187,7 +187,7 @@ export async function decodeFanIn(k) {
   const { decodeSamples } = await import("./syscalls.mjs");
   const bits = Array.from({ length: k }, (_, i) => "s" + i);
   const calls = {
-    kind: "ftqvm-calls", version: 1,
+    kind: "system-calls", version: 1,
     calls: [
       ...bits.map((bit, q) => ({ call: "measure", qubit: q, bit })),
       { call: "decode_syndrome", bits, lut: Array.from({ length: 2 ** k }, (_, s) => s), into: bits.map((bit) => "d" + bit) },

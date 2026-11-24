@@ -33,7 +33,7 @@ Each platform has three levels below the source program. A hardware instruction 
 
 **Superconducting.** The machine is the eight-transmon ring of RISC-Q's example calibration on the RISC-Q `x6y3` build: 500 MHz dspClk, 8 GS/s DAC, 2 GS/s ADC. Durations, amplitudes, frequencies and phases come from that calibration: 35 ns and 70 ns drive pulses, a 400 ns CZ played as one tone on each qubit's drive line, and a readout tone followed by a demodulation window. [Extracted calibration](../validation/riscq/x6y3-calibration.json) · [Extraction script](../validation/riscq/extract_calibration.py). Standard gates decompose into `x90`, `x` and frame updates. A measurement whose bit conditions a later gate ends a segment. The measuring core publishes the bit through the board hub, all cores meet at a barrier, and the conditioned gate runs in the next segment.
 
-**System calls on the transmon ring.** A program can also be a list of the virtual machine's system calls on physical qubits: `gate`, `measure`, `decode_syndrome` and `pauli_frame_update`. The build then has one more RISC-Q core, the decoder. The measuring cores publish their bits through the hub. After the cores have met at a barrier, the decoder reads the syndrome as one field of the shared word, looks the correction up in a table in its RAM, stores the decoded bits and publishes those that condition a gate. A frame update flips bits of a qubit's frame word in the decoder's RAM and reports the word to the host. It plays no pulse. A gate conditioned on a decoded bit runs after one more barrier. `request_ancilla`, `route` and `request_magic` are rejected on this machine: its calibration has no reset pulse, its couplers are fixed, and it has no factory. [Example program](../riscq/examples.mjs) · [Tests](../tests/riscq-decode.test.mjs)
+**System calls on the transmon ring.** A program can also be a list of the operating system's system calls on physical qubits: `gate`, `measure`, `decode_syndrome` and `pauli_frame_update`. The build then has one more RISC-Q core, the decoder. The measuring cores publish their bits through the hub. After the cores have met at a barrier, the decoder reads the syndrome as one field of the shared word, looks the correction up in a table in its RAM, stores the decoded bits and publishes those that condition a gate. A frame update flips bits of a qubit's frame word in the decoder's RAM and reports the word to the host. It plays no pulse. A gate conditioned on a decoded bit runs after one more barrier. `request_ancilla`, `route` and `request_magic` are rejected on this machine: its calibration has no reset pulse, its couplers are fixed, and it has no factory. [Example program](../riscq/examples.mjs) · [Tests](../tests/riscq-decode.test.mjs)
 
 **Trapped ions.** QCCD Studio already states, for every cycle, which ions move over which edges and which electrode control channels act. The lowering plays one waveform per engaged control channel, sets the angle and phase of each gate pulse from the TSIR parameters, and fires one detection pulse per gate zone. Each ion in the zone has its own photon-counter line, and one firmware loop counts the rising edges on those lines during the pulse. An OpenQASM circuit reaches this path through Studio's compiler ([bridge](../bridge/qccd_compile.py)). The full H2 GHZ program, 947 Studio cycles and 32 measurements, runs on eight cores.
 
@@ -172,7 +172,7 @@ The tests replay runs and require the state the page rebuilds at the last frame 
 
 ## First system-call measurements
 
-The companion paper models each service of a fault-tolerant computer by one latency and one capacity. [These measurements](../riscq/syscalls.mjs) read the corresponding costs from controller runs. [Tests](../tests/riscq-syscalls.test.mjs)
+QuantumOS models each service of a fault-tolerant computer by one latency and one capacity. [These measurements](../riscq/syscalls.mjs) read the corresponding costs from controller runs. [Tests](../tests/riscq-syscalls.test.mjs)
 
 | Quantity | Run | Result |
 | --- | --- | --- |
@@ -193,12 +193,12 @@ The companion paper models each service of a fault-tolerant computer by one late
 
 [Limit sweeps](../riscq/limits.mjs) · [Their tests](../tests/riscq-limits.test.mjs)
 
-These are costs of the classical controller and of the scheduled operations in the model. They are not measurements of hardware, and they say nothing about gate fidelity. The decoder here is firmware on a soft core, with the assumed cost of one batch per instruction. A decoder in dedicated logic would have other numbers. The hub carries one bit per message, so syndrome traffic at the rate the paper's factory model needs (132,496 bits/µs) would need a wider path than this hub.
+These are costs of the classical controller and of the scheduled operations in the model. They are not measurements of hardware, and they say nothing about gate fidelity. The decoder here is firmware on a soft core, with the assumed cost of one batch per instruction. A decoder in dedicated logic would have other numbers. The hub carries one bit per message, so the syndrome traffic of a large surface-code machine, thousands of bits per microsecond, would need a wider path than this hub.
 
 ## What comes next
 
-1. Realize the remaining system calls: `request_ancilla` as an active reset, `route` as one call on the ion and atom machines, and `request_magic`. Accept the paper's program text as well as the JSON form.
-2. Compare the measured decode and frame-update times with the declared `decoder_bandwidth`, `decoder_latency_ns` and `pauli_frame_update_ns` of the paper's machines. Add a decoder for a code with more than one round, and a variant that decodes on a fixed deadline without the second barrier.
+1. Realize the remaining system calls: `request_ancilla` as an active reset, `route` as one call on the ion and atom machines, and `request_magic`. Accept a text form of the program as well as the JSON form.
+2. Compare the measured decode and frame-update times with the declared `decoder_bandwidth`, `decoder_latency_ns` and `pauli_frame_update_ns` of declared machines. Add a decoder for a code with more than one round, and a variant that decodes on a fixed deadline without the second barrier.
 3. Sweep machine parameters (link depth, queue depth, channels per core, clock) and report where a schedule stops fitting.
 4. Give the ion and atom machines their control hardware from a hardware design too, and let a design state its own transport and gate durations.
 5. Compile OpenQASM through the ZAC compiler as well, and add routing for the transmon ring.

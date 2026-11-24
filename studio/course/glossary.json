@@ -128,7 +128,7 @@
     "chapter": "qec"
   },
   "system call": {
-    "short": "A service of the fault-tolerant virtual machine, such as decode_syndrome or route, with one latency and one capacity.",
+    "short": "A service of the fault-tolerant operating system, such as decode_syndrome or route, with one latency and one capacity.",
     "chapter": "qec"
   },
   "trace": {

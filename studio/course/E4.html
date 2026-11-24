@@ -12,7 +12,7 @@
       <p class="kicker">Part E · Lesson 4</p>
       <h1>Limits: bandwidth, concurrency, depth</h1>
       <p class="lead">
-        A virtual machine that admits a program promises that every shared service stays below its capacity. This lesson finds
+        An operating system that admits a program promises that every shared service stays below its capacity. This lesson finds
         the capacities of the controller itself: how many bits per microsecond the board can share, how many pulses one core can
         start at once, how short a pulse train can be, and how deep a link the lead still covers.
       </p>
@@ -24,12 +24,11 @@
       <h2 id="capacity"><span class="num">1</span>Capacities, not latencies</h2>
       <p class="q">When does a schedule stop fitting the controller?</p>
       <p>
-        Lessons E1 and E2 measured latencies: how long one bit or one decode takes. The fault-tolerant virtual machine of the
-        companion paper also needs capacities. It describes a machine by a qubit capacity and six shared services: gate slots of the
+        Lessons E1 and E2 measured latencies: how long one bit or one decode takes. A fault-tolerant operating system also
+        needs capacities. QuantumOS describes a machine by a qubit capacity and six shared services: gate slots of the
         control system, ancilla preparation, routing, decoders, factories and classical bandwidth. A call holds a rate
         <code>r(N, D) = ⌈1000 N / D⌉</code> on a service for its whole interval, concurrent calls add up, and the sum must stay below
-        the capacity. A request that does not fit waits. The paper shows that this is where finite services turn into runtime: lowering
-        one capacity of its reference machine multiplies the makespan of a feedback workload by 2.1 to 4.8.
+        the capacity. A request that does not fit waits, and this is where finite services turn into runtime.
       </p>
       <p>
         The functions in <code>riscq/limits.mjs</code> build small synthetic programs, compile them, run them in the Lean model and
@@ -79,10 +78,10 @@
         <div class="why">One bit per batch. A batch is 2,000 ps, so 500 batches per µs: 500 bits/µs for the whole board, whatever
           the number of cores.</div>
       </div>
-      <div class="ex" data-id="E4.2" data-stars="2" data-kind="number" data-answer="265">
-        <p>In the companion paper's model of Gidney and Ekerå's machine, one magic-state factory run holds 132,496 bits/µs of classical
-          bandwidth. How many hubs of 500 bits/µs would carry that one factory's traffic?</p>
-        <div class="why">⌈132,496 / 500⌉ = 265. A one-bit-per-message hub is a controller for a few dozen qubits, not a
+      <div class="ex" data-id="E4.2" data-stars="2" data-kind="number" data-answer="125">
+        <p>A machine holds 100 distance-25 surface-code patches. Each patch measures its 25² − 1 = 624 checks every 1 µs round. How
+          many hubs of 500 bits/µs would carry its syndrome traffic?</p>
+        <div class="why">100 · 624 = 62,400 bits/µs, and ⌈62,400 / 500⌉ = ⌈124.8⌉ = 125. A one-bit-per-message hub is a controller for a few dozen qubits, not a
           syndrome network. A machine at that scale needs a different network for syndromes. Liu et al.'s multi-board system, for
           example, aggregates syndrome bits and moves them between boards over fibre (arXiv:2603.16203).</div>
       </div>
@@ -141,7 +140,7 @@
       </div>
       <p>
         As a capacity this is a <b>gate-slot</b> limit with a twist. The core can start any number of pulses on one batch, but it pays
-        for the width of the burst in time beforehand. A virtual machine that charges a gate slot only while the gate runs does not see
+        for the width of the burst in time beforehand. An operating system that charges a gate slot only while the gate runs does not see
         that cost; one that charges a burst of <i>n</i> gates on one core an extra (<i>n</i> − 1) · 32 batches does.
       </p>
 
@@ -193,8 +192,8 @@
         <b>Program memory.</b> The table loop stores four words per timed write: issue time, start time, register address, data. A core
         of 16,384 words keeps 320 for its classical bit table and stack, leaving 16,064. In the H2 GHZ program of QCCD Studio, 16
         electrode channels on one core need 16,577 words, so the lowering splits them over three transport cores. Memory is not a
-        service of the virtual machine, but it bounds how long a straight-line schedule one core can hold, which is why the FTQVM keeps
-        loops symbolic.
+        service of the operating system, but it bounds how long a straight-line schedule one core can hold, which is why a
+        fault-tolerant program keeps its loops symbolic instead of unrolling them.
       </p>
 
       <h2 id="summary"><span class="num">7</span>From limits to a machine declaration</h2>
