@@ -3,15 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>QControl Studio</title>
+    <title>QuantumOS · Simulate real quantum computers with their control systems</title>
+    <meta property="og:title" content="QuantumOS" />
+    <meta property="og:description" content="A general framework to simulate real quantum computers with control systems." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/docs/media/riscq-ions.gif" />
+    <meta name="theme-color" content="#4338ca" />
     <meta name="description" content="A general framework to simulate real quantum computers with control systems: programs lowered to RISC-Q firmware, executed in a Lean model, shown driving transmons, trapped ions and neutral atoms in 3D." />
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/home.css" />
   </head>
   <body>
     <main>
       <div class="wrap hero">
         <div>
+          <p class="product"><img src="/quantumos.svg" alt="" width="34" height="34" /><span>QuantumOS</span></p>
           <h1>A general framework to simulate <em>real quantum computers</em> with control systems</h1>
           <p class="pitch">
             Write a program in OpenQASM, ZAC, a QCCD Studio program or fault-tolerance system calls. It is compiled to timed hardware
@@ -71,7 +77,7 @@
                 <rect x="1" y="1" width="44" height="44" rx="9" fill="#f4f1fb" stroke="#cfc4e6" />
                 <rect x="7" y="13" width="32" height="20" rx="6" fill="none" stroke="#e8a0a8" stroke-width="2.5" />
                 <circle cx="12" cy="13" r="4" fill="#26324a" /><circle cx="34" cy="33" r="4" fill="#26324a" />
-                <rect x="18" y="9" width="10" height="7" rx="3.5" fill="#58b8ac" />
+                <rect x="18" y="9" width="10" height="7" rx="3.5" fill="#22b8cf" />
               </svg>
               <h3>Trapped-ion QCCD</h3>
               <p class="how">Ions sit in a surface trap. Electrode voltages shuttle them between zones, lasers drive gates on ions in a gate
@@ -132,7 +138,7 @@
       </section>
     </main>
     <footer class="foot">
-      <p>QControlSys simulates the classical control system and the operations it schedules. No quantum state is simulated; measurement outcomes are inputs.</p>
+      <p>QuantumOS simulates the classical control system and the operations it schedules. No quantum state is simulated; measurement outcomes are inputs.</p>
       <p>Built on <a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q" target="_blank" rel="noopener">RISC-Q</a>,
         <a href="https://github.com/yezhuoyang/QCCD/tree/compiler" target="_blank" rel="noopener">QCCD Studio</a>,
         <a href="https://github.com/UCLA-VAST/ZAC" target="_blank" rel="noopener">ZAC</a> and

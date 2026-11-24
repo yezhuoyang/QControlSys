@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Glossary · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .gl { margin: 0; }
+      .gl dt { font-weight: 620; margin: 16px 0 2px; scroll-margin-top: 64px; }
+      .gl dt:target { color: var(--accent); }
+      .gl dd { margin: 0 0 0 0; color: var(--ink2); }
+      .gl dd a { font-size: 12.5px; white-space: nowrap; }
+      .letters { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; margin: 0 0 8px; padding: 0; list-style: none; }
+    </style>
+  </head>
+  <body data-chapter="glossary">
+    <article>
+      <p class="kicker">Background · Reference</p>
+      <h1>Glossary</h1>
+      <p class="lead">
+        Every term of the course in one sentence, in alphabetical order. These are the definitions you see when you hover a dotted word
+        in a lesson. Each entry links to the background chapter that explains it.
+      </p>
+      <p class="pre">
+        The list is read from <code>/course/glossary.json</code> when the page opens, so it always matches the definitions in the lessons.
+        Link to an entry with <code>/course/background/glossary#term-&lt;key&gt;</code>, spaces in the key written as hyphens, for example
+        <code>#term-virtual-Z</code>.
+      </p>
+      <ul class="letters" id="letters"></ul>
+      <div id="entries"><p>Loading the glossary…</p></div>
+    </article>
+    <script type="module">
+      import { course, el } from "/course/course.js";
+      const anchor = (key) => "term-" + key.trim().replace(/\s+/g, "-");
+      const [glossary, curriculum] = await Promise.all([
+        fetch("/course/glossary.json").then((r) => r.json()),
+        fetch("/course/curriculum.json").then((r) => r.json()),
+      ]);
+      const chapters = new Map(curriculum.background.map((c) => [c.id, c]));
+      const keys = Object.keys(glossary).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+      const initial = (key) => key.normalize("NFD").replace(/[^A-Za-z]/g, "").charAt(0).toUpperCase() || "#";
+      const groups = new Map();
+      for (const key of keys) {
+        const letter = initial(key);
+        if (!groups.has(letter)) groups.set(letter, []);
+        groups.get(letter).push(key);
+      }
+      const entries = document.getElementById("entries");
+      entries.replaceChildren();
+      for (const [letter, list] of groups) {
+        entries.append(el("h2", { id: "letter-" + letter, text: letter }));
+        const dl = el("dl", { class: "gl" });
+        for (const key of list) {
+          const entry = glossary[key];
+          const chapter = chapters.get(entry.chapter);
+          dl.append(
+            el("dt", { id: anchor(key), text: key }),
+            el("dd", {}, entry.short + " ",
+              chapter ? el("a", { href: chapter.href, text: "→ " + chapter.title }) : null));
+        }
+        entries.append(dl);
+      }
+      document.getElementById("letters").replaceChildren(...[...groups.keys()].map((letter) =>
+        el("li", {}, el("a", { href: "#letter-" + letter, text: letter }))));
+      await course();
+      // Accept a hash written with spaces or percent-encoding as well as with hyphens.
+      if (location.hash) {
+        const wanted = decodeURIComponent(location.hash.slice(1));
+        const target = document.getElementById(wanted) ?? document.getElementById(anchor(wanted.replace(/^term-/, "")));
+        target?.scrollIntoView();
+      }
+    </script>
+  </body>
+</html>

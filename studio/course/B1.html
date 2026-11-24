@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B1 · Posted writes and the pulse table · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="B1">
+    <article>
+      <p class="kicker">Part B · Lesson 1</p>
+      <h1>Posted writes and the pulse table</h1>
+      <p class="lead">
+        A control core has no instruction for "play a pulse". It has stores. This lesson shows the addresses those stores go
+        to, the registers of a channel, how a frequency, a phase and an amplitude become 16-bit codes, and how one store to
+        one address fires a row of a table.
+      </p>
+      <p class="pre">
+        You should have followed one pulse in <a href="/course/A3">A3</a>. The
+        <a href="/course/background/riscq">background chapter on the RISC-Q architecture</a> places these registers in the
+        whole controller. Hexadecimal numbers are written <code>0x…</code>.
+      </p>
+
+      <h2 id="posted"><span class="num">1</span>A store that does not wait</h2>
+      <p class="q">How does a 32-bit store on a RISC-V core end up as a pulse parameter next to a DAC?</p>
+      <p>
+        Each <span class="term" data-term="core">control core</span> of RISC-Q is an RV32I processor with its own RAM at
+        <code>0x80000000</code>. Some addresses outside the RAM are not memory. A store into the <b>put window</b>, from
+        <code>0x10000</code> upward, leaves the core as a <span class="term" data-term="posted write">posted write</span>:
+        the address and the 32-bit word travel over the <span class="term" data-term="link">link</span> to a
+        <span class="term" data-term="channel">channel</span> or to the board hub. "Posted" means that the core sends it
+        and goes on. It does not wait for the channel to answer, and it cannot read the value back.
+      </p>
+      <p>
+        That is the whole interface between software and pulses. Programming a channel is a series of stores; starting a
+        pulse is one more store. The model charges each load or store one extra batch in the core, an assumed bound from
+        RISC-Q's <code>LsuPlugin.md</code>, and delivers the write 1 + link depth batches later (lesson
+        <a href="/course/A3">A3</a>).
+      </p>
+
+      <h2 id="map"><span class="num">2</span>The address map of a core</h2>
+      <p class="insection"><b>In this section:</b> where everything a core can reach sits, and how the put window is divided into nodes.</p>
+      <table>
+        <thead><tr><th>Address</th><th>What is there</th><th>RISC-Q source</th></tr></thead>
+        <tbody>
+          <tr><td><code>0x80000000</code></td><td>The core's own RAM: program, tables, classical bits</td><td>linker layout</td></tr>
+          <tr><td><code>0x4000</code>, <code>0x4008</code>, <code>0x4010</code></td><td><code>timeCmp</code>, <code>waitTimeCmp</code> (a read stalls until the time is reached), <code>done</code></td><td><code>ControlMemMaps.scala</code></td></tr>
+          <tr><td><code>0xBFF8</code></td><td><code>time</code>: the core's copy of the batch counter</td><td><code>ControlMemMaps.scala</code></td></tr>
+          <tr><td><code>0x4200</code> + 0x20·k</td><td><span class="term" data-term="sink">Sinks</span>: readout results, input events (lesson <a href="/course/B3">B3</a>)</td><td><code>EventLink.scala</code></td></tr>
+          <tr><td><code>0x4300</code>, <code>0x4320</code>, <code>0x4340</code></td><td>Hub board words, barrier release, mailboxes (lesson <a href="/course/B4">B4</a>)</td><td><code>PutHub.scala</code></td></tr>
+          <tr><td><code>0x10000</code> + node · <code>0x10000</code></td><td>The put window: one 64 KiB window per node</td><td><code>map.py</code></td></tr>
+          <tr><td><code>0x40000000</code></td><td>Host window: results for the host computer, write only</td><td><code>HostWindow.md</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        The put window is divided into <b>nodes</b>. Nodes 0 to 15 are the core's own channels, in the order the build lists
+        them. Nodes 16 to 19 are the hub's four shared bit groups, nodes 20 to 35 its sixteen barriers, and the nodes from 36
+        reach other cores' mailboxes (<code>MAP</code> in <code>riscq/soc.mjs</code>, after RISC-Q's <code>map.py</code>). So
+        channel <i>n</i> starts at
+      </p>
+      <p class="formula">channel base = 0x10000 + n · 0x10000</p>
+      <p>
+        Core q0 of the transmon ring has five channels: <code>gate</code> (node 0), <code>cz0</code> (1), <code>cz1</code>
+        (2), <code>ro</code> (3) and <code>demod</code> (4). Its drive channel starts at <code>0x10000</code>, its readout
+        tone channel at <code>0x40000</code>.
+      </p>
+
+      <h2 id="registers"><span class="num">3</span>Inside a channel</h2>
+      <p>
+        A channel that drives a DAC or reads an ADC holds a small register file, which RISC-Q calls the pulse parameter
+        buffer (<code>PulseParamBuffer.scala</code>). Offsets are from the channel base:
+      </p>
+      <table>
+        <thead><tr><th>Offset</th><th>Register</th><th>Data</th></tr></thead>
+        <tbody>
+          <tr><td><code>+0x0</code></td><td><code>fire</code></td><td>The number of the table entry to play</td></tr>
+          <tr><td><code>+0x4</code></td><td><code>freq</code>: the <span class="term" data-term="carrier">carrier</span> frequency</td><td>16-bit code</td></tr>
+          <tr><td><code>+0x8</code></td><td><code>dcOffset</code></td><td>16-bit code</td></tr>
+          <tr><td><code>+0xC</code></td><td><code>phaseOffset</code>, added to every entry's phase</td><td>16-bit code</td></tr>
+          <tr><td>(<i>i</i> + 1) · 16 + 0, 4, 8, 12</td><td>Entry <i>i</i> of the pulse table: <code>phase</code>, <code>amp</code>, <code>env</code>, <code>dur</code></td><td>16-bit codes</td></tr>
+          <tr><td><code>+0x4100</code></td><td><code>startTime</code>: the batch at which the next fired entry starts</td><td>32-bit batch number</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The <span class="term" data-term="pulse table">pulse table</span> is the heart of it. Each entry is one prepared
+        pulse: its phase, its amplitude, the address of its <span class="term" data-term="envelope">envelope</span> in
+        envelope memory, and its duration in batches. On the ring, every drive channel has two entries: entry 0 is the
+        <code>x90</code>, entry 1 the <code>x</code>. A CZ channel, the readout channel and the demodulation channel have one
+        entry each.
+      </p>
+      <p>
+        Writing <i>i</i> to <code>fire</code> hands entry <i>i</i> to the timed queues, to start at the current
+        <code>startTime</code>, and then advances <code>startTime</code> by the entry's duration. Two fires in a row
+        therefore play back to back without any time arithmetic in the program. The fields of a 16-bit register sit in bits
+        31:16 of the stored word; the lower half is ignored. <code>pack16</code> in <code>riscq/soc.mjs</code> builds such a
+        word: <code>(code &amp; 0xFFFF) &lt;&lt; 16</code>.
+      </p>
+      <div class="note"><b>Proved in Lean, about the model</b> (<code>QControl/RiscQ/Timing.lean</code>):
+        <code>fire_captures_start</code>, a fire schedules its entry at the current start time;
+        <code>fire_fire_contiguous</code>, a second fire is scheduled exactly one duration after the first;
+        <code>explicit_start_wins</code>, writing <code>startTime</code> after a fire discards the advance;
+        <code>fire_preserves_table</code>, a fire changes no table entry, so an entry can be fired again and again;
+        <code>decode_layout</code>, the addresses the firmware writes decode to the intended fields. These are statements
+        about the model's decoder, which follows RISC-Q's Scala source. The RTL itself is not proved here.</div>
+      <div class="ex" data-id="B1.1" data-stars="1" data-kind="choice" data-answer="a">
+        <p>The store that fires the <code>x90</code> of qubit 0 is <code>sw x0, 0(x5)</code> with <code>x5 = 0x10000</code>.
+          What does the stored word, 0, mean?</p>
+        <ol class="choices">
+          <li data-k="a">Play entry 0 of q0.gate's pulse table, the <code>x90</code>.</li>
+          <li data-k="b">Stop the channel.</li>
+          <li data-k="c">Start at batch 0.</li>
+          <li data-k="d">Nothing: register x0 is a dummy and the word is ignored.</li>
+        </ol>
+        <div class="why">The fire register takes an entry number. Register x0 always reads 0 in RISC-V, so
+          <code>sw x0</code> is the cheapest way to store 0. The start time was written separately, three batches earlier.</div>
+      </div>
+      <div class="ex" data-id="B1.2" data-stars="2" data-kind="number">
+        <p>Core q0 writes the start time of its readout tone channel <code>ro</code> before firing it. At which CPU address?
+          You may answer in hexadecimal.</p>
+        <div class="why"><code>ro</code> is node 3: base 0x10000 + 3 · 0x10000 = 0x40000, plus 0x4100 for
+          <code>startTime</code>, gives <code>0x44100</code>. In the firmware it is <code>lui x5, 0x44</code> followed by
+          <code>sw x6, 256(x5)</code>.</div>
+      </div>
+
+      <h2 id="codes"><span class="num">4</span>From physical values to codes</h2>
+      <p class="insection"><b>In this section:</b> the three conversions the compiler performs before any store, with qubit 0 as the example.</p>
+      <p>
+        The calibration states frequencies in hertz, phases in radians and amplitudes as fractions of full scale. The
+        registers take 16-bit integers. Three functions of <code>riscq/soc.mjs</code> convert, each a copy of the
+        corresponding function in RISC-Q's <code>units.py</code>.
+      </p>
+      <p>
+        <b>Frequency.</b> The <span class="term" data-term="NCO">NCO</span> of a channel advances the carrier phase by a
+        fixed step for each DAC sample. The code is that step as a fraction of a full turn, times 65,536:
+      </p>
+      <p class="formula">freqCode = round( f · 65536 / (16 · dspClk) )</p>
+      <p>
+        16 · dspClk is the DAC sample rate, 8 GS/s on the ring. Qubit 0's drive frequency in the calibration is
+        5,498,857,081.67 Hz, which gives a code just below 45,047. The code is kept to 16 bits: <code>freqCode</code> returns
+        it in signed form, −20,489, and the register holds the same 16 bits, which the trace prints as 45,047.
+      </p>
+      <p>
+        <b>Phase.</b> An angle is wrapped to −π…π and expressed in units of π/32,768:
+      </p>
+      <p class="formula">phaseCode = round( φ / π · 32768 ), kept to 16 bits</p>
+      <p>
+        <b>Amplitude.</b> A fraction <i>a</i> between −1 and 1 is scaled by 19,896, the largest code that keeps RISC-Q's
+        unsaturated datapath in range (<code>AMP_SCALE</code>, from RISC-Q's <code>pulses/golden.py</code>):
+      </p>
+      <p class="formula">ampCode = round( a · 19896 )</p>
+      <p>
+        Qubit 0's <code>x90</code> has amplitude 0.10560383, so its entry holds 2,101. The durations are already batches
+        (lesson <a href="/course/A2">A2</a>): 18 for the <code>x90</code>, 35 for the <code>x</code>.
+      </p>
+      <div class="ex" data-id="B1.3" data-stars="2" data-kind="number">
+        <p>Qubit 0's <code>x</code> pulse has amplitude 0.10674013 in the calibration. Which code does entry 1 of q0.gate
+          hold? Check your answer in the Machine state of the workspace, or in the init stores of q0's firmware.</p>
+        <div class="why">0.10674013 × 19,896 = 2,123.7, rounded to 2,124. The run stores it with
+          <code>sw</code> to <code>0x10024</code>: entry 1 is at (1 + 1) · 16 = 0x20, amplitude at +4.</div>
+      </div>
+      <div class="ex" data-id="B1.4" data-stars="2" data-kind="number">
+        <p>Compute the frequency code of qubit 0's drive channel from its frequency, 5,498,857,081.67 Hz, as the trace prints
+          it (unsigned, 0 to 65,535).</p>
+        <div class="why">5,498,857,081.67 × 65,536 / 8 × 10⁹ = 45,046.97, rounded to 45,047. This is above 32,767, so the
+          signed form is 45,047 − 65,536 = −20,489. The register bits are the same.</div>
+      </div>
+
+      <h2 id="init"><span class="num">5</span>Programming the tables</h2>
+      <p>
+        Before any pulse, each core programs its channels. The firmware generator (<code>riscq/firmware.mjs</code>,
+        <code>initChannel</code>, after <code>init_pulse_params</code> in RISC-Q's <code>riscq.h</code>) writes, for every
+        channel: the current time as <code>startTime</code>, a zero <code>phaseOffset</code> and <code>dcOffset</code>, the
+        carrier <code>freq</code>, and then the four fields of every table entry. In the trace these are the
+        <code>put</code> frames of core q0 whose source is <code>init</code>, each followed three batches later by a
+        <code>write</code> frame at the channel.
+      </p>
+      <p>
+        Open the workspace at any early step and choose core q0 in the firmware layer. The <code>init</code> region is a
+        long run of pairs: <code>lui</code> or <code>addi</code> to load an address and a value, then <code>sw</code>.
+        Hover a word to see its address and machine word.
+      </p>
+      <div class="ex" data-id="B1.5" data-stars="1" data-kind="number" data-unit="writes">
+        <p>How many posted writes does core q0 make while programming its five channels (source <code>init</code>)?</p>
+        <div class="why">The drive channel: 4 registers and 2 entries × 4 fields = 12. Each of the two CZ channels, the
+          readout channel and the demodulation channel: 4 + 4 = 8. In all 12 + 4 · 8 = 44.</div>
+      </div>
+
+      <h2 id="fire"><span class="num">6</span>Firing one pulse</h2>
+      <p>
+        With the tables in place, a pulse costs three stores in this firmware. For the first <code>x90</code> of qubit 0
+        (hardware instruction <code>h2</code>):
+      </p>
+      <pre><code>0x800001fc  addi x7, x8, -96       # issue time = time base − 96
+0x80000200  sw   x7, 0(x9)         # timeCmp
+0x80000204  lw   x7, 8(x9)         # waitTimeCmp: stall until then (lesson B2)
+0x80000208  lui  x6, 0xbfc60       # phase code 0xBFC6 in bits 31:16
+0x8000020c  lui  x5, 0x10          # channel q0.gate
+0x80000210  sw   x6, 12(x5)        # phaseOffset  ← the virtual Z so far (0x1000C)
+0x80000214  addi x6, x8, 7         # start = time base + 7
+0x80000218  lui  x5, 0x14
+0x8000021c  sw   x6, 256(x5)       # startTime    ← 320 (0x14100)
+0x80000220  lui  x5, 0x10
+0x80000224  sw   x0, 0(x5)         # fire         ← entry 0 (0x10000)</code></pre>
+      <p>
+        This is region <code>h2</code> of q0's firmware, exactly as the workspace disassembles it; the comments are added.
+        Register <code>x8</code> holds the time base of the segment and <code>x9</code> the control block at
+        <code>0x4000</code>. The first three words wait for the right moment to issue, which is the subject of lesson
+        <a href="/course/B2">B2</a>. The other eight are the three stores and the instructions that load their addresses
+        and data.
+      </p>
+      <p>
+        The first store carries the <span class="term" data-term="virtual Z">virtual Z</span>. Lesson A1 showed that a
+        Hadamard begins with frame updates; the lowering adds them up for each qubit and writes their negative as the phase
+        offset before the pulse (<code>lower</code> in <code>riscq/platforms/superconducting.mjs</code>). Every later
+        parameter of the entry stays as it was programmed. This is why Z rotations cost no pulse: they are one register
+        write before the next pulse of the same qubit.
+      </p>
+      <figure class="live" data-title="The store that fires the x90" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=333&view=control">
+        <figcaption>Step 333: core q0 executes <code>sw x0, 0(x5)</code>. The firmware layer highlights the word; the Step
+          inspector shows the address <code>0x10000</code> and the channel 0 it targets.</figcaption>
+      </figure>
+      <div class="ex" data-id="B1.6" data-stars="3" data-kind="number">
+        <p>Before the <code>x90</code> of <code>h2</code>, qubit 0 has two frame updates: π/2 and 0.0055315388 rad. The phase
+          offset is minus their sum. Which 16-bit code does q0 write to <code>phaseOffset</code>, as the trace prints it
+          (unsigned)?</p>
+        <div class="why">−(1.5707963 + 0.0055315) = −1.5763279 rad. Divided by π and multiplied by 32,768 that is −16,441.6,
+          rounded to −16,442. As an unsigned 16-bit number: 65,536 − 16,442 = 49,094. The store is
+          <code>sw x6, 12(x5)</code> with the code in bits 31:16 of <code>x6</code>.</div>
+      </div>
+      <div class="warn"><b>What a store cannot do.</b> A posted write is fire and forget. If the timed queue of the channel
+        is full when it arrives, the write is dropped and the model reports a <code>drop</code> frame and a fault. The
+        compiler therefore refuses a schedule that would overflow the queues; lesson <a href="/course/B2">B2</a> shows the
+        limit.</div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A store into the put window is a posted write: it travels to a channel or the hub, and the core does not wait.</li>
+          <li>Channel <i>n</i> of a core starts at <code>0x10000 + n · 0x10000</code>; <code>fire</code> +0, <code>freq</code> +4, <code>dcOffset</code> +8, <code>phaseOffset</code> +0xC, entry <i>i</i> at (<i>i</i>+1)·16, <code>startTime</code> +0x4100.</li>
+          <li>16-bit fields go in bits 31:16 of the word.</li>
+          <li>Frequencies, phases and amplitudes become codes by <code>freqCode</code>, <code>phaseCode</code> and <code>ampCode</code>.</li>
+          <li>Firing writes an entry number; the start time advances by the entry's duration.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const puts = (run, core) => run.frames.filter((f) => f.part === core && f.op === "put");
+      course({
+        answers: {
+          "B1.2": async (api) => puts(await feedforward(api), "q0").find((f) => f.targets.includes("q0.ro") && f.state.offset === 0x4100).state.address,
+          "B1.3": async (api) => (await feedforward(api)).summary.cores[0].channels[0].buffer.table[1].amp,
+          "B1.4": async (api) => (await feedforward(api)).summary.cores[0].channels[0].freq,
+          "B1.5": async (api) => puts(await feedforward(api), "q0").filter((f) => f.source === "init").length,
+          "B1.6": async (api) => puts(await feedforward(api), "q0").find((f) => f.source === "h2" && f.state.offset === 0xc).state.store >>> 16,
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,6 @@
-# QControlSys
+<p align="center"><img src="studio/quantumos.svg" width="72" height="72" alt="QuantumOS logo" /></p>
+
+# QuantumOS
 
 **A general framework to simulate real quantum computers with control systems.**
 
@@ -25,6 +27,10 @@ pulses on the wires, ions shuttling through a trap, atoms carried by optical twe
 
 It simulates the classical control system and the operations it schedules.
 No quantum state is simulated. Measurement outcomes are inputs.
+
+## Learn it
+
+[The QuantumOS course](http://127.0.0.1:7432/course/) teaches the platform from the qubit up: 20 lessons in five parts (the stack, programming the controller, the three machines, designing hardware, fault tolerance on the controller) and eight background chapters. Each of its 129 exercises is checked against the simulator: a numeric answer is computed by running the program, not written into the page.
 
 ## Examples
 
@@ -124,7 +130,28 @@ node riscq/cli.mjs --list
 node riscq/cli.mjs --example superconducting-feedforward --outcome c=1 --out run.json
 ```
 
-Pages: `/` machine workbench · `/riscq-studio` RISC-Q workspace · `/riscq-design` hardware design editor · `/riscq` controller debugger · `/qccd-studio` · `/qccd` · `/neutral` · `/feedforward` · `/controller` · `/validation` · `/board-validation`
+Pages: `/` home · `/course` the course · `/riscq-studio` RISC-Q workspace · `/riscq-design` hardware design editor · `/riscq` controller debugger · `/qccd-studio` · `/qccd` · `/neutral` · `/feedforward` · `/controller` · `/validation` · `/board-validation`
+
+## Deploy
+
+```sh
+docker build -t quantumos .
+docker run -p 8080:8080 quantumos      # then open http://localhost:8080
+```
+
+The image builds the Lean model and clones [QCCD Studio] for the trapped-ion examples. Without Docker, run `npm start` behind a reverse proxy with these settings:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `PORT` | 7432 | Port to listen on (`QCONTROL_PORT` is also accepted) |
+| `QUANTUMOS_HOST` | 127.0.0.1 | Address to listen on. Use `0.0.0.0` to accept outside connections |
+| `QUANTUMOS_MAX_RUNS` | 4 | Simulations that run at once. Each runs the Lean executable, and QCCD runs also Python |
+| `QUANTUMOS_MAX_QUEUE` | 16 | Simulations that may wait. Further requests are answered 503 until a slot frees |
+| `QUANTUMOS_CACHE_SECONDS` | 300 | How long browsers may cache pages, scripts and images |
+| `QCCD_STUDIO_ROOT` | `../QCCD` | QCCD Studio checkout for the trapped-ion examples |
+| `QCONTROL_PYTHON` | `python` | Python 3.10+ executable for the QCCD Studio bridge |
+
+Every simulation runs inside step, event and time budgets (`riscq/examples.mjs`, `server.mjs`), and request bodies are size-limited. The server has no accounts and stores nothing; progress in the course stays in each visitor's browser.
 
 ## How it works
 
@@ -157,6 +184,10 @@ Pages: `/` machine workbench · `/riscq-studio` RISC-Q workspace · `/riscq-desi
 - [Hardware validation](docs/physical-validation.md) · [Board measurements](docs/board-validation.md) · [Capture format](docs/controller-capture.md)
 - [Literature review](docs/literature-review.md) · [Architecture and development plan](docs/development-plan.md)
 - [Development rule](AGENTS.md) · [How the animations are made](docs/media/README.md)
+
+## License
+
+QuantumOS is released under the [MIT License](LICENSE). Vendored third-party files keep their own licences: RISC-Q firmware and runtime (MIT, [validation/riscq/firmware/LICENSE](validation/riscq/firmware/LICENSE)) and the Helios decoder (BSD-3-Clause, [validation/decoders/helios/LICENSE](validation/decoders/helios/LICENSE)).
 
 [QCCD Studio]: https://github.com/yezhuoyang/QCCD/tree/compiler
 [ZAC]: https://github.com/UCLA-VAST/ZAC

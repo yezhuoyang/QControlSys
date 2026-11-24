@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>D3 · Who drives what · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; font-size: 14px; }
+      .lab .out { font-size: 13px; max-height: 420px; overflow: auto; }
+      .lab .out table { font-size: 12.5px; }
+      .lab .bad { color: var(--red); }
+    </style>
+  </head>
+  <body data-lesson="D3">
+    <article>
+      <p class="kicker">Part D · Lesson 3</p>
+      <h1>Who drives what</h1>
+      <p class="lead">
+        Which core drives which channel is a line in the design. Give the channels of three qubits to one core and the
+        feed-forward program no longer needs the board hub: the measured bit stays inside one processor. That has a price,
+        and this lesson measures both sides.
+      </p>
+      <p class="pre">
+        This lesson assumes lessons <a href="/course/D1">D1</a> and <a href="/course/D2">D2</a>, and uses the hub and
+        barriers of lesson <a href="/course/B4">B4</a>. Lesson <a href="/course/E1">E1</a> breaks down the feedback latency
+        in detail.
+      </p>
+
+      <h2 id="allocation"><span class="num">1</span>Allocation is a field</h2>
+      <p>
+        Each channel of a design names its <code>core</code>. Each qubit names its channels by id. Nothing else ties a
+        qubit to a core. When the design becomes a machine, <code>machine()</code> in <code>riscq/design.mjs</code> builds a
+        function <code>locate(qubit, role)</code> that answers "which core and which channel plays this qubit's gate,
+        readout tone, acquisition window or CZ tone?" by following those ids. The superconducting lowering asks
+        <code>locate</code> for every action. So moving a channel to another core moves every action on that channel, and
+        the firmware generator then writes a different program for each core.
+      </p>
+      <p>
+        In the ring every qubit has its own core. The Bell program of lesson <a href="/course/A1">A1</a> uses qubits 0, 1 and
+        2, so three cores work. Qubit 0's core measures the bit <code>c</code>; qubit 2's core plays <code>x</code> if
+        <code>c</code> is 1. The bit must cross the <span class="term" data-term="hub">hub</span>: q0 publishes it, every core
+        receives it, the cores meet at a <span class="term" data-term="barrier">barrier</span>, and q2 schedules the
+        conditioned pulse.
+      </p>
+
+      <h2 id="merge"><span class="num">2</span>Three qubits on one core</h2>
+      <p class="insection"><b>In this section:</b> the edit, the rules it must respect, and what the check reports.</p>
+      <p>The edit is the one in <code>tests/riscq-design.test.mjs</code>:</p>
+      <pre><code>for (const channel of design.channels)
+  if (["q1", "q2"].includes(channel.core))
+    Object.assign(channel, { name: channel.core + "_" + channel.name, core: "q0" });
+design.parts = design.parts.filter((part) =&gt; !["q1", "q2"].includes(part.id));</code></pre>
+      <p>
+        Every channel of cores q1 and q2 moves to q0. The channels are renamed (<code>q1_gate</code>, …) because names must be
+        unique on a core; their ids, which the qubits refer to, stay the same. The now empty cores are removed, since a core
+        with no channel breaks a rule. Core q0 then owns 15 channels, one fewer than the limit of 16.
+      </p>
+      <div class="lab" id="merger">
+        <h4>Merge cores into q0</h4>
+        <p>Tick the cores whose channels should move to core <code>q0</code>. <b>Check</b> sends the design to
+          <code>POST /api/riscq/design/check</code>; <b>Run</b> runs the Bell program on it with c = 1 and on the unchanged
+          ring, and compares them.</p>
+        <div class="row" id="coreBoxes"></div>
+        <div class="row"><button class="btn small alt" type="button" id="checkIt">Check</button><button class="btn small" type="button" id="runIt">Run</button><span class="src" id="mergeState"></span></div>
+        <div class="out" id="mergeOut"></div>
+      </div>
+      <div class="ex" data-id="D3.1" data-stars="1" data-kind="number">
+        <p>Merge q1 and q2 into q0 and check the design. How many channels does core q0 have in the build the check returns?</p>
+        <div class="why">5 + 5 + 5 = 15: each of qubits 0, 1 and 2 brings a gate channel, two CZ channels, a readout tone
+          and an acquisition channel. The build lists them in document order.</div>
+      </div>
+      <div class="ex" data-id="D3.2" data-stars="2" data-kind="number">
+        <p>Tick q3 as well. The check now fails. How many channels would core q0 have?</p>
+        <div class="why">20. The message is "Core q0 has 20 channels. A core has 1 to 16." A RISC-Q core addresses 16
+          channel nodes in its put window (nodes 0 to 15); higher nodes reach the hub.</div>
+      </div>
+
+      <h3>Converters stay where they are</h3>
+      <p>
+        The merge changes who writes, not what plays. Each moved channel keeps its <code>converter</code>: the gate
+        channel of qubit 1, now <code>q1_gate</code> on core q0, still drives DAC 1, and the wire from DAC 1 to qubit 1 is
+        unchanged. So the pulses, their carriers and their wire delays are the same as before. What changes is the build:
+        core q0's put window now addresses 15 channel nodes, the firmware generator writes one program for q0 that issues
+        every timed write of the three qubits, and cores q1 and q2 no longer exist. The cores q3 to q7 still exist; they
+        have nothing to do in this program and park at once, as in the ring.
+      </p>
+      <p>
+        A converter and a core are separate parts of a design for this reason. A core is a processor that schedules writes;
+        a converter is where a signal leaves the controller. Several channels on different cores may name the same DAC (the
+        eight readout tones do), and one core may drive channels on many DACs (the merged q0 drives DACs 0, 1, 2 and 8 and
+        reads ADC 12). Which assignment is best depends on what the program needs to share between qubits, which is the
+        subject of the rest of this lesson.
+      </p>
+
+      <h2 id="nohub"><span class="num">3</span>The bit never leaves the core</h2>
+      <p>
+        Run the merged design. The run is clean: no fault, every pulse on time, the bit <code>c</code> read as 1. Now look
+        at what is missing. Only core q0 issues timed writes. There is no <code>publish</code> frame, no <code>board</code>
+        frame and no barrier arrival anywhere in the trace. When a single core plays every pulse, the compiler needs no
+        barrier to give cores a common time base, and the bit that conditions the <code>x</code> is already in the core's
+        own memory.
+      </p>
+      <p>
+        Compare the ring. There, the three cores meet at a barrier before the first segment, so that their start times
+        refer to one common batch. After the measurement, q0 stores the bit to the host window, publishes it through the hub,
+        the hub writes it into every core's board register, and the cores meet at a second barrier before q2 issues the
+        conditioned fire. Every one of those steps is a frame in the trace, and every one costs batches. Open the run of the
+        figure below and step from the <code>result</code> frame on <code>q0.inbox</code> to the conditioned pulse on
+        qubit 2 to see them in order.
+      </p>
+      <div class="ex" data-id="D3.3" data-stars="1" data-kind="number">
+        <p>How many <code>publish</code> frames does the merged run contain?</p>
+        <div class="why">None. On the ring the measuring core publishes <code>c</code> once, and the hub delivers it to all
+          eight cores 8 batches later. The merged program has nobody to tell.</div>
+      </div>
+      <div class="ex" data-id="D3.4" data-stars="2" data-kind="number" data-unit="ns">
+        <p>In the merged run, how many nanoseconds after qubit 0's acquisition window closes does the conditioned
+          <code>x</code> open?</p>
+        <div class="why">248 ns, against 344 ns across three cores. The result reaches the core 34 ns after the window
+          closes in both. On the ring the bit then needs the hub (to 86 ns at every core) and a barrier before q2 can
+          schedule its fire. On one core the conditioned fire is issued a few batches after the result is read,
+          one 96-batch lead (192 ns) ahead of its start.</div>
+      </div>
+      <figure class="live" data-title="The feed-forward through the hub, on three cores" data-src="/riscq-studio?example=superconducting-design&outcome=c=1&step=410&view=control">
+        <figcaption>The ring as a design, in the <b>Control system</b> view, at the step where q0 publishes <code>c</code>
+          through the hub. The merged design has no such step.</figcaption>
+      </figure>
+
+      <h2 id="price"><span class="num">4</span>The price: one core does all the writing</h2>
+      <p>
+        The merged run is faster where it matters for feedback, but it is longer overall. A core issues one posted write at
+        a time. Before the first pulse, every core writes the registers and the pulse table of each of its channels; the
+        merged core does that for 15 channels alone. Over the whole run it issues 152 posted writes, where the three cores
+        of the ring issue 56, 54 and 49 in parallel. Pulses that used to come from three cores on the same batch now come from
+        one, so the <span class="term" data-term="preroll">preroll</span> of the first segment grows as well, from 7 to
+        52 batches.
+      </p>
+      <p>
+        Program memory is not the limit here. The merged core's program is 460 words, where the three separate programs were
+        187, 172 and 159 words; the build gives each core 8,192 words. On the ion trap of lesson <a href="/course/C2">C2</a>
+        it was the other way round: there a core with 16 electrode channels ran out of RAM before it ran out of channels.
+        Which resource binds first depends on the program, so measure it with a run rather than guess.
+      </p>
+      <div class="ex" data-id="D3.5" data-stars="2" data-kind="number" data-unit="ns">
+        <p>How many nanoseconds later does the first pulse of the program open in the merged run than on the ring?</p>
+        <div class="why">The first window opens at batch 651 instead of 320: 331 batches, 662 ns later. The setup of 15
+          channels and the wider first burst cost more than the 96 ns the merged design saves on the feedback.</div>
+      </div>
+      <div class="ex" data-id="D3.6" data-stars="2" data-kind="choice" data-answer="c">
+        <p>When does it pay to put several qubits on one core?</p>
+        <ol class="choices">
+          <li data-k="a">Always: fewer cores means a faster machine.</li>
+          <li data-k="b">Never: the hub is as fast as a core's own memory.</li>
+          <li data-k="c">When a measured bit conditions a pulse on another qubit and the feedback latency matters more than setup time and issue rate, within the limit of 16 channels per core.</li>
+          <li data-k="d">Only when the qubits share a DAC.</li>
+        </ol>
+        <div class="why">The hub costs tens of nanoseconds and a barrier; a core's issue rate costs time whenever many
+          writes fall together. Error-correction rounds, where syndromes condition corrections, are the case where the first
+          matters. The choice is a design decision, and the design document is where you make it.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Which core drives a qubit is the <code>core</code> field of its channels; <code>locate</code> follows it for every action.</li>
+          <li>A core holds 1 to 16 channels with unique names; empty cores must be removed.</li>
+          <li>Three qubits on one core: no publish, no barrier, and the conditioned pulse opens 248 ns after the window instead of 344 ns.</li>
+          <li>The same core then does all setup and issues every burst alone: the program starts 662 ns later.</li>
+          <li>Allocation trades feedback latency against issue capacity. The run measures both.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      // The edit of tests/riscq-design.test.mjs, for any set of cores.
+      const merge = (design, cores) => {
+        const d = clone(design);
+        for (const channel of d.channels)
+          if (cores.includes(channel.core)) Object.assign(channel, { name: channel.core + "_" + channel.name, core: "q0" });
+        d.parts = d.parts.filter((part) => !cores.includes(part.id));
+        return d;
+      };
+      const template = () => api.design.template("ring");
+      const bell = (a, t, design) => a.run({ platform: "superconducting", qasm: t.qasm, design, outcomes: { c: 1 } });
+      const ns = (run, batches) => (batches * run.machine.dspPeriodPs) / 1000;
+      const conditionedAfterWindow = (run) => {
+        const op = run.hardware.segments.flatMap((s) => s.ops).find((o) => o.when === "c" && o.op === "x");
+        const window = run.summary.pulses.find((p) => p.kind === "demod");
+        return ns(run, run.summary.pulses.find((p) => p.source === op.id).opens - window.closes);
+      };
+      const firstOpens = (run) => Math.min(...run.summary.pulses.map((p) => p.opens));
+      course({
+        answers: {
+          "D3.1": async (a) => (await a.design.check(merge((await template()).design, ["q1", "q2"]))).build.cores.find((c) => c.name === "q0").channels.length,
+          "D3.2": async (a) => {
+            const v = await a.design.check(merge((await template()).design, ["q1", "q2", "q3"]));
+            return Number(/Core q0 has (\d+) channels/.exec(v.errors.join(" "))[1]);
+          },
+          "D3.3": async (a) => {
+            const t = await template();
+            return (await bell(a, t, merge(t.design, ["q1", "q2"]))).frames.filter((f) => f.op === "publish").length;
+          },
+          "D3.4": async (a) => {
+            const t = await template();
+            return conditionedAfterWindow(await bell(a, t, merge(t.design, ["q1", "q2"])));
+          },
+          "D3.5": async (a) => {
+            const t = await template();
+            const [ring, merged] = await Promise.all([bell(a, t, t.design), bell(a, t, merge(t.design, ["q1", "q2"]))]);
+            return ns(ring, firstOpens(merged) - firstOpens(ring));
+          },
+        },
+      });
+
+      // The merger widget.
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const $ = (id) => document.getElementById(id);
+      let base;
+      const chosen = () => [...document.querySelectorAll("#coreBoxes input:checked")].map((b) => b.value);
+      const check = async () => {
+        $("mergeState").textContent = "Checking…";
+        try {
+          const v = await api.design.check(merge(base.design, chosen()));
+          $("mergeOut").innerHTML = v.errors.length
+            ? "<ul>" + v.errors.map((e) => "<li class='bad'>" + esc(e) + "</li>").join("") + "</ul>"
+            : "<p>No rule broken. Build: " + v.build.cores.map((c) => "<code>" + esc(c.name) + "</code> " + c.channels.length).join(", ") + " channels.</p>";
+          $("mergeState").textContent = "";
+          return v;
+        } catch (error) {
+          $("mergeState").textContent = "The server could not be reached: " + error.message;
+        }
+      };
+      $("checkIt").addEventListener("click", check);
+      $("runIt").addEventListener("click", async () => {
+        const v = await check();
+        if (!v || v.errors.length) return;
+        $("runIt").disabled = true;
+        $("mergeState").textContent = "Running both designs…";
+        try {
+          const [ring, merged] = await Promise.all([bell(api, base, base.design), bell(api, base, merge(base.design, chosen()))]);
+          const rows = [
+            ["Cores that issue timed writes", (r) => r.firmware.filter((f) => f.writes).map((f) => f.core).join(", ")],
+            ["publish frames", (r) => r.frames.filter((f) => f.op === "publish").length],
+            ["Barrier arrivals", (r) => r.frames.filter((f) => f.op === "arrive").length],
+            ["Preroll of each segment (batches)", (r) => r.preroll.join(", ")],
+            ["First pulse opens (batch)", firstOpens],
+            ["Conditioned x after the window closes (ns)", conditionedAfterWindow],
+            ["Run duration (ns)", (r) => r.summary.elapsedPs / 1000],
+            ["Faults", (r) => r.summary.faults.length],
+          ].map(([label, f]) => "<tr><td>" + label + "</td><td class='n'>" + esc(f(ring)) + "</td><td class='n'>" + esc(f(merged)) + "</td></tr>").join("");
+          $("mergeOut").innerHTML += "<table><tr><th></th><th class='n'>ring</th><th class='n'>merged</th></tr>" + rows + "</table>";
+          $("mergeState").textContent = "";
+        } catch (error) {
+          $("mergeState").textContent = "";
+          $("mergeOut").innerHTML += "<p class='bad'>" + esc(error.message) + "</p>";
+        } finally {
+          $("runIt").disabled = false;
+        }
+      });
+      (async () => {
+        try {
+          base = await template();
+          for (const core of base.design.parts.filter((p) => p.type === "core" && p.id !== "q0")) {
+            const label = document.createElement("label");
+            const box = Object.assign(document.createElement("input"), { type: "checkbox", value: core.id, checked: ["q1", "q2"].includes(core.id) });
+            label.append(box, " " + core.id);
+            $("coreBoxes").append(label);
+          }
+        } catch (error) {
+          $("mergeState").textContent = "The server could not be reached: " + error.message;
+        }
+      })();
+    </script>
+  </body>
+</html>

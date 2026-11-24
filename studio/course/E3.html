@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>E3 · A real decoder on a control core · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="E3">
+    <article>
+      <p class="kicker">Part E · Lesson 3</p>
+      <h1>A real decoder on a control core</h1>
+      <p class="lead">
+        A lookup table decodes a repetition code. A surface code needs an algorithm. This lesson takes the C program of an FPGA
+        decoder, compiles it for a RISC-Q control core with RISC-Q's own runtime, checks every answer against the original, and
+        measures what decoding in control-core software costs.
+      </p>
+      <p class="pre">
+        Read lesson <a href="/course/E2">E2</a> first. The <a href="/course/background/qec">background chapter on measurement,
+        feedback and decoding</a> explains surface-code syndromes and decoding graphs in more depth.
+      </p>
+
+      <h2 id="why"><span class="num">1</span>Why a table is not enough</h2>
+      <p class="q">What does the decoder of a surface code have to compute?</p>
+      <p>
+        The decoder of lesson <a href="/course/E2">E2</a> had one table word for each of the 2<sup>n</sup> possible syndromes. For two
+        syndrome bits that is four words. A distance-3 surface code measured over three rounds produces 12 syndrome bits of one
+        error type, 4,096 table words. At distance 5 over five rounds it is 60 bits, and no memory holds 2<sup>60</sup> words. A
+        <span class="term" data-term="decoder">decoder</span> for a real code computes its answer.
+      </p>
+      <p>
+        <span class="term" data-term="union-find">Union-find</span> is one such algorithm
+        (<a href="https://doi.org/10.22331/q-2021-12-02-595">Delfosse and Nickerson, "Almost-linear time decoding algorithm for
+        topological codes", Quantum 5, 595, 2021</a>). It works on a <b>decoding graph</b>: one node per check per round, and one edge
+        per possible error, which flips the checks at its two ends. A node whose check changed value is a <b>defect</b>. Union-find
+        starts with every node as its own cluster, grows every cluster that holds an odd number of defects by half an edge in every
+        direction, merges clusters that touch, and stops when every cluster is even or touches the boundary of the code. A
+        correction inside each cluster then follows.
+      </p>
+
+      <h2 id="helios"><span class="num">2</span>Helios and its C program</h2>
+      <p class="insection"><b>In this section:</b> where the decoder comes from, what its program computes, and what it reports.</p>
+      <p>
+        Helios is a union-find decoder built in FPGA logic (Liyanage, Wu, Tagare and Zhong, "FPGA-based Distributed Union-Find
+        Decoder for Surface Codes", IEEE Transactions on Quantum Engineering, 2024;
+        <a href="https://github.com/NamiLiy/Helios_scalable_QEC">source, BSD-3-Clause</a>). It is the decoder of RISC-Q's own
+        error-correction system: Liu et al. integrate it there and run the whole algorithm in the FPGA fabric
+        (<a href="https://arxiv.org/abs/2603.16203">arXiv:2603.16203</a>).
+      </p>
+      <p>
+        Its repository also carries a C program, <code>software_code/union_find.c</code>, that computes what the hardware computes.
+        The hardware test benches are checked against it. That file, at commit <code>622d85d</code>, is the decoder of this lesson.
+        It is used unmodified except for one line, <code>#define D 13</code>, which the build sets to the distance as the upstream
+        README instructs. A test checks the vendored file's SHA-256 and that this one line is the only difference.
+      </p>
+      <h3>The decoding graph</h3>
+      <p>
+        The program decodes one error type of a rotated surface code of distance <i>D</i> over <i>D</i> measurement rounds. A rotated
+        patch has <i>D</i><sup>2</sup> − 1 checks, half of each type, so one round has (<i>D</i> + 1)(<i>D</i> − 1)/2 nodes, laid out
+        as <i>D</i> + 1 rows of (<i>D</i> − 1)/2 columns. Over <i>D</i> rounds:
+      </p>
+      <div class="formula">nodes(D) = D · (D + 1) · (D − 1) / 2          nodes(3) = 12,  nodes(5) = 60,  nodes(7) = 168</div>
+      <p>
+        The program's main loop is plain. Each pass grows every edge of every odd cluster, then merges across every fully grown edge,
+        and the loop repeats while anything changed. The passes visit <b>every</b> edge, whether or not a cluster is nearby. That makes
+        the C program an exact reference for the hardware, which grows all edges in parallel, and a slow program on a sequential core.
+      </p>
+      <h3>What it reports: roots, not corrections</h3>
+      <p>
+        For each syndrome the program writes the syndrome's id, then one line per node with the <b>root</b> of that node's cluster,
+        encoded as the word <code>0x00KKIIJJ</code>: round <code>KK</code>, row <code>II</code>, column <code>JJ</code>. A node that
+        is alone in its cluster is its own root. Nodes that share a root were merged. The program stops there. It does not turn a
+        cluster into a set of edges to flip, so its output is not yet a correction.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 250" role="img" aria-label="The twelve nodes of the distance-3 decoding graph and one decoded cluster">
+          <style>
+            .dg text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: #111827; }
+            .dg .s { font-size: 11px; fill: #586174; }
+            .dg .m { font: 11px ui-monospace, Consolas, monospace; fill: #586174; }
+            .dg circle { stroke: #8a9a9c; stroke-width: 1.2; fill: #fff; }
+            .dg .in { fill: #eef0fe; stroke: #4338ca; }
+            .dg .def { fill: #fdf0ea; stroke: #c4622d; stroke-width: 2.2; }
+            .dg .root { stroke: #4338ca; stroke-width: 3; }
+          </style>
+          <g class="dg">
+            <text x="96" y="22">round 0</text><text x="236" y="22">round 1</text><text x="376" y="22">round 2</text>
+            <text class="s" x="20" y="54">row 0</text><text class="s" x="20" y="104">row 1</text>
+            <text class="s" x="20" y="154">row 2</text><text class="s" x="20" y="204">row 3</text>
+            <!-- node n = round * 4 + row -->
+            <circle cx="120" cy="50" r="15" /><text class="m" x="116" y="54">0</text>
+            <circle cx="120" cy="100" r="15" /><text class="m" x="116" y="104">1</text>
+            <circle class="in root" cx="120" cy="150" r="15" /><text class="m" x="116" y="154">2</text>
+            <circle cx="120" cy="200" r="15" /><text class="m" x="116" y="204">3</text>
+            <circle cx="260" cy="50" r="15" /><text class="m" x="256" y="54">4</text>
+            <circle class="in" cx="260" cy="100" r="15" /><text class="m" x="256" y="104">5</text>
+            <circle class="def" cx="260" cy="150" r="15" /><text class="m" x="256" y="154">6</text>
+            <circle class="in" cx="260" cy="200" r="15" /><text class="m" x="256" y="204">7</text>
+            <circle cx="400" cy="50" r="15" /><text class="m" x="396" y="54">8</text>
+            <circle cx="400" cy="100" r="15" /><text class="m" x="396" y="104">9</text>
+            <circle class="in" cx="400" cy="150" r="15" /><text class="m" x="392" y="154">10</text>
+            <circle cx="400" cy="200" r="15" /><text class="m" x="392" y="204">11</text>
+            <circle class="def" cx="480" cy="60" r="9" /><text class="s" x="496" y="64">the defect: node 6</text>
+            <circle class="in" cx="480" cy="92" r="9" /><text class="s" x="496" y="96">nodes merged into its cluster</text>
+            <circle class="in root" cx="480" cy="124" r="9" /><text class="s" x="496" y="128">the cluster's root, node 2: word 0x00000200</text>
+            <text class="s" x="470" y="170">Every other node is its own root:</text>
+            <text class="s" x="470" y="186">node 9 reports 0x00020100 (round 2, row 1).</text>
+            <text class="s" x="470" y="210">8 clusters in all.</text>
+          </g>
+        </svg>
+        <figcaption><b>The distance-3 decoding graph and one decode.</b> The 12 nodes, one per check of one type per round, in the
+          order the program reads them. Colored: the second syndrome of the <code>decoder-helios-d3</code> run, with its defect at
+          node 6, and the roots the firmware reported for it. Edges are not drawn. Schematic drawing; the roots are read from the
+          run.</figcaption>
+      </figure>
+      <div class="ex" data-id="E3.1" data-stars="1" data-kind="number">
+        <p>Run the example <code>decoder-helios-d5</code>. How many roots does the decoder report for one syndrome?</p>
+        <div class="why">One root per node: 5 · 6 · 4 / 2 = 60. The answer function counts the roots of the first decode in
+          <code>derived.decodes</code>.</div>
+      </div>
+
+      <h2 id="build"><span class="num">3</span>From C to a control core</h2>
+      <p class="insection"><b>In this section:</b> the build, the file layer that replaces stdio, and the core it runs on.</p>
+      <p>
+        The build follows RISC-Q's own C flow (<code>build.py compile_c</code>), implemented in <code>riscq/toolchain.mjs</code>:
+        RISC-Q's <code>start.S</code>, <code>muldiv.c</code> and <code>riscq.h</code>, vendored unmodified, a generated
+        <code>riscq_map.h</code> with the core's addresses, and a generated linker script with one RAM region and a 1 KB stack
+        reserve. The compiler is clang 20.1.4:
+      </p>
+      <pre><code>clang --target=riscv32-unknown-elf -march=rv32i_zmmul -mabi=ilp32 -O2 -fwrapv
+      -nostdlib -ffreestanding -mno-relax -fuse-ld=lld -T link.ld
+      start.S muldiv.c rq_input.c rq_libc.c union_find.c</code></pre>
+      <p>
+        <code>rv32i_zmmul</code> is the base integer instruction set plus multiply without divide, which RISC-Q's cores implement;
+        <code>muldiv.c</code> supplies division in software. The core is a single RISC-Q core at the 500 MHz of the x6y3 build with
+        64 KiB of RAM. The distance-3 image is 14,328 bytes, 2,573 words of RAM image.
+      </p>
+      <p>
+        The upstream program reads its syndromes with <code>fscanf</code> from a file and writes roots with <code>fprintf</code>. A
+        control core has no files, so a small file layer, <code>riscq/decoders/libc/rq_libc.c</code>, stands in for them.
+        <code>fscanf</code> returns the next word of an array <code>rq_input</code> that the build places in RAM, and after the last
+        word of each syndrome it reads the core's batch-time register, so the <span class="term" data-term="trace">trace</span> marks
+        the moment a syndrome is fully loaded. <code>fprintf</code> assembles one 32-bit word from the hexadecimal digits of each line
+        and stores it to the next slot of the host window. The words in the host window are the lines of the output file.
+      </p>
+      <p>
+        The Lean model executes the image instruction by instruction. The trace records every read of the time register and every
+        store to the host window, and the bundle's <code>derived.decodes</code> lists each syndrome with three batch numbers: input
+        loaded, first output word, last output word. The decode time is the first output minus the input mark. Each instruction is
+        attributed to its C function, grouped into three phases: <i>load syndrome</i>, <i>union-find</i> and <i>report roots</i>.
+      </p>
+      <figure class="live" data-title="The Helios decoder on a RISC-Q core, distance 3" data-src="/riscq-studio?example=decoder-helios-d3&step=16">
+        <figcaption><span>Step 16 of the distance-3 run: <code>fprintf</code> in <code>print_output</code> stores the id of the second
+          syndrome, the first with a defect, to the host window. The next twelve steps store its twelve roots.</span></figcaption>
+      </figure>
+
+      <h2 id="conformance"><span class="num">4</span>Is it the same decoder?</h2>
+      <p class="insection"><b>In this section:</b> what the firmware's answers are compared with.</p>
+      <p>
+        A decoder that runs is not yet a decoder that is right. The tests in <code>tests/riscq-helios.test.mjs</code> compare every
+        root the firmware stores with an independent reference:
+      </p>
+      <div class="tw"><table>
+        <tr><th>Distance</th><th class="n">Nodes</th><th>Syndromes</th><th>Reference</th></tr>
+        <tr><td>3</td><td class="n">12</td><td>14</td><td>11 sampled syndromes against the upstream program compiled natively with gcc, and 3 of
+          Helios's own 1,000 test vectors against Helios's published outputs</td></tr>
+        <tr><td>5</td><td class="n">60</td><td>9</td><td>The natively compiled upstream program</td></tr>
+        <tr><td>7</td><td class="n">168</td><td>7</td><td>The natively compiled upstream program (a slow test, about 40 s)</td></tr>
+      </table></div>
+      <p>
+        The sampled syndromes flip each edge of the decoding graph with probability 0.001 or 0.01. Every root of every case matches.
+        The committed images carry their SHA-256 and the exact compiler command, and with the same clang the distance-3 image rebuilds
+        to the same bytes. This is a <b>conformance test</b>, not a proof: it shows that the compiled firmware, executed by the model,
+        computes what the C program computes on these inputs.
+      </p>
+      <div class="ex" data-id="E3.2" data-stars="2" data-kind="number">
+        <p>The figure showed the second syndrome. Now take the fifth syndrome of the distance-3 run (record id 5): one defect, at
+          node 10 (round 2, row 2). Read node 10's root word from <code>derived.decodes</code> and give the index <i>n</i> = round · 4
+          + row of its root (at distance 3 there is one column).</p>
+        <div class="why">The root word of node 10 is <code>0x00010200</code>: round 1, row 2, column 0, so <i>n</i> = 6. Nodes 6, 9,
+          10 and 11 share that root: the single defect's cluster grew until it touched a boundary of the graph, which counts as even,
+          and the nodes it swept were merged into one cluster. The answer function decodes the word from the bundle.</div>
+      </div>
+
+      <h2 id="time"><span class="num">5</span>What it costs</h2>
+      <p class="insection"><b>In this section:</b> decode times in the model, why they vary, and how they compare with the same
+        algorithm in FPGA logic.</p>
+      <div class="tw"><table>
+        <tr><th>Distance</th><th>No defect</th><th>With defects</th></tr>
+        <tr><td>3</td><td>17 µs</td><td>34 µs to 58 µs</td></tr>
+        <tr><td>5</td><td>94 µs</td><td>up to 285 µs</td></tr>
+        <tr><td>7</td><td>274 µs</td><td>up to 813 µs</td></tr>
+      </table></div>
+      <p>
+        The times come in steps. With no defect, the loop runs once: nothing is odd, nothing grows, and the pass that finds this
+        visits every edge. Two adjacent defects merge into one even cluster after one growth, and the program needs about twice the
+        time. A single defect has no partner; its cluster stays odd until it grows into the boundary, and the program needs about three
+        times the time. The same pattern holds at distance 7: 274 µs with no defect, 774 µs for one defect. Each pass costs roughly the same because it visits every edge regardless of where the defects are.
+      </p>
+      <div class="ex" data-id="E3.3" data-stars="1" data-kind="number" data-unit="µs" data-tolerance="0.05">
+        <p>In the distance-3 run, how long does the first syndrome, the one with no defect, take to decode?</p>
+        <div class="why">8,579 batches of 2 ns, about 17.2 µs: one pass of the loop over every edge, plus setting up the graph.</div>
+      </div>
+      <div class="ex" data-id="E3.4" data-stars="2" data-kind="number">
+        <p>Divide the decode time of the second syndrome, the single defect of the figure, by the no-defect time, and round to a whole number. That
+          estimates how many passes of the grow-and-merge loop it needed.</p>
+        <div class="why">About 55.5 µs over 17.2 µs: 3. The odd cluster grows until it touches the boundary, and a last pass finds that
+          nothing changes. The estimate assumes each pass costs about the same, which is reasonable because every pass visits every
+          edge; the first decode also includes setting up the graph, so the count is approximate.</div>
+      </div>
+      <div class="ex" data-id="E3.5" data-stars="2" data-kind="number" data-tolerance="0.05">
+        <p>Divide the no-defect decode time at distance 5 by the one at distance 3. The graph has 5 times as many nodes. What ratio do
+          you get?</p>
+        <div class="why">94.1 µs over 17.2 µs is about 5.5, close to the ratio of nodes: one pass costs roughly in proportion to the
+          size of the graph. With defects, the number of passes grows too, which is why the slowest distance-5 syndrome takes
+          285 µs.</div>
+      </div>
+      <h3>Against Helios in logic</h3>
+      <p>
+        Liu et al. report that Helios, in the FPGA fabric of their system, completes a distance-3 decode in 56 ns for the worst-case
+        syndrome pattern of their end-to-end test, and decodes in 65 ns and 90 ns on average at distances 5 and 7, for pre-sampled
+        syndromes at a physical error rate of 0.001 (<a href="https://arxiv.org/abs/2603.16203">arXiv:2603.16203</a>). The same
+        algorithm as firmware on one control core takes 17 µs to 58 µs at distance 3 in the model: about 300 to 1,000 times longer.
+      </p>
+      <div class="warn"><b>What this comparison shows.</b> It shows what decoding in control-core software costs, not what Helios
+        costs. Three things separate the numbers. The C program is a reference model that visits every edge on every pass, while
+        Helios grows all edges at once in parallel logic. The core runs one instruction at a time. And its speed in the model is an
+        <b>assumption</b>: one batch per instruction plus penalties for loads, stores and taken branches. Pulse timing does not depend
+        on that assumption, because the lead absorbs it; decode times do.</div>
+      <div class="ex" data-id="E3.6" data-stars="2" data-kind="choice" data-answer="d">
+        <p>Which statement about the 17 µs to 58 µs at distance 3 is right?</p>
+        <ol class="choices">
+          <li data-k="a">It is the measured decode time of Helios on a RISC-Q board.</li>
+          <li data-k="b">It proves a soft core can never decode fast enough for error correction.</li>
+          <li data-k="c">It is the time to compute a correction for the surface code.</li>
+          <li data-k="d">It is the model's time for the reference C program on one core with an assumed instruction cost, ending with cluster roots.</li>
+        </ol>
+        <div class="why">The time is a property of this model and this program: sequential code, an assumed cost per instruction, and
+          an output of roots. A different program (one that visits only active clusters) or a different core would give other numbers.
+          Nothing here was measured on a board.</div>
+      </div>
+
+      <h2 id="next"><span class="num">6</span>Why it is not yet a system call</h2>
+      <p>
+        On the ring of lesson <a href="/course/E2">E2</a>, <code>decode_syndrome</code> is a lookup. The union-find firmware is not
+        wired to it, for two reasons. It reports roots, and a correction needs one more step: inside each cluster, choose the edges to
+        flip. And the eight-transmon ring is too small for a surface code: a distance-3 rotated patch needs 9 data qubits and 8 check
+        qubits. What the run already gives the virtual machine is a measured decode latency as a function of distance and defect
+        count, the shape a decoder contract needs (the FTQVM allows a size-dependent decoder latency <code>λd(n)</code>).
+      </p>
+      <div class="note"><b>Not simulated.</b> No qubit is measured here. The syndromes are inputs placed in RAM, sampled from the
+        decoding graph or taken from Helios's test vectors.</div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Helios's C union-find, unchanged except for its distance, runs as RV32I firmware built with RISC-Q's own runtime.</li>
+          <li>Its decoding graph has D · (D + 1) · (D − 1)/2 nodes; it reports a root word 0x00KKIIJJ per node, not a correction.</li>
+          <li>Every root matches Helios's test vectors at distance 3 and the natively compiled program at distances 3, 5 and 7.</li>
+          <li>In the model a decode takes 17 µs to 58 µs at distance 3 and up to 285 µs at distance 5; Helios in logic takes tens of ns.</li>
+          <li>Those model times rest on an assumed cost per instruction and a program that visits every edge on every pass.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const d3 = (api) => api.run({ example: "decoder-helios-d3" });
+      const d5 = (api) => api.run({ example: "decoder-helios-d5" });
+      const noDefect = (run) => run.derived.decodes.find((d) => d.weight === 0);
+      // The second syndrome of the distance-3 reference: one defect.
+      const single = (run) => run.derived.decodes[1];
+      course({
+        answers: {
+          "E3.1": async (api) => (await d5(api)).derived.decodes[0].roots.length,
+          "E3.2": async (api) => {
+            const run = await d3(api);
+            const d = run.derived.decodes.find((x) => x.id === 5);
+            const word = d.roots[d.syndrome.indexOf("1")];
+            const rows = 4, columns = 1;
+            return ((word >>> 16) & 0xff) * rows * columns + ((word >>> 8) & 0xff) * columns + (word & 0xff);
+          },
+          "E3.3": async (api) => noDefect(await d3(api)).decodeNs / 1000,
+          "E3.4": async (api) => {
+            const run = await d3(api);
+            return Math.round(single(run).decodeNs / noDefect(run).decodeNs);
+          },
+          "E3.5": async (api) => noDefect(await d5(api)).decodeNs / noDefect(await d3(api)).decodeNs,
+        },
+      });
+    </script>
+  </body>
+</html>

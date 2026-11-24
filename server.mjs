@@ -35,6 +35,8 @@ const routes = new Map([
   ["/riscq-design-doc.js", "studio/riscq-design-doc.js"],
   // Home page, tutorial and the menu bar every page loads.
   ["/home.css", "studio/home.css"],
+  ["/quantumos.svg", "studio/quantumos.svg"],
+  ["/favicon.ico", "studio/quantumos.svg"],
   ["/learn", "studio/learn.html"],
   ["/site-nav.js", "studio/site-nav.js"],
   // Optics: Gaussian beams through each platform's optical bench, and the world the stage draws.
@@ -343,22 +345,71 @@ async function readInput(req, limit) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+const SECURITY = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin", "X-Frame-Options": "SAMEORIGIN" };
+
 function reply(res, status, type, body) {
   res.writeHead(status, {
     "Content-Type": type + "; charset=utf-8",
     "Cache-Control": "no-store",
+    ...SECURITY,
   });
   res.end(body);
 }
+
+/** A page, script, style or image: cacheable for a few minutes, revalidated after a deploy. */
+function replyStatic(res, status, type, body) {
+  res.writeHead(status, {
+    "Content-Type": type + (/^(text|application\/json|image\/svg)/.test(type) ? "; charset=utf-8" : ""),
+    "Cache-Control": "public, max-age=" + (process.env.QUANTUMOS_CACHE_SECONDS ?? 300),
+    ...SECURITY,
+  });
+  res.end(body);
+}
+
+/**
+ * Simulations run the Lean executable and, for QCCD programs, Python. At most
+ * QUANTUMOS_MAX_RUNS (default 4) run at once; up to QUANTUMOS_MAX_QUEUE (default 16) more wait,
+ * and further requests are told the server is busy. Pages and static files are never held.
+ */
+const runSlots = {
+  limit: Number(process.env.QUANTUMOS_MAX_RUNS ?? 4),
+  queue: Number(process.env.QUANTUMOS_MAX_QUEUE ?? 16),
+  active: 0,
+  waiting: [],
+  acquire() {
+    if (this.active < this.limit) {
+      this.active++;
+      return Promise.resolve(true);
+    }
+    if (this.waiting.length >= this.queue) return Promise.resolve(false);
+    return new Promise((resolve) => this.waiting.push(resolve));
+  },
+  release() {
+    const next = this.waiting.shift();
+    if (next) next(true);
+    else this.active--;
+  },
+};
+const isSimulation = (req, url) => url.pathname.startsWith("/api/") && !routes.has(url.pathname) &&
+  !["/api/riscq/examples", "/api/machines/examples", "/api/studio/h2"].includes(url.pathname) &&
+  !(req.method === "GET" && url.pathname.startsWith("/api/riscq/design"));
 
 if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
-  const port = Number(process.env.QCONTROL_PORT || 7432);
+  const port = Number(process.env.PORT || process.env.QCONTROL_PORT || 7432);
+  // 127.0.0.1 by default. A public deployment sets QUANTUMOS_HOST=0.0.0.0 (the container does).
+  const host = process.env.QUANTUMOS_HOST || "127.0.0.1";
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url, "http://localhost");
+      if (isSimulation(req, url)) {
+        if (!(await runSlots.acquire()))
+          return reply(res, 503, "text/plain", "The simulator is busy with other runs. Try again in a minute.");
+        let released = false;
+        res.on("close", () => released || (released = true, runSlots.release()));
+      }
       if (req.method === "GET" && ["/api/board-validation/design", "/api/board-validation/capture"].includes(url.pathname)) {
         const bench = await import("./validation/board/bench.mjs");
         const id = url.searchParams.get("case");
@@ -431,15 +482,28 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(page));
       }
       const asset = routes.get(url.pathname) ?? courseAsset(url.pathname);
-      if (req.method !== "GET" || !asset)
+      // HEAD is answered like GET; Node sends the headers without the body.
+      const read = req.method === "GET" || req.method === "HEAD";
+      if (!read || !asset) {
+        // A page address that does not exist gets the site's 404 page.
+        if (read && !url.pathname.startsWith("/api/") && !path.extname(url.pathname))
+          return replyStatic(res, 404, "text/html", await readFile(path.join(root, "studio", "404.html")));
         return reply(res, 404, "text/plain", "Unknown resource.");
-      const body = await readFile(path.join(root, asset));
-      reply(res, 200, mime[path.extname(asset)] || "text/plain", body);
+      }
+      let body;
+      try {
+        body = await readFile(path.join(root, asset));
+      } catch {
+        if (!path.extname(url.pathname)) return replyStatic(res, 404, "text/html", await readFile(path.join(root, "studio", "404.html")));
+        return reply(res, 404, "text/plain", "Unknown resource.");
+      }
+      if (asset.startsWith("validation") || asset.startsWith("examples")) reply(res, 200, mime[path.extname(asset)] || "text/plain", body);
+      else replyStatic(res, 200, mime[path.extname(asset)] || "text/plain", body);
     } catch (error) {
       reply(res, error.status || 400, "text/plain", error.message);
     }
   });
-  server.listen(port, "127.0.0.1", () =>
-    console.log("QControl Studio at http://127.0.0.1:" + port),
+  server.listen(port, host, () =>
+    console.log("QuantumOS at http://" + (host === "0.0.0.0" ? "localhost" : host) + ":" + port),
   );
 }

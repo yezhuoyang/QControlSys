@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Course · QuantumOS</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-index="course">
+    <main class="page wide">
+      <article>
+        <section class="hero">
+          <p class="kicker">The QuantumOS course</p>
+          <h1>Learn how a quantum computer is <span>controlled</span>.</h1>
+          <p class="lead">
+            A quantum program does nothing until classical hardware turns it into pulses, waveforms and laser light at the
+            right nanosecond. This course follows one path: the stack of a real machine, the controller that schedules it,
+            the three platforms it drives, the hardware you can design yourself, and what fault tolerance asks of it.
+            Every exercise is checked against the simulator, running the same firmware the lesson describes.
+          </p>
+          <p>
+            <a class="btn" id="resume" href="/course/A1">Start with A1</a>
+            <a class="btn alt" href="/course/background/">Read the background</a>
+            <a class="btn alt" href="/riscq-studio?example=qccd-ghz3&outcome=q0=1&outcome=q2=1&view=chip">Open the workspace</a>
+          </p>
+        </section>
+
+        <section class="progress" aria-label="Your progress">
+          <div><span>Your progress</span><b id="level">Newcomer</b><span id="levelNote">Kept in this browser.</span></div>
+          <div><b id="exCount">0</b><span id="exOf">exercises</span></div>
+          <div><b id="starCount">0</b><span id="starOf">stars</span></div>
+          <div><b id="badgeCount">0</b><span id="badgeOf">badges</span></div>
+        </section>
+
+        <h2 id="path">The path</h2>
+        <div class="parts" id="parts"></div>
+
+        <h2 id="badges">Badges</h2>
+        <div class="badges" id="badgeList"></div>
+
+        <h2 id="reference">Background and reference</h2>
+        <p class="src">Long-form chapters to read before, beside or after the lessons.</p>
+        <div class="docs" id="docs"></div>
+
+        <h2 id="tools">The tools the lessons use</h2>
+        <div class="docs">
+          <a class="doc" href="/riscq-studio"><span class="tag">workspace</span><b>Run and watch</b><span>Source, hardware instructions and firmware beside the machine in 3D, in real time.</span></a>
+          <a class="doc" href="/riscq-design"><span class="tag">design</span><b>Design a machine</b><span>Place parts, route wires, check the rules, run a program on your hardware.</span></a>
+          <a class="doc" href="/riscq"><span class="tag">debugger</span><b>Inspect every event</b><span>Channel timeline, register file and the causes of every frame.</span></a>
+          <a class="doc" href="/machines"><span class="tag">workbench</span><b>Physical installations</b><span>Cryostat, trap and optical bench in millimetres, wire by wire.</span></a>
+        </div>
+      </article>
+    </main>
+    <footer class="foot">
+      <p>QuantumOS simulates the classical control system of quantum computers and the operations it schedules. No quantum state is simulated; measurement outcomes are inputs.</p>
+      <p><a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">RISC-Q</a> · <a href="https://www.qccd.academy/">QCCD studio</a> · <a href="https://github.com/UCLA-VAST/ZAC">ZAC</a></p>
+    </footer>
+    <script type="module">
+      import { course, solved, progress, el } from "/course/course.js";
+      const curriculum = await course();
+      const totals = { exercises: 0, stars: 0 };
+      const render = () => {
+        const done = progress().done;
+        const partsBox = document.getElementById("parts");
+        partsBox.replaceChildren();
+        let badges = 0, next = null;
+        for (const part of curriculum.parts) {
+          let partEx = 0, partDone = 0;
+          const items = part.lessons.map((lesson) => {
+            const mine = solved(lesson.id + ".");
+            const total = lesson.exercises ?? 0;
+            partEx += total;
+            partDone += mine.exercises;
+            if (!next && mine.exercises < Math.max(1, total)) next = lesson;
+            const finished = total > 0 && mine.exercises >= total;
+            return el("li", {}, el("span", { class: "id", text: lesson.id }),
+              el("span", {}, el("a", { href: lesson.href, text: lesson.title })),
+              el("span", { class: "st" + (finished ? " done" : ""), text: finished ? "✓ done" : total ? mine.exercises + "/" + total + " · " + "★".repeat(Math.min(3, mine.stars)) + "☆".repeat(Math.max(0, Math.min(3, (lesson.stars ?? total) - mine.stars))) : "" }));
+          });
+          if (partEx && partDone >= partEx) badges++;
+          partsBox.append(el("section", { class: "part", id: "part-" + part.id },
+            el("div", { class: "ic", style: "background:" + part.color, text: part.id }),
+            el("div", {},
+              el("div", { class: "kick", style: "color:" + part.color, text: "Part " + part.id + " · " + part.lessons.length + " lessons · " + partEx + " exercises" }),
+              el("h3", { text: part.title }), el("p", { class: "sum", text: part.summary }),
+              el("ul", { class: "lessons" }, items),
+              el("div", { class: "badge", text: "Badge: " + part.badge + " · " + partDone + " of " + partEx + " solved" }))));
+        }
+        totals.exercises = curriculum.parts.reduce((n, p) => n + p.lessons.reduce((m, l) => m + (l.exercises ?? 0), 0), 0);
+        totals.stars = curriculum.parts.reduce((n, p) => n + p.lessons.reduce((m, l) => m + (l.stars ?? 0), 0), 0);
+        const all = solved();
+        document.getElementById("exCount").textContent = all.exercises;
+        document.getElementById("exOf").textContent = "of " + totals.exercises + " exercises";
+        document.getElementById("starCount").textContent = all.stars;
+        document.getElementById("starOf").textContent = "of " + totals.stars + " stars";
+        document.getElementById("badgeCount").textContent = badges;
+        document.getElementById("badgeOf").textContent = "of " + curriculum.parts.length + " badges";
+        const levels = ["Newcomer", "Apprentice", "Operator", "Engineer", "Architect"];
+        const fraction = totals.exercises ? all.exercises / totals.exercises : 0;
+        document.getElementById("level").textContent = "Level " + (1 + Math.min(4, Math.floor(fraction * 4 + (all.exercises ? 1 : 0)))) + " · " + levels[Math.min(4, Math.floor(fraction * 4 + (all.exercises ? 1 : 0)))];
+        if (next) {
+          const resume = document.getElementById("resume");
+          resume.href = next.href;
+          resume.textContent = (all.exercises ? "Continue with " : "Start with ") + next.id + ": " + next.title;
+        }
+        document.getElementById("badgeList").replaceChildren(...curriculum.parts.map((part) => {
+          const total = part.lessons.reduce((m, l) => m + (l.exercises ?? 0), 0);
+          const got = total > 0 && solved(part.id).exercises >= total;
+          return el("div", { class: got ? "got" : "" }, el("i", { style: got ? "background:" + part.color : "", text: part.id }),
+            el("span", {}, el("b", { text: part.badge }), el("br"), "Finish Part " + part.id));
+        }));
+      };
+      render();
+      document.getElementById("docs").replaceChildren(...curriculum.background.map((c) =>
+        el("a", { class: "doc", href: c.href }, el("span", { class: "tag", text: c.tag }), el("b", { text: c.title }), el("span", { text: c.summary }))));
+      window.addEventListener("pageshow", render);
+    </script>
+  </body>
+</html>

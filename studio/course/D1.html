@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>D1 · A machine is a document · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab textarea { width: 100%; min-height: 260px; font: 12px/1.45 var(--mono); border: 1px solid #cfceca; border-radius: 8px; padding: 8px 10px; resize: vertical; }
+      .lab .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+      .lab .out { font-size: 13px; max-height: 380px; overflow: auto; }
+      .lab .out table { font-size: 12.5px; }
+      .lab .bad { color: var(--red); }
+      .lab .warnline { color: var(--orange); }
+      .lab details { margin-top: 10px; }
+      .lab summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+    </style>
+  </head>
+  <body data-lesson="D1">
+    <article>
+      <p class="kicker">Part D · Lesson 1</p>
+      <h1>A machine is a document</h1>
+      <p class="lead">
+        Until now each machine was written in code. A hardware design states the same machine as data: a board, cores,
+        converters, qubits and resonators at positions in millimetres, the channels of each core, routed wires, and the
+        calibrated pulses. The simulator derives the build, the pulse tables and every wire delay from that document.
+      </p>
+      <p class="pre">
+        This part needs lesson <a href="/course/C1">C1</a>: the design here is the transmon ring written as a document. You
+        will read the design through the same server routes the editor uses. Every number below comes from them.
+      </p>
+
+      <h2 id="why"><span class="num">1</span>Why a document</h2>
+      <p>
+        In lesson C1 the ring came from <code>machine()</code> in <code>riscq/platforms/superconducting.mjs</code>: the
+        calibration file, RISC-Q's build file and a few lines of code that decide which core drives what, and that every
+        line has the same 1,050 mm of coax. To change any of that you had to change code. <code>riscq/design.mjs</code>
+        moves those decisions into a document of kind <code>riscq-design</code>. Its function <code>ringDesign()</code>
+        writes the same ring as such a document, and a test (<code>tests/riscq-design.test.mjs</code>) checks that the
+        designed ring plays exactly the pulses of the built-in one: same windows, same channels, same codes.
+      </p>
+      <p>Three ways to get the document:</p>
+      <ul>
+        <li><code>GET /api/riscq/design?template=ring</code> returns <code>{ design, qasm }</code>: the ring and the Bell
+          program with feed-forward of lesson <a href="/course/A1">A1</a>. <code>template=ring-decoder</code> adds a decoder core.</li>
+        <li><code>node riscq/cli.mjs --ring-design &gt; machine.json</code> writes it to a file, and
+          <code>node riscq/cli.mjs --design machine.json --qasm circuit.qasm</code> runs a program on it.</li>
+        <li>The <a href="/riscq-design">hardware design editor</a> starts from it and lets you edit it with the mouse.</li>
+      </ul>
+      <div class="key"><b>Units.</b> Lengths are mm, times ns, frequencies Hz, amplitudes a fraction of DAC full scale,
+        phases rad. Positions are this project's choice: RISC-Q's calibration gives no geometry, so the board, the chip and
+        the cable routes of the ring are a plausible layout, not a measured installation.</div>
+
+      <h2 id="parts"><span class="num">2</span>Board and parts</h2>
+      <p class="insection"><b>In this section:</b> the seven part types and where the ring puts them.</p>
+      <p>
+        <code>board</code> holds the numbers of the RISC-Q build: the control clock <code>dspHz</code> (500 MHz),
+        <code>linkStages</code> (the posted <span class="term" data-term="link">link</span> depth, 2), <code>memWords</code>
+        per core (8,192), <code>queueDepth</code> (32) and <code>envDepth</code> (4,096). <code>parts</code> lists every
+        physical part with an <code>id</code>, a <code>type</code> and <code>centerMm: [x, y, z]</code>. The server lists
+        the allowed types at <code>GET /api/riscq/design/rules</code>:
+      </p>
+      <div class="tw"><table id="typeTable">
+        <tr><th>Type</th><th>What it is (from the rules route)</th><th class="n">In the ring</th></tr>
+      </table></div>
+      <p>
+        In the ring, the board stands at the origin with the eight cores in a column beside it, and the converters 60 mm
+        further along x. The chip is 700 mm along x and 350 mm below, at <code>[700, 0, −350]</code>: the qubits sit on a
+        circle of 3 mm radius, each resonator 4.5 mm out on the same spoke.
+      </p>
+      <div class="ex" data-id="D1.1" data-stars="1" data-kind="number">
+        <p>Load the ring with the reader below. How many parts of type <code>dac</code> does it contain?</p>
+        <div class="why">Nine: one drive DAC per qubit (DAC 0 to 7, from RISC-Q's <code>dac_map</code>) and DAC 8, the
+          shared readout line. There is a single ADC, number 12. A DAC is a part once, however many channels use it.</div>
+      </div>
+
+      <h2 id="channels"><span class="num">3</span>Channels belong to cores</h2>
+      <p>
+        <code>channels</code> lists every <span class="term" data-term="channel">channel</span> with an <code>id</code>, the
+        <code>core</code> it belongs to, a <code>name</code> unique on that core, a <code>kind</code> (<code>pulse</code>,
+        <code>demod</code> or <code>dio</code>), the <code>converter</code> part it uses, its number of pulse-table
+        <code>slots</code> and its interpolation. This is where you say who drives what. In the ring, core <code>q0</code>
+        owns <code>q0.gate</code>, <code>q0.cz0</code>, <code>q0.cz1</code>, <code>q0.ro</code> and <code>q0.demod</code>:
+        exactly the channels of lesson C1.
+      </p>
+      <p>
+        Several channels may name one DAC; their outputs are summed. That is how the eight readout tones share one line.
+        A <code>dio</code> channel needs no converter. RISC-Q requires every core to have at least one channel, and allows
+        at most 16.
+      </p>
+      <div class="ex" data-id="D1.2" data-stars="1" data-kind="number">
+        <p>How many channels of the ring name <code>dac8</code> as their converter?</p>
+        <div class="why">Eight: the <code>ro</code> channel of every core. Their tones are at different frequencies, one per
+          resonator, and are summed on the shared readout line.</div>
+      </div>
+      <div class="ex" data-id="D1.3" data-stars="2" data-kind="choice" data-answer="b">
+        <p>Core <code>q6</code> has only three channels, <code>gate</code>, <code>ro</code> and <code>demod</code>. Why?</p>
+        <ol class="choices">
+          <li data-k="a">Qubit 6 is a spare qubit that is never driven.</li>
+          <li data-k="b">Both of qubit 6's couplings need second-level (EF) pulses that the lowering does not model, so the design has no coupling and no CZ channel for it.</li>
+          <li data-k="c">A core may have at most three channels.</li>
+          <li data-k="d">Qubit 6 shares core q5's CZ channels.</li>
+        </ol>
+        <div class="why"><code>ringDesign()</code> keeps only the pairs without an EF sandwich, as the built-in ring does.
+          One CZ channel is created per coupling a qubit takes part in: two for q0 to q4, one for q5 and q7, none for q6.</div>
+      </div>
+
+      <h2 id="wires"><span class="num">4</span>Wires have routes</h2>
+      <p>
+        <code>wires</code> joins parts. Each wire has <code>from</code> and <code>to</code> part ids, a <code>medium</code>
+        (<code>coax</code>, <code>planar</code>, <code>fiber</code> or <code>beam</code>) and a <code>routeMm</code>: the
+        centreline the wire follows, as a list of points that starts at <code>from</code> and ends at <code>to</code>. A
+        signal travels along wires in their direction only. The ring has three coax lines per qubit: <code>drive</code>
+        from its DAC to the qubit, <code>tone</code> from DAC 8 to the resonator, and <code>return</code> from the resonator
+        back to ADC 12. Lesson <a href="/course/D2">D2</a> turns these routes into delays.
+      </p>
+
+      <h2 id="qubits"><span class="num">5</span>Qubits, couplings and calibrations</h2>
+      <p>
+        <code>qubits</code> is the list the program addresses: <code>q[i]</code> in OpenQASM is entry <i>i</i>. Each entry
+        names its qubit part and resonator part, its three channels (<code>gate</code>, <code>ro</code>, <code>demod</code>),
+        its frequency, its two calibrated pulses <code>x90</code> and <code>x</code> (amplitude, phase, duration in ns,
+        envelope, and the calibration's virtual Z before and after), and its <code>readout</code> (tone frequency, amplitude
+        and duration, the delay and length of the acquisition window, the demodulation phase). Here is qubit 0 as the
+        document states it:
+      </p>
+      <pre><code>{ "part": "qubit0", "resonator": "resonator0", "gate": "q0.gate", "ro": "q0.ro", "demod": "q0.demod",
+  "freqHz": 5498857081.66909,
+  "x90": { "amp": 0.10560383, "phaseRad": 0, "durNs": 35, "envelope": "FAST_DRAG", "virtualZ": [0.0055315388, 0.0055315388] },
+  "x":   { "amp": 0.10674013, "phaseRad": 0, "durNs": 70, "envelope": "FAST_DRAG", "virtualZ": [] },
+  "readout": { "freqHz": 6555406453.21587, "amp": 0.014866665, "durNs": 500, "envelope": "cosine_square",
+               "demodDelayNs": 398.57, "demodNs": 656.67, "demodPhaseRad": -54.25607 } }</code></pre>
+      <p>
+        <code>couplings</code> lists the two-qubit gates: the pair, the tone frequency and duration, one pulse per qubit
+        with the channel that plays it, and the virtual Z corrections that follow. A two-qubit gate in a program needs a
+        coupling between its qubits.
+      </p>
+      <p>
+        From all of this, <code>machine()</code> in <code>design.mjs</code> derives what lesson C1 took from code: one
+        RISC-Q core per <code>core</code> part with its channels in document order, one pulse-table entry per calibrated
+        pulse (entries of one channel share its carrier), and for each pulse a binding to the part it ends at, with the
+        delay of the fastest wired path to it.
+      </p>
+      <div class="ex" data-id="D1.4" data-stars="2" data-kind="number">
+        <p>Send the ring to <code>POST /api/riscq/design/check</code> (the <b>Check</b> button below does that). The answer
+          lists every calibrated pulse under <code>pulses</code>. How many are there?</p>
+        <div class="why">Four per qubit (<code>x90</code>, <code>x</code>, the readout tone and the acquisition window) and
+          two per coupling: 8 × 4 + 6 × 2 = 44. Each carries the part it ends at and its wire delay in ps.</div>
+      </div>
+
+      <h2 id="read"><span class="num">6</span>Read it yourself</h2>
+      <div class="lab" id="reader">
+        <h4>Design reader</h4>
+        <p>The ring from <code>GET /api/riscq/design?template=ring</code>, summarized. Open the document below, edit any
+          field, and press <b>Check</b> to send it to <code>POST /api/riscq/design/check</code>. The answer lists rule
+          errors and warnings, the build the simulator would make, and every wire's length and delay.</p>
+        <div class="row"><select id="template" aria-label="Template"><option value="ring">ring</option><option value="ring-decoder">ring-decoder</option></select>
+          <button class="btn small alt" type="button" id="load">Load template</button>
+          <button class="btn small" type="button" id="check">Check</button><span class="src" id="readerState"></span></div>
+        <div class="out" id="summary"></div>
+        <details><summary>The document (JSON)</summary><textarea id="docText" spellcheck="false" aria-label="Design document"></textarea></details>
+        <div class="out" id="verdict"></div>
+      </div>
+      <div class="ex" data-id="D1.5" data-stars="1" data-kind="number">
+        <p>How many wires does the ring have?</p>
+        <div class="why">24: a drive line, a readout-tone line and a return line for each of the eight qubits. The readout
+          tones and returns all meet at DAC 8 and ADC 12.</div>
+      </div>
+      <div class="ex" data-id="D1.6" data-stars="2" data-kind="text" data-answer="decoder">
+        <p>Load the <code>ring-decoder</code> template. It has one more core than the ring. What is that core's id?</p>
+        <div class="why">The core <code>decoder</code> has a single <code>dio</code> channel, <code>status</code>, because
+          RISC-Q requires a channel on every core, and the design names it in its top-level <code>decoder</code> field. It
+          plays no pulse; it decodes syndromes and keeps the Pauli frame (lesson <a href="/course/E2">E2</a>).</div>
+      </div>
+
+      <h2 id="editor"><span class="num">7</span>The editor and the debugger</h2>
+      <p>
+        The <a href="/riscq-design">hardware design editor</a> works on the same document. Its <b>Start from</b> menu offers
+        three transmons of the ring, the whole ring, or the ring with a decoder core. The left rail holds the
+        <b>Components</b> palette (click a type, then click the canvas), <b>+ Qubit with readout</b>, which adds a qubit with
+        its resonator, core, channels, converters and three coax lines, and the <b>Wire</b> tool with its medium. The canvas
+        shows the parts in plan, side, front or 3D; dragging a part moves it and its wires follow. The dock below has the
+        tabs <b>Rules</b>, <b>Signal timing</b>, <b>Program</b> and <b>Document</b>; the inspector on the right edits the
+        selection's fields. The editor computes no rule and no delay itself: it asks the same <code>/check</code> route as the
+        reader above after every edit.
+      </p>
+      <figure>
+        <img src="/docs/media/riscq-design.png" alt="The hardware design editor: palette, 3D canvas with coax routes, dock with signal timing, inspector with a qubit's calibration" width="1500" height="860" loading="lazy" />
+        <figcaption><b>The editor.</b> A design started from three transmons of the ring, with a fourth qubit added and
+          selected. The dock shows each calibrated pulse's delay and each wire's length and delay; the inspector shows the
+          qubit's channels and calibration. Screenshot of the running page.</figcaption>
+      </figure>
+      <p>
+        <b>Run on this hardware ▶</b> hands the document and the program to the workspace, which runs them with the same
+        <code>run</code> as the command line. The example <code>superconducting-design</code> is the ring as a design with the
+        Bell program. Its chip view draws the qubits and resonators at the document's positions.
+      </p>
+      <figure class="live" data-title="The ring as a design, in the workspace" data-src="/riscq-studio?example=superconducting-design&outcome=c=1&step=357&view=chip">
+        <figcaption>The Bell program on the designed ring, at the step where the first <code>x90</code> reaches qubit 0.</figcaption>
+      </figure>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A <code>riscq-design</code> document holds a board, parts with positions in mm, channels per core, routed wires, qubits and couplings.</li>
+          <li>Channels decide who drives what. Several channels may share a converter; a core has 1 to 16 channels.</li>
+          <li>The build, the pulse tables and the bindings with their delays are derived from the document by <code>machine()</code>.</li>
+          <li>The ring as a design plays exactly the pulses of the built-in ring; its positions are a chosen layout, not a measurement.</li>
+          <li>The template, rules and check routes of <code>/api/riscq/design</code> serve the editor, the course and scripts alike.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const ring = async (a, name = "ring") => (await a.design.template(name)).design;
+      course({
+        answers: {
+          "D1.1": async (a) => (await ring(a)).parts.filter((p) => p.type === "dac").length,
+          "D1.2": async (a) => (await ring(a)).channels.filter((c) => c.converter === "dac8").length,
+          "D1.4": async (a) => (await a.design.check(await ring(a))).pulses.length,
+          "D1.5": async (a) => (await ring(a)).wires.length,
+        },
+      });
+
+      // The design reader: summary of a template, the document as text, and the server's check.
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const $ = (id) => document.getElementById(id);
+      let rules;
+      const summarize = (d) => {
+        const count = (type) => d.parts.filter((p) => p.type === type).length;
+        const cores = d.parts.filter((p) => p.type === "core").map((core) => {
+          const mine = d.channels.filter((c) => c.core === core.id);
+          return "<tr><td><code>" + esc(core.id) + "</code></td><td>" + mine.map((c) => "<code>" + esc(c.name) + "</code> " + esc(c.kind) + (c.converter ? " → " + esc(c.converter) : "")).join(", ") + "</td></tr>";
+        }).join("");
+        $("summary").innerHTML = "<p><b>" + esc(d.name ?? "design") + "</b>: " + d.parts.length + " parts (" +
+          Object.keys(rules.components).map((t) => count(t) + " " + t).join(", ") + "), " + d.channels.length + " channels, " + d.wires.length +
+          " wires, " + d.qubits.length + " qubits, " + (d.couplings ?? []).length + " couplings" + (d.decoder ? ", decoder core <code>" + esc(d.decoder) + "</code>" : "") + ".</p>" +
+          "<table><tr><th>core</th><th>channels → converter</th></tr>" + cores + "</table>";
+      };
+      const load = async () => {
+        $("readerState").textContent = "Loading…";
+        try {
+          const d = await ring(api, $("template").value);
+          $("docText").value = JSON.stringify(d, null, 1);
+          summarize(d);
+          $("verdict").replaceChildren();
+          $("readerState").textContent = "";
+        } catch (error) {
+          $("readerState").textContent = "The server could not be reached: " + error.message;
+        }
+      };
+      $("load").addEventListener("click", load);
+      $("check").addEventListener("click", async () => {
+        let d;
+        try {
+          d = JSON.parse($("docText").value);
+        } catch (error) {
+          $("verdict").innerHTML = "<p class='bad'>The document is not valid JSON: " + esc(error.message) + "</p>";
+          return;
+        }
+        $("readerState").textContent = "Checking…";
+        try {
+          const v = await api.design.check(d);
+          const list = (items, cls) => items.map((x) => "<li class='" + cls + "'>" + esc(x) + "</li>").join("");
+          const wires = v.wires.map((w) => "<tr><td><code>" + esc(w.id) + "</code></td><td class='n'>" + (w.lengthMm ?? "–") + "</td><td class='n'>" + (w.delayPs ?? "–") + "</td></tr>").join("");
+          $("verdict").innerHTML = "<p><b>" + v.errors.length + " errors, " + v.warnings.length + " warnings.</b></p><ul>" + list(v.errors, "bad") + list(v.warnings, "warnline") + "</ul>" +
+            (v.build ? "<p>Build: " + v.build.cores.length + " cores, " + v.build.cores.reduce((n, c) => n + c.channels.length, 0) + " channels, batch " + v.build.dspPeriodPs / 1000 + " ns. " + v.pulses.length + " calibrated pulses.</p>" : "") +
+            "<table><tr><th>wire</th><th class='n'>length (mm)</th><th class='n'>delay (ps)</th></tr>" + wires + "</table>";
+          try {
+            summarize(d);
+          } catch {}
+          $("readerState").textContent = "";
+        } catch (error) {
+          $("readerState").textContent = "The server could not be reached: " + error.message;
+        }
+      });
+      (async () => {
+        try {
+          rules = await (await fetch("/api/riscq/design/rules")).json();
+          const d = await ring(api);
+          for (const [type, text] of Object.entries(rules.components)) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td><code>" + esc(type) + "</code></td><td>" + esc(text) + "</td><td class='n'>" + d.parts.filter((p) => p.type === type).length + "</td>";
+            $("typeTable").append(tr);
+          }
+          await load();
+        } catch (error) {
+          $("readerState").textContent = "The server could not be reached: " + error.message;
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B4 · Cores meet: the board hub · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="B4">
+    <article>
+      <p class="kicker">Part B · Lesson 4</p>
+      <h1>Cores meet: the board hub</h1>
+      <p class="lead">
+        Each core runs its own program on its own clock copy. When a bit measured on one core decides a pulse on another,
+        the cores need a shared place to leave bits, a way to wait for each other, and one common time to start from. On
+        RISC-Q that place is the board hub. This lesson follows the measured bit of the feed-forward program through it.
+      </p>
+      <p class="pre">
+        You should know posted writes (<a href="/course/B1">B1</a>), the lead (<a href="/course/B2">B2</a>) and how a
+        result reaches a core (<a href="/course/B3">B3</a>). Lesson A1 ended with the question this lesson answers: why the
+        conditioned gate waits.
+      </p>
+
+      <h2 id="why"><span class="num">1</span>Why cores need to meet</h2>
+      <p class="q">Core q0 has the bit. Core q2 must play the pulse. How does q2 learn the bit, and when may it start?</p>
+      <p>
+        Two problems hide in that question. The first is <b>data</b>: q2 cannot read q0's registers or RAM. The second is
+        <b>time</b>: every core's schedule is counted from a time base, and the times in segment 1 must mean the same batch
+        on every core, although each core reached the end of segment 0 at a different moment.
+      </p>
+      <p>
+        The <span class="term" data-term="hub">board hub</span> solves both (RISC-Q <code>PutHub.scala</code> and
+        <code>PutHub.md</code>). It offers three services, all reached by posted writes into the put window, beyond the 16
+        nodes of a core's own channels:
+      </p>
+      <table>
+        <thead><tr><th>Service</th><th>Write to</th><th>Read from</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>Shared bits</td><td>node 16 + g: <code>0x110000</code> + g · <code>0x10000</code></td><td><code>0x4300</code> + 4g (board)</td><td>Sets one bit of group word g (4 groups of 32 bits) and sends the word to every core</td></tr>
+          <tr><td>Counted barriers</td><td>node 20 + b: <code>0x150000</code> + b · <code>0x10000</code></td><td><code>0x4320</code> (release)</td><td>Counts arrivals at barrier b (16 barriers); the last one releases all with one common time</td></tr>
+          <tr><td>Mailboxes</td><td>node 36 + core</td><td><code>0x4340</code>, <code>0x4360</code></td><td>Delivers one word to one mailbox of one core</td></tr>
+        </tbody>
+      </table>
+      <p>
+        On the receiving side the words land in the core's <b>inbox</b>, a set of core-local registers next to its
+        <span class="term" data-term="sink">sinks</span>. In the trace, hub events are frames of the part <code>hub</code>
+        and deliveries are frames of <code>q0.inbox</code>, <code>q1.inbox</code> and so on.
+      </p>
+
+      <h2 id="publish"><span class="num">2</span>Publishing a bit</h2>
+      <p class="insection"><b>In this section:</b> the write that shares a bit, and how long it takes to reach every core.</p>
+      <p>
+        After its result read returns (lesson <a href="/course/B3">B3</a>), core q0 publishes the bit with one store
+        (<code>publish</code> in <code>riscq/firmware.mjs</code>). The data word carries the bit in bit 0 and the slot
+        number above it:
+      </p>
+      <p class="formula">data = bit | (slot &lt;&lt; 1)</p>
+      <p>
+        The hub sets bit <i>slot</i> of the group word to <i>bit</i> and sends the whole word to the board register of every
+        core. The model charges two latencies from <code>PutHub.md</code>, both written in terms of the link depth
+        <i>L</i>:
+      </p>
+      <ul>
+        <li>down to the hub: bridge 1 + link <i>L</i> + queue and arbiter 2 + decode and dispatch 4 = <i>L</i> + 7;</li>
+        <li>up to every inbox: replica and link 1 + <i>L</i> + core merge 2 + link <i>L</i> + inbox 1 = 2<i>L</i> + 4.</li>
+      </ul>
+      <p>
+        From the store to every core's board register that is 3<i>L</i> + 11 batches when the arbiter is free. RISC-Q
+        documents 23 batches for a publish; that is the value at <i>L</i> = 4, and the conformance tests check it
+        (<code>tests/riscq-limits.test.mjs</code>). The <code>x6y3</code> build of the ring has <i>L</i> = 2.
+      </p>
+      <figure class="live" data-title="The bit reaches the hub" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=410&view=control">
+        <figcaption>Step 410: the hub's <code>publish</code> frame. Its state shows group 0, slot 0, bit 1 and the new word.
+          Step forward to see eight <code>board</code> frames, one per core, at the same batch.</figcaption>
+      </figure>
+      <div class="ex" data-id="B4.1" data-stars="1" data-kind="number" data-unit="batches">
+        <p>In the feed-forward run, how many batches pass from q0's publish store to the moment the bit is in every core's
+          board register?</p>
+        <div class="why">The store is at batch 1,093, the hub dispatches it at 1,102 (<i>L</i> + 7 = 9) and the eight
+          <code>board</code> frames are at 1,110 (2<i>L</i> + 4 = 8 more). 3 · 2 + 11 = 17 batches, 34 ns.</div>
+      </div>
+      <div class="ex" data-id="B4.2" data-stars="2" data-kind="choice" data-answer="b">
+        <p>How many batches would the same publish take on a build with a link depth of 4, with the arbiter free?</p>
+        <ol class="choices">
+          <li data-k="a">17</li>
+          <li data-k="b">23</li>
+          <li data-k="c">25</li>
+          <li data-k="d">34</li>
+        </ol>
+        <div class="why">3 · 4 + 11 = 23, the figure RISC-Q's <code>PutHub.md</code> states, and what the limit test
+          <code>publishBurst(1)</code> measures: dispatched after 11 batches, at every board after 23.</div>
+      </div>
+      <div class="ex" data-id="B4.3" data-stars="2" data-kind="number" data-answer="7">
+        <p>Which 32-bit data word must a core store to publish the bit 1 into slot 3 of a group?</p>
+        <div class="why">1 | (3 &lt;&lt; 1) = 1 + 6 = 7. The firmware builds it with <code>ori t1, rs, 6</code>, where
+          <code>rs</code> holds the bit.</div>
+      </div>
+
+      <h2 id="barrier"><span class="num">3</span>Barriers and one common time</h2>
+      <p class="insection"><b>In this section:</b> how cores agree on when the next segment starts.</p>
+      <p>
+        A bit in the board register is not enough: q2 must also know that it is there, and must start its pulse on a batch
+        that means the same to every core. Each segment of the compiled program therefore begins with a
+        <span class="term" data-term="barrier">barrier</span>. A core stores the number of members to the barrier's node,
+        then loads <code>release</code>. The load stalls. The hub counts arrivals; when the count reaches the number of
+        members, it sends its own batch time, the same value to every member. In q0's firmware the sequence is six words:
+      </p>
+      <pre><code>addi x6, x0, 3        # three members
+lui  x5, 0x150        # barrier 0 is node 20: 0x150000
+sw   x6, 0(x5)        # arrive
+lw   x10, 800(x9)     # 0x4320 release: stall until the hub answers
+addi x6, x0, 128      # SYNC_LEAD = 96 + 32
+add  x8, x10, x6      # time base of the segment = release time + 128</code></pre>
+      <p>
+        The time base is the release time plus 128 batches: the lead of 96 plus 32 for delivering the release to the cores
+        (<code>SYNC_LEAD</code> in <code>riscq/firmware.mjs</code>). Every start time in the segment is counted from it,
+        so a pulse at offset 0 opens exactly 128 batches after the release on every core.
+      </p>
+      <p>
+        In the feed-forward run, segment 1 starts with barrier 1. Cores q1 and q2 have nothing left to do in segment 0
+        and arrive at the hub at batches 1,079 and 1,081. Core q0 arrives last, after its result read and its publish: the
+        hub releases the barrier at batch 1,111. The release reaches all three inboxes at 1,119; q2 then reads its board
+        register, finds the bit, and fires its <code>x</code> to start at 1,111 + 128 = 1,239.
+      </p>
+      <figure class="live" data-title="The last arrival releases the barrier" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=421&view=control">
+        <figcaption>Step 421: the hub's <code>release</code> frame for barrier 1, with <code>t0</code> = 1,111. The three
+          <code>released</code> frames follow at batch 1,119.</figcaption>
+      </figure>
+      <div class="ex" data-id="B4.4" data-stars="2" data-kind="number" data-unit="batches">
+        <p>How many batches after the release time of barrier 1 does the conditioned <code>x</code> open its window?</p>
+        <div class="why">128 = <code>SYNC_LEAD</code>. The <code>x</code> is the first and only operation of segment 1, at
+          offset 0, and its segment needed no preroll. The bit was in q2's board register a batch before the release, so the
+          barrier, not the bit, sets the start.</div>
+      </div>
+
+      <h2 id="arbiter"><span class="num">4</span>One message per batch: the arbiter</h2>
+      <p>
+        The hub serves the whole board through one arbiter. Every message to it (a publish, a barrier arrival, a mailbox
+        word) first joins a queue of eight for its source core. In every batch the arbiter grants one message, scanning the
+        cores round robin from the one after the last it granted (<code>PutHub.md</code>; that the first scan starts at core
+        0 is a model assumption). A message into a full queue is dropped and reported as a fault. One more rule: a barrier
+        arrival directly behind another arrival at the same barrier waits one extra batch for that barrier's state.
+      </p>
+      <p>
+        The repetition-code example shows the rule. Its first barrier has six members, and the arrivals of five of them reach
+        the hub at the same batch. The hub counts them two batches apart, and the trace records a <code>wait</code> frame for each
+        message held behind another, with <code>waited</code> counting the batches.
+      </p>
+      <figure class="live" data-title="Five arrivals counted two batches apart" data-src="/riscq-studio?example=superconducting-repetition&outcome=s0=1&step=510&view=control">
+        <figcaption>Step 510 of the repetition-code run: the sixth arrival releases barrier 0. Step back through the
+          <code>arrive</code> frames at batches 181, 183, 185 and 187.</figcaption>
+      </figure>
+      <div class="ex" data-id="B4.5" data-stars="2" data-kind="number">
+        <p>In the repetition-code run (example <code>superconducting-repetition</code>), at which batch does the hub release
+          barrier 0?</p>
+        <div class="why">The decoder core arrived long before. Cores q0 to q4 arrive together; the arbiter counts q0 at 181
+          and the others at 183, 185, 187 and 189. The last one, q4, releases the barrier at 189 after waiting 8 batches.</div>
+      </div>
+      <p>
+        Lean proves two properties of the arbiter's grant function <code>nextSource</code>
+        (<code>QControl/RiscQ/Soc.lean</code>): <code>nextSource_waiting</code>, it grants only a core that has a message
+        waiting, and <code>nextSource_isSome</code>, it grants one in every batch in which any core has a message waiting.
+        Together they say the hub is never idle while work waits and never invents work. They do not bound how long one
+        message waits; that comes from the tests.
+      </p>
+      <p>
+        The tests of <code>riscq/limits.mjs</code> run hand-written firmware on a hub build with link depth 4 at 500 MHz:
+      </p>
+      <ul>
+        <li>Eight cores publish one bit on the same batch. The bits reach every board after 23, 24, …, 30 batches, in core
+          order: one bit per batch for the whole board, 500 bits per µs.</li>
+        <li>Eight cores arrive at one barrier together. The arrivals are counted 2 batches apart, and every core holds the
+          common time after 23 + 2 · 7 = 37 batches at link depth 4, which is 74 ns at a 500 MHz clock.</li>
+        <li>A core can issue a publish every 4 batches. Four cores publishing without pause fill the hub exactly and lose
+          nothing; eight overflow its queues and messages are dropped.</li>
+      </ul>
+      <p>
+        These are results of the model, following the statements of RISC-Q's <code>PutHub.md</code>, not traces of the RTL.
+      </p>
+      <div class="ex" data-id="B4.6" data-stars="1" data-kind="choice" data-answer="d">
+        <p>What does <code>nextSource_isSome</code> guarantee?</p>
+        <ol class="choices">
+          <li data-k="a">Every message is delivered within eight batches.</li>
+          <li data-k="b">Barrier arrivals are counted in core order.</li>
+          <li data-k="c">No queue ever overflows.</li>
+          <li data-k="d">If any core has a message waiting, the arbiter grants a message in that batch.</li>
+        </ol>
+        <div class="why">It is a progress property of one batch. Overflow is possible (eight cores publishing without pause
+          drop messages), and the order and the waiting times are results of the round-robin scan, measured by the tests.</div>
+      </div>
+
+      <h2 id="mail"><span class="num">5</span>Mailboxes</h2>
+      <p>
+        Shared bits go to every core. A <b>mailbox</b> carries a 32-bit word to one core. Each core has two mailboxes, at
+        <code>0x4340</code> and <code>0x4360</code>. A load from a mailbox stalls until a word arrives and empties it. The
+        compiled examples of this course do not use mailboxes; they are exercised by RISC-Q's own firmware
+        <code>xcore.elf</code>, which the conformance test runs unmodified: both cores get the same barrier time, core 1's
+        mailbox receives the word <code>0x77</code>, and core 1 opens its pulse at that time plus 1,024
+        (<code>tests/riscq-firmware.test.mjs</code>).
+      </p>
+
+      <h2 id="path"><span class="num">6</span>The whole path of the bit</h2>
+      <figure>
+        <svg viewBox="0 0 760 190" role="img" aria-label="Timeline of the measured bit from the end of the window to the conditioned pulse">
+          <style>
+            .b4t line.ax { stroke: #8a8985; stroke-width: 1.2; }
+            .b4t line.tk { stroke: #eb6834; stroke-width: 2; }
+            .b4t text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: #52514e; }
+            .b4t text.h { font-weight: 600; fill: #0b0b0b; }
+            .b4t text.m { font: 11.5px ui-monospace, Menlo, monospace; }
+            .b4t rect { fill: #eaf7f1; stroke: #1baf7a; }
+          </style>
+          <g class="b4t">
+            <line class="ax" x1="30" y1="96" x2="740" y2="96" />
+            <line class="tk" x1="40" y1="84" x2="40" y2="108" /><text class="h" x="22" y="74">window closes</text><text class="m" x="22" y="128">1,067 · 0 ns</text>
+            <line class="tk" x1="109" y1="84" x2="109" y2="108" /><text class="h" x="92" y="50">result</text><text class="m" x="86" y="146">1,084 · 34</text>
+            <line class="tk" x1="181" y1="84" x2="181" y2="108" /><text class="h" x="160" y="74">at hub</text><text class="m" x="150" y="128">1,102 · 70</text>
+            <line class="tk" x1="213" y1="84" x2="213" y2="108" /><text class="h" x="200" y="50">every board</text><text class="m" x="200" y="146">1,110 · 86</text>
+            <line class="tk" x1="217" y1="84" x2="217" y2="108" />
+            <rect x="217" y="88" width="516" height="16" rx="3" /><text x="300" y="80">segment 1 time base = release 1,111 + 128</text>
+            <line class="tk" x1="733" y1="84" x2="733" y2="108" /><text class="h" x="652" y="74">x opens</text><text class="m" x="640" y="128">1,239 · 344 ns</text>
+            <text x="22" y="178">Batches of the feed-forward run (c = 1) and nanoseconds after the acquisition window closes. Horizontal scale is linear in batches.</text>
+          </g>
+        </svg>
+        <figcaption><b>From readout to conditioned pulse.</b> The same figures appear in <code>docs/riscq-controller.md</code>
+          as system-call measurements. Schematic drawing, positions to scale.</figcaption>
+      </figure>
+      <p>
+        Read left to right: 34 ns for the decoder and the report, 36 ns for the stalled load to return, the host store and
+        the publish to reach the hub, 16 ns for the hub to deliver the bit to every core. Then the cores still have to meet
+        and leave one lead of room: the pulse opens 344 ns after the window closed. Lesson <a href="/course/E1">E1</a>
+        breaks this feedback latency down further and asks which parts a different program or build could shorten.
+      </p>
+      <div class="ex" data-id="B4.7" data-stars="2" data-kind="number" data-unit="ns">
+        <p>How many nanoseconds after the acquisition window closes is the measured bit in every core's board register?</p>
+        <div class="why">The window closes at batch 1,067 and the <code>board</code> frames are at 1,110: 43 batches, 86 ns.
+          It is the same in every core because the hub sends one word to all of them at once.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>The hub offers shared bits, counted barriers and mailboxes, all reached by posted writes.</li>
+          <li>A publish reaches every core after 3<i>L</i> + 11 batches with the arbiter free: 17 on the ring, 23 at link depth 4.</li>
+          <li>A barrier returns one common time; each segment starts 128 batches after it.</li>
+          <li>One arbiter passes one message per batch for the whole board; simultaneous arrivals at one barrier are counted 2 batches apart.</li>
+          <li>Lean proves the arbiter only grants waiting messages and grants one whenever any wait. Waiting times and overflows are tested, not proved.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const repetition = (api) => api.run({ example: "superconducting-repetition", outcomes: { s0: 1 } });
+      const publish = (run) => run.frames.find((f) => f.op === "publish");
+      const lastBoard = (run, p) => Math.max(...run.frames.filter((f) => f.op === "board" && f.parents.includes(p.id)).map((f) => f.atBatch));
+      course({
+        answers: {
+          "B4.1": async (api) => {
+            const run = await feedforward(api), p = publish(run);
+            const store = run.frames.find((f) => f.id === p.parents[0]);
+            return lastBoard(run, p) - store.atBatch;
+          },
+          "B4.4": async (api) => {
+            const run = await feedforward(api);
+            const release = run.frames.filter((f) => f.op === "release").at(-1);
+            const pulse = run.frames.find((f) => f.op === "pulse" && f.source === "h20");
+            return pulse.state.opens - release.state.t0;
+          },
+          "B4.5": async (api) => (await repetition(api)).frames.find((f) => f.op === "release" && f.state.barrier === 0).atBatch,
+          "B4.7": async (api) => {
+            const run = await feedforward(api);
+            const window = run.frames.find((f) => f.op === "pulse" && f.state.kind === "demod");
+            return ((lastBoard(run, publish(run)) - window.state.closes) * run.machine.dspPeriodPs) / 1000;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

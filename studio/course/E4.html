@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>E4 · Limits: bandwidth, concurrency, depth · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="E4">
+    <article>
+      <p class="kicker">Part E · Lesson 4</p>
+      <h1>Limits: bandwidth, concurrency, depth</h1>
+      <p class="lead">
+        A virtual machine that admits a program promises that every shared service stays below its capacity. This lesson finds
+        the capacities of the controller itself: how many bits per microsecond the board can share, how many pulses one core can
+        start at once, how short a pulse train can be, and how deep a link the lead still covers.
+      </p>
+      <p class="pre">
+        Read lessons <a href="/course/E1">E1</a> and <a href="/course/E2">E2</a> first. Lesson <a href="/course/B2">B2</a> explains
+        the lead and the timed queues, lesson <a href="/course/B4">B4</a> the board hub.
+      </p>
+
+      <h2 id="capacity"><span class="num">1</span>Capacities, not latencies</h2>
+      <p class="q">When does a schedule stop fitting the controller?</p>
+      <p>
+        Lessons E1 and E2 measured latencies: how long one bit or one decode takes. The fault-tolerant virtual machine of the
+        companion paper also needs capacities. It describes a machine by a qubit capacity and six shared services: gate slots of the
+        control system, ancilla preparation, routing, decoders, factories and classical bandwidth. A call holds a rate
+        <code>r(N, D) = ⌈1000 N / D⌉</code> on a service for its whole interval, concurrent calls add up, and the sum must stay below
+        the capacity. A request that does not fit waits. The paper shows that this is where finite services turn into runtime: lowering
+        one capacity of its reference machine multiplies the makespan of a feedback workload by 2.1 to 4.8.
+      </p>
+      <p>
+        The functions in <code>riscq/limits.mjs</code> build small synthetic programs, compile them, run them in the Lean model and
+        report where the modeled RISC-Q build stops keeping the schedule. <code>tests/riscq-limits.test.mjs</code> pins each result.
+        These functions run in Node, not in this page, so the exercises use the quantities that also appear in the runs you can open
+        here, or ask you to apply the formulas the tests confirm.
+      </p>
+      <div class="note"><b>Two clocks.</b> The hub sweeps run at 500 MHz (2 ns batches) with a 4-stage link, like RISC-Q's default
+        build. The concurrency, pulse-rate and link-depth sweeps run at 100 MHz (10 ns batches). Results are stated in batches;
+        convert with the clock of the build you care about.</div>
+
+      <h2 id="hub"><span class="num">2</span>Classical bandwidth of the hub</h2>
+      <p class="insection"><b>In this section:</b> how many shared bits per µs one board can move, and what happens beyond that.</p>
+      <p>
+        Every message between cores goes through the <span class="term" data-term="hub">board hub</span>: a published bit, a barrier
+        arrival, a mailbox word. Each core has a queue of eight in front of the hub, and one round-robin arbiter passes <b>one message
+        per batch for the whole board</b> (RISC-Q <code>PutHub.md</code>). Two theorems of the Lean model,
+        <code>nextSource_waiting</code> and <code>nextSource_isSome</code>, state that the arbiter grants only a core that has a
+        message waiting and grants one in every batch in which any core has. A publish carries one bit, so:
+      </p>
+      <div class="formula">hub capacity = 1 bit per batch = clock in MHz bits/µs        500 MHz → 500 bits/µs per board</div>
+      <p>
+        <code>publishBurst(n)</code> lets <i>n</i> cores publish one bit on the same batch. Alone, a bit reaches every core's board
+        register 23 batches after the store, the number <code>PutHub.md</code> documents for a 4-stage link. With eight cores the
+        arbiter grants them in order c0 to c7, one per batch, and bit <i>k</i> reaches every core after 23 + <i>k</i> batches.
+        Nothing is lost; the last bit waits seven batches.
+      </p>
+      <p>
+        <code>publishFlood(n, 40)</code> lets each of <i>n</i> cores publish 40 bits back to back. A core needs four batches per
+        publish, so one core offers a quarter of the hub's capacity.
+      </p>
+      <div class="tw"><table>
+        <tr><th>Cores publishing</th><th class="n">Offered per batch</th><th class="n">Served</th><th class="n">Dropped</th><th class="n">Longest wait</th></tr>
+        <tr><td>4</td><td class="n">1</td><td class="n">160 of 160</td><td class="n">0</td><td class="n">3 batches</td></tr>
+        <tr><td>5</td><td class="n">1.25</td><td class="n">196 of 200</td><td class="n">4</td><td class="n">39 batches</td></tr>
+        <tr><td>8</td><td class="n">2</td><td class="n">220 of 320</td><td class="n">100</td><td class="n">63 batches</td></tr>
+      </table></div>
+      <p>
+        Four cores fill the hub exactly. Beyond that the queues grow, every message waits longer, and once a queue of eight is full
+        a new message is dropped and the model reports a fault. A real system would stall the core instead or lose the bit; either way
+        the schedule no longer holds. The four- and eight-core rows are asserted by the tests; the five-core row comes from the same
+        function.
+      </p>
+      <div class="ex" data-id="E4.1" data-stars="1" data-kind="number" data-unit="bits/µs">
+        <p>The repetition round of lesson E2 runs on the x6y3 build. Read its clock from the run (<code>machine.dspPeriodPs</code>). How
+          many shared bits per µs can its hub pass at most?</p>
+        <div class="why">One bit per batch. A batch is 2,000 ps, so 500 batches per µs: 500 bits/µs for the whole board, whatever
+          the number of cores.</div>
+      </div>
+      <div class="ex" data-id="E4.2" data-stars="2" data-kind="number" data-answer="265">
+        <p>In the companion paper's model of Gidney and Ekerå's machine, one magic-state factory run holds 132,496 bits/µs of classical
+          bandwidth. How many hubs of 500 bits/µs would carry that one factory's traffic?</p>
+        <div class="why">⌈132,496 / 500⌉ = 265. A one-bit-per-message hub is a controller for a few dozen qubits, not a
+          syndrome network. A machine at that scale needs a different network for syndromes. Liu et al.'s multi-board system, for
+          example, aggregates syndrome bits and moves them between boards over fibre (arXiv:2603.16203).</div>
+      </div>
+
+      <h2 id="barrier"><span class="num">3</span>Barrier fan-in</h2>
+      <p class="insection"><b>In this section:</b> what it costs for <i>n</i> cores to agree on one time.</p>
+      <p>
+        A <span class="term" data-term="barrier">barrier</span> is how cores start a segment together. Each core stores its arrival
+        to the hub and stalls until the last arrival releases everyone with the hub's time. Arrivals pass the same arbiter as bits, and
+        <code>PutHub.md</code> adds one rule: an arrival directly behind another for the same barrier waits one more batch. Simultaneous
+        arrivals are therefore counted two batches apart. <code>barrierFanIn(n)</code> confirms it: with eight cores the arrivals are
+        counted 11, 13, 15, … 25 batches after the stores, and every core holds the common time after
+      </p>
+      <div class="formula">23 + 2 · (n − 1) batches        8 cores: 37 batches, 74 ns at 500 MHz</div>
+      <p>
+        You can see this in the repetition round. When its first segment ends, six cores arrive at the barrier within a few batches,
+        and the hub counts them two apart. The run's summary records the longest wait of any message at the hub in
+        <code>summary.hub.maxWait</code> and the most messages waiting at once in <code>summary.hub.peakWaiting</code>.
+      </p>
+      <figure class="live" data-title="Barrier arrivals queue at the hub" data-src="/riscq-studio?example=superconducting-repetition&outcome=s0=1&outcome=s1=1&step=783&view=control">
+        <figcaption><span>The repetition round with both checks fired, at the fifth arrival of the first barrier: qubit 1's core, counted
+          after waiting 8 batches behind four others. Step back to see the earlier arrivals two batches apart.</span></figcaption>
+      </figure>
+      <div class="ex" data-id="E4.3" data-stars="2" data-kind="number" data-unit="batches">
+        <p>Run the repetition round with both checks fired. What is the longest any message waited at the hub?</p>
+        <div class="why">Barrier arrivals behind one another are counted two batches apart. The fifth of a group of simultaneous
+          arrivals waits 2 · 4 = 8 batches. The answer function reads <code>summary.hub.maxWait</code>.</div>
+      </div>
+      <div class="ex" data-id="E4.4" data-stars="2" data-kind="number" data-unit="batches" data-answer="39">
+        <p>A build has nine cores, eight qubit cores and a decoder, with a 4-stage link. All nine arrive at a barrier on the same batch.
+          After how many batches does every core hold the common time?</p>
+        <div class="why">23 + 2 · (9 − 1) = 39 batches, 78 ns at 500 MHz. Every segment boundary of lesson E2 pays a cost of this
+          kind, and it grows with the number of cores that must meet.</div>
+      </div>
+
+      <h2 id="concurrency"><span class="num">4</span>Gate concurrency of one core</h2>
+      <p class="insection"><b>In this section:</b> why many simultaneous pulses from one core delay the whole segment.</p>
+      <p>
+        A core issues its timed writes one at a time. When a segment is a plain list of timed writes, the firmware issues it with a
+        loop over a table of four words per write, and the compiler budgets 32 core cycles per write (<code>TABLE_COST</code> in
+        <code>riscq/firmware.mjs</code>). If <i>n</i> pulses must open on the same batch, the first must be issued
+        (<i>n</i> − 1) · 32 batches before the usual lead. The compiler then starts the segment later by that amount, its
+        <span class="term" data-term="preroll">preroll</span>, for every core, so that all pulses still open on one batch.
+      </p>
+      <div class="formula">preroll(n) = (n − 1) · 32 batches        16 pulses at 100 MHz: 480 batches, 4.8 µs</div>
+      <p>
+        <code>concurrency(n)</code> confirms the formula for 1, 2, 4, 8 and 16 pulses, and that every pulse still opens on the same
+        batch. The run bundle records the preroll of each segment in <code>preroll</code>. The QCCD example <code>qccd-rotation</code>
+        shows it on a real program: each transport cycle engages 24 electrode channels, issued by three transport cores.
+      </p>
+      <div class="ex" data-id="E4.5" data-stars="2" data-kind="number">
+        <p>Run <code>qccd-rotation</code> and read its preroll in batches from the bundle. Using the formula above, how many
+          simultaneous writes does its busiest core issue?</p>
+        <div class="why">The preroll is 224 batches: 224 / 32 + 1 = 8 writes, the 24 channels split over three cores. At 100 MHz
+          that is 2.24 µs before every transport cycle can start, a cost of issuing, not of moving ions.</div>
+      </div>
+      <p>
+        As a capacity this is a <b>gate-slot</b> limit with a twist. The core can start any number of pulses on one batch, but it pays
+        for the width of the burst in time beforehand. A virtual machine that charges a gate slot only while the gate runs does not see
+        that cost; one that charges a burst of <i>n</i> gates on one core an extra (<i>n</i> − 1) · 32 batches does.
+      </p>
+
+      <h2 id="rate"><span class="num">5</span>Pulse rate of one channel</h2>
+      <p class="insection"><b>In this section:</b> the shortest pulse a back-to-back train can use, and what the queue depth buys.</p>
+      <p>
+        A channel's <span class="term" data-term="timed queue">timed queues</span> hold one entry more than the build's queue depth.
+        Each fire is issued one lead, 96 batches, before it starts. <code>shortestTrainPulse(depth)</code> searches for the shortest
+        pulse at which a train of 60 back-to-back pulses on one channel still compiles:
+      </p>
+      <div class="tw"><table>
+        <tr><th>Queue depth</th><th class="n">1</th><th class="n">4</th><th class="n">8</th><th class="n">32</th></tr>
+        <tr><td>Shortest pulse, 60-pulse train</td><td class="n">48</td><td class="n">31</td><td class="n">29</td><td class="n">16</td></tr>
+        <tr><td>Shortest pulse, 1,000-pulse train</td><td class="n">48</td><td class="n">32</td><td class="n">32</td><td class="n">32</td></tr>
+      </table></div>
+      <p>
+        Two limits meet here. The queue must hold every write issued ahead: with depth 1, two entries must cover the 96-batch lead,
+        so a pulse must last at least 48 batches. With deeper queues the core's issue rate takes over: one write per 32 cycles. A
+        deeper queue lets the core run ahead of a train of shorter pulses for a while, so a 60-pulse train of 16-batch pulses fits at
+        depth 32. A train that never ends cannot borrow time forever. The second row is not in the tests; it comes from the same
+        function with a longer train, <code>shortestTrainPulse(depth, 1000)</code>, and shows that the sustained limit is the issue
+        cost.
+      </p>
+      <div class="ex" data-id="E4.6" data-stars="3" data-kind="choice" data-answer="b">
+        <p>At queue depth 32 a 60-pulse train of 16-batch pulses fits, but a 1,000-pulse train needs 32-batch pulses. Why?</p>
+        <ol class="choices">
+          <li data-k="a">Long trains heat the DAC.</li>
+          <li data-k="b">The core issues one timed write per 32 cycles. The queue only buffers a lead the core builds up early; a long enough train uses it up.</li>
+          <li data-k="c">The queue depth is reset after 60 entries.</li>
+          <li data-k="d">The lead grows with the number of pulses.</li>
+        </ol>
+        <div class="why">A buffer helps with bursts, not with sustained rate. Each write takes the core 32 cycles to issue; pulses
+          shorter than that make the core fall further behind with every pulse, and the queue can only absorb the first few dozen.
+          As a capacity: one channel driven by the table loop sustains at most one pulse per 32 batches.</div>
+      </div>
+
+      <h2 id="depth"><span class="num">6</span>Link depth and program memory</h2>
+      <p class="insection"><b>In this section:</b> two build parameters that do not show up as a rate but bound what a core can do.</p>
+      <p>
+        <b>Link depth.</b> A deeper posted <span class="term" data-term="link">link</span> lets a board run at a higher clock or reach
+        farther. In this model it costs the lead twice per stage: the core's copy of the time lags by the link, and the write crosses
+        the link once more. <code>deepestLink()</code> finds that a pulse issued 96 batches ahead still opens on time with up to 13
+        stages. At 14, the phase, whose queue lead of 35 batches is the longest of the fired parameters, no longer lands on the same batch as the others while the window still opens, and the model
+        reports misaligned parameters. That the core's time lags by exactly the link depth is an <b>assumption</b>: RISC-Q states a
+        constant lag without a number. The Lean theorem <code>land_late</code> states the general rule: a write that misses its
+        margin lands late by exactly the amount it missed.
+      </p>
+      <p>
+        <b>Program memory.</b> The table loop stores four words per timed write: issue time, start time, register address, data. A core
+        of 16,384 words keeps 320 for its classical bit table and stack, leaving 16,064. In the H2 GHZ program of QCCD Studio, 16
+        electrode channels on one core need 16,577 words, so the lowering splits them over three transport cores. Memory is not a
+        service of the virtual machine, but it bounds how long a straight-line schedule one core can hold, which is why the FTQVM keeps
+        loops symbolic.
+      </p>
+
+      <h2 id="summary"><span class="num">7</span>From limits to a machine declaration</h2>
+      <div class="tw"><table>
+        <tr><th>Limit in the model</th><th>Value</th><th>What it means for a system call</th></tr>
+        <tr><td>Hub bandwidth</td><td>1 bit per batch per board</td><td>Capacity of the classical-bandwidth service: 500 bits/µs at 500 MHz</td></tr>
+        <tr><td>Barrier fan-in</td><td>23 + 2(n − 1) batches</td><td>Part of every latency that crosses a segment boundary; grows with the cores involved</td></tr>
+        <tr><td>Gate concurrency</td><td>(n − 1) · 32 batches of preroll</td><td>A gate-slot cost paid before a burst, not while it runs</td></tr>
+        <tr><td>Pulse rate</td><td>48 / 31 / 29 / 16 batches at depth 1 / 4 / 8 / 32, 60 pulses</td><td>Gate throughput per channel; sustained, one pulse per 32 batches</td></tr>
+        <tr><td>Link depth</td><td>13 stages at a lead of 96</td><td>A build constraint the declared latencies assume</td></tr>
+        <tr><td>Program memory</td><td>4 words per timed write</td><td>Bounds the unrolled schedule per core</td></tr>
+      </table></div>
+      <div class="warn"><b>Scope.</b> These are limits of the modeled RISC-Q build, under the model's latencies and its assumed core
+        cost. They are not measurements of a board, and they say nothing about gate fidelity or qubit physics. Where a limit depends
+        on an assumption (the core cost, the core's time lag) the text says so.</div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>The board hub passes one message per batch: 500 shared bits/µs at 500 MHz. Four publishing cores fill it; eight overflow it.</li>
+          <li>n cores meet at a barrier in 23 + 2(n − 1) batches at a 4-stage link.</li>
+          <li>n simultaneous pulses from one core cost (n − 1) · 32 batches of preroll before the segment.</li>
+          <li>Deeper queues admit shorter pulses in a finite train; a sustained train is bounded by the core's issue cost.</li>
+          <li>A lead of 96 batches covers at most 13 link stages in this model; a timed write costs four words of program memory.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const repetition = (api) => api.run({ example: "superconducting-repetition", outcomes: { s0: 1, s1: 1 } });
+      course({
+        answers: {
+          "E4.1": async (api) => 1e6 / (await repetition(api)).machine.dspPeriodPs,
+          "E4.3": async (api) => (await repetition(api)).summary.hub.maxWait,
+          "E4.5": async (api) => {
+            const run = await api.run({ example: "qccd-rotation" });
+            return Math.max(...run.preroll) / 32 + 1;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

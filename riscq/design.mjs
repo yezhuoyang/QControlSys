@@ -127,6 +127,19 @@ export function check(design) {
       else if (reach(channel.converter, qubit.part) === undefined) fail("Coupling pulse on " + pulse.channel + ": no wire leads to " + qubit.part + ".");
     }
   if (design.decoder !== undefined && parts.get(design.decoder)?.type !== "core") fail("The decoder is one of the cores.");
+  // A channel has one carrier. Every pulse calibrated on it must use the same frequency.
+  const carriers = new Map();
+  const carrier = (channel, hz, what) => {
+    if (!carriers.has(channel)) carriers.set(channel, { hz, what });
+    else if (carriers.get(channel).hz !== hz)
+      fail("Channel " + channel + " is given two carrier frequencies: " + Math.round(carriers.get(channel).hz) + " Hz for " + carriers.get(channel).what +
+        " and " + Math.round(hz) + " Hz for " + what + ". A channel has one carrier.");
+  };
+  (design.qubits ?? []).forEach((q, i) => {
+    carrier(q.gate, q.freqHz, "qubit " + i + " drive");
+    carrier(q.ro, q.readout?.freqHz, "qubit " + i + " readout");
+  });
+  for (const c of design.couplings ?? []) for (const p of c.pulses) carrier(p.channel, c.freqHz, "coupling " + c.qubits.join("-"));
   return { errors, warnings };
 }
 

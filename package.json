@@ -1,5 +1,5 @@
 {
-  "name": "qcontrol-studio",
+  "name": "quantumos",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +9,7 @@
   },
   "dependencies": {
     "three": "0.180.0"
-  }
+  },
+  "license": "MIT",
+  "description": "QuantumOS: a general framework to simulate real quantum computers with control systems"
 }

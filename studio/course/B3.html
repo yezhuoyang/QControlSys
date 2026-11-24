@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B3 · Measurement results come back · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="B3">
+    <article>
+      <p class="kicker">Part B · Lesson 3</p>
+      <h1>Measurement results come back</h1>
+      <p class="lead">
+        Pulses go out; a measurement has to come back. On the transmon ring a measurement is a tone, a window on an ADC, a
+        decoder pipeline and a register on the core that holds one bit. This lesson follows qubit 0's measurement from the
+        tone to the load instruction that waits for the result.
+      </p>
+      <p class="pre">
+        You should know channels and the pulse table (<a href="/course/B1">B1</a>) and the lead (<a href="/course/B2">B2</a>).
+        The <a href="/course/background/qec">background chapter on measurement, feedback and decoding</a> explains readout
+        physics further.
+      </p>
+
+      <h2 id="readout"><span class="num">1</span>A measurement is two windows</h2>
+      <p class="q">What does <code>c = measure q[0];</code> become on the controller?</p>
+      <p>
+        A transmon is read through a resonator coupled to it. A microwave tone near the resonator's frequency is sent in, and
+        the signal that comes back has an amplitude and phase that depend on the qubit's state. Integrating the returning
+        signal against a reference tone gives one complex number, and a threshold on it gives one bit (Krantz et al., "A
+        quantum engineer's guide to superconducting qubits", Applied Physics Reviews 6, 021318 (2019),
+        <a href="https://arxiv.org/abs/1904.06560">arXiv:1904.06560</a>, Section V). Experimentalists call the whole
+        procedure <span class="term" data-term="readout">readout</span>.
+      </p>
+      <p>
+        On the controller this needs two channels of core q0. The <code>ro</code> channel plays the tone on DAC 8, a line
+        all eight qubits share. The <code>demod</code> channel opens an acquisition window on ADC 12, where it multiplies the
+        incoming samples by its own carrier and integrates: <span class="term" data-term="demodulation">demodulation</span>.
+        Both are ordinary channels with a pulse table of one entry, fired like any drive pulse. The calibration of qubit 0
+        states:
+      </p>
+      <table>
+        <thead><tr><th>Quantity</th><th class="n">Calibration</th><th class="n">In the run</th></tr></thead>
+        <tbody>
+          <tr><td>Readout tone frequency</td><td class="n">6,555,406,453 Hz</td><td class="n">code 53,702</td></tr>
+          <tr><td>Readout tone duration</td><td class="n">500 ns</td><td class="n">250 batches</td></tr>
+          <tr><td>Delay from tone to acquisition window</td><td class="n">398.57 ns</td><td class="n">200 batches</td></tr>
+          <tr><td>Acquisition window</td><td class="n">656.67 ns</td><td class="n">329 batches</td></tr>
+          <tr><td>Demodulation phase</td><td class="n">−54.256 rad</td><td class="n">code 23,913</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Two details differ from a drive pulse. The demodulation carrier advances per ADC sample, and a batch holds 4 ADC
+        samples instead of 16 DAC samples, so its frequency code is four times the tone's, kept to 16 bits: 18,200
+        (<code>_demod_code</code> in RISC-Q's <code>units.py</code>). And its amplitude is the full scale 19,896. The
+        hardware instruction <code>h19</code> covers both windows: the tone opens at batch 538 and the acquisition window at
+        738, 200 batches later.
+      </p>
+      <div class="ex" data-id="B3.1" data-stars="1" data-kind="number" data-unit="batches">
+        <p>How many batches does the acquisition window of <code>h19</code> last? Find the demodulation window's pulse frame
+          with <b>Next pulse</b> and read its <code>dur</code>.</p>
+        <div class="why">656.67 ns / 2 ns = 328.3, rounded up to 329 batches (lesson <a href="/course/A2">A2</a>). The
+          window closes at 738 + 329 = 1,067.</div>
+      </div>
+
+      <h2 id="window"><span class="num">2</span>The window and the decoder</h2>
+      <p class="insection"><b>In this section:</b> what the model does when the acquisition window opens and closes.</p>
+      <figure class="live" data-title="The acquisition window opens" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=390&view=chip">
+        <figcaption>Step 390: the demodulation window of qubit 0 opens on ADC 12 at batch 738. The readout tone, opened at
+          batch 538, is still playing.</figcaption>
+      </figure>
+      <p>
+        The pulse frame of a demodulation window looks like that of a drive pulse, with <code>kind</code> set to
+        <code>demod</code> and the converter <code>adc12</code>. Its <code>atConverter</code> equals <code>opens</code>:
+        there is no DAC pipeline on the way in. The window feeds RISC-Q's readout decoder, which integrates the window and
+        decides the bit. The model charges it
+      </p>
+      <p class="formula">decoder = 9 batches  (complex multiply 6 + 1 + log₂ 4, <code>ReadoutDecoder.md</code>)</p>
+      <p>
+        and then a report to the core-local <span class="term" data-term="sink">sink</span>:
+      </p>
+      <p class="formula">report = 3 + 2 + link depth + 1 = 8 batches on the ring</p>
+      <p>
+        The report latency is an <b>assumption</b>: the worst case of the stages in RISC-Q's <code>EventLink.md</code> (up to
+        three puts, a merge, the link, the sink). The model applies the two latencies twice:
+      </p>
+      <ul>
+        <li>17 batches after the window <b>opens</b>, at batch 755, a <code>clear</code> frame marks the result register of
+          q0 invalid. The new window has started, so the old result no longer applies.</li>
+        <li>17 batches after the window <b>closes</b>, at batch 1,084, a <code>result</code> frame writes the new result to
+          q0's inbox: <code>valid</code>, the bit <code>res</code>, and the two integrals <code>real</code> and
+          <code>imag</code>.</li>
+      </ul>
+      <div class="ex" data-id="B3.2" data-stars="2" data-kind="number" data-unit="batches">
+        <p>How many batches pass between the close of the acquisition window and the <code>result</code> frame?</p>
+        <div class="why">9 for the decoder and 8 for the report at link depth 2: 1,067 + 17 = 1,084, which is 34 ns. The
+          system-call measurements of <code>docs/riscq-controller.md</code> quote it as "result at the measuring core 34 ns
+          after the window closes".</div>
+      </div>
+
+      <h2 id="bit"><span class="num">3</span>Where the bit comes from</h2>
+      <p>
+        RISC-Q's decoder sets the bit from the sign of the real part of the integral (<code>ReadoutDecoder.md</code>). The
+        model keeps that rule but does not produce the integral: <b>no quantum state is simulated, and the returning signal
+        is not computed</b>. The measured bit is an input you choose. In the workspace it is the outcome in the address
+        (<code>outcome=c=1</code>); in the detailed debugger, the "Measurement outcome" box. The lowering
+        (<code>readoutOracle</code> in <code>riscq/platforms/superconducting.mjs</code>) turns it into a result record with
+        <code>res</code> equal to your bit and <code>real</code> set to −20,000 for 1 and +20,000 for 0. Those magnitudes are
+        illustrative; only their sign agrees with the rule.
+      </p>
+      <div class="ex" data-id="B3.3" data-stars="1" data-kind="choice" data-answer="c">
+        <p>In this simulator, what determines whether qubit 0's measurement gives 0 or 1?</p>
+        <ol class="choices">
+          <li data-k="a">A simulation of the qubit's state after the Hadamard.</li>
+          <li data-k="b">A random number with probability one half.</li>
+          <li data-k="c">The outcome you give the run, applied by the readout oracle.</li>
+          <li data-k="d">The phase of the demodulation carrier.</li>
+        </ol>
+        <div class="why">The controller model is classical. The outcome is an input, so you can run both branches of a
+          feed-forward program and compare their timing. Exercise B3.6 does that.</div>
+      </div>
+
+      <h2 id="stall"><span class="num">4</span>A load that waits</h2>
+      <p class="insection"><b>In this section:</b> how the firmware reads the result without polling, and why it must not read too early.</p>
+      <p>
+        The sink of q0's demodulation channel sits at <code>0x4200</code> in the core's address space: <code>res</code> at
+        +0, <code>real</code> at +4, <code>imag</code> at +8 (<code>EventLink.scala</code>). A load from <code>res</code>
+        <b>stalls</b> the core while the result is not valid, and returns the bit the moment it is. The firmware therefore
+        reads the result with one instruction, <code>lw x11, 512(x9)</code>: register <code>x9</code> holds
+        <code>0x4000</code>, plus 512 is <code>0x4200</code>.
+      </p>
+      <p>
+        Timing still matters, in one direction. The result register keeps the previous window's result until the new window
+        has opened and been cleared (RISC-Q's <code>riscq.h</code>, <code>read_res</code>). A read issued too early would
+        return the old bit without stalling. The firmware waits <code>READOUT_LEAD</code> = 48 batches after the window
+        opens before it reads (<code>riscq/soc.mjs</code>, from <code>map.py</code>). On the ring that is batch 786, safely
+        after the clear at 755. From then until the window has closed plus 40 batches (<code>READ_SETTLE</code>), the core
+        is held by the read, so the compiler moves any timed write that would fall in that span to before it.
+      </p>
+      <p>The trace shows the read in two frames:</p>
+      <table>
+        <thead><tr><th>Step</th><th class="n">Batch</th><th>Frame</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>394</td><td class="n">787</td><td><code>q0:165</code> wait</td><td>The load of <code>res</code> stalls: the result is not valid</td></tr>
+          <tr><td>404</td><td class="n">1,084</td><td><code>e190</code> result</td><td>The decoder's result reaches q0's inbox</td></tr>
+          <tr><td>405</td><td class="n">1,085</td><td><code>q0:165.resume</code></td><td>The load returns <code>res</code> = 1 into <code>x11</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        A resume frame is named after the wait it ends, and its parents are that wait and the event that woke it. In the
+        Machine state tab, q0 shows "stalled on res" for every step in between.
+      </p>
+      <figure class="live" data-title="The stalled read returns" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=405&view=control">
+        <figcaption>Step 405: core q0 resumes with <code>res</code> = 1. Its causes are the wait and the result frame.</figcaption>
+      </figure>
+      <div class="ex" data-id="B3.4" data-stars="2" data-kind="text">
+        <p>What is the frame ID of the step at which q0's load of the readout result returns?</p>
+        <div class="why">The resume frame carries the ID of the wait it ends with <code>.resume</code> appended. Its state
+          holds <code>register: res</code> and <code>value: 1</code>.</div>
+      </div>
+      <div class="ex" data-id="B3.5" data-stars="2" data-kind="number" data-unit="batches">
+        <p>For how many batches is core q0 stalled in that load?</p>
+        <div class="why">From the wait at 787 to the resume at 1,085: 298 batches, 596 ns. Most of it is the acquisition
+          window itself. A stalled core issues nothing, which is why the compiler moves timed writes out of the hold.</div>
+      </div>
+
+      <h2 id="store"><span class="num">5</span>Keeping and reporting the bit</h2>
+      <p>
+        With the bit in <code>x11</code>, the firmware (<code>storeBit</code> in <code>riscq/firmware.mjs</code>) stores it
+        twice: in a bit table in the core's own RAM, where later code of the same core can test it, and in the
+        <b>host window</b> at <code>0x40000000</code>, which is how results reach the computer that runs the experiment.
+        The host window is write only (RISC-Q's <code>HostWindow.md</code>). The RAM store leaves no frame in the default
+        trace; the host store is frame <code>q0:168</code> at batch 1,089, and the run's <code>summary.host</code> lists it
+        with its value.
+      </p>
+      <p>
+        Here the bit also conditions a pulse on another core, so q0 then publishes it to the board hub: the subject of lesson
+        <a href="/course/B4">B4</a>. If the measurement and the conditioned gate were on the same core, a branch on the
+        loaded bit would be enough.
+      </p>
+      <div class="ex" data-id="B3.6" data-stars="2" data-kind="number" data-unit="windows">
+        <p>Run the feed-forward program with the outcome <code>c = 0</code> instead. How many pulse and demodulation windows
+          open in that run?</p>
+        <div class="why">Seven instead of eight. The core q2 still waits at the barrier and reads the bit, but its firmware
+          branches over the fire of the <code>x</code> (<code>beq</code> on the stored bit), so no window opens. The run takes
+          as long as before: segment 1 has a fixed span.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A readout is two fired channels: a tone on a DAC and a demodulation window on an ADC.</li>
+          <li>The result reaches the core's sink 9 + 8 = 17 batches after the window closes; the report latency is an assumed worst case.</li>
+          <li>The bit is an input to the model; its <code>real</code> integral only carries the sign RISC-Q's decoder uses.</li>
+          <li>A load of <code>res</code> stalls until the result is valid. The firmware waits 48 batches after the window opens so that it never reads the previous result.</li>
+          <li>The bit is stored in the core's RAM and in the host window at <code>0x40000000</code>.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api, c = 1) => api.run({ example: "superconducting-feedforward", outcomes: { c } });
+      const demod = (run) => run.frames.find((f) => f.op === "pulse" && f.state.kind === "demod");
+      const resumeOfResult = (run) => run.frames.find((f) => f.op === "resume" && f.state.register === "res");
+      course({
+        answers: {
+          "B3.1": async (api) => demod(await feedforward(api)).state.dur,
+          "B3.2": async (api) => {
+            const run = await feedforward(api);
+            return run.frames.find((f) => f.op === "result").atBatch - demod(run).state.closes;
+          },
+          // A text answer is used as a regular expression; the dot of the ID matches itself too.
+          "B3.4": async (api) => resumeOfResult(await feedforward(api)).id,
+          "B3.5": async (api) => {
+            const run = await feedforward(api), resume = resumeOfResult(run);
+            const wait = run.frames.find((f) => f.id === resume.parents[0]);
+            return resume.atBatch - wait.atBatch;
+          },
+          "B3.6": async (api) => (await feedforward(api, 0)).frames.filter((f) => f.op === "pulse").length,
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Classical control systems · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="control">
+    <article>
+      <p class="kicker">Background · Chapter 2</p>
+      <h1>Classical control systems</h1>
+      <p class="lead">
+        Between the program and the qubit sits a rack of classical electronics: FPGAs, converters, oscillators made of
+        arithmetic, clocks, cables and optics. This chapter explains each piece, what it does to a signal, and where it
+        appears in the RISC-Q model that the simulator runs.
+      </p>
+      <p class="pre">
+        Read <a href="/course/background/qubits">chapter 1</a> first if you have not met transmons, ions and atoms. The numbers
+        here come from data sheets, papers and RISC-Q's own files, each named where it is used. Real products are named only
+        where a public source describes them.
+      </p>
+
+      <h2 id="why"><span class="num">1</span>Why a computer is not enough</h2>
+      <p class="q">Why not drive the qubits from an ordinary PC?</p>
+      <p class="insection"><b>In this section:</b> determinism, the division of labor between processors and FPGA logic, and
+        four control systems with public descriptions.</p>
+      <p>
+        A desktop processor is fast but not predictable. Caches, branch predictors, interrupts and the operating system make
+        the time an instruction takes vary from run to run. A transmon gate lasts 35 ns on the ring this course uses, and a
+        pulse that starts 2 ns late is wrong. What a quantum computer needs is <b>determinism</b>: every sample at the converter
+        on its scheduled clock cycle, every time.
+      </p>
+      <p>
+        The standard answer is an <b>FPGA</b> (field-programmable gate array), a chip of configurable logic and memory that
+        runs a fixed, clocked circuit. An FPGA pipeline takes exactly the same number of cycles every time, so its timing can
+        be known to the cycle. Its weakness is flexibility: changing what it does means changing the circuit. Control
+        systems therefore split the work. The <b>datapath</b>, which produces samples and digests incoming ones, is FPGA logic.
+        The <b>sequencing</b>, which decides what to play next and reacts to measurements, is a small processor, either a
+        custom sequencer or a soft CPU built inside the FPGA, whose job is to tell the datapath what to do <i>ahead of time</i>.
+      </p>
+      <p>Four systems with public descriptions show the range:</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>System</th><th>What it is</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td>QubiC</td><td>Open-source FPGA control and measurement for superconducting qubits from Lawrence Berkeley National Laboratory. The first version ran on a Xilinx VC707 board with 1.25 GS/s DACs and 1 GS/s ADCs, operated at 1 GS/s with a 250 MHz DSP clock. QubiC 2.0 runs on the AMD ZCU216 RFSoC with a 500 MHz DSP clock, 8 GS/s DACs and 2 GS/s ADCs, and supports mid-circuit measurement and feed-forward.</td>
+              <td><a href="https://arxiv.org/abs/2101.00071">Xu et al., IEEE TQE 2, 6003811 (2021), arXiv:2101.00071</a>; <a href="https://arxiv.org/abs/2309.10333">Xu et al., arXiv:2309.10333</a> (QubiC 2.0)</td></tr>
+            <tr><td>ARTIQ</td><td>M-Labs' control system for quantum-information experiments, widely used with trapped ions. Experiments are written in a Python-based language that is compiled and executed on FPGA hardware ("usually Kasli or Kasli-SoC"). Output events carry timestamps in machine units that "normally correspond to one nanosecond"; the coarse RTIO clock is most commonly 125 MHz.</td>
+              <td><a href="https://m-labs.hk/experiment-control/artiq/">m-labs.hk</a>; <a href="https://m-labs.hk/artiq/manual/rtio.html">ARTIQ manual, Real-Time I/O concepts</a></td></tr>
+            <tr><td>Quantum Machines OPX</td><td>A commercial controller whose documentation describes an "FPGA-based Pulse Processor" with "multiple cores designed to generate pulses".</td>
+              <td><a href="https://docs.quantum-machines.co/latest/docs/Introduction/qop_overview/">Quantum Machines documentation, conceptual overview</a></td></tr>
+            <tr><td>RISC-Q</td><td>"A RISC-V–controlled SoC for superconducting-qubit control, written in SpinalHDL and targeting the AMD/Xilinx ZCU216 RFSoC board", with one RV32I core per qubit. The controller this course models.</td>
+              <td><a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">RISC-Q repository README</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The simulator models RISC-Q, because its RTL, its documents and its firmware are public, so every latency in the model
+        can name the document it comes from. Chapter <a href="/course/background/riscq">3</a> describes its architecture. The
+        rest of this chapter covers the parts that every such system has.
+      </p>
+
+      <h2 id="converters"><span class="num">2</span>Converters, sample rates and batches</h2>
+      <p class="q">How does a number become a microwave pulse?</p>
+      <p class="insection"><b>In this section:</b> DACs, ADCs, the RFSoC, and why a sample clock of gigahertz forces the logic
+        to work on batches of samples.</p>
+      <p>
+        A <span class="term" data-term="DAC">DAC</span> (digital-to-analog converter) turns a stream of numbers into a voltage that
+        follows them, one number per sample period. An <span class="term" data-term="ADC">ADC</span> does the reverse. A converter
+        that samples at f<sub>s</sub> can represent frequencies up to f<sub>s</sub>/2, the Nyquist frequency; above it, a tone is
+        indistinguishable from an image below it.
+      </p>
+      <p>
+        An <b>RFSoC</b> puts fast converters, FPGA logic and ARM processors on one chip. The AMD ZCU216 evaluation board, which
+        both QubiC 2.0 and RISC-Q target, carries a Zynq UltraScale+ RFSoC Gen 3 ZU49DR with 16 RF-DACs of 14 bits at up to
+        9.85 GS/s and 16 RF-ADCs of 14 bits at up to 2.5 GS/s
+        (<a href="https://www.amd.com/en/products/adaptive-socs-and-fpgas/evaluation-boards/zcu216.html">AMD ZCU216 product page</a>).
+      </p>
+      <p>
+        FPGA logic cannot run at 8 GHz. It runs at a few hundred megahertz, and each clock cycle it hands the converter several
+        samples at once. RISC-Q's <code>x6y3</code> build clocks its DSP logic, the <span class="term" data-term="dspClk">dspClk</span>, at 500 MHz
+        (<code>software/configs/x6y3.json</code>, <code>dsp_freq_hz</code>), and the calibration's sample rates are 8 GS/s for the
+        DAC and 2 GS/s for the ADC. One dspClk cycle therefore carries
+      </p>
+      <div class="formula">samples per batch = converter rate / dspClk<br />
+        DAC: 8 GS/s / 500 MHz = 16 samples &nbsp;&nbsp; ADC: 2 GS/s / 500 MHz = 4 samples</div>
+      <p>
+        That group of samples is a <span class="term" data-term="batch">batch</span>, and every time in the controller is a whole
+        number of batches (<code>BATCH_SIZE = 16</code>, <code>ADC_BATCH = 4</code> in <code>riscq/soc.mjs</code>). The logic
+        computes 16 samples in parallel <b>lanes</b>, one lane per sample position in the batch. QubiC's first version shows the
+        same idea at a smaller ratio: 1 GS/s converters with a 250 MHz DSP clock, 4 samples per cycle.
+      </p>
+      <p>
+        A pulse window starts on a batch boundary and lasts whole batches. Finer timing is possible in principle, by shifting
+        the envelope inside the batch, but the model does not use it: the envelope carries the pulse's shape inside its
+        window, and the window is rounded up to whole batches. A 35 ns <code>x90</code> occupies 18 batches, 36 ns.
+      </p>
+      <div class="ex" data-id="control.1" data-stars="1" data-kind="number" data-unit="ns">
+        <p>Run the feed-forward program. How long is one batch on the transmon ring, in nanoseconds?</p>
+        <div class="why">The run's program states <code>dspPeriodPs</code>, the dspClk period in picoseconds: 2,000 ps, 2 ns, from
+          the 500 MHz clock of the x6y3 build. Every <code>atBatch</code> in the trace is multiplied by it to give
+          <code>atPs</code>.</div>
+      </div>
+      <div class="note"><b>Above the Nyquist frequency.</b> The ring's qubits sit at 5.2–5.9 GHz, above the 4 GHz Nyquist
+        frequency of an 8 GS/s DAC. Direct-sampling converters can place a tone in a higher Nyquist zone, and analog mixers are
+        the other common route. The files the simulator reads do not say which a given installation uses, and the model
+        represents only the 16-bit carrier code, which wraps modulo the sample rate.</div>
+
+      <h2 id="nco"><span class="num">3</span>Numerically controlled oscillators and carriers</h2>
+      <p class="q">How does digital logic make a 5 GHz sine wave?</p>
+      <p class="insection"><b>In this section:</b> the phase accumulator, frequency and phase codes, phase coherence, and why
+        retuning a carrier takes time.</p>
+      <p>
+        An <span class="term" data-term="NCO">NCO</span> (numerically controlled oscillator) is an accumulator. Each sample it adds a
+        fixed phase increment Δφ to a running phase φ and outputs cos φ and sin φ. The output frequency is
+      </p>
+      <div class="formula">φ[n+1] = φ[n] + Δφ &nbsp;&nbsp;⇒&nbsp;&nbsp; f = (Δφ / 2π) · f<sub>s</sub></div>
+      <p>
+        Because the phase keeps running whether or not a pulse is playing, every pulse on that carrier has a well-defined phase
+        relative to all earlier ones. That <b>phase coherence</b> is what makes a virtual Z possible: the Z rotation is an
+        offset added to φ for all later pulses of that qubit.
+      </p>
+      <p>
+        RISC-Q encodes the increment as a 16-bit code, the phase advance per DAC sample in units of π/32768
+        (<code>freqCode</code> in <code>riscq/soc.mjs</code>, after RISC-Q <code>units.py</code>):
+      </p>
+      <div class="formula">code = round(f · 65536 / (lanes · f<sub>dsp</sub>)) &nbsp; (16-bit, signed)<br />
+        resolution = lanes · f<sub>dsp</sub> / 65536 = 8 GS/s / 65536 ≈ 122.07 kHz on the ring</div>
+      <p>
+        A phase is a 16-bit code in the same units (<code>phaseCode</code>), so phases resolve to 2π/65536. An amplitude is a code
+        up to 19,896, the largest that keeps RISC-Q's unsaturated datapath in range (<code>AMP_SCALE</code>, after RISC-Q
+        <code>pulses/golden.py</code>). The firmware writes these codes into channel registers; the
+        <span class="term" data-term="carrier">carrier</span> register of a channel holds the frequency code.
+      </p>
+      <div class="ex" data-id="control.2" data-stars="2" data-kind="number" data-unit="kHz" data-tolerance="0.1" data-answer="24.41">
+        <p>The ion and atom controllers in the simulator run at 100 MHz with 16 lanes, 1.6 GS/s. What is the smallest step by which
+          they can change a tone's frequency, in kHz?</p>
+        <div class="why">1.6 × 10⁹ / 65,536 ≈ 24.41 kHz. On an AOD with the simulator's calibration of 188,462 Hz per µm, that is
+          a position step of about 0.13 µm (<code>riscq/platforms/neutral.mjs</code> states the step in its header).</div>
+      </div>
+      <p>
+        Retuning is not free. RISC-Q's pulse generator does not compute each lane's carrier from scratch every cycle; it holds
+        one <b>phasor</b> per lane and advances it. When the frequency changes, the lane phasors are regenerated one lane per
+        cycle through one CORDIC unit. The model derives the cost from RISC-Q's block latencies
+        (<code>QControl/RiscQ/Timing.lean</code>, <code>regenCycles = lanes + cordic + 2</code>): the carrier itself takes effect
+        36 cycles after release, and all 16 phasors after 52. These leads are used in <a href="/course/background/timing">chapter 4</a>.
+      </p>
+
+      <h2 id="envelopes"><span class="num">4</span>Envelopes and pulse tables</h2>
+      <p class="q">Where does a pulse's shape come from?</p>
+      <p>
+        A pulse is a carrier multiplied by an <span class="term" data-term="envelope">envelope</span>. Storing the envelope as
+        samples in a memory next to the generator lets the processor start a complex pulse with one number: the address of its
+        first sample. RISC-Q channels have an envelope memory (4,096 lines on the x6y3 build, <code>env_depth</code>) and a
+        <span class="term" data-term="pulse table">pulse table</span>: a small list of entries, each holding an amplitude code, a
+        phase code, an envelope address and a duration in batches. Playing a calibrated <code>x90</code> means
+        <span class="term" data-term="fire">firing</span> its entry.
+      </p>
+      <p>
+        The ring's calibration uses two envelope shapes: <code>FAST_DRAG</code> for the 35 and 70 ns drive pulses, and
+        <code>cosine_square</code> (a flat top with cosine edges) for the CZ tones, readout tones and demodulation weights. In the
+        model the envelope is named, not sampled: a pulse frame reports the scheduled codes, and the workspace draws a waveform
+        from them for display. Carrier synthesis is represented by its latency only. <code>docs/riscq-controller.md</code> lists
+        this under "Not modeled".
+      </p>
+
+      <h2 id="demod"><span class="num">5</span>IQ demodulation</h2>
+      <p class="q">How does a returning tone become one bit?</p>
+      <p class="insection"><b>In this section:</b> multiplying by a reference, integrating over a window, and thresholding.</p>
+      <p>
+        A dispersive readout returns a tone at the resonator frequency whose amplitude and phase depend on the qubit state. The
+        ADC samples it, and the logic multiplies each sample by a reference tone at the same frequency and sums over a window:
+      </p>
+      <div class="formula">I + iQ = Σ<sub>n in window</sub> w[n] · s[n] · e<sup>−i(2π f n / f<sub>s</sub> + φ)</sup></div>
+      <p>
+        Here s[n] are the ADC samples, w[n] is a weight (the demodulation envelope), f is the readout frequency and φ a phase
+        chosen so that the two qubit states separate along one axis. This is
+        <span class="term" data-term="demodulation">demodulation</span>. The result is one complex number, plotted as a point in the
+        IQ plane; points for |0⟩ and |1⟩ form two clusters, and a threshold line between them turns the point into a bit.
+      </p>
+      <p>
+        In RISC-Q a demodulation channel has a pulse table like a drive channel: firing its entry opens an acquisition window on
+        the ADC. Its carrier advances per ADC sample, so its code is four times the DAC code of the same frequency
+        (<code>riscq/platforms/superconducting.mjs</code>, after <code>units.py</code>). After the window, the readout decoder
+        takes 9 cycles (complex multiply 6, plus 1, plus log₂ of the 4 ADC lanes; <code>ReadoutDecoder.md</code>), and the result
+        travels back to the core's result <span class="term" data-term="sink">sink</span>, where a load of <code>res</code> stalls
+        until the value has settled. In the model the measured bit is an input you choose: the simulator does not produce IQ
+        samples.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 210" role="img" aria-label="Readout chain from ADC to bit">
+          <style>
+            .dm text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .dm .s { font-size: 11.5px; fill: #52514e; }
+            .dm rect { fill: #fff; stroke: #cfceca; }
+            .dm .a { stroke: #8a8985; stroke-width: 1.5; marker-end: url(#dmtip); }
+          </style>
+          <defs><marker id="dmtip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a8985" /></marker></defs>
+          <g class="dm">
+            <rect x="10" y="40" width="100" height="50" rx="6" /><text x="38" y="70">ADC</text>
+            <text class="s" x="10" y="110">4 samples / batch</text>
+            <rect x="150" y="40" width="130" height="50" rx="6" /><text x="162" y="62">× reference</text><text class="s" x="162" y="80">NCO at f, phase φ</text>
+            <rect x="320" y="40" width="130" height="50" rx="6" /><text x="332" y="62">Σ over window</text><text class="s" x="332" y="80">weights w[n]</text>
+            <rect x="490" y="40" width="110" height="50" rx="6" /><text x="502" y="62">threshold</text><text class="s" x="502" y="80">decoder, 9 cycles</text>
+            <rect x="640" y="40" width="110" height="50" rx="6" /><text x="652" y="62">result sink</text><text class="s" x="652" y="80">res, real, imag</text>
+            <path class="a" d="M110 65 H148" /><path class="a" d="M280 65 H318" /><path class="a" d="M450 65 H488" /><path class="a" d="M600 65 H638" />
+            <circle cx="400" cy="160" r="3" fill="#2a78d6" /><circle cx="410" cy="152" r="3" fill="#2a78d6" /><circle cx="394" cy="168" r="3" fill="#2a78d6" />
+            <circle cx="470" cy="150" r="3" fill="#eb6834" /><circle cx="480" cy="160" r="3" fill="#eb6834" /><circle cx="464" cy="166" r="3" fill="#eb6834" />
+            <line x1="437" y1="132" x2="437" y2="190" stroke="#0b0b0b" stroke-dasharray="3 3" />
+            <text class="s" x="300" y="200">IQ plane: |0⟩ cluster, threshold, |1⟩ cluster</text>
+          </g>
+        </svg>
+        <figcaption><b>From samples to a bit.</b> The returning tone is multiplied by a reference at the readout frequency, weighted
+          and summed over the window, compared with a threshold, and delivered to a register the core can read. Amplifiers before
+          the ADC are omitted. The 9-cycle decoder latency is RISC-Q's <code>ReadoutDecoder.md</code>. Schematic drawing.</figcaption>
+      </figure>
+
+      <h2 id="dio"><span class="num">6</span>Digital lines and photon counters</h2>
+      <p>
+        Not every signal is a waveform. Laser shutters, camera triggers and trigger outputs are digital lines, and an ion's
+        detection is a stream of photon pulses on a digital input. RISC-Q's third channel kind, <code>dio</code>, drives sixteen
+        digital output lines from its table and timestamps changes on its inputs. Each input change becomes an event
+        <code>{changed lines, levels}</code> in a queue of depth 8 at the core's sink, which firmware reads through
+        <code>pop</code>, <code>time</code>, <code>seq</code> and <code>count</code> registers (<code>EventLink.md</code>).
+      </p>
+      <p>
+        On the simulator's ion machine each ion in a gate zone has its own photon-counter line. One firmware loop
+        (<code>countEdges</code> in <code>riscq/firmware.mjs</code>) drains the event queue during the detection window, adds up
+        the rising edges per line, and compares each count with the threshold: more than one photon is bright. The photon
+        edges themselves are inputs to the run, generated from the composite statistic of chapter 1.
+      </p>
+
+      <h2 id="clocks"><span class="num">7</span>Clocks and synchronization</h2>
+      <p class="q">How do a dozen processors agree on what time it is?</p>
+      <p class="insection"><b>In this section:</b> one clock per board, the batch-time register, barriers, and synchronization
+        between boards.</p>
+      <p>
+        Inside one board, every channel and every core runs on the same dspClk, derived from one reference. RISC-Q keeps a
+        32-bit <b>batch-time register</b> that counts dspClk cycles; it wraps after 2³² batches, and the timing theorems of chapter
+        4 are stated with that wrap in mind. Each core reads a copy of the time at <code>0xBFF8</code>. That copy lags the
+        converter edge by the link's delay; RISC-Q states a constant lag without a number, and the model assumes it equals the
+        link depth (<code>coreTimeLag</code> in <code>riscq/soc.mjs</code>, marked assumed).
+      </p>
+      <p>
+        Cores that must act together first meet at a <span class="term" data-term="barrier">barrier</span> in the board
+        <span class="term" data-term="hub">hub</span>. The last arrival releases all of them with one common time, and each core
+        schedules its next writes relative to that time. Chapter <a href="/course/background/riscq">3</a> describes the hub.
+      </p>
+      <p>
+        Between boards the problem is harder: two boards have two oscillators that drift. <b>White Rabbit</b>, developed at CERN,
+        extends Ethernet and the Precision Time Protocol to distribute time with "sub-nanosecond accuracy and picoseconds precision"
+        (<a href="https://white-rabbit.web.cern.ch/">CERN White Rabbit project</a>;
+        Lipiński et al., IEEE ISPCS 2011, <a href="https://doi.org/10.1109/ISPCS.2011.6070148">doi:10.1109/ISPCS.2011.6070148</a>).
+        RISC-Q's repository includes a White Rabbit time-sync node (<code>src/riscq/wr/</code>). RISC-Q's QEC system paper connects
+        three ZCU216 boards and synchronizes them with a minimal PTP over the boards' transceiver links, naming White Rabbit as a
+        future extension (<a href="https://arxiv.org/abs/2603.16203">Liu et al., arXiv:2603.16203</a>). The simulator models one
+        board. Multi-board operation is listed as not modeled.
+      </p>
+
+      <h2 id="cables"><span class="num">8</span>Cables and signal speed</h2>
+      <p class="q">How long does a pulse spend on the wire?</p>
+      <p>
+        A signal on a cable travels slower than light in vacuum, at c/√ε<sub>r</sub> for a dielectric of relative permittivity
+        ε<sub>r</sub>. The ratio to c is the cable's <b>velocity factor</b>. The project's interconnect library
+        (<code>machine/interconnect.mjs</code>) gives each medium one effective speed:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Medium</th><th class="n">Speed (mm/ns)</th><th class="n">Delay per metre</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Coaxial cable</td><td class="n">200</td><td class="n">5.0 ns</td><td>reference design value (velocity factor ≈ 0.67)</td></tr>
+            <tr><td>Optical fibre</td><td class="n">204</td><td class="n">4.9 ns</td><td>reference design value</td></tr>
+            <tr><td>Free space</td><td class="n">299.792458</td><td class="n">3.34 ns</td><td>exact, SI definition of the metre</td></tr>
+            <tr><td>Coplanar microwave trace on chip</td><td class="n">125</td><td class="n">8.0 ns</td><td>reference design value</td></tr>
+            <tr><td>Differential copper pair</td><td class="n">195</td><td class="n">5.1 ns</td><td>reference design value</td></tr>
+            <tr><td>Logic-level and DC copper</td><td class="n">190</td><td class="n">5.3 ns</td><td>reference design value</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">The library marks these as "reference design assumptions for geometry, velocity and transfer parameters" to be
+        replaced by calibrated values for a specific installation.</p>
+      <p>
+        In a hardware design document (chapter <a href="/course/background/simulator">6</a>) a wire's delay is its routed length
+        divided by its medium's speed, so moving a chip two metres farther away delays every arrival by 10 ns and changes nothing at
+        the converters. The built-in transmon ring uses a fixed path: 1,050 mm of coax from the refrigerator flange to the chip
+        (Krinner et al. 2019, Table 1) at an assumed 0.7 c, 5.003 ns.
+      </p>
+      <div class="ex" data-id="control.3" data-stars="2" data-kind="number" data-unit="ps">
+        <p>In the feed-forward run, the first <code>x90</code> pulse leaves the DAC port at some time and reaches qubit 0 later. How
+          many picoseconds does the trace say it spends between the two?</p>
+        <div class="why">The effect frame on <code>qubit0</code> carries <code>atPs</code>, when the pulse is at the converter, and
+          <code>arrivesPs</code>, when it reaches the qubit. The difference is 1,050 mm / (0.7 × 299.792458 mm/ns) ≈ 5,003 ps.</div>
+      </div>
+
+      <h2 id="optics"><span class="num">9</span>Acousto-optics and other optics</h2>
+      <p>
+        For ions and atoms, the last stage of the control chain is optical. An <b>acousto-optic modulator</b> (AOM) and an
+        <span class="term" data-term="AOD">acousto-optic deflector</span> (AOD) are the same device used two ways: an RF tone drives a
+        piezoelectric transducer, which launches a sound wave through a crystal; the sound wave acts as a moving grating, and the
+        laser beam is diffracted by it. The diffracted beam is shifted in frequency by the tone's frequency and deflected by an
+        angle proportional to it. An AOM uses the first effect: turning the RF on and off switches the beam, and the RF phase becomes
+        the light's phase, which is how a laser gate gets its phase. An AOD uses the second: the tone frequency sets the beam's
+        direction, and with a lens, a position in the atom plane.
+      </p>
+      <p>
+        An AOD does not respond instantly. A frequency change reaches the beam only when the new sound has crossed it. The
+        simulator charges each tone a delay of 6.154 µs, the width of a 4 mm beam over an acoustic velocity of 650 m/s
+        (<code>riscq/standards.mjs</code>: velocity from Lu et al., arXiv:2510.11451, supplement; beam width from Endres et al. 2016;
+        marked derived). Static tweezer patterns come from a spatial light modulator, which the control system sets once
+        and does not sequence.
+      </p>
+      <figure>
+        <img src="/docs/media/riscq-feedforward.gif" alt="Feed-forward on the transmon ring in the RISC-Q workspace" loading="lazy" />
+        <figcaption><b>The whole chain at work.</b> Lesson <a href="/course/A1">A1</a>'s feed-forward program: cores write registers,
+          channels fire, converters play, coax carries the pulse to the chip, and a readout result crosses the board to condition a
+          later pulse. Photographed from the running workspace, one trace step per frame.</figcaption>
+      </figure>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Qubit control needs determinism to the clock cycle. FPGA logic provides it; a small processor sequences it ahead of time.</li>
+          <li>FPGA logic runs at hundreds of megahertz and hands the converters a batch of samples per cycle: 16 DAC and 4 ADC samples at 500 MHz.</li>
+          <li>An NCO is a phase accumulator. Its 16-bit code sets the carrier frequency; a phase offset implements a virtual Z.</li>
+          <li>A pulse is a table entry: amplitude, phase, envelope address and duration. Firing it plays it.</li>
+          <li>Demodulation multiplies the returning tone by a reference and integrates it to one IQ point; a threshold makes the bit.</li>
+          <li>One board shares one clock and meets at barriers. Between boards, protocols such as White Rabbit are needed; the model has one board.</li>
+          <li>Cables delay signals by their length over the medium's speed, about 5 ns per metre of coax.</li>
+          <li>AOMs switch and phase laser beams; AODs turn RF frequency into position, with an acoustic delay of microseconds.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      course({
+        answers: {
+          "control.1": async (api) => (await feedforward(api)).program.dspPeriodPs / 1000,
+          "control.3": async (api) => {
+            const effect = (await feedforward(api)).frames.find((f) => f.op === "effect" && f.part === "qubit0");
+            return effect.state.arrivesPs - effect.atPs;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

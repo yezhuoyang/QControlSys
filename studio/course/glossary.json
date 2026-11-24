@@ -1,0 +1,246 @@
+{
+  "batch": {
+    "short": "One cycle of the control clock (dspClk). Every time in the controller is a whole number of batches. On the x6y3 build one batch is 2 ns and carries 16 DAC samples.",
+    "chapter": "timing"
+  },
+  "core": {
+    "short": "A small RISC-V processor (RV32I) that runs the firmware for a group of channels. It never plays samples itself; it writes registers that schedule them.",
+    "chapter": "riscq"
+  },
+  "channel": {
+    "short": "The hardware next to a converter that holds a pulse table and timed queues and turns scheduled entries into samples. Kinds: pulse (DAC), demod (ADC) and dio (digital lines).",
+    "chapter": "riscq"
+  },
+  "posted write": {
+    "short": "A store that the core sends and forgets: it travels over the link to a channel register without waiting for an answer.",
+    "chapter": "riscq"
+  },
+  "pulse table": {
+    "short": "A channel's list of pulse entries, each with amplitude, phase, envelope address and duration. Firing writes an entry's index.",
+    "chapter": "riscq"
+  },
+  "fire": {
+    "short": "Writing an entry index to a channel's fire register. The entry is queued to start at the channel's start time.",
+    "chapter": "riscq"
+  },
+  "lead": {
+    "short": "How far ahead of its start time the firmware issues a write: 96 batches in RISC-Q's software. It covers the link, the queues and the slowest parameter path.",
+    "chapter": "timing"
+  },
+  "timed queue": {
+    "short": "A queue that releases each parameter at its start time minus that parameter's own pipeline latency, so all parameters of a pulse land on the same batch.",
+    "chapter": "timing"
+  },
+  "link": {
+    "short": "The pipelined path that carries posted writes from a core to its channels, and reports back. Its depth is counted in register stages.",
+    "chapter": "riscq"
+  },
+  "hub": {
+    "short": "The board hub: shared bits (groups), counted barriers and mailboxes between cores. It passes one message per batch for the whole board.",
+    "chapter": "riscq"
+  },
+  "barrier": {
+    "short": "A meeting point for cores. Each arrives and waits; the last arrival releases all of them with one common time.",
+    "chapter": "riscq"
+  },
+  "sink": {
+    "short": "A core-local register that receives reports from a channel: a readout result, or a queue of input-line events.",
+    "chapter": "riscq"
+  },
+  "DAC": {
+    "short": "Digital-to-analog converter: turns samples into a voltage on a wire.",
+    "chapter": "control"
+  },
+  "ADC": {
+    "short": "Analog-to-digital converter: samples a returning signal, for example a readout tone.",
+    "chapter": "control"
+  },
+  "NCO": {
+    "short": "Numerically controlled oscillator: a phase accumulator that generates a carrier frequency in digital logic.",
+    "chapter": "control"
+  },
+  "carrier": {
+    "short": "The sinusoid a pulse is modulated onto. Its frequency is a 16-bit code in a channel register.",
+    "chapter": "control"
+  },
+  "envelope": {
+    "short": "The shape of a pulse's amplitude over time, read from envelope memory.",
+    "chapter": "control"
+  },
+  "demodulation": {
+    "short": "Multiplying a returning signal by a reference tone and integrating it over a window, to get one complex number per measurement.",
+    "chapter": "qec"
+  },
+  "readout": {
+    "short": "Measuring a qubit: a tone on its resonator, a demodulation window on the ADC, and a threshold that gives one bit.",
+    "chapter": "qec"
+  },
+  "feed-forward": {
+    "short": "Choosing a later operation from a measured bit during the same run.",
+    "chapter": "qec"
+  },
+  "virtual Z": {
+    "short": "A Z rotation done by shifting the phase of later pulses instead of playing a pulse.",
+    "chapter": "qubits"
+  },
+  "transmon": {
+    "short": "A superconducting qubit made from a Josephson junction shunted by a capacitor, driven by microwave pulses of tens of nanoseconds.",
+    "chapter": "qubits"
+  },
+  "QCCD": {
+    "short": "Quantum charge-coupled device: a trapped-ion architecture in which ions are moved between zones of a segmented trap.",
+    "chapter": "qubits"
+  },
+  "shuttle": {
+    "short": "Moving an ion from one trap site to another by changing electrode voltages.",
+    "chapter": "qubits"
+  },
+  "AOD": {
+    "short": "Acousto-optic deflector: a crystal in which an RF tone deflects a laser beam. The tone's frequency sets the beam's position.",
+    "chapter": "control"
+  },
+  "tweezer": {
+    "short": "A tightly focused laser beam that holds one neutral atom.",
+    "chapter": "qubits"
+  },
+  "Rydberg": {
+    "short": "A highly excited atomic state whose strong interaction gives neutral atoms their two-qubit gate.",
+    "chapter": "qubits"
+  },
+  "Mølmer–Sørensen": {
+    "short": "The standard two-qubit gate on trapped ions, driven through the ions' shared motion.",
+    "chapter": "qubits"
+  },
+  "syndrome": {
+    "short": "The measured parities of an error-correcting code. They reveal errors without revealing the encoded state.",
+    "chapter": "qec"
+  },
+  "decoder": {
+    "short": "The classical algorithm that turns syndromes into a correction.",
+    "chapter": "qec"
+  },
+  "union-find": {
+    "short": "A fast decoder that grows clusters around syndrome defects and merges them until each holds an even number.",
+    "chapter": "qec"
+  },
+  "Pauli frame": {
+    "short": "A classical record of Pauli corrections that are tracked in software instead of being applied as pulses.",
+    "chapter": "qec"
+  },
+  "system call": {
+    "short": "A service of the fault-tolerant virtual machine, such as decode_syndrome or route, with one latency and one capacity.",
+    "chapter": "qec"
+  },
+  "trace": {
+    "short": "The list of frames the Lean model emits as it executes: one frame per event, with an ID, a part, its causes and its state.",
+    "chapter": "simulator"
+  },
+  "frame": {
+    "short": "One event of the trace: an instruction, a register write, a pulse window, a hub message or a signal reaching a qubit.",
+    "chapter": "simulator"
+  },
+  "causal chain": {
+    "short": "The frames that led to a frame, following each frame's parents back to the firmware instruction that started it.",
+    "chapter": "simulator"
+  },
+  "hardware instruction": {
+    "short": "One timed physical operation of a platform: a pulse, an ion shuttle, an AOD move, a measurement.",
+    "chapter": "simulator"
+  },
+  "firmware": {
+    "short": "The RV32I machine code each control core runs.",
+    "chapter": "simulator"
+  },
+  "Lean": {
+    "short": "A programming language and proof assistant. The controller model is written in Lean, so it runs and its properties can be proved.",
+    "chapter": "simulator"
+  },
+  "preroll": {
+    "short": "Extra batches by which a segment starts later, so that the widest burst of simultaneous writes can still be issued on time.",
+    "chapter": "timing"
+  },
+  "put window": {
+    "short": "Core addresses from 0x10000 upward. A store there becomes a posted write to node n at 0x10000 + n·0x10000: nodes 0–15 are the core's channels, 16–19 hub groups, 20–35 barriers, 36 and up mailboxes.",
+    "chapter": "riscq"
+  },
+  "dspClk": {
+    "short": "The converter-side clock of a RISC-Q build. One cycle is one batch: 500 MHz on the x6y3 build.",
+    "chapter": "timing"
+  },
+  "start time": {
+    "short": "The channel register (+0x4100) holding the batch at which the next fired entry starts. A fire advances it by the entry's duration.",
+    "chapter": "riscq"
+  },
+  "arbiter": {
+    "short": "The round-robin stage of the board hub. It passes one message per batch for the whole board, from a queue of eight per core.",
+    "chapter": "riscq"
+  },
+  "link depth": {
+    "short": "The number of register stages of the posted link. A write reaches its channel 1 + link depth batches after the store.",
+    "chapter": "riscq"
+  },
+  "host window": {
+    "short": "Write-only core addresses from 0x40000000 through which firmware reports results to the host computer.",
+    "chapter": "riscq"
+  },
+  "mailbox": {
+    "short": "One of two core-local registers (0x4340, 0x4360) that receive a word sent through the hub to that core alone. A load stalls until a word arrives.",
+    "chapter": "riscq"
+  },
+  "effect frame": {
+    "short": "The trace frame in which a converter's output reaches an apparatus part, with its arrival time after the wire delay.",
+    "chapter": "simulator"
+  },
+  "decoding graph": {
+    "short": "A graph with one node per check per round and one edge per possible error. A decoder groups the defects on it.",
+    "chapter": "qec"
+  },
+  "defect": {
+    "short": "A node of the decoding graph whose check changed value: the input a decoder starts from.",
+    "chapter": "qec"
+  },
+  "reaction time": {
+    "short": "The time from a measurement to the moment an operation that depends on its decoded result can start.",
+    "chapter": "qec"
+  },
+  "segment": {
+    "short": "A stretch of a compiled program that all active cores start together after a barrier, with one shared time base.",
+    "chapter": "simulator"
+  },
+  "hyperfine qubit": {
+    "short": "A qubit stored in two hyperfine levels of an atom's or ion's electronic ground state, which makes it very insensitive to noise.",
+    "chapter": "qubits"
+  },
+  "dispersive readout": {
+    "short": "Measuring a transmon through a coupled resonator whose frequency shifts with the qubit state, so a probe tone returns with a state-dependent amplitude and phase.",
+    "chapter": "qubits"
+  },
+  "DRAG": {
+    "short": "A pulse-shaping correction that adds a derivative component on the quadrature channel, so a short pulse does not excite the second excited level.",
+    "chapter": "qubits"
+  },
+  "RFSoC": {
+    "short": "A chip that combines fast DACs and ADCs, FPGA logic and ARM processors. RISC-Q targets AMD's ZCU216 board.",
+    "chapter": "control"
+  },
+  "Nyquist frequency": {
+    "short": "Half the sample rate: the highest frequency a converter represents without an image.",
+    "chapter": "control"
+  },
+  "surface code": {
+    "short": "An error-correcting code with one logical qubit in a d × d patch of qubits and d² − 1 checks between neighbours.",
+    "chapter": "qec"
+  },
+  "MWPM": {
+    "short": "Minimum-weight perfect matching: a decoder that pairs detection events so that the total weight of the connecting paths is minimal.",
+    "chapter": "qec"
+  },
+  "SLM": {
+    "short": "Spatial light modulator: shapes one laser beam into a fixed pattern of tweezers.",
+    "chapter": "qubits"
+  },
+  "White Rabbit": {
+    "short": "CERN's Ethernet-based protocol for sub-nanosecond time distribution between boards. RISC-Q has a node for it; this model does not.",
+    "chapter": "control"
+  }
+}

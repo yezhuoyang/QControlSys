@@ -1,4 +1,4 @@
-// Rebuilds the GIFs of the top-level README from a running QControl Studio server.
+// Rebuilds the GIFs of the top-level README from a running QuantumOS server.
 //
 // Each frame is one trace step, or for the workspace scenes one batch time: the page is moved
 // there, painted, and photographed.

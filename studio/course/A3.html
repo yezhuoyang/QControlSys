@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A3 · Following one pulse · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="A3">
+    <article>
+      <p class="kicker">Part A · Lesson 3</p>
+      <h1>Following one pulse</h1>
+      <p class="lead">
+        One store instruction on a control core becomes a microwave pulse on a qubit 203 ns later. In between it crosses a
+        link, waits in a queue, opens a window, passes a converter pipeline and travels a metre of coax. This lesson walks
+        that chain one hop at a time, with the frame of the trace that records each hop.
+      </p>
+      <p class="pre">
+        You should know the five layers of <a href="/course/A1">A1</a> and what a batch is (<a href="/course/A2">A2</a>).
+        Every time below is in batches of 2 ns unless it says otherwise.
+      </p>
+
+      <h2 id="pulse"><span class="num">1</span>The pulse to follow</h2>
+      <p class="q">Which event made qubit 0 receive its first pulse, and when?</p>
+      <p>
+        Take the feed-forward program of lesson A1 with the measured bit set to 1. Its first line, <code>h q[0]</code>,
+        became a 90° drive pulse on qubit 0: hardware instruction <code>h2</code>, an <code>x90</code> scheduled at 0 ns
+        of segment 0. Below, you follow that pulse from the firmware to the qubit.
+      </p>
+      <p>
+        Every frame of the trace names its <b>parents</b>: the frames that caused it. Following parents back from an
+        event gives its <span class="term" data-term="causal chain">causal chain</span>. The debugger computes it with
+        <code>causalChain(bundle, frameId)</code> in <code>studio/riscq-model.js</code>, a pure function that a script can
+        call on a saved run. For the frame in which the pulse reaches qubit 0 it returns four frames:
+      </p>
+      <table>
+        <thead><tr><th>Step</th><th>Frame</th><th>Operation</th><th>Part</th><th class="n">Batch</th><th>What happened</th></tr></thead>
+        <tbody>
+          <tr><td>333</td><td><code>q0:137</code></td><td>put</td><td>q0 (core)</td><td class="n">227</td><td>The core stores 0 to the fire register of its drive channel</td></tr>
+          <tr><td>335</td><td><code>e162</code></td><td>fire</td><td>q0.gate (channel)</td><td class="n">230</td><td>The write arrives; entry 0 is queued for start time 320</td></tr>
+          <tr><td>355</td><td><code>e164</code></td><td>pulse</td><td>q0.gate</td><td class="n">320</td><td>The window opens on the scheduled batch</td></tr>
+          <tr><td>357</td><td><code>e172</code></td><td>effect</td><td>qubit0</td><td class="n">326</td><td>The DAC output leaves; it reaches the qubit at 657.003 ns</td></tr>
+        </tbody>
+      </table>
+      <figure class="live" data-title="The x90 reaches qubit 0" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=357&view=chip">
+        <figcaption>Step 357: the effect frame. The Step inspector under the stage ends with "Chain back to the core
+          instruction: q0:137 put → e162 fire → e164 pulse → e172 effect". Click each to step back along the chain.</figcaption>
+      </figure>
+      <div class="ex" data-id="A3.1" data-stars="1" data-kind="number" data-unit="frames">
+        <p>How many frames does <code>causalChain</code> return for the effect frame <code>e172</code>, including
+          <code>e172</code> itself?</p>
+        <div class="why">The put, the fire, the pulse and the effect. A core frame ends the chain: the earlier instructions
+          of the same core are its program order, not its cause.</div>
+      </div>
+
+      <h2 id="store"><span class="num">2</span>The store</h2>
+      <p class="insection"><b>In this section:</b> what the core actually does to start a pulse.</p>
+      <p>
+        A <span class="term" data-term="core">control core</span> is an RV32I processor. It has no instruction that plays a
+        pulse. It starts one with an ordinary store word, <code>sw</code>, into a range of addresses called the put window.
+        A store there becomes a <span class="term" data-term="posted write">posted write</span> to a register of one
+        <span class="term" data-term="channel">channel</span>. The core does not wait for an answer.
+      </p>
+      <p>
+        For this pulse, core <code>q0</code> issues three posted writes, each three or four batches apart:
+      </p>
+      <table>
+        <thead><tr><th class="n">Batch</th><th>Instruction</th><th>Address</th><th>Register</th><th>Data</th></tr></thead>
+        <tbody>
+          <tr><td class="n">220</td><td><code>sw x6, 12(x5)</code></td><td><code>0x1000C</code></td><td>phase offset of q0.gate</td><td>the accumulated <span class="term" data-term="virtual Z">virtual Z</span></td></tr>
+          <tr><td class="n">224</td><td><code>sw x6, 256(x5)</code></td><td><code>0x14100</code></td><td>start time of q0.gate</td><td>320</td></tr>
+          <tr><td class="n">227</td><td><code>sw x0, 0(x5)</code></td><td><code>0x10000</code></td><td>fire of q0.gate</td><td>0: entry 0 of the table, the <code>x90</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        The last store, at firmware address <code>0x80000224</code>, is the one the chain starts from. Lesson
+        <a href="/course/B1">B1</a> explains the address map and the register layout. Here it is enough to know that
+        <code>0x10000</code> is the first register of the core's channel 0, the drive channel of qubit 0, and that writing
+        an entry number to it <span class="term" data-term="fire">fires</span> that entry of the
+        <span class="term" data-term="pulse table">pulse table</span>.
+      </p>
+      <p>
+        Notice the batch: 227, while the window opens at 320. The core works 93 batches ahead of the pulse. Lesson
+        <a href="/course/B2">B2</a> is about that distance, the <span class="term" data-term="lead">lead</span>.
+      </p>
+
+      <h2 id="link"><span class="num">3</span>The link</h2>
+      <p>
+        A posted write leaves the core through a bridge and crosses a pipelined <span class="term" data-term="link">link</span>
+        to the channel, which sits next to its converter. The model charges
+      </p>
+      <p class="formula">store to channel = 1 + link depth batches</p>
+      <p>
+        One batch for the bridge (RISC-Q <code>PutBridge.md</code>) and one per register stage of the link
+        (<code>PutLink.md</code>). The <code>x6y3</code> build has a link depth of 2, so the write that left at 227
+        arrives at 230. That arrival is the fire frame <code>e162</code>.
+      </p>
+      <figure class="live" data-title="The fire reaches the drive channel" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=335&view=control">
+        <figcaption>Step 335 in the Control system view: core q0, its posted link and the channel q0.gate light up along the
+          causal path.</figcaption>
+      </figure>
+      <div class="ex" data-id="A3.2" data-stars="1" data-kind="number" data-unit="batches">
+        <p>How many batches pass between the store <code>q0:137</code> and the fire frame it causes?</p>
+        <div class="why">1 + link depth = 1 + 2 = 3 batches: the store at 227, the fire at 230. Every channel write of this
+          run shows the same distance. Lesson <a href="/course/B2">B2</a> shows what happens when the link is much deeper.</div>
+      </div>
+      <div class="ex" data-id="A3.3" data-stars="1" data-kind="text">
+        <p>What is the frame ID of the fire that the store <code>q0:137</code> causes? Find it in the Trace tab or in the
+          Step inspector's causes.</p>
+        <div class="why">Frames of a core are named <code>core:instructions retired</code>. Events at channels, the hub and
+          the apparatus are numbered <code>e…</code> in the order the model scheduled them.</div>
+      </div>
+
+      <h2 id="queue"><span class="num">4</span>The queues</h2>
+      <p class="insection"><b>In this section:</b> why the pulse does not start when the fire arrives, and what the trace records of the wait.</p>
+      <p>
+        The fire frame reports that entry 0 was queued with start time 320 and that it will land at 320. The channel now
+        holds the entry's amplitude, phase, envelope address and duration in separate
+        <span class="term" data-term="timed queue">timed queues</span>. RISC-Q documents that a fired pulse reaches the
+        queue push 2 batches after its write (<code>PulseParamBuffer.md</code>), at batch 232, and that an entry can pop at
+        the earliest 3 batches after its push (<code>TimedQueue.scala</code>).
+      </p>
+      <p>
+        Each queue then waits. Each parameter takes its own number of batches to travel through the pulse generator to the
+        converter, so each pops that many batches before the start time. The phase, the slowest, takes 35 batches and pops
+        at 285; the amplitude takes 34 and pops at 286; the envelope address takes 11; the duration takes 2. All of them
+        land on batch 320. Lesson <a href="/course/B2">B2</a> derives these numbers and the theorem that guarantees the
+        landing.
+      </p>
+      <p>
+        The trace has no frame for a queue pop. The pulse frame records where each parameter landed instead:
+        <code>ampLands</code>, <code>phaseLands</code> and <code>envLands</code> are all 320, so <code>aligned</code> is
+        true, and the batch-time register read the start time when the window opened, so <code>onTime</code> is true.
+      </p>
+
+      <h2 id="dac"><span class="num">5</span>The window and the converter</h2>
+      <p>
+        The pulse frame <code>e164</code> marks the window: it opens at 320 and closes at 338, the 18 batches of lesson
+        <a href="/course/A2">A2</a>. Its <code>converter</code> field names <code>dac0</code>, and its
+        <code>atConverter</code> field says 326.
+      </p>
+      <p>
+        Those six batches are the path from the pulse generator to the DAC port. Several channels can share one DAC; their
+        outputs are summed by an adder tree, and two more register stages lead to the port. RISC-Q's <code>map.py</code>
+        computes this as <code>dac_pipe</code>, and <code>dacPipe</code> in <code>riscq/soc.mjs</code> copies it. It is one
+        number for the whole build, set by the most shared DAC. On this ring, DAC 8 carries the readout tones of all eight
+        qubits. An adder tree for 8 inputs has ⌈log₂ 8⌉ + 1 = 4 stages, plus 2 gives 6.
+      </p>
+      <div class="ex" data-id="A3.4" data-stars="2" data-kind="number" data-unit="batches">
+        <p>How many batches after the window opens does the pulse reach the DAC port? Read <code>opens</code> and
+          <code>atConverter</code> of the pulse frame at step 355.</p>
+        <div class="why">326 − 320 = 6 batches, the DAC pipeline of this build. Qubit 0's own DAC is shared by only three
+          channels (the drive channel and two CZ channels), but the model uses the build's largest pipeline for every DAC.</div>
+      </div>
+
+      <h2 id="wire"><span class="num">6</span>The wire</h2>
+      <p>
+        From the DAC the pulse travels to the chip inside a dilution refrigerator. The effect frame <code>e172</code> is
+        stamped at batch 326, when the signal leaves the converter, and its <code>arrivesPs</code> field says when it
+        reaches qubit 0: 657,003 ps, 5,003 ps after it left.
+      </p>
+      <p>
+        That delay is a length divided by a speed. The length, 1,050 mm, is the sum of the coax sections from the
+        room-temperature flange through the five cryogenic stages of a published setup: 200 + 290 + 250 + 170 + 140 mm
+        (Krinner et al., "Engineering cryogenic setups for 100-qubit scale superconducting circuit systems",
+        <a href="https://doi.org/10.1140/epjqt/s40507-019-0072-0">EPJ Quantum Technology 6, 2 (2019)</a>,
+        arXiv:1806.07862, Table 1). The speed is an <b>assumption</b>: 0.7 of the speed of light, a typical velocity
+        factor for coax. 1,050 mm ÷ (0.7 × 299.79 mm/ns) = 5.003 ns. The run states both in
+        <code>machine.provenance.delay</code>.
+      </p>
+      <div class="warn"><b>What the arrival means.</b> The effect frame says that a signal bound to <code>q0.x90</code>
+        reached the part <code>qubit0</code> at that time. It does not say what the qubit did. No quantum state is simulated,
+        and loss, dispersion and the attenuators of the real line are not modeled.</div>
+      <div class="ex" data-id="A3.5" data-stars="2" data-kind="number" data-unit="ps">
+        <p>From the effect frame, compute the wire delay in picoseconds: <code>arrivesPs</code> minus the time of batch 326.</p>
+        <div class="why">657,003 − 326 × 2,000 = 5,003 ps. Lesson <a href="/course/D2">D2</a> lets you change this length
+          in a hardware design and watch every arrival move while nothing at the converters changes.</div>
+      </div>
+
+      <h2 id="sum"><span class="num">7</span>The whole chain</h2>
+      <figure>
+        <svg viewBox="0 0 760 200" role="img" aria-label="The causal chain of one pulse with its batches">
+          <style>
+            .a3c rect { stroke: #e6e5e1; stroke-width: 1; rx: 8; }
+            .a3c text { font: 600 13px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .a3c .s { font: 400 12px ui-sans-serif, system-ui, sans-serif; fill: #52514e; }
+            .a3c .m { font: 12px ui-monospace, Menlo, monospace; fill: #52514e; }
+            .a3arr { stroke: #8a8985; stroke-width: 1.5; marker-end: url(#a3tip); }
+          </style>
+          <defs><marker id="a3tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a8985" /></marker></defs>
+          <g class="a3c">
+            <rect x="8" y="30" width="110" height="74" fill="#eaf7f1" /><text x="20" y="54">core q0</text><text class="m" x="20" y="74">sw → 0x10000</text><text class="m" x="20" y="92">batch 227</text>
+            <rect x="140" y="30" width="110" height="74" fill="#eef3fb" /><text x="152" y="54">link</text><text class="s" x="152" y="74">bridge + 2 stages</text><text class="m" x="152" y="92">+3</text>
+            <rect x="272" y="30" width="110" height="74" fill="#fdf0ea" /><text x="284" y="54">q0.gate</text><text class="s" x="284" y="74">fire, queues</text><text class="m" x="284" y="92">230 → 320</text>
+            <rect x="404" y="30" width="110" height="74" fill="#efedf8" /><text x="416" y="54">dac0</text><text class="s" x="416" y="74">adder tree + 2</text><text class="m" x="416" y="92">+6 → 326</text>
+            <rect x="536" y="30" width="100" height="74" fill="#fbf4e2" /><text x="548" y="54">coax</text><text class="s" x="548" y="74">1,050 mm, 0.7 c</text><text class="m" x="548" y="92">+5.003 ns</text>
+            <rect x="658" y="30" width="94" height="74" fill="#eef3fb" /><text x="670" y="54">qubit0</text><text class="m" x="670" y="74">657.003</text><text class="m" x="670" y="92">ns</text>
+            <line class="a3arr" x1="118" y1="67" x2="138" y2="67" /><line class="a3arr" x1="250" y1="67" x2="270" y2="67" /><line class="a3arr" x1="382" y1="67" x2="402" y2="67" />
+            <line class="a3arr" x1="514" y1="67" x2="534" y2="67" /><line class="a3arr" x1="636" y1="67" x2="656" y2="67" />
+            <text class="s" x="8" y="140">Frames: q0:137 put (227) · e162 fire (230) · e164 pulse (320) · e172 effect (326, arrives 657.003 ns)</text>
+            <text class="s" x="8" y="162">Not frames: the queue push (232) and the parameter pops (285 to 318). Their effect is in the pulse frame's *Lands fields.</text>
+            <text class="s" x="8" y="184">Documented latencies: bridge, link, fire to push, DAC pipe. Assumed: coax velocity factor 0.7.</text>
+          </g>
+        </svg>
+        <figcaption><b>One pulse, end to end.</b> Batches from the feed-forward run with c = 1. Schematic drawing.</figcaption>
+      </figure>
+      <p>
+        Most of the 203 ns is deliberate waiting: the write arrives 90 batches before its start time and sits in the queues.
+        The hardware path itself, link plus converter plus coax, takes 3 + 6 batches and 5 ns. That split is the point of the
+        design. Because the queues absorb the waiting, the time the core happened to issue the write does not change when
+        the pulse plays, as long as it was early enough.
+      </p>
+      <div class="ex" data-id="A3.6" data-stars="3" data-kind="number" data-unit="ns" data-tolerance="0.01">
+        <p>How long does it take from the store <code>q0:137</code> to the arrival of the pulse at qubit 0, in nanoseconds?</p>
+        <div class="why">The store is at batch 227, 454 ns. The arrival is at 657.003 ns. The difference is 203.003 ns, of
+          which 180 ns is queue waiting that the lead deliberately builds in.</div>
+      </div>
+      <div class="ex" data-id="A3.7" data-stars="2" data-kind="choice" data-answer="d">
+        <p>Which number in this chain is an assumption of the model rather than a documented latency or a published length?</p>
+        <ol class="choices">
+          <li data-k="a">The 3 batches from store to channel.</li>
+          <li data-k="b">The 6 batches of the DAC pipeline.</li>
+          <li data-k="c">The 1,050 mm of coax.</li>
+          <li data-k="d">The signal speed of 0.7 c in the coax.</li>
+        </ol>
+        <div class="why">The link and DAC latencies come from RISC-Q documents, the length from Krinner et al. Table 1. The
+          velocity factor is stated as "assumed" in <code>riscq/platforms/superconducting.mjs</code> and in the run's
+          provenance.</div>
+      </div>
+
+      <h2 id="debugger"><span class="num">8</span>The same chain in the debugger</h2>
+      <p>
+        The detailed debugger at <a href="/riscq?example=superconducting-feedforward&outcome=c=1&step=355">/riscq</a> shows
+        the same run with more fields. Open it at step 355. The Step inspector lists the pulse frame's state fields,
+        including <code>ampLands</code>, <code>atConverter</code> and <code>dur</code>; under <b>Causes</b> it links the
+        fire. The Controller schematic lights the causal path from core q0 through its link to q0.gate and on to dac0. The
+        Channel timeline below draws the 18-batch window on the q0.gate row. Lesson <a href="/course/A4">A4</a> tours both
+        pages.
+      </p>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A pulse starts as a store into the put window: a posted write to the fire register of a channel.</li>
+          <li>The write crosses the link in 1 + link depth batches, 3 on this machine.</li>
+          <li>The timed queues hold the entry until each parameter's lead before the start time, so all land on the start batch.</li>
+          <li>The DAC pipeline adds 6 batches; the coax adds 5.003 ns at an assumed 0.7 c.</li>
+          <li>Each hop is a frame with parents. <code>causalChain</code> walks them back to the core instruction.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const byId = (run, id) => run.frames.find((f) => f.id === id);
+      // The x90 of h2 on qubit 0: its effect frame, found from the trace rather than by ID.
+      const effect = (run) => {
+        const pulse = run.frames.find((f) => f.op === "pulse" && f.source === "h2" && f.part === "q0.gate");
+        return run.frames.find((f) => f.op === "effect" && f.parents.includes(pulse.id));
+      };
+      const chain = async (api, run) => (await api.model()).causalChain(run, effect(run).id);
+      course({
+        answers: {
+          "A3.1": async (api) => (await chain(api, await feedforward(api))).length,
+          "A3.2": async (api) => {
+            const run = await feedforward(api);
+            const [put, fire] = await chain(api, run);
+            return fire.atBatch - put.atBatch;
+          },
+          "A3.3": async (api) => {
+            const run = await feedforward(api);
+            return (await chain(api, run))[1].id;
+          },
+          "A3.4": async (api) => {
+            const run = await feedforward(api);
+            const pulse = byId(run, effect(run).parents[0]);
+            return pulse.state.atConverter - pulse.state.opens;
+          },
+          "A3.5": async (api) => {
+            const run = await feedforward(api);
+            const e = effect(run);
+            return e.state.arrivesPs - e.atBatch * run.machine.dspPeriodPs;
+          },
+          "A3.6": async (api) => {
+            const run = await feedforward(api);
+            const [put] = await chain(api, run);
+            return (effect(run).state.arrivesPs - put.atPs) / 1000;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

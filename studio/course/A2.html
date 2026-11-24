@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A2 · Batches: the clock everything runs on · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="A2">
+    <article>
+      <p class="kicker">Part A · Lesson 2</p>
+      <h1>Batches: the clock everything runs on</h1>
+      <p class="lead">
+        A converter takes billions of samples per second. The logic that feeds it runs a hundred times slower and handles
+        many samples at once. That slower clock cycle is the unit of every time in the controller. This lesson shows how
+        long it is and what it does to the durations of your gates.
+      </p>
+      <p class="pre">
+        You should have read <a href="/course/A1">A1 · The stack in one picture</a>. The
+        <a href="/course/background/control">background chapter on classical control systems</a> explains digital-to-analog
+        converters and clocks in more depth.
+      </p>
+
+      <h2 id="clock"><span class="num">1</span>One clock for the converters</h2>
+      <p class="q">Why does a controller not count time in nanoseconds?</p>
+      <p>
+        On the eight-transmon ring of lesson A1, each drive line ends at a <span class="term" data-term="DAC">DAC</span>
+        that produces 8 billion samples per second (8 GS/s). The returning readout signal is sampled by an
+        <span class="term" data-term="ADC">ADC</span> at 2 GS/s. These are the rates of the RISC-Q <code>x6y3</code> build
+        that this machine copies (<a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">RISC-Q</a>,
+        <code>software/configs/x6y3.json</code>, as listed in <code>docs/riscq-controller.md</code>).
+      </p>
+      <p>
+        FPGA logic cannot run at 8 GHz. It runs at a much lower clock and computes many samples in parallel in each
+        cycle. RISC-Q calls that clock <code>dspClk</code>. On <code>x6y3</code> it runs at 500 MHz, so one cycle lasts 2 ns.
+        In that time the DAC needs 8 GS/s × 2 ns = 16 samples and the ADC delivers 2 GS/s × 2 ns = 4 samples.
+      </p>
+      <p>
+        One dspClk cycle, with its 16 DAC samples or 4 ADC samples, is called a <span class="term" data-term="batch">batch</span>.
+        Every time inside the controller is a whole number of batches: when a pulse starts, how long it lasts, what the
+        cores read from their clock register, when a bit reaches another core. The model states this in
+        <code>riscq/soc.mjs</code> as <code>BATCH_SIZE = 16, ADC_BATCH = 4</code>, and the Lean model counts its time in
+        the same unit.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 210" role="img" aria-label="Three batches of sixteen DAC samples and four ADC samples">
+          <style>
+            .a2b rect.b { fill: #eef3fb; stroke: #2a78d6; stroke-width: 1.2; }
+            .a2b line.s { stroke: #2a78d6; stroke-width: 1.4; }
+            .a2b line.a { stroke: #6c5a94; stroke-width: 2.4; }
+            .a2b text { font: 12.5px ui-sans-serif, system-ui, sans-serif; fill: #52514e; }
+            .a2b text.h { font-weight: 600; fill: #0b0b0b; }
+            .a2b text.m { font: 12px ui-monospace, Menlo, monospace; }
+          </style>
+          <g class="a2b">
+            <text class="h" x="10" y="20">DAC, 8 GS/s</text>
+            <rect class="b" x="110" y="32" width="200" height="44" /><rect class="b" x="320" y="32" width="200" height="44" /><rect class="b" x="530" y="32" width="200" height="44" />
+            <line class="s" x1="116" y1="42" x2="116" y2="66" /><line class="s" x1="128" y1="42" x2="128" y2="66" /><line class="s" x1="140" y1="42" x2="140" y2="66" /><line class="s" x1="152" y1="42" x2="152" y2="66" /><line class="s" x1="164" y1="42" x2="164" y2="66" /><line class="s" x1="176" y1="42" x2="176" y2="66" /><line class="s" x1="188" y1="42" x2="188" y2="66" /><line class="s" x1="200" y1="42" x2="200" y2="66" /><line class="s" x1="212" y1="42" x2="212" y2="66" /><line class="s" x1="224" y1="42" x2="224" y2="66" /><line class="s" x1="236" y1="42" x2="236" y2="66" /><line class="s" x1="248" y1="42" x2="248" y2="66" /><line class="s" x1="260" y1="42" x2="260" y2="66" /><line class="s" x1="272" y1="42" x2="272" y2="66" /><line class="s" x1="284" y1="42" x2="284" y2="66" /><line class="s" x1="296" y1="42" x2="296" y2="66" /><line class="s" x1="326" y1="42" x2="326" y2="66" /><line class="s" x1="338" y1="42" x2="338" y2="66" /><line class="s" x1="350" y1="42" x2="350" y2="66" /><line class="s" x1="362" y1="42" x2="362" y2="66" /><line class="s" x1="374" y1="42" x2="374" y2="66" /><line class="s" x1="386" y1="42" x2="386" y2="66" /><line class="s" x1="398" y1="42" x2="398" y2="66" /><line class="s" x1="410" y1="42" x2="410" y2="66" /><line class="s" x1="422" y1="42" x2="422" y2="66" /><line class="s" x1="434" y1="42" x2="434" y2="66" /><line class="s" x1="446" y1="42" x2="446" y2="66" /><line class="s" x1="458" y1="42" x2="458" y2="66" /><line class="s" x1="470" y1="42" x2="470" y2="66" /><line class="s" x1="482" y1="42" x2="482" y2="66" /><line class="s" x1="494" y1="42" x2="494" y2="66" /><line class="s" x1="506" y1="42" x2="506" y2="66" /><line class="s" x1="536" y1="42" x2="536" y2="66" /><line class="s" x1="548" y1="42" x2="548" y2="66" /><line class="s" x1="560" y1="42" x2="560" y2="66" /><line class="s" x1="572" y1="42" x2="572" y2="66" /><line class="s" x1="584" y1="42" x2="584" y2="66" /><line class="s" x1="596" y1="42" x2="596" y2="66" /><line class="s" x1="608" y1="42" x2="608" y2="66" /><line class="s" x1="620" y1="42" x2="620" y2="66" /><line class="s" x1="632" y1="42" x2="632" y2="66" /><line class="s" x1="644" y1="42" x2="644" y2="66" /><line class="s" x1="656" y1="42" x2="656" y2="66" /><line class="s" x1="668" y1="42" x2="668" y2="66" /><line class="s" x1="680" y1="42" x2="680" y2="66" /><line class="s" x1="692" y1="42" x2="692" y2="66" /><line class="s" x1="704" y1="42" x2="704" y2="66" /><line class="s" x1="716" y1="42" x2="716" y2="66" />
+            <text class="h" x="10" y="118">ADC, 2 GS/s</text>
+            <rect class="b" x="110" y="96" width="200" height="44" /><rect class="b" x="320" y="96" width="200" height="44" /><rect class="b" x="530" y="96" width="200" height="44" />
+            <line class="a" x1="125" y1="104" x2="125" y2="132" /><line class="a" x1="175" y1="104" x2="175" y2="132" /><line class="a" x1="225" y1="104" x2="225" y2="132" /><line class="a" x1="275" y1="104" x2="275" y2="132" /><line class="a" x1="335" y1="104" x2="335" y2="132" /><line class="a" x1="385" y1="104" x2="385" y2="132" /><line class="a" x1="435" y1="104" x2="435" y2="132" /><line class="a" x1="485" y1="104" x2="485" y2="132" /><line class="a" x1="545" y1="104" x2="545" y2="132" /><line class="a" x1="595" y1="104" x2="595" y2="132" /><line class="a" x1="645" y1="104" x2="645" y2="132" /><line class="a" x1="695" y1="104" x2="695" y2="132" />
+            <text class="m" x="168" y="164">batch 320</text><text class="m" x="378" y="164">batch 321</text><text class="m" x="588" y="164">batch 322</text>
+            <text x="110" y="196">One batch = one dspClk cycle = 2 ns on x6y3: 16 DAC samples or 4 ADC samples computed together.</text>
+          </g>
+        </svg>
+        <figcaption><b>Batches.</b> The converter logic handles one batch of samples per dspClk cycle. Sample counts are those of the <code>x6y3</code> build. Schematic drawing.</figcaption>
+      </figure>
+      <div class="ex" data-id="A2.1" data-stars="1" data-kind="number" data-unit="ns">
+        <p>Run the feed-forward program of lesson A1. How long is one batch on this machine, in nanoseconds? The run bundle
+          states it as <code>machine.dspPeriodPs</code>; the workspace shows it above the hardware instructions.</p>
+        <div class="why">The machine runs at 500 MHz, and <code>dspPeriodPs = round(10¹² / dsp_freq_hz)</code> = 2,000 ps
+          (<code>socSpec</code> in <code>riscq/soc.mjs</code>). The header of the Hardware instructions layer reads
+          "one batch is 2 ns".</div>
+      </div>
+
+      <h2 id="units"><span class="num">2</span>Batches and picoseconds</h2>
+      <p class="insection"><b>In this section:</b> the two clocks every trace frame carries, and how to convert between them.</p>
+      <p>
+        Each event of the <span class="term" data-term="trace">trace</span> is a <span class="term" data-term="frame">frame</span>.
+        A frame carries its time twice: <code>atBatch</code>, the batch count since reset, and <code>atPs</code>, the same
+        time in picoseconds. The second is always computed from the first:
+      </p>
+      <p class="formula">atPs = atBatch × dspPeriodPs</p>
+      <p>
+        The Lean model only knows batches. The picoseconds are there for people and for the wire delays of lesson
+        <a href="/course/A3">A3</a>, which are not whole batches. The workspace prints both: the step card on the stage
+        reads, for example, "batch 320 · 640 ns".
+      </p>
+      <figure class="live" data-title="The first x90 window opens at batch 320" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=355&view=chip">
+        <figcaption>Step 355 of the feed-forward run: the window of the <code>x90</code> on qubit 0 opens at batch 320, which is 640 ns.</figcaption>
+      </figure>
+      <div class="ex" data-id="A2.2" data-stars="1" data-kind="number" data-unit="ns">
+        <p>The conditioned <code>x</code> on qubit 2 (hardware instruction <code>h20</code>) opens its window at batch 1,239.
+          At what time is that, in nanoseconds?</p>
+        <div class="why">1,239 × 2,000 ps = 2,478,000 ps. The answer is read from the <code>atPs</code> of the pulse frame of
+          <code>h20</code>, which the Lean model computed the same way.</div>
+      </div>
+      <div class="note"><b>A 32-bit counter.</b> The batch-time register is 32 bits wide (<code>QControl/RiscQ/Timing.lean</code>).
+        The theorem <code>land_exact</code> of lesson <a href="/course/B2">B2</a> assumes a start time less than 2³¹ batches
+        ahead. At 2 ns per batch that is about 4.3 s, far longer than any program in this course.</div>
+
+      <h2 id="durations"><span class="num">3</span>Durations become whole batches</h2>
+      <p class="q">The calibration says a 90° pulse lasts 35 ns. How long is its window in the run?</p>
+      <p>
+        The pulses of the ring come from RISC-Q's example calibration for <code>x6y3</code>
+        (<code>examples/cal-config-x6y3.yaml</code>, extracted to <code>validation/riscq/x6y3-calibration.json</code>).
+        It states durations in seconds. A pulse window, however, opens on one batch and closes on another. The
+        superconducting lowering converts each duration with
+      </p>
+      <p class="formula">batches = ⌈ duration / batch length ⌉</p>
+      <p>
+        (<code>span</code> in <code>riscq/platforms/superconducting.mjs</code>). The table shows the durations of qubit 0.
+      </p>
+      <table>
+        <thead><tr><th>Calibrated pulse</th><th class="n">Duration</th><th class="n">÷ 2 ns</th><th class="n">Window</th><th class="n">Window length</th></tr></thead>
+        <tbody>
+          <tr><td>X90 (90° drive)</td><td class="n">35 ns</td><td class="n">17.5</td><td class="n">18 batches</td><td class="n">36 ns</td></tr>
+          <tr><td>X (180° drive)</td><td class="n">70 ns</td><td class="n">35</td><td class="n">35 batches</td><td class="n">70 ns</td></tr>
+          <tr><td>CZ tone, each qubit</td><td class="n">400 ns</td><td class="n">200</td><td class="n">200 batches</td><td class="n">400 ns</td></tr>
+          <tr><td>Readout tone</td><td class="n">500 ns</td><td class="n">250</td><td class="n">250 batches</td><td class="n">500 ns</td></tr>
+          <tr><td>Delay to the acquisition window</td><td class="n">398.57 ns</td><td class="n">199.285</td><td class="n">200 batches</td><td class="n">400 ns</td></tr>
+          <tr><td>Acquisition (demodulation) window</td><td class="n">656.67 ns</td><td class="n">328.335</td><td class="n">329 batches</td><td class="n">658 ns</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Only three of these are not already whole batches, and the 35 ns pulse is the one you meet most. Its window is 18
+        batches, 36 ns. That is why the Hardware instructions layer lists every <code>x90</code> with a duration of
+        <code>36 ns</code>, and why the frame update after it (<code>h3</code>) starts at 36 ns, not 35.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 150" role="img" aria-label="A 35 ns pulse inside an 18-batch window">
+          <style>
+            .a2w line { stroke: #c9c7c1; stroke-width: 1; }
+            .a2w rect.win { fill: #eaf7f1; stroke: #1baf7a; stroke-width: 1.4; }
+            .a2w path { fill: none; stroke: #eb6834; stroke-width: 2; }
+            .a2w text { font: 12.5px ui-sans-serif, system-ui, sans-serif; fill: #52514e; }
+            .a2w text.m { font: 12px ui-monospace, Menlo, monospace; }
+          </style>
+          <g class="a2w">
+            <rect class="win" x="40" y="30" width="684" height="70" />
+            <line x1="78" y1="30" x2="78" y2="100" /><line x1="116" y1="30" x2="116" y2="100" /><line x1="154" y1="30" x2="154" y2="100" /><line x1="192" y1="30" x2="192" y2="100" />
+            <line x1="230" y1="30" x2="230" y2="100" /><line x1="268" y1="30" x2="268" y2="100" /><line x1="306" y1="30" x2="306" y2="100" /><line x1="344" y1="30" x2="344" y2="100" />
+            <line x1="382" y1="30" x2="382" y2="100" /><line x1="420" y1="30" x2="420" y2="100" /><line x1="458" y1="30" x2="458" y2="100" /><line x1="496" y1="30" x2="496" y2="100" />
+            <line x1="534" y1="30" x2="534" y2="100" /><line x1="572" y1="30" x2="572" y2="100" /><line x1="610" y1="30" x2="610" y2="100" /><line x1="648" y1="30" x2="648" y2="100" />
+            <line x1="686" y1="30" x2="686" y2="100" />
+            <path d="M40 96 C 150 96, 230 40, 372 40 S 600 96, 705 96" />
+            <text x="40" y="20">window opens: batch 320</text>
+            <text x="560" y="20">closes: batch 338</text>
+            <text class="m" x="40" y="122">0 ns</text><text class="m" x="690" y="122">35 ns</text><text class="m" x="712" y="140">36</text>
+            <text x="150" y="140">18 batches of 2 ns. The calibrated 35 ns pulse ends half a batch before the window closes.</text>
+          </g>
+        </svg>
+        <figcaption><b>A 35 ns pulse in an 18-batch window.</b> Grid lines mark batches. The envelope is drawn only to show the
+          lengths; the model does not compute samples. Schematic drawing.</figcaption>
+      </figure>
+      <div class="ex" data-id="A2.3" data-stars="1" data-kind="number" data-unit="batches">
+        <p>In the run, how many batches does the window of the first <code>x90</code> on qubit 0 last? Read the
+          <code>dur</code> field of its pulse frame (step 355) in the workspace's Step inspector.</p>
+        <div class="why">35 ns / 2 ns = 17.5, rounded up to 18. The pulse-table entry of the <code>x90</code> stores this
+          duration as the code 18, and the window closes at batch 320 + 18 = 338.</div>
+      </div>
+      <div class="ex" data-id="A2.4" data-stars="3" data-kind="number" data-unit="ns">
+        <p>The <code>measure</code> instruction (<code>h19</code>) plays the readout tone and, after the delay, opens the
+          acquisition window. Its duration covers whichever ends later. Using the table, how long is the hardware
+          instruction, in nanoseconds?</p>
+        <div class="why">The tone lasts 250 batches. The window starts after 200 batches and lasts 329, so it ends at
+          batch 529 of the instruction. 529 × 2 ns = 1,058 ns. Each part is rounded up separately, so the total is not
+          ⌈(398.57 + 656.67) / 2⌉ = 528 batches.</div>
+      </div>
+
+      <h2 id="why-up"><span class="num">4</span>Why round up</h2>
+      <p>
+        A window can only open and close on batch boundaries, so a 35 ns pulse needs either 17 or 18 batches. Seventeen
+        batches end at 34 ns: the last nanosecond of the calibrated pulse would have no window to play in. Eighteen batches
+        hold the whole pulse, at the price of half a batch that the next operation on this qubit must wait for.
+      </p>
+      <p>
+        The pulse table stores the duration in batches. What the 16 samples of each batch contain is the business of the
+        envelope memory and the pulse generator, and the model does not compute them. It records the codes of each window
+        and draws a waveform from them for display only (<code>docs/riscq-controller.md</code>, "Not modeled"). The 1 ns
+        difference is therefore a statement about scheduling, not about what the qubit sees.
+      </p>
+      <div class="ex" data-id="A2.5" data-stars="2" data-kind="choice" data-answer="c">
+        <p>Why does the lowering round a 35 ns pulse up to 18 batches instead of to the nearest whole number?</p>
+        <ol class="choices">
+          <li data-k="a">Because 17.5 rounds to 18 anyway.</li>
+          <li data-k="b">Because the DAC needs an even number of batches.</li>
+          <li data-k="c">Because a window of 17 batches would end before the calibrated pulse does.</li>
+          <li data-k="d">Because the queue releases parameters two batches apart.</li>
+        </ol>
+        <div class="why">The rule is ⌈·⌉, not rounding to the nearest: a 34.1 ns pulse also gets 18 batches. A window must
+          contain the whole calibrated pulse. Answer (a) is true of 17.5 by accident; the code uses <code>Math.ceil</code>.</div>
+      </div>
+
+      <h2 id="other"><span class="num">5</span>Other machines, other batches</h2>
+      <p>
+        The batch length is a property of the build, not of the controller design. The trapped-ion and neutral-atom machines
+        of this simulator are built at 100 MHz (<code>DSP_HZ</code> in <code>riscq/platforms/qccd.mjs</code> and
+        <code>riscq/platforms/neutral.mjs</code>), a model choice: one batch is 10 ns there. Their operations are much
+        slower than transmon pulses. A single-ion rotation of 5 µs, the standard value from Pino et al.
+        (<a href="https://arxiv.org/abs/2003.01293">Nature 592, 209 (2021), arXiv:2003.01293</a>, Table III), is 500
+        batches. One QCCD Studio time unit of shuttling, which this model takes as 63.8 µs (58 µs from the same paper's
+        Table II plus 10%, see <code>riscq/standards.mjs</code>), is 6,380 batches.
+      </p>
+      <p>
+        A coarser batch makes the rounding of section 3 coarser too: every duration is a multiple of 10 ns. For operations
+        of microseconds that costs little. The lead of 96 batches of lesson <a href="/course/B2">B2</a> is also counted in
+        batches, so on these machines the firmware works 960 ns ahead instead of 192 ns.
+      </p>
+      <div class="ex" data-id="A2.6" data-stars="1" data-kind="number" data-unit="ns">
+        <p>Run the trapped-ion example <code>qccd-ghz3</code> (GHZ state of three ions). How long is one batch there, in
+          nanoseconds?</p>
+        <div class="why">The QCCD machine is built at <code>dsp_freq_hz = 100e6</code>, so <code>dspPeriodPs</code> is
+          10,000 ps. Open it in the workspace and the Hardware instructions header reads "one batch is 10 ns".</div>
+      </div>
+      <div class="key"><b>Rule of thumb.</b> To read a trace, divide picoseconds by <code>dspPeriodPs</code> to get batches
+        and multiply to go back. Before you compare two durations, convert both to batches and round each up where the
+        lowering does.</div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A batch is one cycle of the converter clock dspClk: 2 ns, 16 DAC samples and 4 ADC samples on the transmon ring.</li>
+          <li>Every time in the controller is a whole number of batches. <code>atPs = atBatch × dspPeriodPs</code>.</li>
+          <li>Calibrated durations are rounded up to whole batches: the 35 ns <code>x90</code> plays in an 18-batch, 36 ns window.</li>
+          <li>The ion and atom machines here run at 100 MHz: one batch is 10 ns.</li>
+          <li>The model counts batches; it does not compute the samples inside them.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const pulseOf = (run, source, part) => run.frames.find((f) => f.op === "pulse" && f.source === source && (!part || f.part === part));
+      course({
+        answers: {
+          "A2.1": async (api) => (await feedforward(api)).machine.dspPeriodPs / 1000,
+          "A2.2": async (api) => pulseOf(await feedforward(api), "h20").atPs / 1000,
+          "A2.3": async (api) => pulseOf(await feedforward(api), "h2", "q0.gate").state.dur,
+          "A2.4": async (api) => (await feedforward(api)).hardware.segments.flatMap((s) => s.ops).find((op) => op.op === "measure").dur / 1000,
+          "A2.6": async (api) => (await api.run({ example: "qccd-ghz3" })).machine.dspPeriodPs / 1000,
+        },
+      });
+    </script>
+  </body>
+</html>

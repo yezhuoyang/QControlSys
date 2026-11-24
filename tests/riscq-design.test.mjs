@@ -90,3 +90,12 @@ test("a design that breaks a rule is rejected with the rule", () => {
   assert.deepEqual(late.errors, []);
   assert.match(late.warnings[0], /Qubit 0: the acquisition window opens .* hold no signal/);
 });
+
+test("two carrier frequencies on one channel are a rule the check reports, not a crash", () => {
+  const d = design.ringDesign();
+  // Play qubit 1's drive on qubit 0's drive channel: the two qubits have different frequencies.
+  d.qubits[1].gate = d.qubits[0].gate;
+  const verdict = design.check(d);
+  assert.match(verdict.errors.join(" "), /Channel q0\.gate is given two carrier frequencies: \d+ Hz for qubit 0 drive and \d+ Hz for qubit 1 drive/);
+  assert.throws(() => design.machine(d), /breaks \d+ rules?/);
+});

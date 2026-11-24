@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>C4 · The same controller everywhere · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+      .lab .err { color: var(--red); font-size: 13.5px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body data-lesson="C4">
+    <article>
+      <p class="kicker">Part C · Lesson 4</p>
+      <h1>The same controller everywhere</h1>
+      <p class="lead">
+        A transmon ring, an ion trap and an atom array differ in almost every physical number. Their control systems, here,
+        are the same design. This lesson puts the three runs side by side, measures what each costs the controller, and
+        separates what the controller decides from what the physics imposes.
+      </p>
+      <p class="pre">
+        This lesson compares the runs of lessons <a href="/course/C1">C1</a>, <a href="/course/C2">C2</a> and
+        <a href="/course/C3">C3</a>. Read those first. Lesson <a href="/course/E1">E1</a> takes the feedback measurement of
+        section 5 further.
+      </p>
+
+      <h2 id="same"><span class="num">1</span>What does not change</h2>
+      <p class="insection"><b>In this section:</b> the parts of the pipeline every platform shares.</p>
+      <p>
+        Each platform has its own front end: OpenQASM for the transmon ring, QCCD Studio's TSIR for the ion trap, a ZAC
+        program for the atom array. Each front end produces <span class="term" data-term="hardware instruction">hardware
+        instructions</span> and lowers them to <b>channel actions</b>: a list of timed fires, carrier updates, result reads
+        and photon counts, each on one core and one channel. From there on, nothing knows the platform:
+      </p>
+      <ol>
+        <li><code>assemble</code> (<code>riscq/compile.mjs</code>) splits the actions into segments, finds the
+          <span class="term" data-term="preroll">preroll</span> of each, and asks <code>riscq/firmware.mjs</code> for one RV32I
+          program per core.</li>
+        <li>Each program issues every timed write one <span class="term" data-term="lead">lead</span> of 96 batches before
+          its start time, through the same table loop or the same inline code.</li>
+        <li>The Lean model of the controller (<code>QControl/RiscQ/Soc.lean</code>) executes all cores, links,
+          <span class="term" data-term="timed queue">timed queues</span>, channels and the
+          <span class="term" data-term="hub">hub</span>, and writes the <span class="term" data-term="trace">trace</span>.</li>
+      </ol>
+      <p>
+        The theorems about that model therefore hold on all three machines. For example <code>land_exact</code> in
+        <code>QControl/RiscQ/Timing.lean</code> states that a write ready no later than its lead before the start time lands
+        exactly when the batch-time register reads the start time. That is a property of the model, proved in Lean. It is not
+        a measurement of hardware.
+      </p>
+      <p>What the front end chooses is the <b>build</b>: the clock, and how many cores with which channels.</p>
+      <div class="tw"><table>
+        <tr><th></th><th>Transmon ring</th><th>Ion trap (QCCD)</th><th>Atom array</th></tr>
+        <tr><td>Control clock, batch</td><td>500 MHz, 2 ns</td><td>100 MHz, 10 ns</td><td>100 MHz, 10 ns</td></tr>
+        <tr><td>Cores</td><td>one per qubit</td><td>transport cores, one per gate zone, one for light</td><td>one per AOD, one for the lasers</td></tr>
+        <tr><td>Pulse channels drive</td><td>microwave drive and readout tones</td><td>electrode waveforms, laser modulators</td><td>RF tones of the deflectors, laser modulators</td></tr>
+        <tr><td>Measurement</td><td>demodulation window on an ADC</td><td>photon edges on a digital input</td><td>none in this program</td></tr>
+        <tr><td>Source of durations</td><td>RISC-Q's calibration file</td><td>Pino et al. 2021 (standard values)</td><td>the ZAC program</td></tr>
+      </table></div>
+
+      <h2 id="runs"><span class="num">2</span>Three runs side by side</h2>
+      <p>
+        The table below is built in your browser from three runs of the simulator: <code>superconducting-feedforward</code>
+        with c = 1, <code>qccd-ghz3</code> with q0 and q2 bright, and <code>neutral-bv14</code>. Every cell is read from the
+        run bundles. "Timed writes" counts the fires and carrier updates the firmware issues during the program
+        (<code>firmware[].writes</code>).
+      </p>
+      <div class="lab" id="compareLab">
+        <h4>Compare the three runs</h4>
+        <p>Runs the three examples on the server (the atom program takes a few seconds) and fills the table.</p>
+        <div class="row"><button class="btn small" type="button" id="compareRun">Build the table</button><span class="src" id="compareState"></span></div>
+        <div class="tw"><table id="compareTable">
+          <tr><th></th><th class="n">Transmon ring</th><th class="n">Ion trap</th><th class="n">Atom array</th></tr>
+        </table></div>
+      </div>
+      <div class="ex" data-id="C4.1" data-stars="1" data-kind="number" data-tolerance="1">
+        <p>How many times longer is the atom run than the transmon run, from first event to last
+          (<code>summary.elapsedPs</code>)? Round to a whole number.</p>
+        <div class="why">About 1,640 µs against 2.55 µs: some 640 times. Neither number is a speed of the controller. Both
+          are set by the physical operations the controller waits for.</div>
+      </div>
+      <div class="ex" data-id="C4.2" data-stars="1" data-kind="number">
+        <p>How many timed writes do the cores of the atom run issue in all?</p>
+        <div class="why">Almost two thousand, against eight on the transmon ring. Nearly all of them are the frequency
+          steps of the moves: one carrier update every 2 µs per moving tone. A neutral-atom controller is a stream of small
+          updates; a transmon controller fires few, precisely placed pulses.</div>
+      </div>
+
+      <h2 id="dominates"><span class="num">3</span>What dominates the time</h2>
+      <p>
+        Sum the durations of each kind of hardware instruction and compare them with the span of the program. On the transmon
+        ring the measurement (1.06 µs of tone and window) is longer than all gates together. On the ion trap the initial
+        cooling (550 µs) and the shuttles (446.6 µs) dwarf the gates (95 µs). On the atom array at least one rearrangement job is under way during
+        1,623.7 µs of the 1,634.1 µs span; the Rydberg pulses add up to less than 5 µs. Open the <b>Hardware instructions</b> layer of each
+        run in the workspace and read the durations there.
+      </p>
+      <div class="ex" data-id="C4.3" data-stars="2" data-kind="choice" data-answer="a">
+        <p>Which line names what takes most of the time in each run?</p>
+        <ol class="choices">
+          <li data-k="a">Transmon: readout. Ions: cooling and shuttling. Atoms: moving atoms.</li>
+          <li data-k="b">Transmon: two-qubit gates. Ions: two-qubit gates. Atoms: Rydberg pulses.</li>
+          <li data-k="c">In all three, the controller's firmware.</li>
+          <li data-k="d">Transmon: coax delay. Ions: photon counting. Atoms: acoustic delay.</li>
+        </ol>
+        <div class="why">In every run the controller spends most of its time waiting with its next writes already queued.
+          What it waits for is physics: a resonator to ring up and down, ions to cool and move, atoms to be carried.</div>
+      </div>
+
+      <h2 id="route"><span class="num">4</span>Measuring a system call: route</h2>
+      <p class="insection"><b>In this section:</b> how a run gives the latency of moving qubits, and why one number per call is costly.</p>
+      <p>
+        The fault-tolerant virtual machine this project serves describes each service of a quantum computer by one latency
+        and one capacity. A <span class="term" data-term="system call">system call</span> such as <code>route</code>, which
+        brings qubits together, is charged that latency every time. <code>riscq/syscalls.mjs</code> reads what the
+        controller model actually spends. Its <code>report(run)</code> takes one route sample per transport:
+      </p>
+      <ul>
+        <li><b>Atoms:</b> one sample per rearrangement job, from the start of its pickup to the end of its drop.</li>
+        <li><b>Ions:</b> one sample per Studio transport cycle.</li>
+        <li><b>Transmons:</b> none. The couplings of the ring are fixed, so <code>route</code> has no realization there.</li>
+      </ul>
+      <p>
+        A single declared latency must cover the slowest route. On the ZAC program the 26 jobs take from 90.45 µs to
+        145.05 µs. Declaring 145.05 µs charges the typical route much more than it costs. The test
+        <code>tests/riscq-syscalls.test.mjs</code> pins these values. On <code>qccd-rotation</code> every cycle takes 5 µs,
+        so one number fits all of them; its cost appears elsewhere, as the 2.24 µs preroll of lesson C2.
+      </p>
+      <div class="ex" data-id="C4.4" data-stars="2" data-kind="number" data-unit="µs" data-tolerance="0.01">
+        <p>What is the median latency of a rearrangement job in the atom run? Use the definition of
+          <code>syscalls.mjs</code>: sort the 26 latencies and take the element at index ⌊0.5 × 26⌋.</p>
+        <div class="why">101.17 µs. Each job is two 15 µs transfers and a move whose duration grows with the square root of
+          the distance, so the spread comes from the moves.</div>
+      </div>
+      <div class="ex" data-id="C4.5" data-stars="2" data-kind="number" data-unit="%" data-tolerance="0.1">
+        <p>If the virtual machine declares the slowest job's latency for every <code>route</code>, by how many percent does
+          it overcharge the median job?</p>
+        <div class="why">145.05 / 101.17 = 1.434, an overcharge of 43.4%. A declaration per distance class, or a latency
+          that depends on the distance, would charge closer to the cost. That is a design question for the virtual
+          machine, and this measurement is the evidence for it.</div>
+      </div>
+
+      <h2 id="control"><span class="num">5</span>What the controller itself costs</h2>
+      <p>
+        <code>report()</code> also measures the controller. Three numbers matter across platforms:
+      </p>
+      <ul>
+        <li><b>Issue rate.</b> At 100 MHz a core's table loop issues at most about 29 posted writes per µs, two per timed
+          write. Every core of the ion and atom runs stays at or under that peak. At 500 MHz the transmon cores reach higher
+          peaks over short stretches.</li>
+        <li><b>Burst width and preroll.</b> The widest set of pulses opening on one batch, and how much later the segment
+          starts because of it: 2 pulses and 7 batches (14 ns) on the transmon ring, 24 pulses and 2.24 µs on
+          <code>qccd-rotation</code>, and no preroll on the GHZ and ZAC runs.</li>
+        <li><b>Feedback.</b> On the transmon ring, the time from the close of a readout window to the bit at the measuring
+          core, at the hub, at every core, and to the conditioned pulse. This is the only platform here whose program
+          conditions a gate on a measurement.</li>
+      </ul>
+      <div class="ex" data-id="C4.6" data-stars="2" data-kind="number" data-unit="ns">
+        <p>In the transmon run, how many nanoseconds after qubit 0's acquisition window closes does the pulse conditioned on
+          its bit open?</p>
+        <div class="why">344 ns. The result is at the measuring core after 34 ns, published through the hub after 70 ns and
+          at every core after 86 ns. The rest is the second barrier and the 96-batch lead of the conditioned fire. Lesson
+          <a href="/course/E1">E1</a> accounts for every batch, and lesson <a href="/course/D3">D3</a> removes the hub from
+          the path.</div>
+      </div>
+
+      <h2 id="physics"><span class="num">6</span>What differs physically</h2>
+      <p>
+        The controller ends at a converter. Between the converter and the qubit, each machine has its own physical path,
+        and the model gives each its own delay. Each is visible as <code>arrivesPs − atPs</code> on the <code>effect</code>
+        frames of a run.
+      </p>
+      <div class="tw"><table>
+        <tr><th>Machine</th><th>Path</th><th class="n">Delay in the model</th><th>Basis</th></tr>
+        <tr><td>Transmon ring</td><td>1,050 mm of coax into the cryostat</td><td class="n">5.003 ns</td><td>Krinner et al. 2019, Table 1, at an assumed 0.7 c</td></tr>
+        <tr><td>Ion trap</td><td>DAC to electrodes, modulators to the zone</td><td class="n">0</td><td>not modeled</td></tr>
+        <tr><td>Atom array</td><td>sound crossing the beam in the deflector</td><td class="n">6.154 µs</td><td>derived: 4 mm at 650 m/s</td></tr>
+      </table></div>
+      <p>
+        The timescales differ just as much. A transmon gate lasts tens of nanoseconds, an ion gate microseconds, a cooling
+        stage or an atom move a hundred microseconds or more. That is why one controller design can serve all three with
+        different clocks: what has to be exact is the start of each pulse relative to the others, and the timed queues
+        provide that on every build.
+      </p>
+      <div class="ex" data-id="C4.7" data-stars="1" data-kind="choice" data-answer="d">
+        <p>Order the modeled converter-to-qubit delays from shortest to longest.</p>
+        <ol class="choices">
+          <li data-k="a">Atom array, transmon ring, ion trap.</li>
+          <li data-k="b">Transmon ring, atom array, ion trap.</li>
+          <li data-k="c">All three are about 5 ns.</li>
+          <li data-k="d">Ion trap (not modeled, 0), transmon ring (5.003 ns), atom array (6.154 µs).</li>
+        </ol>
+        <div class="why">The ion path is not modeled, so its bindings carry no delay. A real trap has filters on its
+          electrode lines that shape and delay the waveforms; that is QCCD Studio's domain.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>The front ends differ; firmware generation, the Lean model and the trace are shared, and so are their proofs.</li>
+          <li>A build is a clock plus cores and channels. The physics sets the durations: ns for transmons, µs to ms for ions and atoms.</li>
+          <li>In every run the controller mostly waits. Readout, cooling, shuttling and atom moves dominate.</li>
+          <li><code>report()</code> turns runs into system-call costs: route latency, issue rate, burst preroll, feedback.</li>
+          <li>One declared route latency overcharges the median atom job by 43%: measurement is evidence for the virtual machine's design.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const runs = (a) => Promise.all([
+        a.run({ example: "superconducting-feedforward", outcomes: { c: 1 } }),
+        a.run({ example: "qccd-ghz3", outcomes: { q0: 1, q2: 1 } }),
+        a.run({ example: "neutral-bv14" }),
+      ]);
+      const ops = (run) => run.hardware.segments.flatMap((s) => s.ops);
+      const writes = (run) => run.firmware.reduce((n, f) => n + f.writes, 0);
+      // riscq/syscalls.mjs routeSamples for the atom array: one sample per job, pickup start to drop end.
+      const jobLatencies = (run) => {
+        const jobs = new Map();
+        for (const op of ops(run).filter((o) => ["pickup", "move", "drop"].includes(o.op))) {
+          const job = op.id.split(".")[0];
+          if (!jobs.has(job)) jobs.set(job, []);
+          jobs.get(job).push(op);
+        }
+        return [...jobs.values()].map((steps) => (Math.max(...steps.map((s) => s.t + s.dur)) - Math.min(...steps.map((s) => s.t))) / 1000).sort((x, y) => x - y);
+      };
+      const median = (sorted) => sorted[Math.min(sorted.length - 1, Math.floor(0.5 * sorted.length))];
+      course({
+        answers: {
+          "C4.1": async (a) => {
+            const [sc, , na] = await runs(a);
+            return Math.round(na.summary.elapsedPs / sc.summary.elapsedPs);
+          },
+          "C4.2": async (a) => writes((await runs(a))[2]),
+          "C4.4": async (a) => median(jobLatencies((await runs(a))[2])) / 1000,
+          "C4.5": async (a) => {
+            const sorted = jobLatencies((await runs(a))[2]);
+            return Math.round(1000 * (sorted.at(-1) / median(sorted) - 1)) / 10;
+          },
+          "C4.6": async (a) => {
+            // riscq/syscalls.mjs feedbackSamples: first conditioned pulse after the window closes.
+            const [sc] = await runs(a);
+            const measure = ops(sc).find((o) => o.op === "measure" && o.result === "c");
+            const window = sc.summary.pulses.find((p) => p.source === measure.id && p.kind === "demod");
+            const conditioned = ops(sc).filter((o) => o.when === "c").map((o) => sc.summary.pulses.find((p) => p.source === o.id)).filter(Boolean);
+            return ((Math.min(...conditioned.map((p) => p.opens)) - window.closes) * sc.machine.dspPeriodPs) / 1000;
+          },
+        },
+      });
+
+      // The comparison table, read from the three run bundles.
+      const fmt = (x, digits = 0) => x.toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+      const time = (ps) => (ps >= 1e6 ? fmt(ps / 1e6, 2) + " µs" : fmt(ps / 1000, 0) + " ns");
+      const longest = (run) => {
+        const by = {};
+        for (const o of ops(run)) by[o.op] = (by[o.op] ?? 0) + o.dur;
+        const [op, ps] = Object.entries(by).sort((x, y) => y[1] - x[1])[0];
+        return op + ", " + time(ps);
+      };
+      const rows = [
+        ["Clock period", (r) => fmt(r.machine.dspPeriodPs / 1000) + " ns"],
+        ["Cores (with timed writes)", (r) => r.machine.cores.length + " (" + r.firmware.filter((f) => f.writes > 0).length + ")"],
+        ["Channels", (r) => fmt(r.machine.cores.reduce((n, c) => n + c.channels.length, 0))],
+        ["Hardware instructions", (r) => fmt(ops(r).length)],
+        ["Timed writes", (r) => fmt(writes(r))],
+        ["Pulse windows", (r) => fmt(r.summary.pulses.length)],
+        ["Carrier updates", (r) => fmt(r.summary.tones.length)],
+        ["Firmware words", (r) => fmt(r.firmware.reduce((n, f) => n + f.instructions, 0))],
+        ["Trace frames", (r) => fmt(r.frames.length)],
+        ["Run duration", (r) => time(r.summary.elapsedPs)],
+        ["Longest kind of instruction (sum)", longest],
+        ["Faults", (r) => String(r.summary.faults.length)],
+      ];
+      const button = document.getElementById("compareRun"), state = document.getElementById("compareState"), table = document.getElementById("compareTable");
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        state.textContent = "Running three programs…";
+        try {
+          const all = await runs(api);
+          for (const [label, cell] of rows) {
+            const tr = document.createElement("tr");
+            const th = document.createElement("td");
+            th.textContent = label;
+            tr.append(th, ...all.map((r) => {
+              const td = document.createElement("td");
+              td.className = "n";
+              td.textContent = cell(r);
+              return td;
+            }));
+            table.append(tr);
+          }
+          state.textContent = "Read from the runs just made.";
+          button.hidden = true;
+        } catch (error) {
+          state.textContent = "The simulator could not be reached: " + error.message;
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-# QControl Studio guide
+# QuantumOS guide
 
 The long-form guide to the benches, the machine workbench, the validation pages and the Lean model. It was the repository README until that became a short overview. [Overview and examples](../README.md)
 
@@ -6,7 +6,7 @@ This is a repo for Simulating, Visualizing lower-level hardware control system f
 
 ## Run the studio
 
-QControl Studio runs a two-board feed-forward experiment. Board A digitizes a scripted observation and sends a two-bit result over fiber. Board B samples the receive register, looks up pulse amplitudes in waveform memory and drives its RF envelope. The Lean program produces the trace, assembly placements and register values used by the interactive 3D bench.
+QuantumOS runs a two-board feed-forward experiment. Board A digitizes a scripted observation and sends a two-bit result over fiber. Board B samples the receive register, looks up pulse amplitudes in waveform memory and drives its RF envelope. The Lean program produces the trace, assembly placements and register values used by the interactive 3D bench.
 
 Install Node.js with npm and Lean's Elan toolchain manager. From this directory run:
 
@@ -65,7 +65,7 @@ The replay and native editor use Python 3.10+ and a local checkout of the [QCCD 
 
 1. Open **QCCD Studio replay**. The H2 example reads Studio's original architecture and 32-qubit GHZ program. Scrub its 947 cycles to inspect ion moves, addressed gates, actual control banks and the input instruction that caused each cycle.
 2. Use **Open files** to load an architecture and compiled TSIR, or a version 1 `qccd.studio` design with authored calls. A design that references a compiled artifact also needs its original TSIR. The bridge rebuilds authored geometry from the Studio records. Original machine and program files are available for download. A [small authored design](../bridge/fixtures/three-hop.studio.json) exercises a three-hop rotation.
-3. **Open native editor** under **Studio source files** opens the local QCCD Studio authoring interface. Export the edited machine and program in Studio, then use **Open files** in QControl to replay them. An authored design restores its edit records, program calls and saved cursor. Supplying an external compiled TSIR opens that program on the resulting machine. Compiled exports preserve the instruction IDs and operands. Extended numeric metadata such as the compiler's unbounded cooling limit is written as the string `"Infinity"` in strict JSON. **Save TSIR** in QControl downloads the original input file. Imported architectures with unknown physical scale open in the topology debugger. The H2 reference additionally opens in its metric installation.
+3. **Open native editor** under **Studio source files** opens the local QCCD Studio authoring interface. Export the edited machine and program in Studio, then use **Open files** in QuantumOS to replay them. An authored design restores its edit records, program calls and saved cursor. Supplying an external compiled TSIR opens that program on the resulting machine. Compiled exports preserve the instruction IDs and operands. Extended numeric metadata such as the compiler's unbounded cooling limit is written as the string `"Infinity"` in strict JSON. **Save TSIR** in QuantumOS downloads the original input file. Imported architectures with unknown physical scale open in the topology debugger. The H2 reference additionally opens in its metric installation.
 
 The GHZ32 comparison checks every displayed ion position, traversed rail, gate operand and cycle interval against Studio's own viewer representation. It covers 59 sites, 674 source instructions, 947 expanded cycles, 31 two-ion gates and 32 measurements. The H2 fixture assigns unit durations to its primitives. Its clock is shown in model units. For each import, the Python executor reports the Studio rule verdicts and the Lean checker independently walks the rails, applies placements simultaneously and compares the resulting occupancy. The rules view lists skipped and partial checks. [Conformance and native round-trip tests](../tests/studio-bridge.test.mjs) · [Placement checker and proof](../QControl/StudioPlacement.lean)
 

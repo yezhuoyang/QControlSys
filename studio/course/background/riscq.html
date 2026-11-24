@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The RISC-Q architecture · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="riscq">
+    <article>
+      <p class="kicker">Background · Chapter 3</p>
+      <h1>The RISC-Q architecture</h1>
+      <p class="lead">
+        RISC-Q gives each qubit a small RISC-V processor that never touches a sample. It writes registers, and the hardware next
+        to the converters turns those writes into pulses on exactly the scheduled clock cycle. This chapter describes every part
+        of that design as the simulator models it: cores, the address map, posted writes, channels and pulse tables, timed
+        queues, sinks, the board hub and the host window.
+      </p>
+      <p class="pre">
+        This chapter assumes the vocabulary of <a href="/course/background/control">chapter 2</a>: batches, DACs and ADCs, carriers,
+        envelopes and demodulation. RISC-Q is an open-source design from the Wu Quantum Application System Group
+        (<a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">github.com/Wu-Quantum-Application-System-Group/RISC-Q</a>).
+        Its QEC system paper is J. Liu, Y. Lee, Y. Xu, G. Huang and X. Wu, "A Scalable Open-Source QEC System with Sub-Microsecond
+        Decoding-Feedback Latency", <a href="https://arxiv.org/abs/2603.16203">arXiv:2603.16203</a> (2026). Where this chapter
+        names a document such as <code>PutHub.md</code>, it is a file of the RISC-Q repository that the model follows.
+      </p>
+
+      <h2 id="overview"><span class="num">1</span>One processor per qubit</h2>
+      <p class="q">If a control processor does not produce samples, what does it do?</p>
+      <p class="insection"><b>In this section:</b> the shape of a RISC-Q system and the path of one register write.</p>
+      <p>
+        RISC-Q's README describes "a RISC-V–controlled SoC for superconducting-qubit control, written in SpinalHDL and targeting the
+        AMD/Xilinx ZCU216 RFSoC board", with one RV32I core per qubit. Each <span class="term" data-term="core">core</span> runs its
+        own program from its own RAM. Next to the converters sit <span class="term" data-term="channel">channels</span>: a pulse
+        generator for a DAC, an acquisition unit for an ADC, or a bank of digital lines. A core and its channels are joined by a
+        pipelined <span class="term" data-term="link">link</span>. Above all cores sits the board
+        <span class="term" data-term="hub">hub</span>, through which cores share bits, meet at barriers and send each other words.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 330" role="img" aria-label="Block diagram of a RISC-Q system">
+          <style>
+            .rq text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .rq .s { font-size: 11.5px; fill: #52514e; }
+            .rq .m { font: 11.5px ui-monospace, Menlo, monospace; fill: #52514e; }
+            .rq .core { fill: #eaf7f1; stroke: #1baf7a; }
+            .rq .ch { fill: #eef3fb; stroke: #2a78d6; }
+            .rq .hubb { fill: #efedf8; stroke: #4a3aa7; }
+            .rq .cv { fill: #fdf0ea; stroke: #eb6834; }
+            .rq .host { fill: #fbf4e2; stroke: #d59a00; }
+            .rq .a { stroke: #8a8985; stroke-width: 1.5; fill: none; marker-end: url(#rqtip); }
+            .rq .b { stroke: #8a8985; stroke-width: 1.5; fill: none; marker-end: url(#rqtip); stroke-dasharray: 4 3; }
+          </style>
+          <defs><marker id="rqtip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a8985" /></marker></defs>
+          <g class="rq">
+            <rect class="hubb" x="250" y="10" width="260" height="46" rx="8" /><text x="266" y="32">board hub</text>
+            <text class="s" x="266" y="48">groups · barriers · mailboxes · 1 msg/batch</text>
+            <rect class="host" x="590" y="10" width="160" height="46" rx="8" /><text x="606" y="32">host window</text><text class="s" x="606" y="48">results, write only</text>
+            <rect class="core" x="20" y="90" width="160" height="70" rx="8" /><text x="34" y="112">core q0 (RV32I)</text>
+            <text class="s" x="34" y="130">own RAM, sinks</text><text class="m" x="34" y="148">sw → put window</text>
+            <rect class="core" x="420" y="90" width="160" height="70" rx="8" /><text x="434" y="112">core q1 (RV32I)</text>
+            <text class="s" x="434" y="130">own RAM, sinks</text><text class="m" x="434" y="148">sw → put window</text>
+            <rect x="200" y="100" width="70" height="50" rx="6" fill="#fff" stroke="#cfceca" /><text x="214" y="122">link</text><text class="s" x="210" y="140">depth L</text>
+            <path class="a" d="M180 125 H198" />
+            <path class="b" d="M235 100 V58" /><path class="b" d="M500 90 V58" />
+            <rect class="ch" x="20" y="200" width="110" height="60" rx="8" /><text x="32" y="222">gate</text><text class="s" x="32" y="240">pulse table, queues</text>
+            <rect class="ch" x="140" y="200" width="110" height="60" rx="8" /><text x="152" y="222">ro</text><text class="s" x="152" y="240">readout tone</text>
+            <rect class="ch" x="260" y="200" width="110" height="60" rx="8" /><text x="272" y="222">demod</text><text class="s" x="272" y="240">acquisition</text>
+            <path class="a" d="M235 150 L75 198" /><path class="a" d="M235 150 L195 198" /><path class="a" d="M235 150 L315 198" />
+            <rect class="cv" x="40" y="285" width="160" height="34" rx="6" /><text x="54" y="307">DAC (16 samples/batch)</text>
+            <rect class="cv" x="250" y="285" width="140" height="34" rx="6" /><text x="264" y="307">ADC (4/batch)</text>
+            <path class="a" d="M75 260 V283" /><path class="a" d="M195 260 L170 283" /><path class="a" d="M315 283 V262" />
+            <path class="b" d="M300 200 C300 175 150 175 120 162" />
+            <text class="s" x="378" y="222">report → sink</text>
+            <path class="b" d="M180 100 C320 70 520 70 600 58" />
+            <text class="s" x="610" y="120">… one core per qubit,</text><text class="s" x="610" y="136">8 on the x6y3 ring</text>
+          </g>
+        </svg>
+        <figcaption><b>A RISC-Q system as the model sees it.</b> A core's store into its put window becomes a posted write that
+          crosses the link to one channel (solid arrows). Channels feed the converters. Reports from acquisition channels come back to
+          core-local sinks, and messages to the hub and results to the host travel as writes too (dashed arrows). The channel list is
+          the one each transmon core has on the ring, without its CZ channels. Schematic drawing; the workspace's control view draws
+          the same parts at the model's schematic floorplan positions.</figcaption>
+      </figure>
+      <p>
+        One pulse, in four events, shows the whole idea. In the feed-forward run of lesson <a href="/course/A1">A1</a> with the
+        measured bit set to 1, the conditioned <code>x</code> on qubit 2 is caused by one store on core q2 at batch 1,157. The write
+        reaches the channel <code>q2.gate</code> at batch 1,160 and is fired there. The pulse window opens at batch 1,239, and 6
+        batches later, at batch 1,245, the pulse is at the DAC port, from where the coax takes it to the qubit. Everything in between
+        is what this chapter explains: why the write arrives three batches after the store, why it waits 79 batches before the
+        window opens, and why the opening does not depend on when the write arrived.
+      </p>
+
+      <h2 id="cores"><span class="num">2</span>Cores</h2>
+      <p>
+        Each core executes RV32I, the 32-bit base integer instruction set of RISC-V, with the multiply-only Zmmul extension
+        (<code>QControl/RiscQ/Rv32.lean</code>, after RISC-Q <code>docs/riscv/RISCV.md</code>: single issue, in order). The model
+        has no CSRs, interrupts, compressed or atomic instructions; an unsupported word decodes to <code>illegal</code> and stops the
+        core with a fault frame. RAM starts at <code>0x80000000</code>. The x6y3 build gives each core 8,192 words; the ion and atom
+        builds of the simulator give 16,384.
+      </p>
+      <p>
+        The model's core timing is a <b>cost model</b>, not a pipeline simulation: one batch per instruction, five more after a taken
+        branch or jump (an assumed upper bound from the stages in <code>RISCV.md</code>) and one more for a load or store
+        (<code>LsuPlugin.md</code>). This matters for how fast firmware runs, for example a decoder, but not for when pulses land, as
+        long as each write is issued early enough. That is the subject of <a href="/course/background/timing">chapter 4</a>.
+      </p>
+
+      <h2 id="map"><span class="num">3</span>The address map</h2>
+      <p class="q">How does a store instruction reach a pulse generator?</p>
+      <p class="insection"><b>In this section:</b> every register a core can read or write, with the RISC-Q source of each.</p>
+      <p>
+        A core talks to the rest of the system only through loads and stores to fixed addresses. The table is from
+        <code>docs/riscq-controller.md</code>; the constants are in <code>riscq/soc.mjs</code> (<code>MAP</code>), after RISC-Q's
+        <code>software/riscq/map.py</code>.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Register (core address)</th><th>Behavior</th><th>RISC-Q source</th></tr></thead>
+          <tbody>
+            <tr><td><code>time</code> 0xBFF8</td><td>Batch time. The core's copy lags the converter edge by the link</td><td><code>ControlMemMaps.scala</code></td></tr>
+            <tr><td><code>timeCmp</code> 0x4000, <code>waitTimeCmp</code> 0x4008</td><td>A read of <code>waitTimeCmp</code> stalls the core until <code>time + 3 ≥ timeCmp</code></td><td><code>ControlMemMaps.scala</code></td></tr>
+            <tr><td><code>done</code> 0x4010</td><td>Sticky completion flag</td><td><code>ControlMemMaps.scala</code></td></tr>
+            <tr><td>Sinks from 0x4200, 0x20 apart</td><td>Readout result (<code>res</code> stalls until settled, <code>real</code>, <code>imag</code>) or an input-edge queue (<code>pop</code>, <code>time</code>, <code>seq</code>, <code>count</code>)</td><td><code>EventLink.scala</code></td></tr>
+            <tr><td><code>board</code> 0x4300, <code>release</code> 0x4320, mailboxes 0x4340</td><td>Shared group words, barrier release time, unicast words</td><td><code>PutHub.scala</code></td></tr>
+            <tr><td>Put window from 0x10000, 0x10000 per node</td><td>Nodes 0–15 are the core's channels. Higher nodes reach the hub</td><td><code>map.py</code></td></tr>
+            <tr><td>Channel: <code>fire</code> +0, <code>freq</code> +4, <code>dcOffset</code> +8, <code>phaseOffset</code> +0xC, entry <i>i</i> at (<i>i</i>+1)·16, <code>startTime</code> +0x4100</td><td>16-bit fields sit in bits 31:16 of the written word</td><td><code>PulseParamBuffer.scala</code></td></tr>
+            <tr><td>Host window from 0x40000000</td><td>Write only. Results for the host</td><td><code>HostWindow.md</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The <span class="term" data-term="put window">put window</span> is divided into <b>nodes</b> of 0x10000 bytes. Node <i>k</i> starts at <code>0x10000 + k · 0x10000</code>. Nodes
+        0–15 are the core's own channels in the order its build lists them. Nodes 16–19 are the four shared group words of the hub,
+        nodes 20–35 the sixteen barriers, and from node 36 on the mailboxes of other cores (<code>GROUP_NODE0</code>,
+        <code>BARRIER_NODE0</code>, <code>INBOX_NODE0</code> in <code>riscq/soc.mjs</code>). So a store to <code>0x10000</code> fires
+        channel 0, and a store to <code>0x150000</code> arrives at barrier 0.
+      </p>
+      <div class="ex" data-id="riscq.1" data-stars="1" data-kind="text" data-answer="0x30000|30000|0x00030000">
+        <p>On the ring, each core's channels are listed <code>gate</code>, <code>cz0</code>, <code>cz1</code>, <code>ro</code>,
+          <code>demod</code> (where the qubit has two CZ partners). At which address does core q0 write to fire its <code>cz1</code>
+          channel? Answer in hexadecimal.</p>
+        <div class="why"><code>cz1</code> is channel 2, node 2: 0x10000 + 2 · 0x10000 = 0x30000. Its <code>fire</code> register is at offset
+          0, its <code>startTime</code> at 0x34100.</div>
+      </div>
+
+      <h2 id="posted"><span class="num">4</span>Posted writes and the link</h2>
+      <p>
+        A store into the put window is a <span class="term" data-term="posted write">posted write</span>: the core sends it and goes on
+        without waiting for an answer. The <code>PutBridge</code> forwards it as one beat after a one-cycle acknowledgment, and the
+        <code>PutLink</code> carries it through <i>L</i> register stages, the <span class="term" data-term="link depth">link depth</span>. A write therefore reaches its channel
+        <code>1 + L</code> batches after the store (<code>PutBridge.md</code>, <code>PutLink.md</code>). The x6y3 build has
+        <code>link_pipe = 2</code>, which is why the store at batch 1,157 above reaches <code>q2.gate</code> at batch 1,160. The ion and
+        atom builds of the simulator use a depth of 4.
+      </p>
+      <p>
+        Posted writes are what make the link cheap to pipeline. Because nothing waits for an answer, adding a register stage to meet
+        the FPGA's timing costs one batch of latency and no throughput. The cost is that the core does not know when a write
+        arrives, which the timed queues of section 6 make irrelevant. The link also carries traffic back: reports from channels to
+        the core's sinks, and messages to and from the hub.
+      </p>
+
+      <h2 id="channels"><span class="num">5</span>Channels and pulse tables</h2>
+      <p class="q">What does a channel hold, and what does a fire do?</p>
+      <p class="insection"><b>In this section:</b> the three channel kinds, the register layout, firing, and the start-time
+        register that advances by itself.</p>
+      <p>
+        A channel is one of three kinds (<code>riscq/soc.mjs</code>, <code>socSpec</code>): <code>pulse</code>, which drives a DAC;
+        <code>demod</code>, which opens acquisition windows on an ADC; and <code>dio</code>, which drives and watches sixteen digital
+        lines. Each holds a register file (<code>Buffer</code> in <code>Timing.lean</code>): a start time, a carrier code, a DC offset, a
+        phase offset and a <span class="term" data-term="pulse table">pulse table</span> of <i>slots</i> entries, each with a phase, an
+        amplitude, an envelope address and a duration. The firmware fills the table once, at the start of the program; a calibrated
+        pulse is then just an index.
+      </p>
+      <p>
+        To play an entry, the firmware writes the start time to <code>startTime</code> and then the entry's index to
+        <code>fire</code>. A <span class="term" data-term="fire">fire</span> captures the current start time and the entry, hands both to
+        the timed queues, and then advances <code>startTime</code> by the entry's duration. Three theorems in
+        <a href="/model/RiscQ/Timing.lean"><code>Timing.lean</code></a> pin this behavior down:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Theorem</th><th>Statement</th></tr></thead>
+          <tbody>
+            <tr><td><code>fire_captures_start</code></td><td>A fire schedules its entry at the buffer's current start time.</td></tr>
+            <tr><td><code>fire_fire_contiguous</code></td><td>A second fire is scheduled exactly one duration after the first, with no time arithmetic in the control program.</td></tr>
+            <tr><td><code>explicit_start_wins</code></td><td>Writing <code>startTime</code> after a fire discards the automatic advance.</td></tr>
+            <tr><td><code>fire_preserves_table</code></td><td>A fire changes no table entry, so a slot can be fired repeatedly.</td></tr>
+            <tr><td><code>decode_layout</code></td><td><code>startTime</code> at 0x4100 and the fields of entry <i>i</i> at (<i>i</i>+1)·16 decode to the intended registers, provided the table ends below 0x4100.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <code>fire_fire_contiguous</code> is what makes pulse trains cheap: firing the same channel twice plays two pulses back to back
+        without the firmware computing the second start time. The firmware this simulator generates writes the start time before every
+        fire anyway, because its pulses are rarely contiguous.
+      </p>
+
+      <h2 id="queues"><span class="num">6</span>Timed queues and leads</h2>
+      <p class="q">How can parameters that take different times to process all take effect on the same batch?</p>
+      <p class="insection"><b>In this section:</b> why each parameter of a pulse has its own pipeline latency, and how the queues
+        hide it.</p>
+      <p>
+        A pulse generator is a pipeline. The amplitude goes through a multiplier, the phase through a rotation, the envelope address
+        through a memory read, the duration only through a gate. Each takes a different number of cycles from the moment the
+        generator receives it to the moment it affects the output. If all four were applied at the start time, the pulse would begin
+        with the right duration but the wrong amplitude for a few dozen samples.
+      </p>
+      <p>
+        RISC-Q solves this with one <span class="term" data-term="timed queue">timed queue</span> per parameter. A fired entry is pushed
+        into every queue 2 batches after its beat (<code>PulseParamBuffer.md</code>). Each queue releases its value at
+        <code>startTime − lead</code>, where <code>lead</code> is that parameter's own pipeline latency, so every parameter reaches the
+        output on the start time. The model derives the leads from the block latencies of <code>PulseGenerator.md</code>:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th>Path</th><th class="n">Lead (batches)</th></tr></thead>
+          <tbody>
+            <tr><td>Amplitude</td><td>carrier amplitude 27 + complex multiply 6 + gate 1</td><td class="n">34</td></tr>
+            <tr><td>Phase</td><td>carrier phase 28 + 6 + 1</td><td class="n">35</td></tr>
+            <tr><td>Carrier frequency</td><td>carrier frequency 29 + 6 + 1</td><td class="n">36</td></tr>
+            <tr><td>Lane phasors (16 lanes)</td><td>regeneration 16 + CORDIC 19 + 2, then phasor 8 + 6 + 1</td><td class="n">52</td></tr>
+            <tr><td>Envelope address</td><td>envelope reader 4 + 6 + 1</td><td class="n">11</td></tr>
+            <tr><td>Duration</td><td>gate 1 + 1</td><td class="n">2</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">Theorem <code>default_leads</code> in <code>Timing.lean</code> proves that these formulas give exactly 34, 35, 36, 52, 11 and 2
+        for the default datapath; <code>phase_is_slowest_fired_lead</code> proves that phase is the slowest parameter of a fired pulse.</p>
+      <p>
+        A queue cannot release an entry the instant it is pushed. The model follows RISC-Q's <code>TimedQueue.scala</code> (RegHead
+        implementation): an entry can pop no sooner than 3 batches after its push (FIFO write, head register, registered compare), and
+        consecutive pops of one queue are at least 2 batches apart. Each queue holds the build's queue depth plus one entry: 33 on the
+        x6y3 build (depth 32), 5 on the default depth of 4. After the generator, the samples cross an adder tree that combines the
+        channels sharing one DAC, plus 2 stages, to reach the DAC port (<code>dac_pipe</code> in <code>map.py</code>): 6 batches on the
+        ring, where several channels of one core share each DAC. That is the gap between the window opening at 1,239 and the pulse at
+        the port at 1,245.
+      </p>
+      <div class="key"><b>The result.</b> As long as a write reaches its channel early enough, the pulse opens exactly on its start
+        time, whatever the link latency, the core's speed or the order of other writes. Chapter <a href="/course/background/timing">4</a>
+        states this as three theorems and shows what "early enough" means in batches.</div>
+
+      <h2 id="sinks"><span class="num">7</span>Sinks: results coming back</h2>
+      <p>
+        Information flows back to a core through <span class="term" data-term="sink">sinks</span>, core-local registers starting at
+        <code>0x4200</code>, one per reporting channel in channel order (<code>sinkAddress</code> in <code>riscq/soc.mjs</code>). There are
+        two kinds (<code>EventLink.md</code>):
+      </p>
+      <ul>
+        <li><b>Result sink</b>, for a demodulation channel. After the acquisition window and the 9-cycle readout decoder, the result is
+          reported up the link. A load of <code>res</code> stalls the core until the result of the current window has settled, then
+          returns the bit; <code>real</code> and <code>imag</code> hold the IQ point. The firmware reads <code>res</code> with an
+          ordinary <code>lw</code>, which simply takes longer.</li>
+        <li><b>FIFO sink</b>, for a digital channel. Each change on the input lines becomes an event in a consume-on-read queue of depth 8,
+          read through <code>pop</code>, <code>time</code>, <code>seq</code> and <code>count</code>.</li>
+      </ul>
+      <p>
+        A report takes <code>3 + 2 + L + 1</code> batches to reach its sink: up to three puts, a merge, the link and the sink. This is an
+        <b>assumed</b> worst case of the stages <code>EventLink.md</code> describes, listed as such in <code>docs/riscq-controller.md</code>.
+        On the ring the measured result is in the measuring core 34 ns after the window closes; lesson <a href="/course/E1">E1</a>
+        takes that interval apart.
+      </p>
+
+      <h2 id="hub"><span class="num">8</span>The board hub</h2>
+      <p class="q">How do cores that each drive one qubit coordinate a two-qubit gate or a feed-forward?</p>
+      <p class="insection"><b>In this section:</b> groups, barriers, mailboxes, and the one-message-per-batch arbiter that every core
+        shares.</p>
+      <p>
+        The hub (<code>PutHub.md</code>) offers three services, all reached by posted writes to put-window nodes above 15:
+      </p>
+      <ul>
+        <li><b>Groups.</b> Four shared 32-bit words. A core publishes one bit by writing <code>(slot &lt;&lt; 1) | bit</code> to a group node
+          (<code>publish</code> in <code>riscq/firmware.mjs</code>). The hub updates the word and sends it to every core's
+          <code>board</code> register at <code>0x4300 + 4·group</code>.</li>
+        <li><b>Barriers.</b> Sixteen counted barriers. A core arrives by writing the number of members to a barrier node, then reads
+          <code>release</code> at <code>0x4320</code>, which stalls until the last member has arrived. All members get the same release
+          time, which becomes their common time base.</li>
+        <li><b><span class="term" data-term="mailbox">Mailboxes</span>.</b> Unicast words from one core to another, read at <code>0x4340</code> onward.</li>
+      </ul>
+      <p>
+        The hub is a shared resource with a fixed throughput. Every message waits in a queue of depth 8 per core, and a round-robin
+        <span class="term" data-term="arbiter">arbiter</span> passes <b>one message per batch for the whole board</b>. A message into a full queue is dropped and reported as a
+        fault. A barrier arrival directly behind another for the same barrier waits one more batch. At link depth 4, a published bit
+        reaches every core's board 23 batches after the store, as RISC-Q documents, plus any wait at the arbiter.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Behavior</th><th>Value</th><th>Basis</th></tr></thead>
+          <tbody>
+            <tr><td>Publish to every core's board</td><td>23 batches at link depth 4, plus the wait at the arbiter</td><td><code>PutHub.md</code>; conformance test</td></tr>
+            <tr><td>Hub throughput</td><td>1 message per batch, whole board</td><td><code>PutHub.md</code></td></tr>
+            <tr><td>Queue per core</td><td>8 messages</td><td><code>PutHub.md</code></td></tr>
+            <tr><td>8 cores publish on the same batch</td><td>reach every board after 23 to 30 batches, in core order</td><td><code>riscq/limits.mjs</code>, <code>publishBurst</code>, run for this chapter</td></tr>
+            <tr><td>8 cores arrive at one barrier on the same batch</td><td>counted 2 batches apart; all hold the common time 37 batches after the arrival</td><td><code>riscq/limits.mjs</code>, <code>barrierFanIn</code>, run for this chapter</td></tr>
+            <tr><td>Arbiter fairness</td><td>grants only a core with a message waiting, and grants one in every batch in which any core has one</td><td>proved: <code>nextSource_waiting</code>, <code>nextSource_isSome</code> in <a href="/model/RiscQ/Soc.lean"><code>Soc.lean</code></a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The hub arbiter follows the statements of <code>PutHub.md</code>, not an RTL trace, and the model starts the arbiter's round at
+        core 0, an assumption. One bit per message and one message per batch means the hub carries at most 500 bits per microsecond
+        at 500 MHz. Lessons <a href="/course/B4">B4</a> and <a href="/course/E4">E4</a> measure what that limit means for feed-forward
+        and for error-correction traffic.
+      </p>
+      <div class="ex" data-id="riscq.2" data-stars="2" data-kind="number">
+        <p>Run the feed-forward program with the measured bit set to 1. How many messages does the hub pass in the whole run?</p>
+        <div class="why">The run's summary counts every message the arbiter granted (<code>summary.hub.served</code>): the three
+          active cores (q0, q1, q2) arrive at barrier 0 before the first segment and at barrier 1 before the conditioned gate, and q0
+          publishes the measured bit once. Open the control view in the workspace and
+          step through the hub's frames to see each one.</div>
+      </div>
+      <div class="ex" data-id="riscq.3" data-stars="1" data-kind="choice" data-answer="b">
+        <p>A core writes a message to the hub while its queue of 8 is full. What does the model do?</p>
+        <ol class="choices">
+          <li data-k="a">The store stalls the core until there is room.</li>
+          <li data-k="b">The message is dropped and the run reports a fault.</li>
+          <li data-k="c">The oldest message in the queue is overwritten.</li>
+          <li data-k="d">The hub passes two messages in that batch.</li>
+        </ol>
+        <div class="why">The write is posted, so the core never waits for it. A message into a full queue is dropped and reported as a
+          fault (<code>docs/riscq-controller.md</code>). The limit sweeps show that eight cores publishing without pause overflow their
+          queues.</div>
+      </div>
+
+      <h2 id="host"><span class="num">9</span>The host window</h2>
+      <p>
+        Results leave the controller through the <span class="term" data-term="host window">host window</span> at <code>0x40000000</code> (<code>HostWindow.md</code>). It is write
+        only: a core stores a word there and the host reads it later. The firmware this simulator generates writes every measured or
+        decoded bit to the host window at the same offset as its slot in the core's bit table (<code>storeBit</code> in
+        <code>riscq/firmware.mjs</code>), and the compiled Helios decoder writes each output line there. A run's summary lists every
+        host write with its batch, core and value.
+      </p>
+
+      <h2 id="conformance"><span class="num">10</span>How close the model is to RISC-Q</h2>
+      <p>
+        Three firmware binaries from the RISC-Q repository run unmodified in the model and reproduce what RISC-Q's own RTL simulations
+        assert (<code>tests/riscq-firmware.test.mjs</code>): <code>pulse_sched.elf</code> opens one gate pulse on DAC 8 exactly at its
+        start time for six batches; <code>xcore.elf</code> gives two cores the same barrier time, delivers the word 0x77 to core 1's
+        mailbox and opens core 1's pulse at that time plus 1,024; <code>host_window.elf</code> writes its ramp, byte lanes and sentinel and
+        raises <code>done</code>. Three latencies are assumed rather than documented: the core's time lag, the report path and the
+        branch and bus penalties. Chapter <a href="/course/background/simulator">6</a> separates what is proved, tested and assumed.
+      </p>
+      <figure class="live" data-title="The feed-forward run in the control-system view" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&view=control">
+        <figcaption>Live run of the feed-forward program with the measured bit set to 1, showing host, hub, cores, links, inboxes,
+          channels and converters at their schematic floorplan positions. Press <b>Play</b> or step through the trace.</figcaption>
+      </figure>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Each qubit has an RV32I core with its own RAM. Cores write registers; channels next to the converters make the samples.</li>
+          <li>A store into the put window is a posted write. It reaches its channel 1 + L batches later, without the core waiting.</li>
+          <li>A channel holds a pulse table. Writing <code>startTime</code> and then an index to <code>fire</code> schedules that entry.</li>
+          <li>Timed queues release each parameter early by its own lead (34, 35, 36, 52, 11, 2 batches), so all land on the start time.</li>
+          <li>Results come back to core-local sinks: a result register that stalls until settled, or an event queue of depth 8.</li>
+          <li>The board hub gives shared bits, barriers and mailboxes, one message per batch for the whole board, eight queued per core.</li>
+          <li>Results for the host go to the write-only host window at 0x40000000.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      course({
+        answers: {
+          "riscq.2": async (api) => (await api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } })).summary.hub.served,
+        },
+      });
+    </script>
+  </body>
+</html>

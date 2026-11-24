@@ -1,8 +1,8 @@
 # Hardware control for fault-tolerant quantum computers
 
-Research review for QControlSys · 22 November 2026 · [Architecture and development plan](development-plan.md)
+Research review for QuantumOS · 22 November 2026 · [Architecture and development plan](development-plan.md)
 
-A controller can issue the right instruction and still produce the wrong physical operation. A measurement bit can reach the other board after its branch deadline. An RF tone can move every occupied tweezer in a column. An electrode waveform can reach a site whose local selection bit still holds the previous value. QControlSys should let a designer follow each of those outcomes from the program through the electronics to the device, then test a change to the design.
+A controller can issue the right instruction and still produce the wrong physical operation. A measurement bit can reach the other board after its branch deadline. An RF tone can move every occupied tweezer in a column. An electrode waveform can reach a site whose local selection bit still holds the previous value. QuantumOS should let a designer follow each of those outcomes from the program through the electronics to the device, then test a change to the design.
 
 The evidence below comes from experimental papers, architecture proposals, protocol specifications, simulator documentation, and the team's existing artifacts. Numerical observations belong to the apparatus and measurement boundaries named alongside them. The proposed experiments and simulator models are engineering deductions from those sources.
 
@@ -50,7 +50,7 @@ Run two workloads. In a memory experiment, measure syndrome production and servi
 
 ## Prior software and boundaries for reuse
 
-| System | What to take from it | Boundary for QControlSys |
+| System | What to take from it | Boundary for QuantumOS |
 | --- | --- | --- |
 | QCCD Studio and QCCDCert | Architecture files, TSIR hardware instructions, stage witnesses, stable instruction identity, and revisioned human/agent edits | Import a checked transport program and explain how the electronics realize each step. A separate checker must establish that the lowered control trace implements it. [Studio](https://qccd.academy/) · [Agent workflow](https://qccd.academy/agentic/) · [QCCDCert preprint](https://arxiv.org/abs/2611.23469) |
 | QCCDSim and Atomique | Architectural workloads, transport schedules and published comparison points | Use legal movement and operation order as oracles. Controller clocks, buses and waveform delivery require additional observations. [QCCDSim study](https://arxiv.org/abs/2004.04706) · [Atomique](https://arxiv.org/abs/2311.15123) |

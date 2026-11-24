@@ -1,6 +1,6 @@
 # RISC-Q controller model and the three lowering paths
 
-This part of QControlSys takes a program for a quantum computer down to the machine code of its control processors and executes that machine code in a Lean model of the controller. It covers superconducting qubits, trapped-ion QCCD machines and neutral-atom arrays with one controller design, [RISC-Q](https://github.com/Wu-Quantum-Application-System-Group/RISC-Q). No quantum state is simulated. Measurement results are inputs.
+This part of QuantumOS takes a program for a quantum computer down to the machine code of its control processors and executes that machine code in a Lean model of the controller. It covers superconducting qubits, trapped-ion QCCD machines and neutral-atom arrays with one controller design, [RISC-Q](https://github.com/Wu-Quantum-Application-System-Group/RISC-Q). No quantum state is simulated. Measurement results are inputs.
 
 ## Run it
 
@@ -65,7 +65,7 @@ One batch is one dspClk cycle. It carries 16 DAC samples or 4 ADC samples. All t
 | Carrier update leads: carrier, phasors | 36, lanes + 36 | Same derivation. Phasors regenerate serially |
 | Generator to DAC port | adder tree + 2 | `map.py` `dac_pipe` |
 | Decoder | 9 | `ReadoutDecoder.md` |
-| Publish to every core's board | 23 at link depth 4, plus the wait at the arbiter | `PutHub.md` |
+| Publish to every core's board | 3 × link depth + 11: 23 at link depth 4 (RISC-Q's figure), 17 on the x6y3 ring (depth 2), plus the wait at the arbiter | `PutHub.md` |
 | Hub throughput, queue per core | 1 message per batch, 8 | `PutHub.md` |
 | Sink queue depth | 8 | `EventLink.md` |
 | Core time lag | link depth | Assumed. RISC-Q states a constant lag without a number |
@@ -93,7 +93,7 @@ node validation/decoders/helios/make-reference.mjs    # rebuild references and i
 | 5 (5) | 60 | 94 µs to 285 µs | the natively compiled program: 9 of 9 |
 | 7 (7) | 168 | 274 µs to 813 µs | the natively compiled program: 7 of 7 |
 
-For comparison, the same algorithm in FPGA logic is reported at 56 ns, 65 ns and 90 ns per decode for distances 3, 5 and 7 (arXiv:2603.16203). The compiled program is a reference model that visits every edge on every pass, and it runs here on a soft core with the assumed cost of one batch per instruction. The comparison shows what decoding in control-core software costs, not what Helios costs. The program reports the root node of every node. It does not derive a correction, so it is not yet wired to `decode_syndrome` on a machine: the eight-transmon ring is too small for a surface code. Micro Blossom's embedded MWPM firmware targets `riscv32i` too, but needs its accelerator in the FPGA fabric, which this model does not have.
+For comparison, the same algorithm in FPGA logic is reported at 56 ns for a worst-case distance-3 pattern, and 65 ns and 90 ns on average at distances 5 and 7 for p = 0.001 (arXiv:2603.16203). The compiled program is a reference model that visits every edge on every pass, and it runs here on a soft core with the assumed cost of one batch per instruction. The comparison shows what decoding in control-core software costs, not what Helios costs. The program reports the root node of every node. It does not derive a correction, so it is not yet wired to `decode_syndrome` on a machine: the eight-transmon ring is too small for a surface code. Micro Blossom's embedded MWPM firmware targets `riscv32i` too, but needs its accelerator in the FPGA fabric, which this model does not have.
 
 [Build flow](../riscq/toolchain.mjs) · [Decoder module](../riscq/decoders/helios.mjs) · [File layer](../riscq/decoders/libc/rq_libc.c) · [Vendored source, vectors and images](../validation/decoders/helios/) · [Tests](../tests/riscq-helios.test.mjs)
 
@@ -185,9 +185,9 @@ The companion paper models each service of a fault-tolerant computer by one late
 | Pulse rate | Back-to-back train of 60 pulses on one channel | Shortest pulse 48, 31, 29 and 16 batches at queue depth 1, 4, 8 and 32 |
 | Link depth | One pulse issued 96 batches ahead | On time up to 13 link stages. At 14 the phase lands late while the window still opens. This depends on the assumed core time lag |
 | Classical bandwidth of the hub | *n* cores publish one bit on the same batch, 500 MHz | One bit per batch for the whole board: 500 bits/µs. Bit *k* reaches every core after 23 + *k* batches. One core offers a bit every 4 batches, so four cores fill the hub and eight overflow its queues |
-| Barrier | *n* cores arrive on the same batch | Every core holds the common time after 23 + 2 · (*n* − 1) batches: 74 ns for 8 cores |
+| Barrier | *n* cores arrive on the same batch | Every core holds the common time after 23 + 2 · (*n* − 1) batches at link depth 4: 37 batches for 8 cores, which is 74 ns at a 500 MHz clock and 370 ns at 100 MHz |
 | Syndrome to decoder | Repetition-code round, 2 syndrome bits | The last bit is in the decoder's board register 86 ns after its window closes. The same 86 ns holds for 8 bits here, because this ring's readout windows end at different times |
-| Decode | Lookup decoder on a RISC-Q core | The decoder has met the other cores and reads the syndrome at 112 ns. The lookup and stores take 14 ns plus 14 ns per decoded bit: 64 ns for three bits, decoded at 176 ns |
+| Decode | Lookup decoder on a RISC-Q core | The decoder has met the other cores and reads the syndrome at 112 ns. The lookup and stores take 14 ns plus 14 ns per decoded bit, and 8 ns more for each decoded bit that is published to another core: 64 ns for three bits with one published, decoded at 176 ns |
 | Pauli-frame update | Frame word in the decoder's RAM, no pulse | The first update is stored 22 ns after the decode, the second 16 ns later |
 | Feed-forward through the decoder | X on a data qubit conditioned on a decoded bit | The decoded bit is at every core at 196 ns and the pulse opens at 490 ns. A pulse conditioned directly on a measured bit opens at 344 ns |
 

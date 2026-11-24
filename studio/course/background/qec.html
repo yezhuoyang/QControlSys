@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Measurement, feedback and decoding · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="qec">
+    <article>
+      <p class="kicker">Background · Chapter 5</p>
+      <h1>Measurement, feedback and decoding</h1>
+      <p class="lead">
+        Error correction turns a quantum computer into a real-time classical system. Every round, thousands of measured bits have to
+        reach a decoder, be turned into a correction, and be ready before the next operation that depends on them. This chapter
+        follows that path from a readout window to a Pauli frame, compares published decoder latencies, and explains the
+        system-call model of the fault-tolerant virtual machine that this simulator measures.
+      </p>
+      <p class="pre">
+        The readout chain and the board hub are explained in chapters <a href="/course/background/control">2</a> and
+        <a href="/course/background/riscq">3</a>. No prior knowledge of error-correcting codes is assumed. Lessons
+        <a href="/course/E1">E1</a>, <a href="/course/E2">E2</a> and <a href="/course/E3">E3</a> do the hands-on version of this chapter.
+      </p>
+
+      <h2 id="feedback"><span class="num">1</span>From a readout window to a conditioned pulse</h2>
+      <p class="q">What happens between a measurement and the gate that depends on it?</p>
+      <p class="insection"><b>In this section:</b> the stages a measured bit crosses on the transmon ring, with the times the model
+        gives for each.</p>
+      <p>
+        In <span class="term" data-term="feed-forward">feed-forward</span>, a later operation depends on a result obtained during the same
+        run. Lesson <a href="/course/A1">A1</a>'s program measures qubit 0 and flips qubit 2 if the result is 1. On the ring each qubit has
+        its own core, so the bit is produced on one core and consumed on another. It crosses five stages:
+      </p>
+      <ol>
+        <li><b>Acquisition.</b> The <span class="term" data-term="readout">readout</span> tone plays, the demodulation window integrates the
+          returning signal, and the window closes.</li>
+        <li><b>Decision and report.</b> The readout decoder thresholds the IQ point (9 batches) and reports the bit up the link to the
+          measuring core's result sink, where a stalled load of <code>res</code> returns it.</li>
+        <li><b>Publication.</b> The measuring core stores the bit, writes it to the host window, and publishes it to a shared group word of
+          the hub.</li>
+        <li><b>Distribution.</b> The hub's arbiter passes the message and the new group word reaches every core's <code>board</code> register.</li>
+        <li><b>Synchronization and issue.</b> The cores meet at a barrier, read the bit, and the consuming core issues the conditioned pulse
+          one lead ahead of its start time.</li>
+      </ol>
+      <p>
+        The simulator's system-call report (<code>riscq/syscalls.mjs</code>, <code>feedbackSamples</code>) measures these stages on the
+        feed-forward run. Run for this chapter, it gives the result at the measuring core 34 ns after the window closes, published at the
+        hub at 70 ns, and at every other core at 86 ns. The conditioned pulse opens 344 ns after the window closes
+        (<code>docs/riscq-controller.md</code>). Most of the gap between 86 ns and 344 ns is the barrier and the 96-batch lead: the cores have
+        to agree on a time base, and the pulse has to be issued far enough ahead to land exactly
+        (<a href="/course/background/timing">chapter 4</a>).
+      </p>
+      <div class="warn"><b>These are model numbers.</b> They are costs of the classical controller as modeled, with RISC-Q's documented
+        stage counts and three assumed latencies. They are not measurements of hardware, and they say nothing about gate fidelity.</div>
+      <figure>
+        <svg viewBox="0 0 760 190" role="img" aria-label="Feedback timeline on the transmon ring">
+          <style>
+            .fb text { font: 12.5px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .fb .s { font-size: 11.5px; fill: #52514e; }
+            .fb .ax { stroke: #8a8985; }
+            .fb .tick { stroke: #0b0b0b; stroke-width: 1.5; }
+          </style>
+          <g class="fb">
+            <line class="ax" x1="40" y1="120" x2="730" y2="120" />
+            <line class="tick" x1="40" y1="110" x2="40" y2="130" /><text x="20" y="150">0 ns</text><text class="s" x="10" y="168">window closes</text>
+            <line class="tick" x1="105" y1="110" x2="105" y2="130" /><text x="92" y="100">34</text><text class="s" x="80" y="150">result at core</text>
+            <line class="tick" x1="174" y1="110" x2="174" y2="130" /><text x="162" y="100">70</text><text class="s" x="158" y="168">at the hub</text>
+            <line class="tick" x1="205" y1="110" x2="205" y2="130" /><text x="198" y="100">86</text><text class="s" x="218" y="150">at every core</text>
+            <rect x="205" y="60" width="495" height="18" fill="#efedf8" />
+            <text class="s" x="300" y="73">barrier, time base, 96-batch lead, issue of the conditioned pulse</text>
+            <line class="tick" x1="700" y1="110" x2="700" y2="130" /><text x="686" y="100">344</text><text class="s" x="610" y="150">conditioned pulse opens</text>
+          </g>
+        </svg>
+        <figcaption><b>Feedback on the ring, to scale.</b> Times after the close of qubit 0's demodulation window in the feed-forward run,
+          from <code>riscq/syscalls.mjs</code> and <code>docs/riscq-controller.md</code>. Model results, not hardware measurements.</figcaption>
+      </figure>
+
+      <h2 id="codes"><span class="num">2</span>Syndromes and codes</h2>
+      <p class="q">How can you detect an error without measuring the data?</p>
+      <p class="insection"><b>In this section:</b> stabilizer checks, the repetition code, the surface code, and rounds.</p>
+      <p>
+        Quantum error correction spreads one logical qubit over many physical ones. An [[n, k, d]] stabilizer code encodes k logical qubits
+        in n physical qubits and detects any error of weight below the code distance d. Its <b>checks</b> are multi-qubit Pauli operators
+        whose values are +1 on every valid encoded state. Measuring a check does not disturb the encoded information; it only tells you
+        whether an error has flipped that check. The set of measured check values is the <span class="term" data-term="syndrome">syndrome</span>
+        (review: <a href="https://arxiv.org/abs/1302.3428">Terhal, Rev. Mod. Phys. 87, 307 (2015), arXiv:1302.3428</a>).
+      </p>
+      <p>
+        A check is measured with an <b>ancilla</b> qubit: entangle the ancilla with the check's data qubits through CNOT or CZ gates, then
+        measure the ancilla. The simplest example is the three-qubit <b>repetition code</b> against bit flips. Data qubits 0, 2 and 4 hold
+        the encoded bit; ancilla 1 measures the parity of data 0 and 2, ancilla 3 the parity of data 2 and 4. A single flip on data 0 sets
+        only the first parity, on data 4 only the second, on data 2 both. That is exactly the simulator's
+        <code>superconducting-repetition</code> example: four <code>cx</code> gates, two measurements into syndrome bits <code>s0</code> and
+        <code>s1</code>, and a decode.
+      </p>
+      <p>
+        The <b>surface code</b> is the workhorse of superconducting proposals. It encodes one logical qubit in a d × d patch with d² − 1
+        checks, each acting on up to four neighboring qubits on a square lattice
+        (<a href="https://arxiv.org/abs/quant-ph/0110143">Dennis et al., J. Math. Phys. 43, 4452 (2002)</a>;
+        <a href="https://arxiv.org/abs/1208.0928">Fowler et al., Phys. Rev. A 86, 032324 (2012), arXiv:1208.0928</a>). Because the
+        measurements themselves can be wrong, the checks are measured repeatedly, once per <b>round</b>, and a decoder looks at the changes
+        between rounds, the <b>detection events</b>, across space and time. Google's 2023 experiment ran rounds of 921 ns: 500 ns
+        measurement, 160 ns reset, and the gates in between
+        (<a href="https://arxiv.org/abs/2207.06431">Google Quantum AI, Nature 614, 676 (2023)</a>, Fig. 1); their 2025 processor runs
+        rounds of 1.1 µs (<a href="https://arxiv.org/abs/2408.13687">Nature 638, 920 (2025)</a>). Every round produces about d² new bits per
+        patch, forever.
+      </p>
+
+      <h2 id="decoders"><span class="num">3</span>Decoders</h2>
+      <p class="q">Given a syndrome, which error happened?</p>
+      <p class="insection"><b>In this section:</b> lookup tables, union-find, matching and clustering decoders, and what makes them
+        fast or accurate.</p>
+      <p>
+        A <span class="term" data-term="decoder">decoder</span> is the classical algorithm that turns syndromes into a correction. Many errors
+        produce the same syndrome; the decoder picks the most likely one, or a good approximation.
+      </p>
+      <ul>
+        <li><b>Lookup table.</b> For a tiny code, precompute the correction for every possible syndrome. The repetition example uses the
+          table <code>[0, 1, 4, 2]</code>: syndrome (s1 s0) = 01 flips data 0 (bit e0), 10 flips data 4 (e2), 11 flips data 2 (e1). The table
+          grows as 2<sup>checks</sup>, so this works only for a few bits; the simulator's lookup decode takes 1 to 10 syndrome bits.</li>
+        <li><b>Minimum-weight perfect matching (MWPM).</b> Detection events in the surface code come in pairs at the ends of error chains.
+          Pair them up so that the total weight of the connecting paths is minimal, using Edmonds' blossom algorithm
+          (<a href="https://doi.org/10.4153/CJM-1965-045-4">Edmonds, Can. J. Math. 17, 449 (1965)</a>). Sparse Blossom is a fast software
+          implementation (<a href="https://arxiv.org/abs/2303.15933">Higgott and Gidney, Quantum 9, 1600 (2025), arXiv:2303.15933</a>).</li>
+        <li><b><span class="term" data-term="union-find">Union-find</span>.</b> Grow clusters around detection events and merge them until every
+          cluster holds an even number, then peel a correction inside each. Almost linear time, slightly less accurate than matching
+          (<a href="https://arxiv.org/abs/1709.06218">Delfosse and Nickerson, Quantum 5, 595 (2021), arXiv:1709.06218</a>). Its simple, local
+          operations map well onto FPGA logic.</li>
+        <li><b>Clustering in hardware.</b> Riverlane's Collision Clustering decoder is a union-find variant designed for FPGAs and ASICs
+          (<a href="https://arxiv.org/abs/2309.05558">Barber et al., Nature Electronics 8, 84 (2025), arXiv:2309.05558</a>).</li>
+      </ul>
+
+      <h2 id="deadline"><span class="num">4</span>The decoding deadline</h2>
+      <p class="q">How fast does a decoder have to be?</p>
+      <p>
+        Two different numbers matter, and they are often confused. <b>Throughput</b>: the decoder must process syndromes at least as fast
+        as rounds produce them. A decoder slower than the syndrome stream falls behind by a growing backlog and never recovers (Terhal
+        2015). <b>Latency</b>: the time from the last measurement a decision depends on to the decoded value. Clifford gates can be tracked
+        without waiting, but a logical measurement whose outcome selects the next operation, as in a non-Clifford gate by teleportation,
+        must wait for its decoded value. That wait is the <span class="term" data-term="reaction time">reaction time</span>, and it sets the speed of a fault-tolerant computer
+        (<a href="https://arxiv.org/abs/1210.4626">Fowler, arXiv:1210.4626 (2012)</a>). Gidney and Ekerå's RSA-2048 estimate assumes a
+        10 µs reaction time (<a href="https://arxiv.org/abs/1905.09749">Quantum 5, 433 (2021), arXiv:1905.09749</a>).
+      </p>
+      <p>
+        Google's 2025 below-threshold experiment shows the distinction. Its real-time decoder kept up with a 1.1 µs cycle for up to a million
+        cycles at distance 5, with an average latency of 63 µs (Google Quantum AI 2025, abstract): enough throughput, but a reaction time of
+        tens of microseconds.
+      </p>
+      <div class="ex" data-id="qec.1" data-stars="1" data-kind="choice" data-answer="c">
+        <p>A decoder keeps up with a 1.1 µs round indefinitely, but each decoded value is ready 63 µs after its last round. What does that
+          mean?</p>
+        <ol class="choices">
+          <li data-k="a">It is too slow: the backlog grows without bound.</li>
+          <li data-k="b">It is fast enough for every purpose, because throughput is all that matters.</li>
+          <li data-k="c">Its throughput is sufficient, but any operation that must wait for a decoded value waits about 63 µs.</li>
+          <li data-k="d">The round time must be raised to 63 µs.</li>
+        </ol>
+        <div class="why">Throughput and latency are separate requirements. A pipelined decoder can process many rounds at once and still
+          take a long time on each. The latency becomes the reaction time of every feed-forward on a decoded value.</div>
+      </div>
+
+      <h2 id="frame"><span class="num">5</span>Pauli frames</h2>
+      <p>
+        Most corrections are never played as pulses. Because Pauli errors commute or anticommute with Clifford gates in a known way, a
+        correction can be recorded in software and applied to the interpretation of later measurement results instead. That record is the
+        <span class="term" data-term="Pauli frame">Pauli frame</span> (Terhal 2015; Fowler et al. 2012). A frame update costs a few classical
+        instructions and no quantum operation.
+      </p>
+      <p>
+        In the simulator a frame update is the system call <code>pauli_frame_update</code>. On the ring with a decoder core, it flips bits of
+        the qubit's frame word in the decoder core's RAM and reports the word to the host. It plays no pulse. In the repetition run the
+        first update is stored 22 ns after the decode and the second 16 ns later (<code>docs/riscq-controller.md</code>).
+      </p>
+
+      <h2 id="published"><span class="num">6</span>Published decoder latencies</h2>
+      <p class="insection"><b>In this section:</b> what real decoders achieve, under which conditions, and how that compares with a
+        decoder run as firmware in this model.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Decoder</th><th>Platform</th><th>Condition</th><th class="n">Latency</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td>Helios (union-find)</td><td>FPGA (VCU129)</td><td>d = 21, phenomenological noise 0.1%</td><td class="n">11.5 ns per round, average</td>
+              <td>Liyanage et al., IEEE QCE 2023, <a href="https://arxiv.org/abs/2301.08419">arXiv:2301.08419</a>; IEEE TQE 2024, <a href="https://arxiv.org/abs/2406.08491">arXiv:2406.08491</a></td></tr>
+            <tr><td>Helios in RISC-Q's QEC system</td><td>FPGA</td><td>d = 3, worst-case pattern</td><td class="n">56 ns per decode</td><td>Liu et al., <a href="https://arxiv.org/abs/2603.16203">arXiv:2603.16203</a>, Sec. V-B</td></tr>
+            <tr><td>Helios in RISC-Q's QEC system</td><td>FPGA</td><td>d = 5 and 7, p = 0.001</td><td class="n">65 ns, 90 ns per decode</td><td>same, Sec. V-C</td></tr>
+            <tr><td>RISC-Q with Helios, end to end</td><td>three ZCU216 boards</td><td>d = 3 surface code, 3 rounds; syndrome at the leaves to correction back at the leaves</td><td class="n">446 ns</td><td>same, abstract and Sec. V-B</td></tr>
+            <tr><td>Micro Blossom (MWPM)</td><td>FPGA (VMK180), 62 MHz</td><td>d = 13, circuit-level p = 0.1%</td><td class="n">0.8 µs average</td><td>Wu, Liyanage and Zhong, ASPLOS 2025, <a href="https://arxiv.org/abs/2502.14787">arXiv:2502.14787</a></td></tr>
+            <tr><td>Collision Clustering</td><td>FPGA (XCVU3P)</td><td>881-qubit surface code (d = 21), circuit-level noise</td><td class="n">810 ns per round</td><td>Barber et al. 2025, <a href="https://arxiv.org/abs/2309.05558">arXiv:2309.05558</a></td></tr>
+            <tr><td>Collision Clustering</td><td>12 nm ASIC</td><td>1,057-qubit surface code (d = 23)</td><td class="n">240 ns per round</td><td>same, abstract and Table II</td></tr>
+            <tr><td>Google real-time decoder</td><td>software</td><td>d = 5, 1.1 µs cycle, up to 10⁶ cycles</td><td class="n">63 µs average</td><td>Google Quantum AI, <a href="https://arxiv.org/abs/2408.13687">arXiv:2408.13687</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">The numbers are not directly comparable: they differ in code distance, noise model, whether latency is per round or per
+        decode, and what the clock starts and stops on. The 446 ns breaks down, in the paper, into leaf aggregation 29 ns, fibre to the root
+        157 ns, root aggregation and pre-decode 20 ns, Helios 56 ns, root distribution 25 ns, network back 155 ns and leaf distribution 9 ns.</p>
+      <p>
+        The simulator runs a real decoder too. Helios's repository carries a C program, <code>software_code/union_find.c</code>, that computes
+        what the hardware computes. Compiled for RV32I with RISC-Q's own start-up code and run on one RISC-Q core in the model, it decodes
+        distance 3 in 17 µs with no defect and 34 µs to 58 µs with defects, distance 5 in 94 µs to 285 µs, and distance 7 in 274 µs to 813 µs,
+        and agrees with Helios's own test vectors (<code>docs/riscq-controller.md</code>; lesson <a href="/course/E3">E3</a>). That is a
+        thousand times slower than Helios in FPGA logic, for two reasons: the C program is a reference model that visits every edge on every
+        pass, and it runs on a soft core with the model's <b>assumed</b> cost of one batch per instruction. The comparison shows what
+        decoding in control-core software costs, not what Helios costs.
+      </p>
+      <figure>
+        <img src="/docs/media/riscq-decoder.gif" alt="The compiled Helios decoder running on a RISC-Q core" loading="lazy" />
+        <figcaption><b>A decoder as firmware.</b> The Helios union-find program, compiled C, running on one RISC-Q core in the model. The
+          workspace shows the C source, the RV32I firmware and the decoding graph as it runs. Photographed from the running workspace.</figcaption>
+      </figure>
+
+      <h2 id="ftqvm"><span class="num">7</span>The system-call model</h2>
+      <p class="q">How can a scheduler reason about a million-qubit machine without simulating every pulse?</p>
+      <p class="insection"><b>In this section:</b> the fault-tolerant virtual machine's services, its rate formula, its decode duration,
+        and what this simulator measures for it.</p>
+      <p>
+        The companion paper of this project describes a fault-tolerant quantum virtual machine (FTQVM). It virtualizes the resources of a
+        fault-tolerant computer behind a small set of <span class="term" data-term="system call">system calls</span>, so that one program runs on
+        superconducting, ion and atom machines alike. The paper's premise is that, to first order, each mechanism is described by <b>one
+        latency and one capacity</b>. A program obtains services only through system calls, and a machine is a declaration of their latencies
+        and capacities. The calls are:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Call</th><th>What it does on hardware</th><th>Demand</th></tr></thead>
+          <tbody>
+            <tr><td><code>request_ancilla N</code></td><td>N qubits reset to |0⟩, usable after the preparation latency λ<sub>p</sub></td><td>qubits + N; preparation rate r(N, λ<sub>p</sub>)</td></tr>
+            <tr><td><code>route q₁ … qₙ</code></td><td>brings qubits together so that two-qubit gates among them are allowed: AOD moves, shuttles or SWAP chains</td><td>routing rate r(n, λ<sub>r</sub>)</td></tr>
+            <tr><td><code>gate</code></td><td>pulses for the gate, for example H · CZ · H for a CNOT</td><td>one gate slot</td></tr>
+            <tr><td><code>measure q -&gt; c[i]</code></td><td>readout and IQ threshold</td><td>classical rate r(1, λ<sub>m</sub>)</td></tr>
+            <tr><td><code>decode_syndrome</code></td><td>the decoder computes a correction from syndrome bits</td><td>one decoder; classical rate r(n, I) during its input phase</td></tr>
+            <tr><td><code>pauli_frame_update</code></td><td>frame bits flip, no pulse</td><td>classical rate r(n, λ<sub>u</sub>)</td></tr>
+            <tr><td><code>request_magic</code></td><td>one factory run produces a magic state</td><td>one factory, plus the factory contract's demands</td></tr>
+            <tr><td><code>release_ancilla N</code></td><td>frees N qubits</td><td>qubits − N</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>An operation that moves N items (bits or qubits) in D nanoseconds reserves, for its whole interval,</p>
+      <div class="formula">r(N, D) = ⌈1000 · N / D⌉ items/µs</div>
+      <p>
+        and concurrent reservations add up, so that at no instant may the sum on a service exceed its capacity C. Since r(N, D) ≤ C exactly when
+        1000 N ≤ C D, moving N bits over a link of capacity C takes at least ⌈1000 N / C⌉ ns however it is placed. A decode of n bits on a
+        decoder with input bandwidth b, and cap = min(b, C), lasts
+      </p>
+      <div class="formula">δ = λ<sub>d</sub>(n) &nbsp;&nbsp;if r(n, λ<sub>d</sub>(n)) ≤ cap<br />
+        δ = I + λ<sub>d</sub>(n), &nbsp;I = ⌈1000 n / cap⌉ &nbsp;&nbsp;otherwise</div>
+      <p>
+        The paper's model of Gidney and Ekerå's machine splits the 10 µs reaction time into a 550 ns measurement and a 9.45 µs decoder latency
+        with b = 728 bits/µs. A decode of the 27 rounds of one lattice-surgery operation reads 19,656 bits, more than 728 bits/µs over its latency
+        allows, so it needs an input phase of exactly 27 µs, and its outcome is ready 37 µs after the last measurement starts.
+      </p>
+      <div class="ex" data-id="qec.2" data-stars="2" data-kind="number" data-unit="bits/µs" data-answer="728">
+        <p>A decode reads 19,656 syndrome bits during an input phase of 27 µs. What rate r(N, D) does it reserve on the classical link?</p>
+        <div class="why">r = ⌈1000 · 19,656 / 27,000⌉ = ⌈728⌉ = 728 bits/µs, exactly the decoder's input bandwidth b. That is why the input phase
+          is 27 µs: it is the shortest time in which 19,656 bits fit through 728 bits/µs.</div>
+      </div>
+      <h3>What the simulator realizes and measures</h3>
+      <p>
+        On the transmon ring the simulator accepts a program of system calls on physical qubits: <code>gate</code>, <code>measure</code>,
+        <code>decode_syndrome</code> and <code>pauli_frame_update</code>. The build then has one more RISC-Q core, the decoder. The measuring cores
+        publish their bits through the hub; after a barrier, the decoder reads the syndrome as one field of a shared word, looks the correction
+        up in a table in its RAM, stores the decoded bits, and publishes those that condition a gate. <code>request_ancilla</code>, <code>route</code>
+        and <code>request_magic</code> are rejected on this machine: its calibration has no reset pulse, its couplers are fixed, and it has no
+        factory. The repetition example is compiled into three segments: the syndrome circuit and measurements, the decode and frame updates,
+        and the conditioned <code>x</code> on data qubit 2.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Quantity</th><th>Run</th><th>Model result</th></tr></thead>
+          <tbody>
+            <tr><td>Syndrome to decoder</td><td>Repetition round, 2 syndrome bits</td><td>last bit in the decoder's board register 86 ns after its window closes</td></tr>
+            <tr><td>Decode</td><td>Lookup decoder on a RISC-Q core</td><td>reads the syndrome at 112 ns; 64 ns for three decoded bits; decoded at 176 ns</td></tr>
+            <tr><td>Decoded bit at every core</td><td>same</td><td>196 ns; the conditioned pulse opens at 490 ns, against 344 ns for a pulse conditioned directly on a measured bit</td></tr>
+            <tr><td>Hub bandwidth</td><td>n cores publish on one batch</td><td>one bit per batch for the whole board, 500 bits/µs at 500 MHz</td></tr>
+            <tr><td>Route latency</td><td>ZAC 14-qubit program, 26 rearrangement jobs</td><td>90.5 µs to 145.1 µs, median 101.2 µs; one declared latency of 145.1 µs overcharges the median route by 43%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">From <code>riscq/syscalls.mjs</code> reports on the <code>superconducting-repetition</code> and <code>neutral-bv14</code> runs,
+        reproduced for this chapter, and <code>docs/riscq-controller.md</code>. Times after the close of the readout window.</p>
+      <p>
+        The last row is the paper's own caveat made concrete: the FTQVM gives a route one latency regardless of distance, and atom moves whose
+        duration depends on distance are one of the two mechanisms in its corpus that one latency does not describe. The hub row shows the
+        other direction of the comparison: one bit per message is fine for a repetition code, but syndrome traffic at the rate the paper's
+        factory model needs, 132,496 bits/µs, would need a much wider path than this hub.
+      </p>
+      <div class="ex" data-id="qec.3" data-stars="1" data-kind="number">
+        <p>Run the repetition-code example. Into how many segments does the compiler split its hardware instructions?</p>
+        <div class="why">Each segment boundary is a point where a bit produced on one core is needed by another: the syndrome bits must reach
+          the decoder core, and the decoded bit e1 must reach qubit 2's core. Each crossing costs a barrier.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A measured bit crosses acquisition, decision, publication, distribution and synchronization before a conditioned pulse can play.</li>
+          <li>On the modeled ring: result at the core 34 ns, at the hub 70 ns, at every core 86 ns, conditioned pulse 344 ns after the window.</li>
+          <li>Checks measured each round give the syndrome; the surface code has d² − 1 checks per patch and needs repeated rounds.</li>
+          <li>Decoders range from lookup tables to union-find and matching. Union-find suits hardware; matching is more accurate.</li>
+          <li>Throughput keeps the backlog bounded. Latency is the reaction time every decision on a decoded value waits for.</li>
+          <li>Corrections are usually tracked in a Pauli frame, not played.</li>
+          <li>The FTQVM charges each call one latency and one capacity, with rate r(N, D) = ⌈1000 N / D⌉ items/µs.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      course({
+        answers: {
+          "qec.3": async (api) => (await api.run({ example: "superconducting-repetition" })).hardware.segments.length,
+        },
+      });
+    </script>
+  </body>
+</html>

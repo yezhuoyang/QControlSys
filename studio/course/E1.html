@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>E1 · Feedback latency · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="E1">
+    <article>
+      <p class="kicker">Part E · Lesson 1</p>
+      <h1>Feedback latency</h1>
+      <p class="lead">
+        A readout window closes. Some time later a pulse that depends on its result opens on another qubit. Error correction
+        lives or dies by that interval. This lesson takes it apart, stage by stage, on the eight-transmon ring.
+      </p>
+      <p class="pre">
+        You should know what a batch, a posted write, the lead and the board hub are (lessons <a href="/course/A2">A2</a>,
+        <a href="/course/B2">B2</a>, <a href="/course/B3">B3</a> and <a href="/course/B4">B4</a>). The
+        <a href="/course/background/qec">background chapter on measurement, feedback and decoding</a> explains why the interval
+        matters for fault tolerance.
+      </p>
+
+      <h2 id="why"><span class="num">1</span>Why one interval matters</h2>
+      <p class="q">What is the controller doing between a measurement and the gate that depends on it?</p>
+      <p>
+        In <span class="term" data-term="feed-forward">feed-forward</span> a later operation depends on a result obtained in the
+        same run. Error correction is feed-forward at scale. Every round produces a <span class="term" data-term="syndrome">syndrome</span>,
+        a <span class="term" data-term="decoder">decoder</span> turns it into a correction, and a logical measurement whose result
+        selects the next gate has to wait for the decoded value. This wait is the reaction time, and it sets how fast a
+        fault-tolerant computer can execute non-Clifford gates
+        (<a href="https://arxiv.org/abs/1210.4626">A. G. Fowler, "Time-optimal quantum computation", arXiv:1210.4626, 2012</a>).
+      </p>
+      <p>
+        The fault-tolerant virtual machine of the companion paper (the FTQVM, lesson <a href="/course/E2">E2</a>) does not model
+        this path in detail. It charges a measurement one latency, a decode another, and a frame update a third. Its model of
+        Gidney and Ekerå's RSA-2048 estimate (<a href="https://doi.org/10.22331/q-2021-04-15-433">Quantum 5, 433, 2021</a>), for
+        example, splits that estimate's 10 µs reaction time into a 550 ns measurement and a 9.45 µs decoder latency. Those are declared numbers. This lesson measures what the classical part of that path costs in a model of a real
+        controller, so you can see what a declared latency has to cover.
+      </p>
+      <div class="note"><b>Scope.</b> Everything below is the classical controller. No quantum state is simulated, the
+        measured bit is an input you choose, and the readout window itself (the 658 ns demodulation of qubit 0) is not counted:
+        the clock starts when the window closes.</div>
+
+      <h2 id="program"><span class="num">2</span>The program and the number</h2>
+      <p class="insection"><b>In this section:</b> the run this lesson measures, and the four times read from its trace.</p>
+      <p>
+        The run is the Bell program of lesson <a href="/course/A1">A1</a>: <code>c = measure q[0]; if (c) x q[2];</code> on the
+        RISC-Q <code>x6y3</code> build. The bit is measured by qubit 0's <span class="term" data-term="core">core</span> and the
+        conditioned <code>x</code> is played by qubit 2's core. One <span class="term" data-term="batch">batch</span> is one cycle
+        of the 500 MHz dspClk, 2 ns. The posted <span class="term" data-term="link">link</span> of this build has two stages.
+      </p>
+      <p>
+        The function <code>feedbackSamples</code> in <code>riscq/syscalls.mjs</code> reads four moments from the
+        <span class="term" data-term="trace">trace</span>, each in ns after the window closes:
+      </p>
+      <div class="tw"><table>
+        <tr><th>Moment</th><th>Trace frame it reads</th><th class="n">ns</th></tr>
+        <tr><td>Result at the measuring core</td><td><code>result</code> on <code>q0.inbox</code></td><td class="n">34</td></tr>
+        <tr><td>Published at the hub</td><td><code>publish</code> on <code>hub</code></td><td class="n">70</td></tr>
+        <tr><td>At every core</td><td><code>board</code> on each inbox, child of the publish</td><td class="n">86</td></tr>
+        <tr><td>Conditioned pulse opens</td><td><code>pulse</code> on <code>q2.gate</code></td><td class="n">344</td></tr>
+      </table></div>
+      <p>
+        The test <code>tests/riscq-syscalls.test.mjs</code> asserts these four values. You will read them yourself from a run in
+        the exercises, so they cannot drift from what the simulator does.
+      </p>
+      <div class="ex" data-id="E1.1" data-stars="1" data-kind="number" data-unit="ns">
+        <p>Run the program with the bit set to 1. How many ns after qubit 0's demodulation window closes is the result in qubit 0's
+          result register?</p>
+        <div class="why">The answer function finds the <code>result</code> frame of the measurement and subtracts the window's
+          closing batch: 17 batches of 2 ns. Section 3 explains the 17.</div>
+      </div>
+
+      <h2 id="stages"><span class="num">3</span>Stage by stage</h2>
+      <p class="insection"><b>In this section:</b> each stage of the path, with the latency parameter of <code>riscq/soc.mjs</code>
+        that sets it and the RISC-Q document that parameter comes from.</p>
+      <figure>
+        <svg viewBox="0 0 760 250" role="img" aria-label="The feedback path from window close to the conditioned pulse, on a time axis">
+          <style>
+            .fb text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: #111827; }
+            .fb .s { font-size: 11px; fill: #586174; }
+            .fb .m { font: 11px ui-monospace, Consolas, monospace; fill: #586174; }
+            .fb .ax { stroke: #8a9a9c; stroke-width: 1; }
+            .fb .tick { stroke: #8a9a9c; stroke-width: 1; }
+          </style>
+          <g class="fb">
+            <line class="ax" x1="30" y1="200" x2="730" y2="200" />
+            <!-- scale: x = 30 + 2 * ns -->
+            <rect x="30" y="40" width="68" height="26" fill="#eef0fe" stroke="#4338ca" />
+            <text x="38" y="57">readout</text>
+            <rect x="98" y="72" width="36" height="26" fill="#eef3fb" stroke="#1e1b4b" />
+            <text x="101" y="89">core</text>
+            <rect x="134" y="104" width="36" height="26" fill="#fdf0ea" stroke="#c4622d" />
+            <text x="136" y="121">hub ↓</text>
+            <rect x="170" y="136" width="32" height="26" fill="#fdf0ea" stroke="#c4622d" />
+            <text x="172" y="153">hub ↑</text>
+            <rect x="170" y="40" width="36" height="26" fill="#efedf8" stroke="#5b4a8a" />
+            <text x="210" y="50" class="s">q0 arrives at the barrier;</text>
+            <text x="210" y="63" class="s">release time t0 at 88 ns</text>
+            <rect x="206" y="104" width="512" height="26" fill="#fbf4e2" stroke="#d59a00" />
+            <text x="216" y="121">SYNC_LEAD: 128 batches from the release time to the first start time</text>
+            <g class="tick">
+              <line x1="30" y1="195" x2="30" y2="205" /><line x1="98" y1="195" x2="98" y2="205" />
+              <line x1="170" y1="195" x2="170" y2="205" /><line x1="202" y1="195" x2="202" y2="205" />
+              <line x1="206" y1="190" x2="206" y2="210" /><line x1="718" y1="195" x2="718" y2="205" />
+            </g>
+            <text class="m" x="26" y="222">0</text><text class="m" x="90" y="222">34</text>
+            <text class="m" x="160" y="222">70</text><text class="m" x="194" y="238">86</text>
+            <text class="m" x="208" y="222">88</text><text class="m" x="706" y="222">344 ns</text>
+            <text class="s" x="30" y="20">window closes</text>
+            <text class="s" x="610" y="20">x opens on qubit 2</text>
+            <line class="tick" x1="718" y1="26" x2="718" y2="100" stroke-dasharray="3 3" />
+          </g>
+        </svg>
+        <figcaption><b>The feedback path of the Bell program.</b> Times in ns after the window closes, read from the trace.
+          <i>readout</i>: the readout decoder and the report to the core's sink; <i>core</i>: qubit 0's instructions;
+          <i>hub ↓</i> and <i>hub ↑</i>: the trip to the hub and back. Boxes on the upper rows run in parallel with the lower ones: qubit 0's core arrives at the barrier while its bit is still
+          on the way back from the hub. Schematic drawing, to scale on the time axis.</figcaption>
+      </figure>
+
+      <h3>0 to 34 ns: decoder and report</h3>
+      <p>
+        When the window closes, the readout channel still has to turn the integral into a bit. RISC-Q's
+        <code>ReadoutDecoder.md</code> gives its pipeline as a complex multiply of 6 stages, one more stage, and
+        log₂ 4 = 2 stages for the four ADC samples of a batch: 9 batches. The bit then travels back to the core's <span class="term" data-term="sink">sink</span> over the report
+        path of <code>EventLink.md</code>: up to three puts, a merge, the link and the sink, <code>reportUp = 3 + 2 + L + 1</code>
+        batches for a link of <code>L</code> stages. With <code>L = 2</code> that is 8. In all 17 batches, 34 ns. The report latency
+        is an <b>assumed worst case</b> of the stages that document lists; RISC-Q gives no single number.
+      </p>
+      <h3>34 to 52 ns: the measuring core</h3>
+      <p>
+        Qubit 0's core has been stalled since before the window opened, in a load of the result register. The
+        <code>result</code> frame wakes it one batch later. It then stores the bit in its RAM, reports it to the host window and
+        issues the publish: a store into the put window that names shared group 0, slot 0. That store leaves 26 batches after the
+        window closed. The core costs one batch per instruction plus a penalty for each load, store and taken branch, an
+        <b>assumed</b> cost model (<code>riscq/soc.mjs</code> <code>model</code>).
+      </p>
+      <h3>52 to 86 ns: through the hub and back</h3>
+      <p>
+        The publish crosses to the <span class="term" data-term="hub">board hub</span>: bridge, link, the per-core queue and the
+        arbiter, decode and dispatch, <code>hubDown = 1 + L + 2 + 4</code> = 9 batches. The hub writes the bit into group 0 and
+        sends the new word to every core: replica and link, core merge, link, inbox, <code>hubUp = 1 + L + 2 + L + 1</code> = 8
+        batches. Both follow <code>PutHub.md</code>, which states 23 batches for the round trip at a link depth of 4. At depth 2 it
+        is 17. The bit reaches every core 43 batches after the window closed, 86 ns.
+      </p>
+      <h3>86 to 344 ns: waiting for the next segment</h3>
+      <p>
+        Qubit 2's core cannot simply read its board register and fire. It does not know when the bit has arrived, and its pulse
+        must open on a batch it agreed on with the other cores. The compiler therefore starts a new segment: all three active cores
+        meet at a <span class="term" data-term="barrier">barrier</span>, and the last arrival releases them with the hub's own time
+        <code>t0</code>. Qubit 0's core arrives last, because it first had to read the result and publish it. Its arrival is dispatched at 88 ns, so
+        <code>t0</code> is 44 batches after the window closed.
+      </p>
+      <p>
+        Each core then sets its new time base to <code>t0 + SYNC_LEAD</code>, with <code>SYNC_LEAD = LEAD + 32</code> = 128
+        batches (<code>riscq/firmware.mjs</code>). The 96-batch <span class="term" data-term="lead">lead</span> is RISC-Q's own
+        software lead (<code>map.py</code>): a write issued that early reaches its channel and every
+        <span class="term" data-term="timed queue">timed queue</span> before its start time. The extra 32 batches cover the delivery of
+        the release to the cores (8 batches here) and the instructions that read it. They are this project's firmware choice. The
+        conditioned <code>x</code> sits at offset 0 of the new segment, so it opens at <code>t0 + 128</code>: 44 + 128 = 172
+        batches, 344 ns.
+      </p>
+      <figure class="live" data-title="The result settles in qubit 0's sink" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=404&view=control">
+        <figcaption><span>The run stopped at the <code>result</code> frame on <code>q0.inbox</code>. Step forward to the publish, the eight
+          <code>board</code> frames, the barrier release and, about 40 steps later, the pulse on <code>q2.gate</code>.</span></figcaption>
+      </figure>
+      <div class="ex" data-id="E1.2" data-stars="1" data-kind="number" data-unit="ns">
+        <p>How many ns after the window closes is the measured bit in every core's board register?</p>
+        <div class="why">The latest <code>board</code> frame whose parent is the publish, minus the window's end. The bit needs 17
+          batches from the core's store to every board: 9 down to the hub, 8 back.</div>
+      </div>
+      <div class="ex" data-id="E1.3" data-stars="2" data-kind="choice" data-answer="c">
+        <p>Which stage of this path is the longest?</p>
+        <ol class="choices">
+          <li data-k="a">The readout decoder and report path.</li>
+          <li data-k="b">The trip through the board hub and back.</li>
+          <li data-k="c">The schedule lead between the barrier release and the conditioned pulse.</li>
+          <li data-k="d">The instructions of the measuring core.</li>
+        </ol>
+        <div class="why">256 of the 344 ns lie between the barrier's release time and the pulse. The bit itself is at every core
+          after 86 ns. The rest is the price of issuing writes ahead and landing them exactly, which lesson
+          <a href="/course/B2">B2</a> explains. A firmware that fired a pre-loaded pulse as soon as the bit arrived would be
+          faster and would give up the exact start time.</div>
+      </div>
+      <div class="ex" data-id="E1.4" data-stars="2" data-kind="number" data-unit="batches">
+        <p>Read it from the trace: how many batches separate the barrier's release time <code>t0</code> (the <code>release</code>
+          frame on the hub) from the batch on which the conditioned pulse opens?</p>
+        <div class="why"><code>SYNC_LEAD = LEAD + 32</code>: the 96-batch lead plus 32 batches for the release to reach the cores
+          and be read. The answer function subtracts the hub's <code>t0</code> from the pulse's opening batch.</div>
+      </div>
+      <div class="ex" data-id="E1.5" data-stars="1" data-kind="number" data-unit="ns">
+        <p>How many ns after the window closes does the conditioned pulse open?</p>
+        <div class="why">44 batches to the release time plus 128 of lead: 172 batches, 344 ns. The pulse then needs the DAC
+          pipeline and 1,050 mm of coax before it reaches the qubit, which this measurement does not count.</div>
+      </div>
+
+      <h2 id="parameters"><span class="num">4</span>What the numbers depend on</h2>
+      <p class="insection"><b>In this section:</b> which parameters move which stage, and which ones are assumptions.</p>
+      <p>
+        Every stage above is a formula in a few build parameters. That is what makes the model useful as a calibration: change the
+        build and you know which part of the path moves.
+      </p>
+      <div class="tw"><table>
+        <tr><th>Stage</th><th>Batches</th><th>Formula</th><th>Basis</th></tr>
+        <tr><td>Readout decoder</td><td class="n">9</td><td><code>decoder</code></td><td>RISC-Q <code>ReadoutDecoder.md</code></td></tr>
+        <tr><td>Report to sink</td><td class="n">8</td><td><code>3 + 2 + L + 1</code></td><td>Assumed worst case of <code>EventLink.md</code></td></tr>
+        <tr><td>Measuring core</td><td class="n">9</td><td>instructions × cost</td><td>Assumed core cost model</td></tr>
+        <tr><td>Core to hub</td><td class="n">9</td><td><code>1 + L + 2 + 4</code></td><td>RISC-Q <code>PutHub.md</code></td></tr>
+        <tr><td>Hub to every core</td><td class="n">8</td><td><code>1 + L + 2 + L + 1</code></td><td>RISC-Q <code>PutHub.md</code></td></tr>
+        <tr><td>Release to pulse</td><td class="n">128</td><td><code>LEAD + 32</code></td><td>RISC-Q <code>map.py</code> LEAD, plus this project's margin</td></tr>
+      </table></div>
+      <p>
+        The link depth <code>L</code> appears in four places. The hub also adds a wait whenever several messages arrive in the same
+        batch, because it passes one message per batch for the whole board; lesson <a href="/course/E4">E4</a> measures that. In
+        this run three barrier arrivals reach the hub within a few batches, and each waits its turn.
+      </p>
+      <div class="ex" data-id="E1.6" data-stars="3" data-kind="number" data-unit="ns">
+        <p>Suppose the posted link had four stages instead of two, as in RISC-Q's default build. How many ns after the window
+          closes would the result reach the measuring core? Use the formulas of the table.</p>
+        <div class="why">The decoder stays at 9 batches. The report path becomes 3 + 2 + 4 + 1 = 10. 19 batches, 38 ns. The answer
+          function reads the latency parameters of the run (<code>program.model</code>) and replaces the link depth.</div>
+      </div>
+
+      <h2 id="published"><span class="num">5</span>Against published systems</h2>
+      <p class="insection"><b>In this section:</b> two measured systems, what their numbers cover, and why they are not the same
+        quantity as the model's.</p>
+      <p>
+        <b>RISC-Q's own QEC system.</b> Liu, Lee, Xu, Huang and Wu built the controller this model follows into a three-board
+        error-correction system on AMD ZCU216 RFSoC boards, with the Helios union-find decoder in FPGA logic
+        (<a href="https://arxiv.org/abs/2603.16203">Liu et al., arXiv:2603.16203, 2026</a>). They report an end-to-end
+        decoding-feedback latency of 446 ns for a distance-3 surface code, from the moment the final syndrome bits are available
+        on the leaf boards to the moment the decoded error information is back and ready for feedback. They break it into
+        206 ns of syndrome aggregation, 56 ns of decoding and 189 ns of error distribution; about 312 ns of that is two fibre
+        transfers between boards. The measurement used no qubits: the RF outputs were looped back into the readout ADCs.
+      </p>
+      <p>
+        <b>Google's below-threshold experiment.</b> Acharya et al. ran a distance-5 surface code with a real-time decoder and report
+        an average decoder latency of 63 µs (± 17 µs), up to a million cycles of 1.1 µs, defined as the time between the decoding
+        software receiving the final cycle of syndromes and returning its correction
+        (<a href="https://arxiv.org/abs/2408.13687">Acharya et al., "Quantum error correction below the surface code threshold",
+        arXiv:2408.13687, 2024</a>). The decoder is a multi-threaded C++ implementation of sparse blossom matching on a workstation
+        that receives the measurements over Ethernet.
+      </p>
+      <div class="warn"><b>Not the same quantity.</b> The model's 86 ns is one board, no decoder, from window close to every core.
+        Liu et al.'s 446 ns starts after the syndrome bits exist, crosses three boards over fibre and includes a decode. Google's
+        63 µs is a software decoder alone. Use the model to see the <i>structure</i> of the path and which parameter moves which
+        stage, not to rank systems. Lesson <a href="/course/E2">E2</a> adds a decoder core to the same ring.</div>
+      <p>
+        One comparison is fair: the order of magnitude. On a single board the controller's share of feedback is tens to hundreds of
+        nanoseconds. A software decoder on a separate computer costs tens of microseconds. That is why the Gidney–Ekerå assumption
+        of a 10 µs reaction time is a statement about the decoder, and why the companion paper finds that a fast classical path from
+        measurement to decoder to frame matters more than more factories.
+      </p>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>On the x6y3 ring a measured bit is at its own core 34 ns after the window closes and at every core after 86 ns.</li>
+          <li>A pulse conditioned on it opens at 344 ns: most of that is the lead after the barrier, the price of exact timing.</li>
+          <li>Each stage is a formula in build parameters: the decoder pipeline, the link depth, the hub, the core's instructions.</li>
+          <li>The report path and the core cost are assumptions; the decoder and hub latencies come from RISC-Q's documents.</li>
+          <li>Published feedback numbers measure different intervals. Compare the structure, not the totals.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      // The same reading as riscq/syscalls.mjs feedbackSamples, from the run bundle.
+      async function feedback(api) {
+        const run = await feedforward(api);
+        const periodNs = run.machine.dspPeriodPs / 1000;
+        const ops = run.hardware.segments.flatMap((s) => s.ops);
+        const measure = ops.find((o) => o.op === "measure" && o.result === "c");
+        const window = run.summary.pulses.find((p) => p.source === measure.id && p.kind === "demod");
+        const after = (test) => run.frames.find((f) => f.atBatch >= window.closes && test(f));
+        const result = after((f) => f.op === "result" && f.source === measure.id);
+        const publish = after((f) => f.op === "publish" && f.source === measure.id);
+        const boards = run.frames.filter((f) => f.op === "board" && f.parents.includes(publish.id));
+        const conditioned = ops.filter((o) => o.when === "c").map((o) => run.summary.pulses.find((p) => p.source === o.id)).filter(Boolean);
+        const opens = Math.min(...conditioned.map((p) => p.opens));
+        const release = run.frames.filter((f) => f.op === "release" && f.atBatch <= opens).at(-1);
+        return {
+          run, periodNs,
+          result: (result.atBatch - window.closes) * periodNs,
+          everyCore: (Math.max(...boards.map((f) => f.atBatch)) - window.closes) * periodNs,
+          pulse: (opens - window.closes) * periodNs,
+          leadBatches: opens - release.state.t0,
+        };
+      }
+      course({
+        answers: {
+          "E1.1": async (api) => (await feedback(api)).result,
+          "E1.2": async (api) => (await feedback(api)).everyCore,
+          "E1.4": async (api) => (await feedback(api)).leadBatches,
+          "E1.5": async (api) => (await feedback(api)).pulse,
+          "E1.6": async (api) => {
+            const { run, periodNs } = await feedback(api);
+            const m = run.program.model;
+            // reportUp = 3 + 2 + L + 1: replace the build's link depth by four stages.
+            return (m.decoder + (m.reportUp - m.linkPipe + 4)) * periodNs;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

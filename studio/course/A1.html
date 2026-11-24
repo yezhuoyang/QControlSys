@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A1 · The stack in one picture · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="A1">
+    <article>
+      <p class="kicker">Part A · Lesson 1</p>
+      <h1>The stack in one picture</h1>
+      <p class="lead">
+        A quantum program is four lines of text. A quantum computer is a cryostat, cables, converters and a dozen small
+        processors. This lesson follows one program through every layer in between.
+      </p>
+      <p class="pre">
+        No background is needed. If a word is underlined with dots, hover over it for a one-sentence definition. The
+        <a href="/course/background/qubits">background chapter on qubits</a> explains the physics this lesson only names.
+      </p>
+
+      <h2 id="program"><span class="num">1</span>A program is not enough</h2>
+      <p class="q">What does it take to run <code>h q[0]</code> on a real machine?</p>
+      <p>
+        Here is the program this lesson follows. It prepares two entangled qubits, measures one, and flips a third qubit
+        if the measurement gave 1. Experimentalists call the last step <span class="term" data-term="feed-forward">feed-forward</span>:
+        a later operation depends on a result obtained during the same run.
+      </p>
+      <pre><code>OPENQASM 3.0;
+include "stdgates.inc";
+qubit[3] q;
+bit c;
+h q[0];
+cx q[0], q[1];
+c = measure q[0];
+if (c) x q[2];</code></pre>
+      <p>
+        None of these lines can be executed by the qubits themselves. A <span class="term" data-term="transmon">transmon</span>
+        qubit responds to a microwave pulse of a precise frequency, amplitude, phase and duration, arriving on its drive line
+        at a precise nanosecond. Something has to decide every one of those numbers, store them, and release them on time.
+        That something is the <b>control system</b>, and most of this course is about it.
+      </p>
+
+      <h2 id="layers"><span class="num">2</span>Five layers</h2>
+      <p class="insection"><b>In this section:</b> the five representations a program passes through, and which part of the machine owns each.</p>
+      <figure>
+        <svg viewBox="0 0 760 330" role="img" aria-label="The five layers of the stack">
+          <style>
+            .lay rect { stroke: #e6e5e1; stroke-width: 1; rx: 10; }
+            .lay text { font: 600 14px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .lay .s { font: 400 12.5px ui-sans-serif, system-ui, sans-serif; fill: #52514e; }
+            .lay .m { font: 12px ui-monospace, Menlo, monospace; fill: #52514e; }
+            .arr { stroke: #8a8985; stroke-width: 1.5; marker-end: url(#tip); }
+          </style>
+          <defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a8985" /></marker></defs>
+          <g class="lay">
+            <rect x="10" y="8" width="740" height="52" fill="#eef3fb" /><text x="26" y="30">1 · Source</text>
+            <text class="s" x="26" y="49">What the programmer writes: OpenQASM, a QCCD Studio program, a ZAC program, system calls.</text>
+            <text class="m" x="600" y="30">h q[0];</text>
+            <rect x="10" y="72" width="740" height="52" fill="#fdf0ea" /><text x="26" y="94">2 · Hardware instructions</text>
+            <text class="s" x="26" y="113">Timed physical operations of one platform: pulses, shuttles, moves, measurements, in picoseconds.</text>
+            <text class="m" x="600" y="94">x90 q0 @0, 36 ns</text>
+            <rect x="10" y="136" width="740" height="52" fill="#eaf7f1" /><text x="26" y="158">3 · Firmware</text>
+            <text class="s" x="26" y="177">RV32I machine code for each control core: register writes issued ahead of their start times.</text>
+            <text class="m" x="600" y="158">sw x0, 0(x6)</text>
+            <rect x="10" y="200" width="740" height="52" fill="#efedf8" /><text x="26" y="222">4 · Controller</text>
+            <text class="s" x="26" y="241">Cores, links, timed queues, converters. Here a Lean model executes the firmware and records every event.</text>
+            <text class="m" x="600" y="222">window opens @ batch 320</text>
+            <rect x="10" y="264" width="740" height="52" fill="#fbf4e2" /><text x="26" y="286">5 · Wires and qubits</text>
+            <text class="s" x="26" y="305">Coax, fibre or free-space light carries each signal to the qubit, trap electrode or atom it acts on.</text>
+            <text class="m" x="600" y="286">qubit0 @ 657.003 ns</text>
+          </g>
+        </svg>
+        <figcaption><b>The stack.</b> Each layer is produced from the one above it. The right column shows what <code>h q[0]</code> looks like at each layer of the run in this lesson. Schematic drawing.</figcaption>
+      </figure>
+      <p>
+        Layers 1 to 3 are programs. They are produced by compilers and can be read like text. Layers 4 and 5 are hardware.
+        In a laboratory you would observe them with an oscilloscope. Here they are <b>simulated</b>: the firmware of layer 3
+        runs in a model of the controller, written in <span class="term" data-term="Lean">Lean</span>, and every event it
+        produces is recorded in a <span class="term" data-term="trace">trace</span>.
+      </p>
+      <div class="note"><b>What is not simulated.</b> No quantum state. The simulator follows every classical signal to the
+        qubit it reaches, but the qubit's response is not computed. A measurement result is an input you choose.</div>
+
+      <h2 id="instructions"><span class="num">3</span>From source to hardware instructions</h2>
+      <p>
+        The first compiler step replaces each gate by operations the hardware can perform, and gives each one a start time.
+        On this eight-transmon machine the native operations are a 90° rotation (<code>x90</code>), a 180° rotation
+        (<code>x</code>), a two-qubit <code>cz</code> and a <code>measure</code>. A rotation about the Z axis is not played at
+        all: it becomes a <span class="term" data-term="virtual Z">virtual Z</span>, a phase added to every later pulse of
+        that qubit. The hardware program lists these as <code>frame</code> instructions of zero duration.
+      </p>
+      <div class="ex" data-id="A1.1" data-stars="1" data-kind="choice" data-answer="b">
+        <p>The line <code>h q[0]</code> becomes which hardware instructions?</p>
+        <ol class="choices">
+          <li data-k="a">One <code>x90</code> pulse on qubit 0.</li>
+          <li data-k="b">Frame updates (virtual Z) around one <code>x90</code> pulse on qubit 0.</li>
+          <li data-k="c">A <code>cz</code> between qubit 0 and itself.</li>
+          <li data-k="d">Nothing: a Hadamard is free.</li>
+        </ol>
+        <div class="why">A Hadamard is Z(π/2) · X(π/2) · Z(π/2) up to a global phase. The two Z rotations become frame updates,
+          and the calibration adds two more around each <code>x90</code>. Only the <code>x90</code> plays a pulse: 36 ns
+          on qubit 0's drive line.</div>
+      </div>
+      <div class="ex" data-id="A1.2" data-stars="1" data-kind="number">
+        <p>Run the program. How many hardware instructions does it compile to in all?</p>
+        <div class="why">The compiler emits one instruction per native operation, including every frame update and the
+          frame corrections that end a CZ. Count them in the <b>Hardware instructions</b> column of the workspace.</div>
+      </div>
+      <div class="ex" data-id="A1.3" data-stars="2" data-kind="number">
+        <p>How many of those instructions play no pulse at all?</p>
+        <div class="why">Every <code>frame</code> instruction is a virtual Z: it changes a number in the firmware and plays
+          nothing. On superconducting machines most single-qubit gates are mostly phase bookkeeping.</div>
+      </div>
+
+      <h2 id="firmware"><span class="num">4</span>From hardware instructions to firmware</h2>
+      <p>
+        The second step writes a program for each <span class="term" data-term="core">control core</span>. This machine
+        has one core per qubit, each a small RISC-V processor next to its qubit's converters. A core does not produce
+        samples. It writes registers: which entry of a <span class="term" data-term="pulse table">pulse table</span> to play,
+        and at which <span class="term" data-term="batch">batch</span> to start it. Those writes are issued about 96 batches
+        early; lesson <a href="/course/B2">B2</a> explains why.
+      </p>
+      <div class="ex" data-id="A1.4" data-stars="1" data-kind="number">
+        <p>The machine has eight cores. How many of them issue at least one timed write in this run?</p>
+        <div class="why">Only qubits 0, 1 and 2 are used, so only their cores have work. The other five run a six-word
+          program that parks them at once.</div>
+      </div>
+
+      <h2 id="run"><span class="num">5</span>Running it</h2>
+      <p>
+        Start the run below. The workspace shows the four program layers on the right and the machine on the left. Press
+        <b>Play</b> and watch pulses leave the cores, cross the converters and reach the chip. Each step of the trace is
+        one event: an instruction, a register write, a pulse window opening, a bit crossing between cores.
+      </p>
+      <figure class="live" data-title="The feed-forward program on the eight-transmon ring" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&view=chip">
+        <figcaption>Live run of this program with the measured bit set to 1. Hover any part for what it is.</figcaption>
+      </figure>
+      <div class="ex" data-id="A1.5" data-stars="2" data-kind="number" data-unit="ns" data-tolerance="2">
+        <p>From the first event to the last, how long does the run take on the machine?</p>
+        <div class="why">The run ends when the last pulse, the conditioned <code>x</code> on qubit 2, has finished and every
+          core has stopped. The total includes the readout, the time the bit needs to cross the board, and the scheduling
+          lead.</div>
+      </div>
+
+      <h2 id="segments"><span class="num">6</span>Why the last gate waits</h2>
+      <p>
+        The conditioned <code>x q[2]</code> cannot be scheduled with the rest. Its condition is measured by qubit 0's core,
+        but the pulse is played by qubit 2's core. The bit has to travel across the board first. The compiler therefore
+        splits the program into <b>segments</b>: the first ends with the measurement; the cores then meet at a
+        <span class="term" data-term="barrier">barrier</span>, read the bit, and start the second segment together.
+      </p>
+      <div class="ex" data-id="A1.6" data-stars="2" data-kind="choice" data-answer="b">
+        <p>Why does <code>if (c) x q[2];</code> start a new segment?</p>
+        <ol class="choices">
+          <li data-k="a">Qubit 2 is busy with an earlier gate.</li>
+          <li data-k="b">Its condition is measured on another core, so the bit must reach qubit 2's core first.</li>
+          <li data-k="c">An <code>x</code> pulse is longer than an <code>x90</code>.</li>
+          <li data-k="d">The virtual Z of qubit 0 must be applied first.</li>
+        </ol>
+        <div class="why">A segment boundary is where a measured bit has to cross between cores. Lesson
+          <a href="/course/B4">B4</a> follows that bit through the board hub, and lesson <a href="/course/E1">E1</a>
+          measures how long it takes.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A program passes through five layers: source, hardware instructions, firmware, controller, wires and qubits.</li>
+          <li>Gates become calibrated pulses; Z rotations become phase bookkeeping and play nothing.</li>
+          <li>Control cores write registers ahead of time. Converters and channels play the samples.</li>
+          <li>A measured bit that conditions a gate on another core forces the cores to meet before that gate.</li>
+          <li>Everything you see in the workspace is read from the trace of the firmware's execution.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const ops = (run) => run.hardware.segments.flatMap((s) => s.ops);
+      course({
+        answers: {
+          "A1.2": async (api) => ops(await feedforward(api)).length,
+          "A1.3": async (api) => ops(await feedforward(api)).filter((op) => op.op === "frame").length,
+          "A1.4": async (api) => (await feedforward(api)).firmware.filter((f) => f.writes > 0).length,
+          "A1.5": async (api) => (await feedforward(api)).summary.elapsedPs / 1000,
+        },
+      });
+    </script>
+  </body>
+</html>

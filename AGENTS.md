@@ -1,4 +1,4 @@
-# QControlSys development rule
+# QuantumOS development rule
 
 Every simulated operation must have an executable program representation, a clear physical 3D representation, and a debugger step with a reconstructible state. Keep machine, program, calibration and display geometry explicit. Document units, approximation boundaries and evidence for timing or physical parameters.
 

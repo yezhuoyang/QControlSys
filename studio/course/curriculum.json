@@ -1,0 +1,267 @@
+{
+  "parts": [
+    {
+      "id": "A",
+      "title": "What you are looking at",
+      "color": "#1f3a5f",
+      "badge": "Map reader",
+      "summary": "A quantum computer is a stack: a program, timed hardware operations, firmware for control processors, wires, and the qubits at the end. Learn to read every layer of one run.",
+      "lessons": [
+        {
+          "id": "A1",
+          "title": "The stack in one picture",
+          "href": "/course/A1",
+          "hook": "A three-line program becomes 400 events on 24 parts. Follow it from the source line to the qubit.",
+          "exercises": 6,
+          "stars": 9
+        },
+        {
+          "id": "A2",
+          "title": "Batches: the clock everything runs on",
+          "href": "/course/A2",
+          "hook": "Every time in the machine is a whole number of clock cycles. Find out how long one is, and why.",
+          "exercises": 6,
+          "stars": 9
+        },
+        {
+          "id": "A3",
+          "title": "Following one pulse",
+          "href": "/course/A3",
+          "hook": "One store instruction, one link, one queue, one DAC, one coax, one qubit. Walk the causal chain.",
+          "exercises": 7,
+          "stars": 12
+        },
+        {
+          "id": "A4",
+          "title": "Reading the workspace",
+          "href": "/course/A4",
+          "hook": "Four synchronized layers and a 3D stage. Learn which question each one answers.",
+          "exercises": 6,
+          "stars": 9
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "title": "Programming the controller",
+      "color": "#c4622d",
+      "badge": "Firmware writer",
+      "summary": "The control processor does not play pulses; it schedules them ahead of time through memory-mapped registers. Learn the mechanism that makes timing exact.",
+      "lessons": [
+        {
+          "id": "B1",
+          "title": "Posted writes and the pulse table",
+          "href": "/course/B1",
+          "hook": "A pulse is a row in a table. Firing it is one store to one address.",
+          "exercises": 6,
+          "stars": 11
+        },
+        {
+          "id": "B2",
+          "title": "Timed queues and the lead",
+          "href": "/course/B2",
+          "hook": "Issue early, land exactly. Why the firmware works 96 cycles in the future.",
+          "exercises": 8,
+          "stars": 14
+        },
+        {
+          "id": "B3",
+          "title": "Measurement results come back",
+          "href": "/course/B3",
+          "hook": "A demodulation window, a decoder pipeline and a load that stalls until the bit is ready.",
+          "exercises": 6,
+          "stars": 10
+        },
+        {
+          "id": "B4",
+          "title": "Cores meet: the board hub",
+          "href": "/course/B4",
+          "hook": "Shared bits, barriers and mailboxes, one message per cycle for the whole board.",
+          "exercises": 7,
+          "stars": 12
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "title": "Three machines, one controller",
+      "color": "#00695d",
+      "badge": "Platform engineer",
+      "summary": "Superconducting qubits, trapped ions and neutral atoms differ in physics but share one control problem. See how the same controller drives each.",
+      "lessons": [
+        {
+          "id": "C1",
+          "title": "Superconducting: from OpenQASM to microwaves",
+          "href": "/course/C1",
+          "hook": "Gates become calibrated microwave pulses, virtual Z becomes a phase, and readout is a tone plus a window.",
+          "exercises": 7,
+          "stars": 11
+        },
+        {
+          "id": "C2",
+          "title": "Trapped ions: shuttling is a waveform",
+          "href": "/course/C2",
+          "hook": "An ion moves because electrode voltages change. Every hop is a burst of DAC waveforms.",
+          "exercises": 7,
+          "stars": 13
+        },
+        {
+          "id": "C3",
+          "title": "Neutral atoms: tones carry atoms",
+          "href": "/course/C3",
+          "hook": "An acousto-optic deflector turns an RF frequency into a position. Step the frequency and the atom follows.",
+          "exercises": 7,
+          "stars": 13
+        },
+        {
+          "id": "C4",
+          "title": "The same controller everywhere",
+          "href": "/course/C4",
+          "hook": "Compare the three runs: what changes, what stays, and what limits each.",
+          "exercises": 7,
+          "stars": 11
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "title": "Designing hardware",
+      "color": "#5b4a8a",
+      "badge": "Hardware designer",
+      "summary": "A machine is a document: parts, positions, channels and routed wires, checked against rules. Change the hardware and watch the timing change.",
+      "lessons": [
+        {
+          "id": "D1",
+          "title": "A machine is a document",
+          "href": "/course/D1",
+          "hook": "Parts, channels, wires and calibrations: read the design of an eight-qubit ring.",
+          "exercises": 6,
+          "stars": 9
+        },
+        {
+          "id": "D2",
+          "title": "Wire length is latency",
+          "href": "/course/D2",
+          "hook": "Move the chip two metres away and every pulse arrives 10 ns later. Nothing at the converters changes.",
+          "exercises": 6,
+          "stars": 11
+        },
+        {
+          "id": "D3",
+          "title": "Who drives what",
+          "href": "/course/D3",
+          "hook": "Give three qubits to one core and the feed-forward never touches the hub.",
+          "exercises": 6,
+          "stars": 10
+        },
+        {
+          "id": "D4",
+          "title": "When a design breaks a rule",
+          "href": "/course/D4",
+          "hook": "Converters of the wrong kind, wires that end nowhere, readouts that return too late.",
+          "exercises": 6,
+          "stars": 12
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "title": "Fault tolerance on the controller",
+      "color": "#b07a00",
+      "badge": "Fault-tolerance architect",
+      "summary": "Error correction needs measurements, decoding and corrections within a deadline. Measure what the control system costs, and run a real decoder on a control core.",
+      "lessons": [
+        {
+          "id": "E1",
+          "title": "Feedback latency",
+          "href": "/course/E1",
+          "hook": "From the end of a readout window to the conditioned pulse: every nanosecond accounted for.",
+          "exercises": 6,
+          "stars": 10
+        },
+        {
+          "id": "E2",
+          "title": "System calls",
+          "href": "/course/E2",
+          "hook": "measure, decode_syndrome, pauli_frame_update: a fault-tolerant program as calls on the controller.",
+          "exercises": 7,
+          "stars": 13
+        },
+        {
+          "id": "E3",
+          "title": "A real decoder on a control core",
+          "href": "/course/E3",
+          "hook": "The C union-find of the Helios decoder, compiled for RISC-V and checked against its own test vectors.",
+          "exercises": 6,
+          "stars": 10
+        },
+        {
+          "id": "E4",
+          "title": "Limits: bandwidth, concurrency, depth",
+          "href": "/course/E4",
+          "hook": "How many bits per microsecond, how many pulses at once, how deep a link. Find where a schedule stops fitting.",
+          "exercises": 6,
+          "stars": 12
+        }
+      ]
+    }
+  ],
+  "background": [
+    {
+      "id": "qubits",
+      "tag": "background",
+      "title": "Qubits and what controls them",
+      "href": "/course/background/qubits",
+      "summary": "Transmons, trapped ions and neutral atoms: what a qubit is in each, and which signals act on it."
+    },
+    {
+      "id": "control",
+      "tag": "control systems",
+      "title": "Classical control systems",
+      "href": "/course/background/control",
+      "summary": "FPGAs, DACs, ADCs, numerically controlled oscillators, clocks, cables and optics."
+    },
+    {
+      "id": "riscq",
+      "tag": "the controller",
+      "title": "The RISC-Q architecture",
+      "href": "/course/background/riscq",
+      "summary": "One RISC-V core per channel group, posted writes, pulse tables, timed queues, sinks and the board hub."
+    },
+    {
+      "id": "timing",
+      "tag": "timing",
+      "title": "Deterministic timing",
+      "href": "/course/background/timing",
+      "summary": "Why control systems schedule ahead, what the lead covers, and what the Lean proofs guarantee."
+    },
+    {
+      "id": "qec",
+      "tag": "fault tolerance",
+      "title": "Measurement, feedback and decoding",
+      "href": "/course/background/qec",
+      "summary": "Readout, feed-forward, syndromes, decoders and the deadline every error-correction round must meet."
+    },
+    {
+      "id": "simulator",
+      "tag": "this simulator",
+      "title": "How this simulator works",
+      "href": "/course/background/simulator",
+      "summary": "Lowering, firmware, the Lean model, the trace, and what is proved, tested or assumed."
+    },
+    {
+      "id": "numbers",
+      "tag": "reference",
+      "title": "Numbers and sources",
+      "href": "/course/background/numbers",
+      "summary": "Every latency, duration and rate the simulator uses, with where it comes from."
+    },
+    {
+      "id": "glossary",
+      "tag": "reference",
+      "title": "Glossary",
+      "href": "/course/background/glossary",
+      "summary": "Every term of the course, in one sentence each."
+    }
+  ]
+}

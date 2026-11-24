@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>D4 · When a design breaks a rule · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; font-size: 14px; }
+      .lab .breaks { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px 16px; font-size: 13.5px; margin: 6px 0 10px; }
+      .lab input[type="number"] { width: 120px; font: 13px var(--mono); padding: 5px 7px; border: 1px solid #cfceca; border-radius: 6px; }
+      .lab .out { font-size: 13px; max-height: 360px; overflow: auto; }
+      .lab .bad { color: var(--red); }
+      .lab .warnline { color: var(--orange); }
+    </style>
+  </head>
+  <body data-lesson="D4">
+    <article>
+      <p class="kicker">Part D · Lesson 4</p>
+      <h1>When a design breaks a rule</h1>
+      <p class="lead">
+        A design is only useful if the simulator can tell you when it describes a machine that cannot work. This lesson goes
+        through every rule the checker applies, the message each one gives, and the one warning: a readout that returns
+        after its acquisition window has opened.
+      </p>
+      <p class="pre">
+        This lesson assumes lessons <a href="/course/D1">D1</a> to <a href="/course/D3">D3</a>. All verdicts on this page come
+        from <code>check()</code> in <code>riscq/design.mjs</code>, through <code>POST /api/riscq/design/check</code>.
+      </p>
+
+      <h2 id="verdicts"><span class="num">1</span>Errors and warnings</h2>
+      <p>
+        <code>check(design)</code> returns <code>{ errors, warnings }</code>. An <b>error</b> means the document does not
+        describe a machine the simulator can build: <code>machine()</code> refuses it with "The hardware design breaks
+        <i>n</i> rules" followed by the list, and no program runs. The editor marks the parts concerned in red and disables
+        <b>Run on this hardware</b>. A <b>warning</b> describes a consequence you should see, but the machine is built and
+        runs.
+      </p>
+      <p>
+        The check works in two phases. First it checks every part, channel and wire on its own. Only if that phase finds
+        nothing does it look for paths: whether each calibrated pulse can actually reach the part it acts on. A design with a
+        broken wire therefore does not also get a list of every path that wire would have completed.
+      </p>
+
+      <h2 id="structure"><span class="num">2</span>Rules on parts, channels and wires</h2>
+      <p class="insection"><b>In this section:</b> the first phase, with the exact message of each rule.</p>
+      <div class="tw"><table>
+        <tr><th>Rule</th><th>Message (X, Y stand for ids)</th></tr>
+        <tr><td>The document's kind and version</td><td>A hardware design is { kind: "riscq-design", version: 1, … }.</td></tr>
+        <tr><td>Part ids are unique</td><td>Part id X is used twice.</td></tr>
+        <tr><td>Part types come from the list</td><td>Part X has the unknown type T. Allowed: control-board, core, dac, adc, stage, qubit, resonator.</td></tr>
+        <tr><td>Every part has a position</td><td>Part X needs centerMm: [x, y, z].</td></tr>
+        <tr><td>One board</td><td>A design has exactly one control-board.</td></tr>
+        <tr><td>1 to 64 cores</td><td>A board carries 1 to 64 cores.</td></tr>
+        <tr><td>Converter numbers</td><td>Every dac has its own index from 0 to 63. (The same for adc.)</td></tr>
+        <tr><td>Channel ids are unique</td><td>Channel id X is used twice.</td></tr>
+        <tr><td>A channel belongs to a core</td><td>Channel X names Y, which is not a core.</td></tr>
+        <tr><td>Channel kinds</td><td>Channel X has the unknown kind K.</td></tr>
+        <tr><td>Pulse channels use a DAC, demod channels an ADC</td><td>Channel X of kind pulse needs a dac as its converter.</td></tr>
+        <tr><td>1 to 16 channels per core</td><td>Core X has N channels. A core has 1 to 16.</td></tr>
+        <tr><td>Channel names unique on a core</td><td>Core X has two channels of one name.</td></tr>
+        <tr><td>Wires join parts</td><td>Wire X joins A and B, and one of them is not a part.</td></tr>
+        <tr><td>Wire media come from the list</td><td>Wire X has the unknown medium M. Allowed: coax, planar, fiber, beam.</td></tr>
+        <tr><td>A route has points</td><td>Wire X needs routeMm with at least two points [x, y, z].</td></tr>
+        <tr><td>A route ends at its parts</td><td>Wire X must start at A and end at B: its route ends are more than 0.5 mm from them.</td></tr>
+      </table></div>
+      <p>
+        The last rule is why a route is not decoration: the length that sets the delay is the length of a path that really
+        joins the two parts, within 0.5 mm at each end.
+      </p>
+      <div class="lab" id="breaker">
+        <h4>Break the ring</h4>
+        <p>Tick one or more edits, then press <b>Check</b>. Each edit is applied to a fresh copy of the ring from
+          <code>GET /api/riscq/design?template=ring</code>, and the copy is sent to the check route.</p>
+        <div class="breaks" id="breaks"></div>
+        <div class="row"><label>Move the chip along x by <input type="number" id="dx" value="0" step="1000" /> mm</label></div>
+        <div class="row"><button class="btn small" type="button" id="checkIt">Check</button><span class="src" id="breakState"></span></div>
+        <div class="out" id="breakOut"></div>
+      </div>
+      <div class="ex" data-id="D4.1" data-stars="1" data-kind="choice" data-answer="a">
+        <p>You shift the first point of <code>drive0</code>'s route by 5 mm along x and leave everything else. What does the
+          check say?</p>
+        <ol class="choices">
+          <li data-k="a">Wire drive0 must start at dac0 and end at qubit0: its route ends are more than 0.5 mm from them.</li>
+          <li data-k="b">Nothing: only the length changed, so only the delay changes.</li>
+          <li data-k="c">Qubit 0: no wire leads from dac0 to qubit0.</li>
+          <li data-k="d">Wire drive0 has the unknown medium coax.</li>
+        </ol>
+        <div class="why">The route no longer starts at its part. To make a wire longer, change its path, not its ends: add
+          a bend, as the editor does when you double-click a wire.</div>
+      </div>
+      <div class="ex" data-id="D4.2" data-stars="2" data-kind="number">
+        <p>How many <code>dio</code> channels can you add to core <code>q0</code> of the ring before the check reports an
+          error?</p>
+        <div class="why">q0 already has five channels, and a core takes at most 16: eleven more fit. The twelfth gives "Core
+          q0 has 17 channels. A core has 1 to 16." A <code>dio</code> channel needs no converter, so nothing else is checked
+          about it.</div>
+      </div>
+
+      <h2 id="paths"><span class="num">3</span>Rules on paths</h2>
+      <p>
+        The second phase follows the wires (<code>pathDelay</code>, in their direction only, through stages). For each qubit
+        it requires:
+      </p>
+      <ul>
+        <li>that it names a <code>qubit</code> part and a <code>resonator</code> part ("Qubit <i>i</i> names a qubit part and a resonator part."),</li>
+        <li>that its <code>gate</code>, <code>ro</code> and <code>demod</code> channels exist ("Qubit <i>i</i> names no gate channel.") and have the right kinds
+          ("Qubit <i>i</i> drives and reads out through pulse channels and acquires through a demod channel."),</li>
+        <li>a wired path from the gate channel's DAC to the qubit, from the readout channel's DAC to the resonator, and from the
+          resonator back to the acquisition channel's ADC ("Qubit <i>i</i>: no wire leads from dac0 to qubit0.").</li>
+      </ul>
+      <p>
+        For each coupling, every pulse must name a pulse channel and a qubit, and its DAC must reach that qubit ("Coupling pulse on
+        q0.cz0: no wire leads to qubit0."). A <code>decoder</code>, if given, must be a core ("The decoder is one of the cores.").
+      </p>
+      <div class="ex" data-id="D4.3" data-stars="2" data-kind="number">
+        <p>Delete the wire <code>drive0</code> from the ring. How many errors does the check report?</p>
+        <div class="why">Three. Qubit 0's gate DAC no longer reaches it, and neither do its two CZ channels, which drive the
+          same DAC for the couplings (0, 1) and (7, 0). One missing cable breaks every pulse that used it.</div>
+      </div>
+      <div class="ex" data-id="D4.4" data-stars="2" data-kind="choice" data-answer="b">
+        <p>You give <code>drive0</code> the medium <code>string</code> and also delete the wire <code>tone0</code>. Which
+          errors does the check report?</p>
+        <ol class="choices">
+          <li data-k="a">Both: the unknown medium, and that no wire leads from dac8 to resonator0.</li>
+          <li data-k="b">Only the unknown medium.</li>
+          <li data-k="c">Only the missing path.</li>
+          <li data-k="d">None, since every remaining wire is valid.</li>
+        </ol>
+        <div class="why">The unknown medium is a first-phase error, so the path phase does not run. Fix it, check again, and
+          the missing <code>tone0</code> appears. The editor's <b>Rules</b> tab works the same way, one phase at a time.</div>
+      </div>
+      <div class="note"><b>One rule outside <code>check()</code>.</b> A channel has one carrier. If two calibrated pulses with
+        different frequencies name the same channel, for example a coupling pulse moved onto <code>q0.gate</code>, the check
+        finds nothing, but building the machine fails with "Channel q0.gate is given two carrier frequencies. A channel has
+        one carrier." The check route then answers with that message and HTTP status 400 instead of a verdict. Try it with
+        the last edit in the widget above.</div>
+
+      <h2 id="late"><span class="num">4</span>The late-readout warning</h2>
+      <p class="q">What if the readout tone comes back after the window has opened?</p>
+      <p>
+        A readout fires its tone, then opens the acquisition window <code>demodDelayNs</code> later. That delay comes from the
+        calibration, and it assumes cables of a certain length. In a design the tone needs the delay of its wire to reach the
+        resonator, and the response needs the delay of the return wire to reach the ADC. The check compares the two:
+      </p>
+      <div class="formula">warning when  demodDelayNs × 1000  &lt;  delay(tone wire path) + delay(return wire path)   (in ps)</div>
+      <p>
+        The message says how much of the window holds no signal, for example: "Qubit 3: the acquisition window opens
+        335.23 ns after the readout tone starts, but the tone needs … ns to reach the resonator and return. The first … ns of
+        the window hold no signal."
+      </p>
+      <div class="warn"><b>A warning, not a model of the signal.</b> The model does not shift the window and does not
+        compute the returning signal: the acquisition binding has no delay, and the result is still the outcome you chose.
+        The warning tells you that on real hardware this design would integrate noise at the start of its window.</div>
+      <p>
+        Each qubit has its own calibrated delay, from 335.23 ns to 750 ns, and in the ring its tone and return wires together
+        take about 10 ns. Moving the chip farther along x lengthens both wires by the same amount.
+      </p>
+      <div class="ex" data-id="D4.5" data-stars="2" data-kind="number">
+        <p>As you move the chip farther along x, which qubit's readout is warned about first? Give its index.</p>
+        <div class="why">The qubit with the least slack between its calibrated delay and its tone-plus-return delay. Qubit 3
+          has the shortest calibrated delay, 335.23 ns, and about 325.2 ns of slack in the ring. The order of the warnings in
+          the message list is the order of the qubits, not the order in which they appear.</div>
+      </div>
+      <div class="ex" data-id="D4.6" data-stars="3" data-kind="number" data-unit="m" data-tolerance="0.01">
+        <p>How far, in metres, can you move the chip along x before the first warning appears? Compute it from the wire
+          delays the check reports, then confirm it with the widget above.</p>
+        <div class="why">Qubit 3's slack is 335,230 − (4,949 + 5,089) = 325,192 ps. Each mm of x adds 1 mm to the tone wire
+          and 1 mm to the return wire, 10 ps in all at 200 mm/ns. So the warning appears after about 32,519 mm: 32.52 m.
+          Rounding each wire to a picosecond moves the exact threshold by a fraction of a millimetre.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Errors stop a design from running; warnings describe consequences. Both come from <code>check()</code>.</li>
+          <li>The check first validates parts, channels and wires, then, only if they are sound, every path a pulse needs.</li>
+          <li>A route must start and end within 0.5 mm of its parts; a core takes 1 to 16 channels; a pulse channel needs a DAC.</li>
+          <li>One missing wire breaks every pulse that used it, including coupling pulses.</li>
+          <li>A readout whose tone and return take longer than its calibrated delay is warned about. The model does not shift the window.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      const template = async () => (await api.design.template("ring")).design;
+      const moveChip = (d, dx) => {
+        const parts = new Map(d.parts.map((p) => [p.id, p]));
+        for (const p of d.parts) if (p.type === "qubit" || p.type === "resonator") p.centerMm = [p.centerMm[0] + dx, p.centerMm[1], p.centerMm[2]];
+        for (const w of d.wires) {
+          const a = parts.get(w.from).centerMm, b = parts.get(w.to).centerMm;
+          w.routeMm = parts.get(w.from).type === "resonator" ? [a, [a[0], a[1], b[2]], [a[0], b[1], b[2]], b] : [a, [b[0], a[1], a[2]], [b[0], b[1], a[2]], b];
+        }
+        return d;
+      };
+      // Slack of each qubit's readout in ps: calibrated delay minus tone and return wire delays.
+      const slacks = async (a) => {
+        const d = await template();
+        const v = await a.design.check(d);
+        const delay = (id) => v.wires.find((w) => w.id === id).delayPs;
+        return d.qubits.map((q, i) => q.readout.demodDelayNs * 1000 - delay("tone" + i) - delay("return" + i));
+      };
+      course({
+        answers: {
+          "D4.2": async (a) => {
+            const d = await template();
+            for (let k = 1; k <= 16; k++) {
+              const e = clone(d);
+              for (let j = 0; j < k; j++) e.channels.push({ id: "q0.extra" + j, core: "q0", name: "extra" + j, kind: "dio" });
+              if ((await a.design.check(e)).errors.length) return k - 1;
+            }
+            return 16;
+          },
+          "D4.3": async (a) => {
+            const d = await template();
+            d.wires = d.wires.filter((w) => w.id !== "drive0");
+            return (await a.design.check(d)).errors.length;
+          },
+          "D4.5": async (a) => {
+            const s = await slacks(a);
+            return s.indexOf(Math.min(...s));
+          },
+          "D4.6": async (a) => Math.round(Math.min(...(await slacks(a))) / 10) / 1000,
+        },
+      });
+
+      // The breaker widget.
+      const breaks = [
+        ["Shift the first route point of drive0 by 5 mm", (d) => (d.wires.find((w) => w.id === "drive0").routeMm[0][0] += 5)],
+        ["Give drive0 the medium \"string\"", (d) => (d.wires.find((w) => w.id === "drive0").medium = "string")],
+        ["Delete the wire drive0", (d) => (d.wires = d.wires.filter((w) => w.id !== "drive0"))],
+        ["Delete the wire tone0", (d) => (d.wires = d.wires.filter((w) => w.id !== "tone0"))],
+        ["Delete the wire return0", (d) => (d.wires = d.wires.filter((w) => w.id !== "return0"))],
+        ["Let drive0 end at a part qubit99", (d) => (d.wires.find((w) => w.id === "drive0").to = "qubit99")],
+        ["Give q0.gate the converter adc12", (d) => (d.channels.find((c) => c.id === "q0.gate").converter = "adc12")],
+        ["Add a part of type laser", (d) => d.parts.push({ id: "laser0", type: "laser", centerMm: [0, 0, 0] })],
+        ["Add a second control board", (d) => d.parts.push({ id: "board2", type: "control-board", centerMm: [0, 200, 0] })],
+        ["Give dac1 the index 0", (d) => (d.parts.find((p) => p.id === "dac1").index = 0)],
+        ["Add 12 dio channels to q0", (d) => { for (let j = 0; j < 12; j++) d.channels.push({ id: "q0.extra" + j, core: "q0", name: "extra" + j, kind: "dio" }); }],
+        ["Remove the core q7", (d) => (d.parts = d.parts.filter((p) => p.id !== "q7"))],
+        ["Name qubit0 as the decoder", (d) => (d.decoder = "qubit0")],
+        ["Move the CZ pulse of q0 for (0, 1) onto q0.gate", (d) => (d.couplings[0].pulses[0].channel = "q0.gate")],
+      ];
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const $ = (id) => document.getElementById(id);
+      breaks.forEach(([label], k) => {
+        const row = document.createElement("label");
+        row.append(Object.assign(document.createElement("input"), { type: "checkbox", value: String(k) }), " " + label);
+        $("breaks").append(row);
+      });
+      $("checkIt").addEventListener("click", async () => {
+        $("breakState").textContent = "Checking…";
+        try {
+          let d = await template();
+          d = moveChip(d, Number($("dx").value) || 0);
+          for (const box of document.querySelectorAll("#breaks input:checked")) breaks[Number(box.value)][1](d);
+          // The check route answers a design it cannot build with an error status and a message.
+          const r = await fetch("/api/riscq/design/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) });
+          const text = await r.text();
+          if (!r.ok) {
+            $("breakOut").innerHTML = "<p class='bad'>The check route answered " + r.status + ": " + esc(text) + "</p>";
+          } else {
+            const v = JSON.parse(text);
+            $("breakOut").innerHTML = "<p><b>" + v.errors.length + " errors, " + v.warnings.length + " warnings.</b>" + (v.errors.length ? " The design cannot run." : " The design runs.") + "</p><ul>" +
+              v.errors.map((e) => "<li class='bad'>" + esc(e) + "</li>").join("") + v.warnings.map((e) => "<li class='warnline'>" + esc(e) + "</li>").join("") + "</ul>";
+          }
+          $("breakState").textContent = "";
+        } catch (error) {
+          $("breakState").textContent = "The server could not be reached: " + error.message;
+        }
+      });
+    </script>
+  </body>
+</html>

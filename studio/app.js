@@ -127,7 +127,7 @@ let run,
 $("bench").value = location.pathname;
 $("bench").onchange = () => location.assign($("bench").value);
 if (qccd) {
-  document.title = "QCCD broadcast · QControl Studio";
+  document.title = "QCCD broadcast · QuantumOS";
   document.querySelector("h1").textContent = "QCCD broadcast bench";
   document.querySelector(".heading p").textContent =
     "Shared electrode transport and independently addressed gate light";
@@ -143,7 +143,7 @@ if (qccd) {
   document.querySelector("#editor a").href = "/model/QCCD.lean";
 }
 if (neutral) {
-  document.title = "Neutral-atom AOD · QControl Studio";
+  document.title = "Neutral-atom AOD · QuantumOS";
   document.querySelector("h1").textContent = "Neutral-atom steering bench";
   document.querySelector(".heading p").textContent =
     "FPGA tone commands, acoustic propagation and shared optical traps";
@@ -162,7 +162,7 @@ if (neutral) {
   document.querySelector("#editor a").href = "/model/Neutral.lean";
 }
 if (controller) {
-  document.title = "FPGA waveform controller · QControl Studio";
+  document.title = "FPGA waveform controller · QuantumOS";
   document.querySelector("h1").textContent = "FPGA waveform controller";
   document.querySelector(".heading p").textContent = "Instruction issue, waveform RAM and buffered DAC playback on the reference control rack";
   $("controllerPanel").hidden = false;

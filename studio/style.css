@@ -1,10 +1,10 @@
 :root {
   color-scheme: light;
-  --ink: #152b2d;
-  --muted: #526568;
-  --line: #cdd8d5;
-  --green: #00695d;
-  --pale: #e4f1ec;
+  --ink: #111827;
+  --muted: #586174;
+  --line: #d6dbe6;
+  --green: #4338ca;
+  --pale: #eef0fe;
   --mono: "Cascadia Code", Consolas, monospace;
   font:
     16px "Inter",
@@ -12,7 +12,7 @@
     Arial,
     sans-serif;
   color: var(--ink);
-  background: #f4f6f3;
+  background: #f5f6fa;
 }
 .system-tools {
   display: flex;
@@ -318,28 +318,15 @@ textarea:focus-visible {
 }
 .brand span {
   font-weight: 400;
-  color: #637471;
+  color: #586174;
 }
 .brand-mark {
   display: inline-block;
   width: 24px;
   height: 24px;
   margin-right: 4px;
-  background: repeating-linear-gradient(
-    135deg,
-    #116959 0 4px,
-    transparent 4px 7px
-  );
-  clip-path: polygon(
-    25% 0,
-    75% 0,
-    100% 25%,
-    100% 75%,
-    75% 100%,
-    25% 100%,
-    0 75%,
-    0 25%
-  );
+  border-radius: 6px;
+  background: url("/quantumos.svg") center / cover no-repeat;
 }
 nav,
 .viewbar > div,

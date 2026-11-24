@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How this simulator works · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="simulator">
+    <article>
+      <p class="kicker">Background · Chapter 6</p>
+      <h1>How this simulator works</h1>
+      <p class="lead">
+        Every picture in the workspace, every number in an exercise and every plot in the debugger is read from one list: the trace of
+        a firmware execution in a Lean model of the controller. This chapter explains how a program becomes that trace, what one entry
+        of it contains, how you can replay and check it yourself, and exactly which parts of the result are proved, tested, assumed or
+        not modeled.
+      </p>
+      <p class="pre">
+        This chapter uses the vocabulary of chapters <a href="/course/background/riscq">3</a> and
+        <a href="/course/background/timing">4</a>. The source files are named as paths in the repository; the Lean model is readable in
+        the browser at <a href="/model/RiscQ/Soc.lean">/model/RiscQ/Soc.lean</a>, <a href="/model/RiscQ/Timing.lean">/model/RiscQ/Timing.lean</a>
+        and <a href="/model/RiscQ/Rv32.lean">/model/RiscQ/Rv32.lean</a>. The full reference is <a href="/docs/riscq-controller.md">docs/riscq-controller.md</a>.
+      </p>
+
+      <h2 id="pipeline"><span class="num">1</span>From a program to a trace</h2>
+      <p class="q">What exactly is simulated, and by what?</p>
+      <p class="insection"><b>In this section:</b> the five representations of a run and the program that produces each.</p>
+      <figure>
+        <svg viewBox="0 0 760 270" role="img" aria-label="Pipeline of the simulator">
+          <style>
+            .pp text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .pp .s { font-size: 11.5px; fill: #52514e; }
+            .pp .m { font: 11.5px ui-monospace, Menlo, monospace; fill: #52514e; }
+            .pp rect { stroke: #e6e5e1; }
+            .pp .a { stroke: #8a8985; stroke-width: 1.5; marker-end: url(#pptip); }
+          </style>
+          <defs><marker id="pptip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a8985" /></marker></defs>
+          <g class="pp">
+            <rect x="10" y="20" width="130" height="80" rx="8" fill="#eef3fb" /><text x="22" y="42">Source</text><text class="s" x="22" y="60">OpenQASM, TSIR,</text><text class="s" x="22" y="76">ZAC, system calls, C</text>
+            <rect x="160" y="20" width="130" height="80" rx="8" fill="#fdf0ea" /><text x="172" y="42">Hardware</text><text x="172" y="58">instructions</text><text class="s" x="172" y="76">platforms/*.mjs</text>
+            <rect x="310" y="20" width="130" height="80" rx="8" fill="#fdf0ea" /><text x="322" y="42">Channel actions</text><text class="s" x="322" y="60">timed register writes</text><text class="s" x="322" y="76">per core, per segment</text>
+            <rect x="460" y="20" width="130" height="80" rx="8" fill="#eaf7f1" /><text x="472" y="42">Firmware</text><text class="s" x="472" y="60">RV32I words per core</text><text class="m" x="472" y="78">firmware.mjs</text>
+            <rect x="610" y="20" width="140" height="80" rx="8" fill="#efedf8" /><text x="622" y="42">Lean model</text><text class="s" x="622" y="60">discrete-event run</text><text class="m" x="622" y="78">Soc.lean → qcontrol</text>
+            <path class="a" d="M140 60 H158" /><path class="a" d="M290 60 H308" /><path class="a" d="M440 60 H458" /><path class="a" d="M590 60 H608" />
+            <path class="a" d="M680 100 V138" />
+            <rect x="460" y="140" width="290" height="50" rx="8" fill="#fbf4e2" /><text x="472" y="162">Trace: frames with IDs, parents, state</text><text class="s" x="472" y="180">plus the summary Lean computes from its own state</text>
+            <path class="a" d="M460 165 H352" />
+            <rect x="10" y="140" width="340" height="110" rx="8" fill="#fff" /><text x="22" y="162">Views, all derived from the trace</text>
+            <text class="s" x="22" y="182">workspace layers and 3D stage · debugger inspector</text>
+            <text class="s" x="22" y="200">machine state at any step · channel timeline</text>
+            <text class="s" x="22" y="218">apparatus: ions, atoms, qubits reached</text>
+            <text class="m" x="22" y="238">studio/riscq-model.js, riscq-layers.js</text>
+            <text class="s" x="472" y="225">node riscq/cli.mjs --verify run.json</text><text class="s" x="472" y="241">re-executes and compares every frame</text>
+          </g>
+        </svg>
+        <figcaption><b>The pipeline.</b> JavaScript compilers produce hardware instructions, channel actions and firmware; the Lean executable
+          runs the firmware and emits the trace; the pages and the headless functions only read the trace. Schematic drawing.</figcaption>
+      </figure>
+      <p>
+        Each platform has three levels below its source program (<code>docs/riscq-controller.md</code>). A
+        <span class="term" data-term="hardware instruction">hardware instruction</span> is one physical operation with a start time and a
+        duration. A <b>channel action</b> is one timed register write on one control core. The
+        <span class="term" data-term="firmware">firmware</span> is the RV32I program that issues those writes. The Lean model runs the
+        firmware and emits the trace. Nothing in the views is computed from the source program directly; a pulse is shown because a trace
+        frame says it opened.
+      </p>
+      <div class="note"><b>No quantum state.</b> The simulator follows classical signals to the qubit, ion, electrode or atom they reach and
+        records when they arrive. It never computes amplitudes. Measurement results, photon counts and digital input edges are inputs to
+        the run.</div>
+
+      <h2 id="lowering"><span class="num">2</span>Lowering, per platform</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Platform</th><th>Source</th><th>Hardware instructions</th><th>What a control core drives</th></tr></thead>
+          <tbody>
+            <tr><td>Superconducting</td><td>OpenQASM 3</td><td><code>x90</code>, <code>x</code>, <code>frame</code> (virtual Z), <code>cz</code>, <code>measure</code>, scheduled as soon as their qubits are free</td><td>One core per qubit: a drive channel, one more drive channel per CZ partner, a readout tone and a demodulation window</td></tr>
+            <tr><td>Trapped-ion QCCD</td><td>OpenQASM compiled by QCCD Studio, or a Studio TSIR program or design</td><td>The cycles of Studio's own replay: <code>transport</code>, <code>rotate</code>, <code>ms</code>, <code>measure</code>, <code>cool</code>, <code>frame</code></td><td>Transport cores with one DAC channel per Studio electrode control channel; one core per gate zone with three laser modulators and a photon counter; one core for broadcast light</td></tr>
+            <tr><td>Neutral atoms</td><td>A compiled ZAC program</td><td><code>pickup</code>, <code>move</code>, <code>drop</code>, <code>raman</code>, <code>rydberg</code>, at ZAC's times</td><td>One core per AOD with one RF tone channel per row and column; one laser core</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">From <code>docs/riscq-controller.md</code>; the code is <code>riscq/platforms/superconducting.mjs</code>, <code>qccd.mjs</code> and <code>neutral.mjs</code>.</p>
+      <p>
+        <b>Superconducting.</b> Standard gates decompose into <code>x90</code>, <code>x</code> and frame updates; durations, amplitudes,
+        frequencies and phases come from RISC-Q's x6y3 calibration. A measurement whose bit conditions a later gate ends a segment.
+        <b>Trapped ions.</b> QCCD Studio already states, for every cycle, which ions move over which edges and which electrode control
+        channels act; the lowering plays one waveform per engaged control channel, sets angle and phase of each gate pulse from the TSIR
+        parameters, and fires one detection pulse per gate zone. Electrode voltages, ion motion and heating stay Studio's models. When Studio
+        reports unit times, each cycle takes the standard duration of its kind (<a href="/course/background/numbers">chapter 7</a>).
+        <b>Neutral atoms.</b> Each active AOD tone ramps its amplitude up at pickup, holds it during the move while its frequency steps every
+        2 µs along an assumed constant-acceleration path, and ramps down at drop. Lessons <a href="/course/C1">C1</a>, <a href="/course/C2">C2</a>
+        and <a href="/course/C3">C3</a> follow one program on each.
+      </p>
+
+      <h2 id="firmware"><span class="num">3</span>Firmware generation</h2>
+      <p class="q">How does a list of timed writes become a program for a processor?</p>
+      <p class="insection"><b>In this section:</b> plans per core, segments and barriers, the table loop, and inline issue.</p>
+      <p>
+        The shared back end (<code>riscq/compile.mjs</code>, <code>plans</code>) groups a platform's channel actions into one plan per core. A
+        core with no action parks at once and joins no barrier: in the feed-forward run, cores q3 to q7 each run a six-instruction program.
+        Every classical bit has exactly one producer. A bit that conditions an action on another core is given a slot in one of the hub's
+        four 32-bit group words (128 shared bits at most), and a decoder's inputs take consecutive slots so it can read them as one field.
+      </p>
+      <p>
+        <code>compileCore</code> in <code>riscq/firmware.mjs</code> then writes each core's program. It loads base registers (<code>s1</code>
+        points at the control block at 0x4000, <code>s2</code> at the bit table near the top of RAM), programs every pulse table, and for each
+        segment:
+      </p>
+      <ol>
+        <li><b>Synchronizes.</b> All active cores arrive at a counted barrier; each sets its time base <code>s0</code> to the release time plus
+          <code>SYNC_LEAD</code> (128 batches), plus the segment's preroll.</li>
+        <li><b>Fetches</b> the shared bits this segment conditions on, from the core's <code>board</code> registers, into its bit table.</li>
+        <li><b>Issues.</b> A segment of plain timed writes is issued by a loop over a four-word table: issue time, start time, register address,
+          data. Each pass waits until the issue time with <code>waitTimeCmp</code>, writes <code>startTime</code> and then the data word. Any
+          other segment, one with conditions, phase offsets, result reads, photon counts, decodes or frame updates, is issued inline, one
+          operation after another, each preceded by a wait until its issue time.</li>
+      </ol>
+      <p>
+        The issue order comes from <code>issueOrder</code>: every write one lead (96 batches) before its start, moved earlier where a result
+        read would hold the core, and a backward pass that spaces writes by their issue cost. If the earliest write then falls before the time
+        base, the segment's start moves later by the preroll. A schedule that would overflow a channel's queues is rejected with an error
+        that names the channel and both batches. The program is assembled by <code>riscq/rv32.mjs</code>, and every word carries a source-map
+        entry naming the hardware instruction it serves, so the workspace can light the firmware row of any event.
+      </p>
+
+      <h2 id="lean"><span class="num">4</span>The Lean model as a discrete-event system</h2>
+      <p>
+        <a href="/model/RiscQ/Soc.lean"><code>Soc.lean</code></a> is the executable model of a RISC-Q system-on-chip, written in
+        <span class="term" data-term="Lean">Lean</span> so that it both runs and can carry proofs. Its header states the design: "Execution is
+        a discrete-event simulation with exact cycle arithmetic." The world holds every core's registers and RAM, every channel's register
+        file and queues, every sink, the hub and a schedule of pending events. Time advances to the next batch at which anything happens. At
+        equal batches, converter-edge and link events apply before a core retires an instruction, and cores retire in index order. All times
+        are whole batches; <code>atPs = atBatch × dspPeriodPs</code>.
+      </p>
+      <p>
+        A core executes the RV32I semantics of <a href="/model/RiscQ/Rv32.lean"><code>Rv32.lean</code></a>: decode a 32-bit word, compute
+        the register update and the single bus access it requests. <code>Soc.lean</code> resolves that access against RAM, the control
+        block, the sinks or the put window. A put becomes a scheduled link event; when it reaches its channel it is decoded by
+        <code>decodeCmd</code> of <a href="/model/RiscQ/Timing.lean"><code>Timing.lean</code></a> and applied by <code>Buffer.apply</code>; a
+        fire pushes queue entries whose pop and landing cycles are exactly the <code>popCycle</code> and <code>landCycle</code> the timing
+        theorems are about. So the theorems are about the same definitions that produce the trace.
+      </p>
+
+      <h2 id="frames"><span class="num">5</span>Frames</h2>
+      <p class="q">What does one step of the trace contain?</p>
+      <p class="insection"><b>In this section:</b> the fields of a frame, the kinds of events, and the two trace levels.</p>
+      <p>
+        Every event is one <span class="term" data-term="frame">frame</span> of the <span class="term" data-term="trace">trace</span>. This is the
+        frame in which the first <code>x90</code> of the feed-forward run opens its window, as the run bundle stores it (state shortened):
+      </p>
+      <pre><code>{ "id": "e164", "op": "pulse", "part": "q0.gate", "targets": ["dac0"],
+  "atBatch": 320, "atPs": 640000, "parents": ["e162"],
+  "pc": 2147484196, "source": "h2",
+  "state": { "opens": 320, "closes": 338, "atConverter": 326, "dur": 18,
+             "amp": 2101, "phase": 49094, "freq": 45047,
+             "ampLands": 320, "phaseLands": 320, "envLands": 320,
+             "onTime": true, "aligned": true, "overlap": false, … } }</code></pre>
+      <ul>
+        <li><b><code>id</code></b> is stable: the same program produces the same IDs, so a link to a step names the same event tomorrow.</li>
+        <li><b><code>part</code></b> is the scene part the event acts on, and <b><code>targets</code></b> the parts it acts toward. Every part has a
+          3D component in the workspace.</li>
+        <li><b><code>parents</code></b> are its causal predecessors, here the fire <code>e162</code> on the same channel.</li>
+        <li><b><code>pc</code></b> and <b><code>source</code></b> name the firmware address and the hardware instruction that caused it, here
+          <code>h2</code>, the <code>x90</code> on qubit 0.</li>
+        <li><b><code>state</code></b> is the committed state of the part after the event. For a pulse it includes when each parameter landed;
+          <code>onTime</code> and <code>aligned</code> say whether all of them landed on the start time.</li>
+      </ul>
+      <p>
+        The event kinds in a run of the feed-forward program are: core events <code>read</code>, <code>write</code>, <code>put</code>,
+        <code>wait</code>, <code>resume</code>, <code>host</code>, <code>done</code>; channel events <code>write</code>, <code>freq</code>,
+        <code>fire</code>, <code>pulse</code>; hub events <code>wait</code>, <code>arrive</code>, <code>release</code>, <code>publish</code>;
+        inbox events, where hub deliveries and reports reach a core, <code>released</code>, <code>board</code>, <code>result</code> and
+        <code>clear</code>; and <code>effect</code> frames when a pulse reaches a qubit or resonator, with the arrival time after the wire.
+      </p>
+      <h3>io and full traces</h3>
+      <p>
+        By default a run records the <code>io</code> trace: only instructions that touch a control register appear, together with every channel,
+        hub and apparatus event. With <code>--trace full</code> every retired instruction is a frame too, of kind <code>exec</code>. Because a core
+        frame carries the register it wrote, the register file is rebuilt by replaying frames; with the <code>io</code> trace the debugger marks
+        registers that no recorded frame wrote.
+      </p>
+      <div class="ex" data-id="simulator.1" data-stars="1" data-kind="number" data-unit="frames">
+        <p>Run the feed-forward program with the measured bit set to 1 and the default <code>io</code> trace. How many frames does the trace
+          hold?</p>
+        <div class="why">Count <code>frames</code> in the run bundle, or read the last step number in the workspace's trace dock. Every one
+          of them is an event on some part of the scene.</div>
+      </div>
+      <div class="ex" data-id="simulator.2" data-stars="2" data-kind="number" data-unit="frames">
+        <p>Run the same program with <code>trace: "full"</code>. How many more frames does it record than the <code>io</code> trace?</p>
+        <div class="why">The difference is exactly the <code>exec</code> frames: instructions that touched no control register, such as
+          address arithmetic and branches. The events that act on the machine are the same in both traces.</div>
+      </div>
+
+      <h2 id="chains"><span class="num">6</span>Causal chains</h2>
+      <p>
+        Following <code>parents</code> back from any frame gives its <span class="term" data-term="causal chain">causal chain</span>, which ends at
+        the core instruction that started it (<code>causalChain</code> in <code>studio/riscq-model.js</code>). The conditioned <code>x</code> on
+        qubit 2 in the feed-forward run has a short one:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Frame</th><th>Kind</th><th>Part</th><th class="n">Batch</th><th>What happened</th></tr></thead>
+          <tbody>
+            <tr><td><code>q2:152</code></td><td>put</td><td>q2</td><td class="n">1,157</td><td><code>sw x6, 0(x5)</code>: the core writes slot 1 to the <code>fire</code> register of channel 0</td></tr>
+            <tr><td><code>e213</code></td><td>fire</td><td>q2.gate</td><td class="n">1,160</td><td>the write arrives after 1 + L = 3 batches; entry 1 is fired for start time 1,239</td></tr>
+            <tr><td><code>e214</code></td><td>pulse</td><td>q2.gate</td><td class="n">1,239</td><td>the window opens, all parameters landed on time</td></tr>
+            <tr><td><code>e215</code></td><td>effect</td><td>qubit2</td><td class="n">1,245</td><td>the pulse is at the DAC port, 6 batches later, and arrives at the qubit at 2,495,003 ps</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">Read from the run of <code>superconducting-feedforward</code> with <code>c = 1</code>, for this chapter.</p>
+      <p>
+        The chain stops at the first core instruction, the store. The barrier and the published bit are not in it: they decided
+        <i>whether</i> and <i>when</i> the core reached that store. The core's own frames are linked as well, each to the one before it
+        (<code>q2:152</code> has the parent <code>q2:149</code>), so you can keep walking back through the firmware in the debugger. The tests
+        require every chain to end at a core instruction (<code>tests/riscq-debugger.test.mjs</code>).
+      </p>
+      <div class="ex" data-id="simulator.3" data-stars="2" data-kind="number" data-unit="frames">
+        <p>How many frames long is the causal chain of the last <code>effect</code> frame in that run, counting the frame itself?</p>
+        <div class="why">The answer is computed by <code>causalChain</code> of <code>studio/riscq-model.js</code>, the same function the debugger
+          uses to light the causal path back to the core instruction.</div>
+      </div>
+
+      <h2 id="replay"><span class="num">7</span>Replay, reconstruction and --verify</h2>
+      <p>
+        A run saved with <code>node riscq/cli.mjs --example &lt;id&gt; --out run.json</code> contains the source, the hardware instructions, the
+        firmware statistics, the Lean program document, every frame and the summary. Three things can be done with it without a browser:
+      </p>
+      <ul>
+        <li><b>Verify.</b> <code>node riscq/cli.mjs --verify run.json</code> re-executes the saved program in Lean and names the first frame
+          that differs. For the feed-forward run it prints <code>{"events":451,"verified":true}</code>.</li>
+        <li><b>Reconstruct.</b> <code>stateAt(bundle, index)</code> in <code>studio/riscq-model.js</code> rebuilds pulse tables, start times,
+          carriers, queues, sinks, hub groups and registers at any step from the frames up to that step and from nothing else. The tests require
+          the state rebuilt at the last frame to equal the summary Lean computes from its own state, and a state asked for out of order to equal a
+          replay from reset.</li>
+        <li><b>Inspect.</b> The functions of <code>studio/riscq-layers.js</code> answer what the workspace shows: <code>focusAt</code> gives the
+          source line, hardware instruction, core and firmware row of a step; <code>ionPositions</code> and <code>atomPositions</code> give what the
+          chip view draws (<code>docs/riscq-workspace.md</code>, "Headless use").</li>
+      </ul>
+      <p>
+        A person in the workspace and a script reading the bundle therefore see the same result. The exercises in this course use the same
+        route: their answer functions run the program on the server and read the bundle.
+      </p>
+
+      <h2 id="claims"><span class="num">8</span>What is proved, tested, assumed and not modeled</h2>
+      <p class="insection"><b>In this section:</b> the four kinds of claim, kept apart, as <code>docs/riscq-controller.md</code> lists them.</p>
+      <h3>Proved in Lean, about the model</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Theorem</th><th>Statement</th><th>File</th></tr></thead>
+          <tbody>
+            <tr><td><code>land_exact</code></td><td>A write ready no later than its lead before the start time lands exactly when the batch-time register reads the start time</td><td><a href="/model/RiscQ/Timing.lean">Timing.lean</a></td></tr>
+            <tr><td><code>land_independent_of_arrival</code></td><td>Two writes that both meet the margin land on the same batch, whatever link latency separates them</td><td>Timing.lean</td></tr>
+            <tr><td><code>land_late</code></td><td>A write that misses the margin lands late by exactly the amount it missed</td><td>Timing.lean</td></tr>
+            <tr><td><code>popCycle_ge_push</code>, <code>popCycle_spacing</code></td><td>A queue entry pops at least 3 batches after its push and at least 2 after the previous pop</td><td>Timing.lean</td></tr>
+            <tr><td><code>default_leads</code></td><td>The leads derived from the block latencies equal 34, 35, 36, 52, 11 and 2</td><td>Timing.lean</td></tr>
+            <tr><td><code>fire_fire_contiguous</code>, <code>explicit_start_wins</code></td><td>A second fire is scheduled one duration after the first; writing <code>startTime</code> after a fire discards the advance</td><td>Timing.lean</td></tr>
+            <tr><td><code>fire_preserves_table</code>, <code>decode_layout</code></td><td>A fire changes no table entry; the register addresses firmware writes decode to the intended fields</td><td>Timing.lean</td></tr>
+            <tr><td><code>readRam_writeRam_word</code></td><td>A word read returns what a word write stored</td><td><a href="/model/RiscQ/Soc.lean">Soc.lean</a></td></tr>
+            <tr><td><code>nextSource_waiting</code>, <code>nextSource_isSome</code></td><td>The hub arbiter grants only a core with a message waiting, and grants one in every batch in which any core has one</td><td>Soc.lean</td></tr>
+            <tr><td><code>Cpu.setReg_zero</code>, <code>exec_selfJump_pc</code></td><td>Register x0 is never written; a jump to itself is a fixed point</td><td><a href="/model/RiscQ/Rv32.lean">Rv32.lean</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Conformance tests</h3>
+      <p>
+        <b>Against RISC-Q artifacts.</b> Three firmware binaries from the RISC-Q repository run unmodified and reproduce what RISC-Q's RTL
+        simulations assert: <code>pulse_sched.elf</code>, <code>xcore.elf</code> and <code>host_window.elf</code>. A publish reaches every board
+        after 23 batches, as RISC-Q documents. The hub arbiter follows the statements of <code>PutHub.md</code>, not an RTL trace.
+        <b>Against independent references.</b> Arithmetic, shifts, comparisons, multiplies, loads, stores, branches and links are checked against
+        values computed outside the model; every word the assembler emits is decoded by Lean as the same instruction; gate decompositions are
+        checked as 2 × 2 matrices up to a global phase. Tests: <code>tests/riscq-firmware.test.mjs</code>, <code>riscq-rv32.test.mjs</code>,
+        <code>riscq-superconducting.test.mjs</code>, <code>riscq-qccd.test.mjs</code>, <code>riscq-neutral.test.mjs</code>,
+        <code>riscq-limits.test.mjs</code>.
+      </p>
+      <h3>Assumed or schematic</h3>
+      <ul>
+        <li>Three latencies: the core's time lag (link depth), the report path (3 + 2 + L + 1) and the branch and bus penalties (+5, +1).</li>
+        <li>The hub arbiter starts its round at core 0 and is modeled at the dispatch stage.</li>
+        <li>The core's cost model: one batch per instruction plus the two penalties. Pulse timing does not depend on it while the lead margin holds;
+          decode times do.</li>
+        <li>The controller floorplan positions: a schematic two-region layout in tenths of a clock region, not physical dimensions.</li>
+        <li>The mapping of one QCCD Studio time unit to one shuttle; the path inside a neutral-atom move; the positions of the ring written as a
+          hardware design.</li>
+      </ul>
+      <h3>Not modeled</h3>
+      <ul>
+        <li>Carrier synthesis is represented by its latency; a pulse frame reports the scheduled codes, and a waveform is drawn from them for display.</li>
+        <li>Electrode voltages, ion motion and heating remain QCCD Studio's models.</li>
+        <li>A frequency step is not phase continuous on the RISC-Q generator.</li>
+        <li>The two ring pairs whose CZ needs a pulse on the second excited level are not offered.</li>
+        <li>Multi-board operation over White Rabbit, interrupts and CSRs are absent.</li>
+        <li>Quantum states, gate fidelities, atom loss and imaging.</li>
+      </ul>
+
+      <h2 id="designs"><span class="num">9</span>Hardware design documents</h2>
+      <p>
+        A pulse-controlled machine can also be given as a document instead of code (<code>riscq/design.mjs</code>): a control board, cores, DACs,
+        ADCs, qubits, resonators and passive stages with positions in millimetres, the channels of each core, wires with a medium and a routed
+        path, and the calibrated pulses of each qubit and coupling. The simulator checks it against rules and derives the build, the pulse tables
+        and every propagation delay from it. The editor at <a href="/riscq-design">/riscq-design</a> edits such a document, and
+        <code>node riscq/cli.mjs --ring-design</code> prints the built-in ring as one.
+      </p>
+      <ul>
+        <li><b>Rules.</b> One board. 1 to 64 cores, 1 to 16 channels each. A pulse channel names a DAC and a demodulation channel an ADC. Every wire
+          starts and ends at its parts. Every calibrated pulse has a wired path from its converter to the part it acts on, and every resonator a
+          path back to its ADC. A readout whose tone returns after the acquisition window opens is a warning.</li>
+        <li><b>Timing.</b> A wire's delay is its routed length over the signal speed of its medium (<a href="/course/background/control#cables">chapter 2</a>).</li>
+        <li><b>Checked.</b> The ring written as a design plays exactly the pulses of the built-in ring. Moving the chip 2 m farther delays every
+          arrival by 10 ns and changes nothing at the converters. Driving three qubits from one core runs the feed-forward program without any
+          message through the hub.</li>
+        <li><b>Boundary.</b> Only machines whose gates are pulses on fixed qubits. The ion and atom machines still take their control hardware from
+          code. Loss, dispersion, crosstalk and placement inside the FPGA are not modeled; the posted-link depth is one number for the board.</li>
+      </ul>
+      <p>Lessons <a href="/course/D1">D1</a> to <a href="/course/D4">D4</a> work with these documents.</p>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Source → hardware instructions → channel actions → firmware → Lean execution → trace. Every view reads the trace.</li>
+          <li>Firmware is generated per core: tables, a barrier per segment, a table loop or inline issue one lead ahead.</li>
+          <li>The Lean model is a discrete-event system with exact batch arithmetic and a fixed order at equal batches.</li>
+          <li>A frame has a stable ID, a part, targets, parents, a firmware address, a source instruction and the committed state.</li>
+          <li>The <code>io</code> trace omits only instructions that touch no control register; <code>full</code> records them as <code>exec</code>.</li>
+          <li><code>--verify</code> re-executes a saved run; <code>stateAt</code> rebuilds the machine at any step from the frames alone.</li>
+          <li>Keep four kinds of claim apart: proved about the model, conformance-tested, assumed, and not modeled.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const run = (api, trace) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 }, ...(trace ? { trace } : {}) });
+      course({
+        answers: {
+          "simulator.1": async (api) => (await run(api)).frames.length,
+          "simulator.2": async (api) => (await run(api, "full")).frames.length - (await run(api)).frames.length,
+          "simulator.3": async (api) => {
+            const bundle = await run(api);
+            const last = bundle.frames.filter((f) => f.op === "effect").at(-1);
+            return (await api.model()).causalChain(bundle, last.id).length;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

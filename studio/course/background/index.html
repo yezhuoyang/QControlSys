@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Background · QuantumOS</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-index="background">
+    <main class="page wide">
+      <article>
+        <p class="crumb"><a href="/course/">Course</a> › Background</p>
+        <p class="kicker">Background</p>
+        <h1>What you need to know, from the qubit to the firmware</h1>
+        <p class="lead">
+          These chapters explain the physics and engineering behind the lessons: what each kind of qubit needs from its
+          control system, how that control system is built, why it schedules everything ahead of time, what error
+          correction asks of it, and how this simulator models it. Read them in order, or come back to one when a lesson
+          points to it.
+        </p>
+        <div class="docs" id="docs"></div>
+      </article>
+    </main>
+    <script type="module">
+      import { course, el } from "/course/course.js";
+      const curriculum = await course();
+      document.getElementById("docs").replaceChildren(...curriculum.background.map((c, k) =>
+        el("a", { class: "doc", href: c.href }, el("span", { class: "tag", text: k + 1 + " · " + c.tag }), el("b", { text: c.title }), el("span", { text: c.summary }))));
+    </script>
+  </body>
+</html>

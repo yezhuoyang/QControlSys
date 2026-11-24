@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>C3 · Neutral atoms: tones carry atoms · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="C3">
+    <article>
+      <p class="kicker">Part C · Lesson 3</p>
+      <h1>Neutral atoms: tones carry atoms</h1>
+      <p class="lead">
+        A neutral-atom computer moves its qubits with light. An acousto-optic deflector turns a radio-frequency tone into a
+        beam position, so the controller moves an atom by stepping a frequency. This lesson follows one compiled program
+        from its rearrangement jobs down to those frequency steps.
+      </p>
+      <p class="pre">
+        This lesson assumes lessons <a href="/course/C1">C1</a> and <a href="/course/C2">C2</a>. The
+        <a href="/course/background/qubits">background chapter on qubits</a> describes optical tweezers and Rydberg gates,
+        and the <a href="/course/background/control">chapter on control systems</a> describes numerically controlled
+        oscillators.
+      </p>
+
+      <h2 id="zac"><span class="num">1</span>A compiled program for a zoned array</h2>
+      <p>
+        Neutral atoms are held one per <span class="term" data-term="tweezer">tweezer</span>. In a zoned machine they wait in
+        a storage zone and are carried into an entanglement zone, where a global laser pulse excites neighbouring pairs to a
+        <span class="term" data-term="Rydberg">Rydberg</span> state and entangles them (Bluvstein et al., <i>Nature</i> 604,
+        451 (2022), <a href="https://arxiv.org/abs/2112.03923">arXiv:2112.03923</a>). The program of this lesson was compiled
+        by <a href="https://github.com/UCLA-VAST/ZAC">ZAC</a> (Lin, Tan and Cong, HPCA 2025,
+        <a href="https://arxiv.org/abs/2411.11784">arXiv:2411.11784</a>) for a 14-qubit circuit on an architecture with two
+        crossed AOD pairs. It is the example <code>neutral-bv14</code>.
+      </p>
+      <p>
+        ZAC already decides when everything happens. Its program lists timed instructions of three kinds, and the lowering
+        in <code>riscq/platforms/neutral.mjs</code> keeps every time:
+      </p>
+      <div class="tw"><table>
+        <tr><th>ZAC instruction</th><th>Hardware instructions</th><th>Duration from ZAC</th></tr>
+        <tr><td><code>rearrangeJob</code></td><td><code>pickup</code>, <code>move</code>, <code>drop</code></td><td>15 µs transfer, a move time that grows with distance, 15 µs transfer</td></tr>
+        <tr><td><code>rydberg</code></td><td><code>rydberg</code>: one global laser pulse</td><td>0.36 µs</td></tr>
+        <tr><td><code>1qGate</code></td><td><code>raman</code>: one global laser pulse</td><td>stated per instruction</td></tr>
+      </table></div>
+      <p>
+        ZAC does not say which beams address single atoms, so the lowering plays each one-qubit instruction as one global
+        Raman pulse. The 15 µs transfer and the 0.36 µs Rydberg pulse are ZAC's own values (Sec. VII-B of the paper).
+      </p>
+      <div class="ex" data-id="C3.1" data-stars="1" data-kind="number">
+        <p>Run <code>neutral-bv14</code>. How many rearrangement jobs, that is <code>pickup</code> instructions, does the program contain?</p>
+        <div class="why">26 jobs, each a pickup, a move and a drop, plus 13 Rydberg pulses and 14 Raman pulses: 105 hardware
+          instructions. Read them in the <b>Hardware instructions</b> layer of the workspace.</div>
+      </div>
+
+      <h2 id="aod"><span class="num">2</span>A frequency is a position</h2>
+      <p class="insection"><b>In this section:</b> how an AOD maps a tone to a spot, and the calibration the model uses.</p>
+      <p>
+        An <span class="term" data-term="AOD">acousto-optic deflector</span> is a crystal with a piezo transducer on one
+        side. An RF tone launches a sound wave through the crystal, and the wave diffracts a laser beam by an angle that is
+        proportional to the tone's frequency. A lens turns the angle into a position in the atom plane. Several tones at
+        once make several beams. Two deflectors crossed at right angles make a spot at every crossing of a column tone and
+        a row tone, and each spot can hold one atom.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 250" role="img" aria-label="Column and row tones of a crossed AOD make spots at their crossings">
+          <style>
+            .c3 text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #111827; }
+            .c3 .m { font: 12px ui-monospace, Consolas, monospace; fill: #586174; }
+            .c3 .tone { stroke: #c4622d; stroke-width: 1.6; }
+            .c3 .grid { stroke: #e6e9f2; stroke-width: 1; }
+            .c3 rect { stroke: #dde1ea; }
+          </style>
+          <g class="c3">
+            <rect x="10" y="20" width="200" height="200" rx="10" fill="#f1f3f9" />
+            <text x="24" y="44">core aod0</text>
+            <text class="m" x="24" y="72">x0  f ≈ 80.57 MHz</text>
+            <text class="m" x="24" y="94">x1  f ≈ 87.35 MHz</text>
+            <text class="m" x="24" y="116">y0  f = …</text>
+            <text class="m" x="24" y="150">x0, x1 → DAC 0 (summed)</text>
+            <text class="m" x="24" y="172">y0     → DAC 1</text>
+            <line x1="210" y1="120" x2="300" y2="120" stroke="#8a9a9c" stroke-width="1.4" />
+            <rect x="300" y="70" width="110" height="100" rx="8" fill="#fdf0ea" />
+            <text x="314" y="100">crossed</text><text x="314" y="120">AODs</text><text class="m" x="314" y="142">6.154 µs</text>
+            <line x1="410" y1="120" x2="480" y2="120" stroke="#8a9a9c" stroke-width="1.4" />
+            <rect x="480" y="20" width="270" height="200" rx="10" fill="#fff" />
+            <line class="tone" x1="530" y1="30" x2="530" y2="210" /><line class="tone" x1="690" y1="30" x2="690" y2="210" />
+            <line class="tone" x1="490" y1="150" x2="740" y2="150" />
+            <circle cx="530" cy="150" r="7" fill="#5b4a8a" /><circle cx="690" cy="150" r="7" fill="#5b4a8a" />
+            <text class="m" x="536" y="44">x0 at 3 µm</text><text class="m" x="600" y="70">x1 at 39 µm</text>
+            <text class="m" x="560" y="176">y0 at 297 µm</text>
+          </g>
+        </svg>
+        <figcaption><b>Two column tones and one row tone hold two atoms.</b> The pickup of the first job: tones x0 and x1 of
+          AOD 0 at 3 µm and 39 µm, row tone y0 at 297 µm, atoms 0 and 13 at the two crossings. Schematic drawing, not to scale.</figcaption>
+      </figure>
+      <p>
+        The model uses a linear calibration for each axis (<code>HZ_PER_UM</code> and <code>BASE_HZ</code> in
+        <code>neutral.mjs</code>):
+      </p>
+      <div class="formula">f = 80 MHz + 188,462 Hz/µm × position</div>
+      <p>
+        The slope is derived from Endres et al., <i>Science</i> 354, 1024 (2016),
+        <a href="https://arxiv.org/abs/1607.03044">arXiv:1607.03044</a>, Fig. 1D: tones 0.49 MHz apart give spots 2.6 µm apart.
+        Placing position 0 at 80 MHz is this project's choice. The tone is a 16-bit
+        <span class="term" data-term="carrier">carrier</span> code of a channel that runs at 1.6 GS/s (16 samples per 10 ns
+        batch), so one code step is 1.6 GHz / 65,536 = 24.4 kHz, which is 0.13 µm. A position is always rounded to that grid.
+      </p>
+      <div class="ex" data-id="C3.2" data-stars="2" data-kind="number" data-unit="MHz" data-tolerance="0.002">
+        <p>At the pickup of the first job, ZAC puts column tone x1 of AOD 0 at 39 µm. Read the carrier code the trace
+          records for <code>aod0.x1</code> at that pickup and convert it to a frequency. How many MHz is it?</p>
+        <div class="why">The code is 3,578, and 3,578 × 24,414.0625 Hz = 87.354 MHz. By the calibration, 39 µm asks for
+          80 MHz + 39 × 0.188462 MHz = 87.350 MHz. The difference is the 24.4 kHz rounding of the code.</div>
+      </div>
+      <div class="ex" data-id="C3.3" data-stars="2" data-kind="number" data-unit="µm" data-tolerance="0.01">
+        <p>The run turns every carrier update back into a position (<code>derived.tonePositions</code>). Where does it place
+          <code>aod0.x1</code> at that pickup?</p>
+        <div class="why">39.019 µm: the code 3,578 read back through the same calibration. The workspace draws the tone line
+          and its atoms from these read-back positions, not from ZAC's coordinates, so what you see is what the controller
+          actually commanded.</div>
+      </div>
+
+      <h2 id="channels"><span class="num">3</span>One core per deflector</h2>
+      <p>
+        The lowering gives each AOD pair one <span class="term" data-term="core">core</span>, named <code>aod0</code> and
+        <code>aod1</code>, with one pulse channel per tone: <code>x0</code>, <code>x1</code>, … for columns and
+        <code>y0</code>, … for rows. The number of tones is sized to the widest job of the program. For this program each AOD
+        needs two column tones and one row tone. All column tones of an AOD name one DAC, and their outputs are summed into
+        one multi-tone RF signal; the row tones use a second DAC. A third core, <code>laser</code>, has a
+        <code>raman</code> and a <code>rydberg</code> channel. The controller runs at 100 MHz, like the ion controller.
+      </p>
+
+      <h2 id="job"><span class="num">4</span>Pickup, move, drop</h2>
+      <p class="insection"><b>In this section:</b> what each step of a job writes, and the path a tone follows during a move.</p>
+      <p>
+        <b>Pickup.</b> Each tone of the job first gets its carrier: a frequency write that places it at the atom's site. Then
+        a pulse-table entry the model calls <code>ramp-up</code> raises the tone's RF amplitude over the 15 µs transfer, so
+        the moving tweezer takes the atom from the static trap.
+      </p>
+      <p>
+        <b>Move.</b> A <code>hold</code> entry keeps the amplitude up for the whole move. Meanwhile the core writes a new
+        carrier every 200 batches, 2 µs (<code>STEP_BATCHES</code>). The positions follow a fixed profile: constant
+        acceleration to the midpoint, then constant deceleration to rest (<code>profile</code> in <code>neutral.mjs</code>).
+        The last step lands exactly on the destination. A step whose rounded code equals the previous one is not written.
+      </p>
+      <div class="formula">fraction of the distance at fraction s of the move = 2s²  for s &lt; ½,   1 − 2(1 − s)²  for s ≥ ½</div>
+      <p>
+        <b>Drop.</b> A <code>ramp-down</code> entry lowers the amplitude over 15 µs and the static trap takes the atom back.
+      </p>
+      <div class="warn"><b>Assumptions.</b> ZAC states only the move's duration. The path inside it is this project's choice,
+        made to match ZAC's duration law below. The atom is assumed to follow its tones; loss and heating are not modeled.
+        The model also does not compute the RF waveform: a pulse is its scheduled codes. On the RISC-Q pulse generator a
+        frequency step is not phase continuous, which a real AOD driver would have to handle.</div>
+      <p>
+        How long a move takes is ZAC's decision. ZAC follows a square-root law, t = √(d / a) with
+        a = 2,750 m/s², after the moves of Bluvstein et al. 2022 (Lin, Tan and Cong, Sec. VII-B). With the profile above,
+        the peak acceleration of the tone is 4d/t², four times that constant.
+      </p>
+      <div class="ex" data-id="C3.4" data-stars="3" data-kind="number" data-unit="m/s²" data-tolerance="5">
+        <p>Check ZAC's law on the first job, <code>z2</code>. Take the move instruction <code>z2.1</code>, the longest
+          distance any of its atoms travels (from <code>atoms</code>, in µm), and its duration. Compute d / t² in m/s².</p>
+        <div class="why">Atom 0 goes from (3, 297) to (35, 307): 33.53 µm. The move lasts 110.41 µs.
+          33.53 × 10⁻⁶ / (110.41 × 10⁻⁶)² ≈ 2,750 m/s². The small difference comes from rounding the duration to the 10 ns grid.</div>
+      </div>
+      <div class="ex" data-id="C3.5" data-stars="2" data-kind="number">
+        <p>During move <code>z2.1</code>, how many carrier updates reach tone <code>aod0.x0</code>?</p>
+        <div class="why">The move lasts 11,041 batches, so it has ⌊11,041 / 200⌋ = 55 steps. Near the start and the end the
+          tone moves slowly and some steps round to the same code, so fewer than 55 are written. Tone x1, which moves only
+          2 µm, gets far fewer. Count them in the <b>Channel timeline</b> or in <code>summary.tones</code>.</div>
+      </div>
+      <figure class="live" data-title="The first atom move of the ZAC program" data-src="/riscq-studio?example=neutral-bv14&step=741&view=chip">
+        <figcaption>The ZAC program in the chip view, at the first frequency step of column tone x0 during move z2.1. Step
+          forward to watch atoms 0 and 13 follow their tones into the entanglement zone.</figcaption>
+      </figure>
+      <figure>
+        <img src="/docs/media/riscq-atoms.gif" alt="The chip view of the ZAC run: tones pick atoms up, carry them between zones and drop them" width="788" height="700" loading="lazy" />
+        <figcaption><b>The atom array, recorded from the workspace.</b> Orange lines are the AOD tones at their read-back
+          positions; violet dots are atoms; the highlighted chain runs from the core through the DAC and the deflector to the
+          tone it changed.</figcaption>
+      </figure>
+
+      <h2 id="acoustic"><span class="num">5</span>Sound is slow</h2>
+      <p>
+        A new frequency does not move the beam at once. The sound wave must first cross the laser beam inside the crystal.
+        The model takes the crossing time as the beam width over the acoustic velocity: 4 mm (the beam of Endres et al. 2016)
+        over 650 m/s (the supplement of Lu et al., <a href="https://arxiv.org/abs/2510.11451">arXiv:2510.11451</a>), which is
+        6.154 µs. This is a derived value, not a measurement of one device. It is the delay of every <code>effect</code>
+        frame on an AOD tone.
+      </p>
+      <p>
+        The lowering does not compensate for it, and the laser channels have no delay in the model. So in the atom plane a
+        tone change lags a laser pulse fired on the same batch by 6.154 µs. The drop of the first job closes at the
+        converters exactly when the first Rydberg pulse opens, but the end of its ramp reaches the atoms 6.154 µs after the
+        Rydberg pulse has started, when the 0.36 µs pulse is long over. Whether ZAC's times are meant at the RF source or at the atoms, the program does not say.
+      </p>
+      <div class="ex" data-id="C3.6" data-stars="1" data-kind="number" data-unit="µs" data-tolerance="0.001">
+        <p>Find the first <code>effect</code> frame on <code>aod0:x0</code>. How many microseconds after the pulse window
+          opens at the DAC does the change reach the atom plane (<code>arrivesPs − atPs</code>)?</p>
+        <div class="why">6.154 µs, the acoustic delay. Compare 5.003 ns of coax on the transmon ring: three orders of
+          magnitude.</div>
+      </div>
+
+      <h2 id="retune"><span class="num">6</span>How fast can a tone be retuned?</h2>
+      <p>
+        A RISC-Q pulse generator does not just store a new frequency. It regenerates the phasors of all 16 sample lanes,
+        one lane per cycle, through one CORDIC unit. In the Lean model that takes 16 + 19 + 2 = 37 batches
+        (<code>regenCycles</code> in <code>QControl/RiscQ/Timing.lean</code>), and the slowest path of a carrier update has a
+        lead of 52 batches (theorem <code>default_leads</code>). If a second update lands before the previous regeneration has
+        finished, the first frequency never reaches the carrier. The model reports that as a fault:
+        <i>carrier update lands before the previous phasor regeneration finished</i>. The test
+        <code>tests/riscq-neutral.test.mjs</code> provokes it with two updates 20 batches apart.
+      </p>
+      <p>
+        Steps of 200 batches are far from that limit, and the same test file checks that no two steps of a tone in the ZAC
+        run are closer than 37 batches.
+      </p>
+      <div class="ex" data-id="C3.7" data-stars="2" data-kind="choice" data-answer="b">
+        <p>You change <code>STEP_BATCHES</code> to 20 to make moves smoother. What does the simulator report?</p>
+        <ol class="choices">
+          <li data-k="a">Nothing: smaller steps only add writes.</li>
+          <li data-k="b">A fault on the tone channels: each update lands before the previous phasor regeneration has finished.</li>
+          <li data-k="c">A compile error: the lead is too short.</li>
+          <li data-k="d">The atoms are lost.</li>
+        </ol>
+        <div class="why">20 batches is less than the 37 batches of one regeneration, so every step restarts it. The model
+          finds the conflict when it executes the firmware, not the compiler. It reports a fault, and the frequency that
+          was cut short never plays. Atom loss is not modeled at all.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>ZAC's program fixes every time. Each rearrangement job becomes pickup, move and drop; Rydberg and Raman pulses are global.</li>
+          <li>An AOD tone's frequency is a position: 80 MHz + 188,462 Hz/µm, in 0.13 µm steps of the 16-bit code.</li>
+          <li>Pickup and drop ramp the tone's amplitude for 15 µs. A move steps the frequency every 2 µs along a constant-acceleration profile.</li>
+          <li>Tone positions in the workspace are read back from the carrier updates in the trace.</li>
+          <li>The acoustic delay is 6.154 µs (derived). Retuning faster than one phasor regeneration, 37 batches, is a fault.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const zac = (a) => a.run({ example: "neutral-bv14" });
+      const ops = (run) => run.hardware.segments.flatMap((s) => s.ops);
+      course({
+        answers: {
+          "C3.1": async (a) => ops(await zac(a)).filter((o) => o.op === "pickup").length,
+          "C3.2": async (a) => {
+            const run = await zac(a);
+            const tone = run.summary.tones.find((t) => t.part === "aod0.x1" && t.source === "z2.0");
+            const code = tone.freq > 32767 ? tone.freq - 65536 : tone.freq;
+            // 16 samples per batch: the carrier code counts 1/65536 of the channel's sample rate.
+            return Math.round((code * 16 * (1e12 / run.machine.dspPeriodPs)) / 65536 / 1e3) / 1e3;
+          },
+          "C3.3": async (a) => {
+            const run = await zac(a);
+            return Math.round(run.derived.tonePositions.find((t) => t.part === "aod0.x1" && t.source === "z2.0").um * 1000) / 1000;
+          },
+          "C3.4": async (a) => {
+            const move = ops(await zac(a)).find((o) => o.id === "z2.1");
+            const um = Math.max(...move.atoms.map((x) => Math.hypot(x.to[0] - x.from[0], x.to[1] - x.from[1])));
+            const s = move.dur / 1e12;
+            return Math.round((um * 1e-6) / (s * s));
+          },
+          "C3.5": async (a) => (await zac(a)).summary.tones.filter((t) => t.part === "aod0.x0" && t.source === "z2.1").length,
+          "C3.6": async (a) => {
+            const f = (await zac(a)).frames.find((x) => x.op === "effect" && x.part === "aod0:x0");
+            return (f.state.arrivesPs - f.atPs) / 1e6;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

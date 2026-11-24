@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Qubits and what controls them · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="qubits">
+    <article>
+      <p class="kicker">Background · Chapter 1</p>
+      <h1>Qubits and what controls them</h1>
+      <p class="lead">
+        A superconducting circuit at 10 millikelvin, an ion floating above a gold chip, and an atom held in a beam of light are
+        three very different objects. Each is a qubit only because a classical machine prepares it, rotates it, entangles it and
+        reads it out on cue. This chapter explains, for each platform, what the qubit is, which signals act on it, how long
+        each operation takes, and what that asks of the control system.
+      </p>
+      <p class="pre">
+        No physics background is assumed beyond the idea that a qubit has two states, written |0⟩ and |1⟩, and can be in a
+        superposition of them. Dotted words have a one-sentence definition on hover; the <a href="/course/background/glossary">glossary</a>
+        lists them all. The numbers in this chapter carry their sources. When a number belongs to the simulator, the text
+        says which file or run it comes from.
+      </p>
+
+      <h2 id="jobs"><span class="num">1</span>Four jobs, three machines</h2>
+      <p class="q">What does a qubit need from the outside world?</p>
+      <p class="insection"><b>In this section:</b> the operations every platform must perform, and why their timescales differ
+        by a factor of a thousand.</p>
+      <p>
+        Every quantum computer needs the same four things from its control system. It must <b>prepare</b> each qubit in a known
+        state, usually |0⟩. It must <b>rotate</b> single qubits by precise angles about precise axes. It must <b>entangle</b> pairs
+        of qubits with a two-qubit gate. And it must <b>measure</b> qubits and turn the result into a classical bit. Two of the
+        three platforms in this course add a fifth job: <b>moving</b> qubits, because their two-qubit gates act only on qubits
+        that sit next to each other.
+      </p>
+      <p>
+        Each job is done by a physical signal. On a superconducting chip the signal is a microwave pulse on a coaxial cable.
+        On an ion trap it is a laser beam switched by a radio-frequency modulator, or a set of electrode voltages. In a
+        neutral-atom array it is a laser, or a radio-frequency tone that steers a laser beam. The control system has to produce
+        every one of those signals with the right shape, frequency and phase, and release it at the right moment.
+      </p>
+      <p>
+        How tight "the right moment" is depends on the platform. A transmon single-qubit gate lasts tens of nanoseconds, so a
+        timing error of one nanosecond is a few percent of the gate. An ion gate lasts microseconds and an ion shuttle tens of
+        microseconds, so the absolute precision needed is lower, but the number of signals is much larger: a trapped-ion
+        machine can have hundreds of electrodes, each with its own voltage waveform. The rest of this chapter goes through the
+        three platforms one by one. <a href="#compare">Section 5</a> puts them side by side.
+      </p>
+      <div class="note"><b>What the simulator does with this.</b> QuantumOS follows every classical signal from the
+        control processor to the qubit, ion, electrode or atom it reaches. It does not compute what the qubit does in
+        response: no quantum state is simulated, and a measurement result is an input you choose. This chapter explains the
+        physics so that you know what each signal is for.</div>
+
+      <h2 id="transmons"><span class="num">2</span>Superconducting transmons</h2>
+      <p class="q">How can a piece of metal on a chip be a qubit?</p>
+      <p class="insection"><b>In this section:</b> the transmon, its microwave drive, the virtual Z, two-qubit gates, dispersive
+        readout, and the cryostat with its cables.</p>
+      <h3>The qubit</h3>
+      <p>
+        A <span class="term" data-term="transmon">transmon</span> is an electrical circuit: a <b>Josephson junction</b>, a thin
+        insulating barrier between two superconductors, in parallel with a capacitor
+        (<a href="https://arxiv.org/abs/cond-mat/0703002">Koch et al., Phys. Rev. A 76, 042319 (2007), arXiv:cond-mat/0703002</a>).
+        Cooled far below the superconducting transition, the circuit behaves like a quantum oscillator. Because the junction is
+        nonlinear, its energy levels are not evenly spaced. The lowest two serve as |0⟩ and |1⟩, and the gap between the first
+        and second excited level is a few hundred megahertz smaller, so a pulse tuned to the 0–1 transition does not drive the
+        next one by accident. That difference is the <b>anharmonicity</b>.
+      </p>
+      <p>
+        The qubit frequency is set when the chip is made, and for tunable designs adjusted with a magnetic flux. On the
+        eight-transmon ring that this course runs, the frequencies come from RISC-Q's example calibration
+        (<code>validation/riscq/x6y3-calibration.json</code>): the eight qubits sit between 5.234 and 5.914 GHz, and their
+        measured energy-relaxation times <b>T1</b> range from 24 µs to 118 µs. T1 is how long, on average, an excited qubit stays
+        excited. Every operation has to fit well inside it.
+      </p>
+      <h3>Single-qubit gates: microwave pulses</h3>
+      <p>
+        A rotation is a microwave pulse at the qubit frequency on the qubit's <b>drive line</b>. The pulse is a
+        <span class="term" data-term="carrier">carrier</span> sinusoid multiplied by an
+        <span class="term" data-term="envelope">envelope</span>. The pulse's area sets the rotation angle and the carrier's phase
+        sets the rotation axis: phase 0 rotates about X, phase 90° about Y. A plain Gaussian envelope leaks population into the
+        second excited level when the pulse is short, so most laboratories add a derivative component on the quadrature
+        channel, the <b>DRAG</b> correction
+        (<a href="https://arxiv.org/abs/0901.0534">Motzoi et al., Phys. Rev. Lett. 103, 110501 (2009), arXiv:0901.0534</a>).
+      </p>
+      <p>
+        The ring's calibration gives every qubit a 35 ns 90° pulse (<code>x90</code>) and a 70 ns 180° pulse (<code>x</code>), both
+        with a <code>FAST_DRAG</code> envelope. Published devices are in the same range: ETH Zurich's distance-three surface code
+        used 40 ns DRAG pulses
+        (<a href="https://arxiv.org/abs/2112.03708">Krinner et al., Nature 605, 669 (2022), arXiv:2112.03708</a>), and Google's
+        105-qubit processor runs all XY rotations in 25 ns
+        (<a href="https://arxiv.org/abs/2408.13687">Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687</a>, supplement).
+      </p>
+      <p>
+        Rotations about Z need no pulse at all. A Z rotation changes the phase of the qubit relative to the drive, so it can be
+        implemented by shifting the phase of every later pulse on that qubit. This is the
+        <span class="term" data-term="virtual Z">virtual Z</span>
+        (<a href="https://arxiv.org/abs/1612.00858">McKay et al., Phys. Rev. A 96, 022330 (2017), arXiv:1612.00858</a>). It is
+        exact and takes zero time, and it is why a Hadamard on a transmon is one physical pulse with phase bookkeeping
+        around it. In the simulator it is the <code>frame</code> hardware instruction, and lesson <a href="/course/C1">C1</a>
+        follows one.
+      </p>
+      <div class="ex" data-id="qubits.1" data-stars="1" data-kind="number" data-unit="batches">
+        <p>On the ring, one batch of the controller clock is 2 ns, and a pulse window is a whole number of batches. How many batches
+          does the 35 ns <code>x90</code> pulse window of qubit 0 last in the feed-forward run?</p>
+        <div class="why">35 ns is 17.5 batches, and the window is rounded up to whole batches: 18 batches, 36 ns. The envelope
+          inside the window carries the shape. The answer is read from the first pulse of the run's summary.</div>
+      </div>
+      <h3>Two-qubit gates</h3>
+      <p>
+        Two transmons are coupled through a capacitor or a tunable coupler. Many laboratories make a controlled-Z (CZ) gate by
+        bringing the two qubits' levels into resonance with a fast flux pulse. Krinner et al. report 68 ns net-zero flux pulses
+        with 15 ns buffers on each side, 98 ns in all; Google's 105-qubit processor performs CZ gates in 42 ns (both sources
+        above). The ring's calibration takes a different route: a CZ is a 400 ns tone at a pair frequency, played at the same
+        time on both qubits' drive lines, followed by phase corrections. For the control system the difference matters: a
+        flux-based CZ needs a baseband <b>flux line</b> per qubit, a microwave-activated CZ needs only the drive lines that are
+        already there.
+      </p>
+      <h3>Readout: dispersive measurement</h3>
+      <p>
+        A transmon is read out through a microwave <b>resonator</b> coupled to it. The resonator's frequency shifts slightly
+        depending on whether the qubit is in |0⟩ or |1⟩. A probe tone at the resonator frequency therefore comes back with a
+        state-dependent amplitude and phase. This is <b>dispersive readout</b>
+        (<a href="https://arxiv.org/abs/2005.12667">Blais et al., Rev. Mod. Phys. 93, 025005 (2021), arXiv:2005.12667</a>). The
+        returning tone is amplified, digitized by an <span class="term" data-term="ADC">ADC</span>, multiplied by a reference tone
+        and integrated over a window. That step, <span class="term" data-term="demodulation">demodulation</span>, gives one complex
+        number per measurement, and a threshold on it gives the bit. Chapter <a href="/course/background/control">2</a> explains
+        the arithmetic.
+      </p>
+      <p>
+        The ring's resonators sit between 6.555 and 6.836 GHz. Each readout tone lasts 500 to 750 ns, and each demodulation
+        window, which opens 335 to 750 ns after the tone starts, lasts 590 to 835 ns (calibration file). Published numbers are
+        similar: Google's 2023 surface-code experiment used a 500 ns measurement and a 160 ns reset in a 921 ns cycle
+        (<a href="https://arxiv.org/abs/2207.06431">Google Quantum AI, Nature 614, 676 (2023), arXiv:2207.06431</a>, Fig. 1), and
+        Krinner et al. integrated for 400 ns.
+      </p>
+      <h3>The cryostat and its cables</h3>
+      <p>
+        Transmons work only at a few millikelvin, inside a dilution refrigerator. The refrigerator is a stack of plates at
+        decreasing temperatures, and every control signal enters from room temperature through coaxial cables that are
+        attenuated and thermally anchored at each plate. Krinner et al. list the stages of a Bluefors XLD400 and the cable
+        length between them
+        (<a href="https://arxiv.org/abs/1806.07862">Krinner et al., EPJ Quantum Technology 6, 2 (2019), arXiv:1806.07862</a>,
+        Table 1):
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Stage</th><th class="n">Temperature</th><th class="n">Cable length into the stage</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td>50 K plate</td><td class="n">35 K</td><td class="n">200 mm</td><td>Krinner et al. 2019, Table 1</td></tr>
+            <tr><td>4 K plate</td><td class="n">2.85 K</td><td class="n">290 mm</td><td>same</td></tr>
+            <tr><td>Still</td><td class="n">882 mK</td><td class="n">250 mm</td><td>same</td></tr>
+            <tr><td>Cold plate</td><td class="n">82 mK</td><td class="n">170 mm</td><td>same</td></tr>
+            <tr><td>Mixing chamber</td><td class="n">6 mK</td><td class="n">140 mm</td><td>same</td></tr>
+            <tr><td><b>Flange to chip</b></td><td class="n"></td><td class="n"><b>1,050 mm</b></td><td>sum, used by <code>riscq/platforms/superconducting.mjs</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The simulator uses that 1,050 mm as the path from the converters to the chip, at an <b>assumed</b> signal speed of 0.7 times
+        the speed of light. Every drive pulse therefore reaches its qubit about 5 ns after it leaves the converter. Lesson
+        <a href="/course/D2">D2</a> shows what happens when you lengthen that path.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 300" role="img" aria-label="Signal path of one transmon">
+          <style>
+            .tq text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .tq .s { font-size: 11.5px; fill: #52514e; }
+            .tq .box { fill: #fff; stroke: #cfceca; }
+            .tq .warm { fill: #fdf0ea; stroke: #e6e5e1; }
+            .tq .cold { fill: #eef3fb; stroke: #e6e5e1; }
+            .tq .w { stroke: #2a78d6; stroke-width: 2; fill: none; }
+            .tq .r { stroke: #eb6834; stroke-width: 2; fill: none; }
+            .tq .plate { stroke: #8a8985; stroke-width: 1; stroke-dasharray: 4 3; }
+            .tq .h { paint-order: stroke; stroke: #eef3fb; stroke-width: 4px; stroke-linejoin: round; }
+          </style>
+          <g class="tq">
+            <rect class="warm" x="10" y="10" width="200" height="280" rx="10" />
+            <text x="24" y="32">Room temperature</text>
+            <rect class="box" x="30" y="50" width="160" height="40" rx="6" /><text x="42" y="75">control processor</text>
+            <rect class="box" x="30" y="120" width="70" height="36" rx="6" /><text x="46" y="143">DAC</text>
+            <rect class="box" x="120" y="200" width="70" height="36" rx="6" /><text x="136" y="223">ADC</text>
+            <path class="w" d="M65 90 V120" /><path class="w" d="M155 90 V200" />
+            <rect class="cold" x="230" y="10" width="520" height="280" rx="10" />
+            <text x="244" y="32">Dilution refrigerator</text>
+            <line class="plate" x1="300" y1="40" x2="300" y2="280" /><text class="s" x="282" y="276">50 K</text>
+            <line class="plate" x1="380" y1="40" x2="380" y2="280" /><text class="s" x="370" y="276">4 K</text>
+            <line class="plate" x1="450" y1="40" x2="450" y2="280" /><text class="s" x="436" y="276">still</text>
+            <line class="plate" x1="510" y1="40" x2="510" y2="280" /><text class="s" x="493" y="276">cold pl.</text>
+            <line class="plate" x1="560" y1="40" x2="560" y2="280" /><text class="s" x="548" y="276">MXC</text>
+            <path class="w" d="M100 138 H620" />
+            <text class="s h" x="320" y="130">drive: shaped microwave pulse, ~5.2–5.9 GHz</text>
+            <circle cx="640" cy="138" r="18" fill="#fff" stroke="#0b0b0b" /><text x="626" y="143">Q</text>
+            <rect x="620" y="190" width="40" height="22" rx="4" fill="#fff" stroke="#0b0b0b" /><text class="s" x="624" y="206">res.</text>
+            <path d="M640 156 V190" stroke="#0b0b0b" />
+            <path class="r" d="M620 201 H190" />
+            <text class="s h" x="250" y="222">readout: probe tone in, reflected tone back to the ADC, ~6.6–6.8 GHz</text>
+            <text class="s h" x="590" y="250">qubit chip, ~6 mK</text>
+            <text class="s h" x="320" y="70">1,050 mm of coax, flange to chip (Krinner et al. 2019)</text>
+          </g>
+        </svg>
+        <figcaption><b>One transmon and its signals.</b> A DAC at room temperature produces the drive pulse, which travels through
+          the refrigerator stages to the qubit. The readout tone reflects off the qubit's resonator and returns to an ADC.
+          Attenuators, filters, amplifiers and circulators that real setups put on these lines are omitted, and the simulator
+          does not model them either. Frequencies are the ranges of the x6y3 calibration. Schematic drawing, not to scale.</figcaption>
+      </figure>
+      <h3>What the control system must produce</h3>
+      <p>
+        Per transmon: shaped microwave pulses of tens to hundreds of nanoseconds on a drive line, with phase changes applied
+        between pulses at the exact batch; for a flux-tuned design, baseband pulses on a flux line; a readout tone; and an
+        acquisition window on a shared ADC, with the result available fast enough to condition later pulses. A 2 ns timing
+        step is 6% of a 35 ns gate, so every pulse must land on its scheduled clock cycle, not near it. Chapter
+        <a href="/course/background/timing">4</a> explains how RISC-Q guarantees that.
+      </p>
+
+      <h2 id="ions"><span class="num">3</span>Trapped ions</h2>
+      <p class="q">How do you compute with single charged atoms held in vacuum?</p>
+      <p class="insection"><b>In this section:</b> the hyperfine qubit, laser gates and the Mølmer–Sørensen gate, the QCCD
+        architecture and its shuttles, fluorescence detection, cooling, and the signals all of this needs.</p>
+      <h3>The qubit</h3>
+      <p>
+        An ion trap holds charged atoms in vacuum with oscillating and static electric fields. In a surface-electrode trap the
+        electrodes lie on a chip and the ions float tens of micrometres above it. The qubit is two internal states of one
+        ion. In a <b>hyperfine qubit</b> both states belong to the electronic ground level and differ in how the electron and
+        nuclear spins combine, which makes the qubit very insensitive to noise
+        (<a href="https://arxiv.org/abs/1904.04178">Bruzewicz et al., Appl. Phys. Rev. 6, 021314 (2019), arXiv:1904.04178</a>).
+        Quantinuum's H-series machines use <sup>171</sup>Yb<sup>+</sup> as the qubit and <sup>138</sup>Ba<sup>+</sup> as a coolant
+        ion that shares the trap (<a href="https://arxiv.org/abs/2003.01293">Pino et al., Nature 592, 209 (2021), arXiv:2003.01293</a>;
+        <a href="https://arxiv.org/abs/2305.03828">Moses et al., Phys. Rev. X 13, 041052 (2023), arXiv:2305.03828</a>). The
+        <sup>171</sup>Yb<sup>+</sup> hyperfine splitting is about 12.6 GHz
+        (<a href="https://arxiv.org/abs/0708.0657">Olmschenk et al., Phys. Rev. A 76, 052314 (2007), arXiv:0708.0657</a>).
+      </p>
+      <h3>Gates: lasers and shared motion</h3>
+      <p>
+        A single-qubit rotation is driven by light, most often a pair of laser beams whose frequency difference matches the
+        qubit splitting: a <b>Raman</b> transition. As on a transmon, the pulse's duration and power set the angle and its phase
+        sets the axis, and Z rotations can again be virtual. The beams are switched and shaped by <b>acousto-optic
+        modulators</b>, crystals driven by a radio-frequency tone; the control system generates that tone.
+      </p>
+      <p>
+        Ions in the same trap repel each other and move together, so they share vibrational modes. The
+        <span class="term" data-term="Mølmer–Sørensen">Mølmer–Sørensen</span> gate uses laser beams tuned close to a motional
+        sideband to push the shared motion out and back along a path whose enclosed phase depends on both qubits' states
+        (<a href="https://arxiv.org/abs/quant-ph/9810039">Sørensen and Mølmer, Phys. Rev. Lett. 82, 1971 (1999), arXiv:quant-ph/9810039</a>).
+        When the motion returns, only the entangling phase remains. The gate works only if the ions are cold and in the same
+        well, which is why ions have to be moved together before they can interact.
+      </p>
+      <h3>The QCCD: moving ions</h3>
+      <p>
+        A long chain of ions in one trap has crowded vibrational modes and slow gates. The
+        <span class="term" data-term="QCCD">quantum charge-coupled device</span> keeps chains short by using many small trapping
+        zones on one chip and moving ions between them
+        (Kielpinski, Monroe and Wineland, <a href="https://doi.org/10.1038/nature00784">Nature 417, 709 (2002)</a>). The static
+        electrode voltages shape the potential along the trap axis into wells. Changing the voltages moves the wells, and
+        an ion follows its well. This is a <span class="term" data-term="shuttle">shuttle</span>. Splitting a pair into two wells,
+        merging two wells into one, and swapping two ions are built from the same mechanism.
+      </p>
+      <p>
+        Pino et al. measured every primitive of their QCCD machine:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Operation</th><th class="n">Duration</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td>Intrazone shift, 110 µm within one gate zone</td><td class="n">58 µs</td><td>Pino et al. 2021, Table II</td></tr>
+            <tr><td>Interzone shift between the two gate zones</td><td class="n">283 µs</td><td>Table II</td></tr>
+            <tr><td>Split or combine</td><td class="n">128 µs</td><td>Table II</td></tr>
+            <tr><td>Swap</td><td class="n">200 µs</td><td>Table II</td></tr>
+            <tr><td>Interpolation and electronics overhead</td><td class="n">~10% on every operation</td><td>Table II caption</td></tr>
+            <tr><td>State initialization</td><td class="n">10 µs</td><td>Table III</td></tr>
+            <tr><td>Single-qubit π/2</td><td class="n">5 µs</td><td>Table III</td></tr>
+            <tr><td>Two-qubit gate</td><td class="n">25 µs</td><td>Table III</td></tr>
+            <tr><td>Measurement (high fidelity / low crosstalk, mid-circuit)</td><td class="n">120 µs / 60 µs</td><td>Table III</td></tr>
+            <tr><td>Cooling stages: Doppler, sideband, axial sideband</td><td class="n">550 / 850 / 650 µs</td><td>Table III</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Transport dominates. On Quantinuum's H2 racetrack, transport takes 60% of the total circuit time on average
+        (Moses et al. 2023, Sec. II.E). For a control system this means that most of what it does on an ion machine is play
+        voltage waveforms on electrodes, not laser pulses.
+      </p>
+      <figure>
+        <img src="/docs/media/riscq-ions.gif" alt="Ions moving between trap sites in the RISC-Q workspace" loading="lazy" />
+        <figcaption><b>Shuttling in the simulator.</b> The GHZ program of lesson <a href="/course/C2">C2</a> running on a QCCD
+          Studio architecture. Each hop of an ion is a set of DAC waveforms on its electrode control channels, issued by a
+          transport core. Photographed from the running workspace, one trace step per frame.</figcaption>
+      </figure>
+      <h3>Detection and cooling</h3>
+      <p>
+        An ion is measured by shining a laser that makes one qubit state scatter many photons and leaves the other dark.
+        For <sup>171</sup>Yb<sup>+</sup> this light is near 369 nm (Olmschenk et al. 2007). A photomultiplier or a similar detector
+        turns each collected photon into an electrical pulse, and the control system counts those pulses during the detection
+        window: many counts mean |1⟩ (bright), few mean |0⟩ (dark). In the simulator a bright ion yields 10 photons per window
+        and more than one count reads as bright. These are a <b>composite</b> of two machines
+        (<a href="https://arxiv.org/abs/1903.08181">Wright et al., Nat. Commun. 10, 5464 (2019)</a> and
+        <a href="https://arxiv.org/abs/2009.11482">Egan et al., Nature 598, 281 (2021)</a>), because no H-series paper states its
+        photon statistics; <code>riscq/standards.mjs</code> marks them so.
+      </p>
+      <p>
+        Every gate and every shuttle heats the ions' motion a little, and a hot ion gives a poor Mølmer–Sørensen gate. Cooling
+        lasers take the motion back down. Because laser light on the qubit ion would scatter photons and destroy its state,
+        the coolant ion is cooled instead and takes the qubit's motion with it: <b>sympathetic cooling</b> (Pino et al. 2021).
+      </p>
+      <h3>What the control system must produce</h3>
+      <p>
+        Many slow, precise voltage waveforms, one per electrode control channel, updated together so that wells move
+        smoothly; RF tones for the acousto-optic modulators that switch and shape each laser beam, with the gate's phase; and
+        photon counting on digital inputs during each detection window. In the simulator's QCCD machine
+        (<code>riscq/platforms/qccd.mjs</code>), transport cores carry one DAC channel per QCCD Studio electrode control channel,
+        each gate zone has a core with three laser-modulator channels (rotation, Mølmer–Sørensen, detection) and a photon-counter
+        input, and one more core switches the broadcast cooling light. Its controller clock is 100 MHz, so one batch is 10 ns.
+      </p>
+      <div class="ex" data-id="qubits.2" data-stars="1" data-kind="choice" data-answer="c">
+        <p>In a QCCD machine, what physically moves an ion from one zone to the next?</p>
+        <ol class="choices">
+          <li data-k="a">A laser beam that pushes it along the trap axis.</li>
+          <li data-k="b">The radio-frequency trap drive changing its frequency.</li>
+          <li data-k="c">Changing the static voltages on the segmented electrodes, so the potential well moves and the ion follows.</li>
+          <li data-k="d">A magnetic field gradient.</li>
+        </ol>
+        <div class="why">The DC electrodes shape the potential along the trap axis into wells. Changing their voltages moves the
+          wells. This is why, in the simulator, every transport cycle is a burst of DAC waveforms on electrode control channels
+          (lesson <a href="/course/C2">C2</a>).</div>
+      </div>
+
+      <h2 id="atoms"><span class="num">4</span>Neutral atoms</h2>
+      <p class="q">How can light both hold an atom and move it?</p>
+      <p class="insection"><b>In this section:</b> optical tweezers, static and movable traps (SLM and AOD), Rydberg gates, Raman
+        rotations, camera readout, and the signals they need.</p>
+      <h3>The qubit and the trap</h3>
+      <p>
+        A neutral atom has no charge, so it cannot be held by electric fields the way an ion is. Instead it is held in a
+        <span class="term" data-term="tweezer">tweezer</span>: a laser beam focused to a spot about a micrometre wide, tuned so that the
+        atom is attracted to the brightest point. The qubit is again a pair of hyperfine ground states; the Harvard and MIT
+        experiments this chapter cites use <sup>87</sup>Rb
+        (<a href="https://arxiv.org/abs/2112.03923">Bluvstein et al., Nature 604, 451 (2022), arXiv:2112.03923</a>), whose
+        ground-state hyperfine splitting is about 6.83 GHz (D. A. Steck, "Rubidium 87 D Line Data", 2001, revised since).
+      </p>
+      <p>
+        Large arrays use two kinds of tweezers. A <b>spatial light modulator</b> (SLM) shapes one beam into a fixed pattern of
+        hundreds of spots: static traps where atoms are stored. An <span class="term" data-term="AOD">acousto-optic deflector</span>
+        (AOD) makes movable spots. An RF tone drives a sound wave through a crystal, the sound wave diffracts the laser beam,
+        and the deflection angle grows with the tone's frequency. Several tones at once make several beams. Two crossed AODs,
+        one for rows and one for columns, make a grid of spots at every crossing of a row tone and a column tone. Endres et al.
+        drove 100 tweezers with tones 0.49 MHz apart, which put the spots 2.6 µm apart
+        (<a href="https://arxiv.org/abs/1607.03044">Endres et al., Science 354, 1024 (2016), arXiv:1607.03044</a>, Fig. 2D).
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 250" role="img" aria-label="An AOD turns RF tone frequencies into beam positions">
+          <style>
+            .ao text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .ao .s { font-size: 11.5px; fill: #52514e; }
+            .ao .beam { stroke: #c62828; stroke-width: 2; fill: none; opacity: .8; }
+          </style>
+          <g class="ao">
+            <rect x="20" y="95" width="100" height="40" rx="6" fill="#fff" stroke="#cfceca" /><text x="40" y="120">laser</text>
+            <path class="beam" d="M120 115 H250" />
+            <rect x="250" y="70" width="110" height="90" rx="4" fill="#efedf8" stroke="#4a3aa7" />
+            <text x="262" y="92">AOD crystal</text>
+            <path d="M270 150 q8 -8 16 0 t16 0 t16 0 t16 0 t16 0" stroke="#4a3aa7" fill="none" />
+            <text class="s" x="262" y="185">sound wave from RF tones</text>
+            <rect x="255" y="200" width="100" height="34" rx="6" fill="#fff" stroke="#cfceca" /><text x="268" y="222">RF: f₁, f₂, f₃</text>
+            <path d="M305 200 V160" stroke="#8a8985" />
+            <path class="beam" d="M360 115 L640 60" /><path class="beam" d="M360 115 L640 115" /><path class="beam" d="M360 115 L640 170" />
+            <circle cx="650" cy="60" r="7" fill="#1baf7a" /><circle cx="650" cy="115" r="7" fill="#1baf7a" /><circle cx="650" cy="170" r="7" fill="#1baf7a" />
+            <text class="s" x="666" y="64">atom at x(f₃)</text><text class="s" x="666" y="119">atom at x(f₂)</text><text class="s" x="666" y="174">atom at x(f₁)</text>
+            <text class="s" x="420" y="210">position x = x₀ + (f − f₀) / k, k ≈ 188 kHz per µm here</text>
+          </g>
+        </svg>
+        <figcaption><b>An acousto-optic deflector.</b> Each RF tone in the crystal deflects part of the beam by an angle that grows
+          with the tone's frequency, so each tone makes one tweezer, and stepping a tone's frequency moves its tweezer. The
+          simulator's calibration constant k = 188,462 Hz/µm is derived from Endres et al.'s 0.49 MHz per 2.6 µm
+          (<code>riscq/standards.mjs</code>). Lenses between the AOD and the atoms are omitted. Schematic drawing.</figcaption>
+      </figure>
+      <h3>Moving atoms</h3>
+      <p>
+        To bring two atoms together, an AOD tweezer picks an atom up from its SLM trap, the tones sweep their frequencies so
+        the spot moves, and the atom is dropped into another trap. The sweep has to be gentle. Bluvstein et al. interpolate
+        the AOD frequencies with a cubic profile, which "enacts a constant jerk onto the atoms" and lets them move 5–10× faster
+        than at constant velocity without heating or loss; they start to observe loss when moving 55 µm in 200 µs (Bluvstein
+        et al. 2022, Methods). In their 2024 logical processor the typical move between gates takes about 200 µs
+        (<a href="https://arxiv.org/abs/2312.03982">Bluvstein et al., Nature 626, 58 (2024), arXiv:2312.03982</a>, Methods).
+      </p>
+      <p>
+        Two constraints follow directly from how an AOD works. All atoms on one row tone move together, as do all atoms on
+        one column tone, so a single move transports a whole sub-grid. And a tone cannot pass through another tone on the
+        same axis without the two beams overlapping, so rows and columns keep their order. Compilers such as ZAC schedule
+        moves around these rules
+        (<a href="https://arxiv.org/abs/2411.11784">Lin, Tan and Cong, HPCA 2025, arXiv:2411.11784</a>). ZAC models a move of
+        distance d as lasting t with d/t² = 2750 m/s², and a transfer between SLM and AOD as 15 µs (Sec. VII-B).
+      </p>
+      <h3>Gates: Rydberg interaction and Raman rotations</h3>
+      <p>
+        Two neutral atoms barely interact in their ground states. Excited to a <span class="term" data-term="Rydberg">Rydberg</span>
+        state, a state with the electron very far from the nucleus, they interact strongly over several micrometres: one
+        excited atom shifts the other's Rydberg level so far that it cannot be excited too. That blockade gives a controlled
+        phase gate (<a href="https://arxiv.org/abs/quant-ph/0004038">Jaksch et al., Phys. Rev. Lett. 85, 2208 (2000),
+        arXiv:quant-ph/0004038</a>; review: <a href="https://arxiv.org/abs/0909.4777">Saffman, Walker and Mølmer, Rev. Mod. Phys. 82,
+        2313 (2010)</a>). The Rydberg laser usually illuminates a whole <b>entanglement zone</b> at once, and every pair of atoms
+        placed close together there undergoes a CZ. Bluvstein et al. 2024 report 270 ns entangling gates with measured
+        fidelities of 99.3–99.5%; ZAC assumes a 360 ns Rydberg pulse.
+      </p>
+      <p>
+        Single-qubit rotations use Raman lasers, often globally on the whole array, with local beams for addressing. ZAC
+        assumes 1-qubit gates are executed sequentially, each built from five 8 µs pulses separated by 3 µs, 52 µs per gate
+        (Sec. VII-B). The ZAC program this course runs, <code>neutral-bv14</code>, states its own one-qubit durations; its first
+        layer lasts 8.75 µs.
+      </p>
+      <h3>Readout: a camera</h3>
+      <p>
+        Atoms are measured by imaging. A resonant beam makes atoms in one state fluoresce (atoms in the other state are
+        first pushed out or shelved), and a camera photographs the array. Bluvstein et al. 2024 use a 500 µs imaging time with
+        readout fidelity of about 99.8% (Fig. 1c). Imaging is slow compared with gates, which is why mid-circuit measurement
+        and feed-forward are harder on this platform than on transmons.
+      </p>
+      <figure>
+        <img src="/docs/media/riscq-atoms.gif" alt="Atoms moving with their AOD tones in the RISC-Q workspace" loading="lazy" />
+        <figcaption><b>AOD moves in the simulator.</b> The ZAC 14-qubit program on a zoned array (lesson <a href="/course/C3">C3</a>).
+          Each atom is drawn at the crossing of its row and column tones, whose positions are read back from the carrier updates
+          in the trace through the same linear calibration that produced them. Atoms are assumed to follow their tones.
+          Photographed from the running workspace.</figcaption>
+      </figure>
+      <h3>What the control system must produce</h3>
+      <p>
+        Per AOD axis: a sum of RF tones, each ramping its amplitude up at pickup, stepping or sweeping its frequency during the
+        move and ramping down at drop; laser pulses for the Rydberg and Raman beams through modulators; and camera triggers and
+        image analysis for readout. In the simulator's atom machine (<code>riscq/platforms/neutral.mjs</code>) each AOD has a core
+        with one pulse channel per row tone and per column tone, and a laser core plays the Rydberg and Raman pulses. During a
+        move each tone's frequency steps every 2 µs. The controller clock is 100 MHz. Imaging is not modeled.
+      </p>
+      <div class="ex" data-id="qubits.3" data-stars="2" data-kind="number" data-unit="µm" data-tolerance="0.05" data-answer="5.31">
+        <p>Using the calibration of Endres et al. (0.49 MHz between tones for 2.6 µm), how far does a tweezer move when its tone's
+          frequency is raised by 1 MHz? Give the answer to two decimals.</p>
+        <div class="why">2.6 µm / 0.49 MHz = 5.306 µm per MHz, so 1 MHz moves the spot about 5.31 µm. The simulator stores the
+          inverse, 188,462 Hz per µm, in <code>riscq/standards.mjs</code> and marks it as derived.</div>
+      </div>
+
+      <h2 id="compare"><span class="num">5</span>Side by side</h2>
+      <p class="insection"><b>In this section:</b> one table with the timescales of all three platforms, and what they mean for
+        the controller.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th></th><th>Transmon</th><th>Trapped ion (QCCD)</th><th>Neutral atom</th></tr></thead>
+          <tbody>
+            <tr><td>Qubit</td><td>Lowest two levels of a superconducting circuit, 5.2–5.9 GHz on the ring</td><td>Hyperfine states of <sup>171</sup>Yb<sup>+</sup>, ~12.6 GHz</td><td>Hyperfine states of <sup>87</sup>Rb, ~6.8 GHz</td></tr>
+            <tr><td>Single-qubit gate</td><td>25–70 ns microwave pulse</td><td>5 µs laser pulse</td><td>Raman pulse; 52 µs per gate in ZAC's model</td></tr>
+            <tr><td>Two-qubit gate</td><td>42–98 ns flux CZ; 400 ns tone on the ring</td><td>25 µs Mølmer–Sørensen</td><td>270–360 ns Rydberg CZ</td></tr>
+            <tr><td>Measurement</td><td>400–835 ns window</td><td>120 µs fluorescence (60 µs mid-circuit)</td><td>500 µs imaging</td></tr>
+            <tr><td>Moving a qubit</td><td>not possible; SWAP gates instead</td><td>58–283 µs shuttles, 60% of circuit time on H2</td><td>~200 µs AOD moves, 15 µs transfers</td></tr>
+            <tr><td>Main control signals</td><td>Microwave pulses, readout tone, ADC</td><td>Electrode waveforms, modulator RF, photon counts</td><td>Multi-tone AOD RF, laser pulses, camera</td></tr>
+            <tr><td>Simulator's controller clock</td><td>500 MHz, 2 ns per batch</td><td>100 MHz, 10 ns per batch</td><td>100 MHz, 10 ns per batch</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">Sources: transmon, Krinner et al. 2022, Google Quantum AI 2025 and the x6y3 calibration; ion, Pino et al. 2021
+        and Moses et al. 2023; atom, Bluvstein et al. 2022 and 2024 and Lin, Tan and Cong 2025. Controller clocks: <code>riscq/platforms/*.mjs</code>.
+        The ion and atom clocks are this project's choice, not a published build.</p>
+      <p>
+        Three observations shape the rest of the course. First, transmon operations are a thousand times faster than ion and
+        atom operations, so on a transmon machine the controller's own latencies (tens of nanoseconds to cross the board)
+        are comparable to a gate, and on the others they are not. Second, ions and atoms spend most of their time moving,
+        and moving is a control problem: many waveforms that must start together. Third, all three need exact timing,
+        phase-coherent carriers and fast handling of measurement results. That shared core is why one controller design,
+        RISC-Q, can drive all three in this simulator (lesson <a href="/course/C4">C4</a>).
+      </p>
+
+      <h2 id="simulator"><span class="num">6</span>What the simulator takes from the physics</h2>
+      <p>
+        The simulator keeps the physics as durations, frequencies, phases and positions, each with a source. It does not
+        compute amplitudes of quantum states, gate fidelities, ion heating or atom loss. A pulse that reaches a qubit is
+        recorded as an <b>effect</b> frame in the <span class="term" data-term="trace">trace</span>, with the time it arrives. A
+        measurement result is an outcome you choose in the workspace or with <code>--outcome</code>. Electrode voltages and ion
+        motion remain QCCD Studio's models; atom positions are read back from the tone frequencies. Chapter
+        <a href="/course/background/simulator">6</a> lists every boundary, and chapter <a href="/course/background/numbers">7</a>
+        every number.
+      </p>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Every platform needs preparation, rotations, two-qubit gates and measurement. Ions and atoms also need transport.</li>
+          <li>A transmon is driven by nanosecond microwave pulses; a Z rotation is a phase shift of later pulses, the virtual Z.</li>
+          <li>Transmon readout is a tone on a resonator, digitized and demodulated into one complex number and thresholded to a bit.</li>
+          <li>Trapped ions are moved by changing electrode voltages. On H2, transport takes 60% of the circuit time.</li>
+          <li>Neutral atoms are held in tweezers. An AOD tone's frequency sets a tweezer's position; Rydberg states give the CZ.</li>
+          <li>Transmon operations are tens of nanoseconds; ion and atom operations are microseconds to hundreds of microseconds.</li>
+          <li>The simulator follows the classical signals to the qubit. It never computes a quantum state.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      course({
+        answers: {
+          "qubits.1": async (api) => {
+            const run = await api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+            return run.summary.pulses.find((p) => p.part === "q0.gate").dur;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

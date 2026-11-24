@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>D2 · Wire length is latency · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; font-size: 14px; }
+      .lab input[type="number"] { width: 110px; font: 13px var(--mono); padding: 5px 7px; border: 1px solid #cfceca; border-radius: 6px; }
+      .lab input[type="range"] { width: 260px; }
+      .lab .out { font-size: 13px; max-height: 420px; overflow: auto; }
+      .lab .out table { font-size: 12.5px; }
+      .lab .bad { color: var(--red); }
+      .lab .warnline { color: var(--orange); }
+    </style>
+  </head>
+  <body data-lesson="D2">
+    <article>
+      <p class="kicker">Part D · Lesson 2</p>
+      <h1>Wire length is latency</h1>
+      <p class="lead">
+        A signal needs time to travel down a cable. In a hardware design every wire has a routed length and a medium, and
+        its delay follows from them. Move the chip two metres away and every pulse reaches it 10 ns later, while nothing at
+        the converters changes.
+      </p>
+      <p class="pre">
+        This lesson assumes lesson <a href="/course/D1">D1</a>. The <a href="/course/background/control">background
+        chapter on control systems</a> says more about cables and their signal speeds.
+      </p>
+
+      <h2 id="rule"><span class="num">1</span>The timing rule</h2>
+      <p>
+        An electrical signal in a cable travels at a fraction of the speed of light, set by the cable's dielectric. Light in
+        a fibre travels at the speed of light divided by the glass's refractive index. A design states each wire's medium,
+        and <code>machine/interconnect.mjs</code> gives the signal speed of each:
+      </p>
+      <div class="tw"><table id="mediaTable">
+        <tr><th>Medium</th><th class="n">Signal speed (mm/ns)</th><th class="n">Delay per metre (ns)</th></tr>
+      </table></div>
+      <p>
+        The table is read from <code>GET /api/riscq/design/rules</code>. A wire's length is the length of its route: the sum
+        of the straight segments between its points (<code>pathLengthMm</code>). Its delay is that length over the speed,
+        rounded up to a whole picosecond (<code>wireTiming</code> in <code>riscq/design.mjs</code>):
+      </p>
+      <div class="formula">delay (ps) = ⌈ 1000 × route length (mm) / speed (mm/ns) ⌉</div>
+      <p>
+        A pulse's delay is that of the fastest path of wires from its converter to the part it acts on, through any
+        <code>stage</code> parts in between (<code>pathDelay</code>). A stage stands for a feedthrough, an attenuator or a
+        filter; it adds no delay of its own. Loss, dispersion and crosstalk are not modeled: a wire delays a signal, it does
+        not change it.
+      </p>
+      <div class="note"><b>Where the speeds come from.</b> 200 mm/ns for coax is a velocity factor of about 0.67;
+        <code>riscq/standards.mjs</code> lists it with its source. The built-in ring of lesson
+        <a href="/course/C1">C1</a> instead assumes 0.7 c, 209.85 mm/ns, for its 1,050 mm of coax. The two machines therefore
+        differ in their arrival times by a few hundred picoseconds. Exercise 6 measures by how much.</div>
+
+      <h2 id="route"><span class="num">2</span>A route, by hand</h2>
+      <p class="q">How long does the drive pulse of qubit 2 take to reach the chip?</p>
+      <p>
+        In the ring as a design, every coax from a converter runs along x at the board's height, turns along y, and drops
+        along z to the chip. The drive line of qubit 2, <code>drive2</code>, goes from <code>dac2</code> at
+        [60, −66, 0] to <code>qubit2</code> at [700, 0, −350] (qubit 2 sits on the chip's 3 mm circle, at the top):
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 230" role="img" aria-label="The route of wire drive2 in three straight segments">
+          <style>
+            .d2 text { font: 12.5px ui-monospace, Consolas, monospace; fill: #111827; }
+            .d2 .s { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #586174; }
+            .d2 path { fill: none; stroke: #c4622d; stroke-width: 3; }
+            .d2 circle { fill: #1e1b4b; }
+          </style>
+          <g class="d2">
+            <path d="M60 60 L600 60 L640 100 L640 200" />
+            <circle cx="60" cy="60" r="6" /><circle cx="600" cy="60" r="5" /><circle cx="640" cy="100" r="5" /><circle cx="640" cy="200" r="6" />
+            <text x="40" y="40">dac2 [60, −66, 0]</text>
+            <text x="470" y="40">[700, −66, 0]</text>
+            <text x="652" y="98">[700, 3, 0]</text>
+            <text x="652" y="204">qubit2 [700, 3, −350]</text>
+            <text class="s" x="270" y="82">640 mm along x</text>
+            <text class="s" x="500" y="104">69 mm along y</text>
+            <text class="s" x="520" y="160">350 mm down z</text>
+          </g>
+        </svg>
+        <figcaption><b>The route of <code>drive2</code>.</b> Four points, three straight segments. The y step is drawn as a
+          diagonal because the drawing is flat. Schematic drawing, not to scale.</figcaption>
+      </figure>
+      <div class="ex" data-id="D2.1" data-stars="2" data-kind="number" data-unit="ps">
+        <p>Compute the delay of <code>drive2</code> in coax by hand. Then confirm it with the reader of lesson D1 or the
+          widget below.</p>
+        <div class="why">640 + 69 + 350 = 1,059 mm. 1,059 / 200 = 5.295 ns, so 5,295 ps. The check route returns the same
+          number for <code>drive2</code>, and so does the run: the <code>effect</code> frame of a pulse on qubit 2 arrives
+          5,295 ps after its window opens at the DAC.</div>
+      </div>
+      <p>
+        Each qubit sits at a different angle on the chip and each DAC at a different height on the board, so no two drive
+        lines have quite the same length. In one design, lines of different length arrive at different times. The test
+        <code>tests/riscq-design.test.mjs</code> checks exactly that.
+      </p>
+      <div class="ex" data-id="D2.2" data-stars="2" data-kind="number" data-unit="ps">
+        <p>Across the eight drive lines of the ring, what is the difference between the longest and the shortest delay?</p>
+        <div class="why"><code>drive0</code> is the longest, 1,083 mm or 5,415 ps; <code>drive7</code> the shortest, 996 mm
+          or 4,980 ps: 435 ps apart. Two qubits fired on the same batch receive their pulses 435 ps apart. A real system
+          would calibrate that skew away or measure it; this model shows it.</div>
+      </div>
+
+      <h2 id="move"><span class="num">3</span>Move the chip</h2>
+      <p class="insection"><b>In this section:</b> change the layout, then compare what the converters do and when the signals arrive.</p>
+      <p>
+        The widget below moves every qubit and resonator of the ring along x and re-routes their wires with the same
+        right-angle rule as <code>ringDesign()</code>. It sends the result to the check route and shows every line's length
+        and delay. <b>Run the program</b> runs the Bell program of lesson A1 on the moved design and lists, for every pulse,
+        the batch its window opens at the converter and the time it reaches the chip.
+      </p>
+      <div class="lab" id="mover">
+        <h4>Chip position</h4>
+        <div class="row">
+          <label>Chip moved along x by <input type="number" id="dx" value="0" step="100" min="-500" max="50000" /> mm</label>
+          <input type="range" id="dxRange" min="0" max="5000" step="100" value="0" aria-label="Chip offset in mm" />
+        </div>
+        <div class="row">
+          <label>Medium of the drive lines <select id="medium"></select></label>
+          <button class="btn small alt" type="button" id="checkIt">Check</button>
+          <button class="btn small" type="button" id="runIt">Run the program</button>
+          <span class="src" id="moverState"></span>
+        </div>
+        <div class="out" id="moverOut"></div>
+        <div class="out" id="runOut"></div>
+      </div>
+      <div class="ex" data-id="D2.3" data-stars="1" data-kind="number" data-unit="ns" data-tolerance="0.001">
+        <p>Move the chip 2,000 mm farther along x and run the program. How many nanoseconds later than on the unmoved ring
+          does the first <code>x90</code> reach qubit 0?</p>
+        <div class="why">2,000 mm more coax at 200 mm/ns is 10 ns. Every drive and readout tone arrives 10 ns later. The test
+          <code>tests/riscq-design.test.mjs</code> requires exactly that for every arrival of the program.</div>
+      </div>
+      <div class="ex" data-id="D2.4" data-stars="2" data-kind="number" data-unit="batches">
+        <p>In that run, how many batches later does the conditioned <code>x</code> on qubit 2 open at its DAC than on the
+          unmoved ring?</p>
+        <div class="why">Zero. The controller plays the same schedule: the firmware, the windows and their batches are
+          identical. Only the arrivals move. Note what the model leaves out: the readout tone also reaches its resonator
+          10 ns later and the response returns 10 ns later, but the acquisition window still opens at its calibrated delay.
+          Lesson <a href="/course/D4">D4</a> shows when the check warns about that.</div>
+      </div>
+      <figure class="live" data-title="The ring as a design" data-src="/riscq-studio?example=superconducting-design&outcome=c=1&step=357&view=chip">
+        <figcaption>The designed ring with the chip at its default position. Select the first <code>effect</code> frame on
+          qubit 0 in the trace and read <code>arrivesPs</code> in the step inspector.</figcaption>
+      </figure>
+
+      <h2 id="medium"><span class="num">4</span>Change the medium</h2>
+      <p>
+        The same route in a slower medium is a later arrival. A planar trace on a circuit board carries a signal at
+        125 mm/ns in this model, a fibre at 204 mm/ns, free space at the speed of light. The medium menu of the widget changes
+        all eight drive lines at once.
+      </p>
+      <div class="ex" data-id="D2.5" data-stars="2" data-kind="number" data-unit="ps">
+        <p>Make <code>drive0</code> a <code>planar</code> wire and keep its route. What delay does the check report for it?</p>
+        <div class="why">1,083 mm / 125 mm/ns = 8.664 ns, 8,664 ps, against 5,415 ps in coax. A metre of planar trace
+          would be an odd way to reach a cryostat. The point is the rule: same length, slower medium, later arrival.</div>
+      </div>
+
+      <h2 id="paths"><span class="num">5</span>Paths through stages</h2>
+      <p class="insection"><b>In this section:</b> how a delay is found when a signal crosses several wires.</p>
+      <p>
+        A real line into a cryostat is not one cable. It runs from the room-temperature electronics to a vacuum feedthrough,
+        then through attenuators at each temperature stage, then to the sample. A design can say so: add <code>stage</code>
+        parts at those points and split the line into one wire per section. Each section has its own route and medium. The
+        delay of a pulse is then the sum of the delays of the sections it crosses.
+      </p>
+      <p>
+        <code>pathDelay(design, from, to)</code> finds that sum. It starts at the pulse's converter and follows every wire
+        leaving a part, in the wire's direction, adding each wire's delay. When two paths reach the same part, it keeps the
+        shorter delay. The answer is the delay of the fastest path from the converter to the qubit or resonator. If no path
+        exists, the answer is undefined, and lesson <a href="/course/D4">D4</a> shows the error that follows.
+      </p>
+      <p>Three consequences are worth checking for yourself in the editor:</p>
+      <ul>
+        <li><b>Splitting a wire at a stage changes nothing</b> if the two sections follow the old route: the lengths add up to
+          the same total, and a stage adds no delay of its own. Each section is rounded up to a picosecond separately, so the
+          sum can grow by a picosecond or two.</li>
+        <li><b>Direction matters.</b> A wire from the resonator to the ADC carries the returning signal only. It does not give
+          the ADC a path to the resonator, and it does not give the readout DAC one either.</li>
+        <li><b>A redundant path does not slow anything down.</b> If you add a second, longer route between the same parts, the
+          shorter one still sets the delay.</li>
+      </ul>
+      <p>
+        The editor's <b>Signal timing</b> tab lists every wire with its length and delay, and every calibrated pulse with the
+        delay of its fastest path. Those numbers come from the same check route as the widget above, so they agree with the
+        run. Why care about a few nanoseconds? A readout tone that goes down a line and comes back up another pays both
+        delays before the signal reaches the ADC, and feedback cannot start before that. Lesson <a href="/course/E1">E1</a>
+        follows the rest of that loop inside the controller.
+      </p>
+
+      <h2 id="builtin"><span class="num">6</span>Design versus built-in</h2>
+      <p>
+        The built-in ring gives every line 1,050 mm at 0.7 c: 5,003 ps for every pulse. The designed ring routes each line
+        and uses 200 mm/ns. The design test requires both to play identical windows; it does not require identical arrivals,
+        and they are not.
+      </p>
+      <div class="ex" data-id="D2.6" data-stars="2" data-kind="number" data-unit="ps">
+        <p>Run the Bell program on the built-in ring (example <code>superconducting-feedforward</code>) and on the ring as a
+          design (example <code>superconducting-design</code>). By how many picoseconds does qubit 0's first
+          <code>x90</code> arrive later on the design?</p>
+        <div class="why">5,415 − 5,003 = 412 ps: 33 mm more cable and a slower assumed speed. Neither number is a measured
+          installation. They are two stated assumptions, and the run tells you which one it used in
+          <code>machine.provenance.delay</code>.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>A wire's delay is its routed length over its medium's speed, rounded up to a picosecond: coax 200, planar 125, fibre 204, free space 299.79 mm/ns.</li>
+          <li>A pulse's delay is the fastest wired path from its converter to its part; stages add nothing.</li>
+          <li>Moving the chip changes when signals arrive, not when the controller plays them.</li>
+          <li>Lines of different length give different arrivals: 435 ps of skew across the ring's drive lines.</li>
+          <li>The built-in ring and the design assume different coax speeds; each run states which.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const template = () => api.design.template("ring");
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      // Move every qubit and resonator along x and re-route each wire with ringDesign()'s right-angle rule:
+      // from a converter along x, then y, then z; from a resonator down z, then along y, then x.
+      const moveChip = (design, dx) => {
+        const d = clone(design);
+        const parts = new Map(d.parts.map((p) => [p.id, p]));
+        for (const p of d.parts) if (p.type === "qubit" || p.type === "resonator") p.centerMm = [p.centerMm[0] + dx, p.centerMm[1], p.centerMm[2]];
+        for (const w of d.wires) {
+          const a = parts.get(w.from).centerMm, b = parts.get(w.to).centerMm;
+          w.routeMm = parts.get(w.from).type === "resonator" ? [a, [a[0], a[1], b[2]], [a[0], b[1], b[2]], b] : [a, [b[0], a[1], a[2]], [b[0], b[1], a[2]], b];
+        }
+        return d;
+      };
+      const bell = (a, t, design) => a.run({ platform: "superconducting", qasm: t.qasm, design, outcomes: { c: 1 } });
+      const firstArrival = (run, part) => {
+        const f = run.frames.find((x) => x.op === "effect" && x.part === part);
+        return f.state.arrivesPs - f.atPs;
+      };
+      const conditionedOpens = (run) => {
+        const op = run.hardware.segments.flatMap((s) => s.ops).find((o) => o.when === "c" && o.op === "x");
+        return run.summary.pulses.find((p) => p.source === op.id).opens;
+      };
+      const wire = (verdict, id) => verdict.wires.find((w) => w.id === id);
+      course({
+        answers: {
+          "D2.1": async (a) => wire(await a.design.check((await template()).design), "drive2").delayPs,
+          "D2.2": async (a) => {
+            const v = await a.design.check((await template()).design);
+            const drives = v.wires.filter((w) => /^drive/.test(w.id)).map((w) => w.delayPs);
+            return Math.max(...drives) - Math.min(...drives);
+          },
+          "D2.3": async (a) => {
+            const t = await template();
+            const [near, far] = await Promise.all([bell(a, t, t.design), bell(a, t, moveChip(t.design, 2000))]);
+            return (firstArrival(far, "qubit0") - firstArrival(near, "qubit0")) / 1000;
+          },
+          "D2.4": async (a) => {
+            const t = await template();
+            const [near, far] = await Promise.all([bell(a, t, t.design), bell(a, t, moveChip(t.design, 2000))]);
+            return conditionedOpens(far) - conditionedOpens(near);
+          },
+          "D2.5": async (a) => {
+            const d = clone((await template()).design);
+            d.wires.find((w) => w.id === "drive0").medium = "planar";
+            return wire(await a.design.check(d), "drive0").delayPs;
+          },
+          "D2.6": async (a) => {
+            const [built, designed] = await Promise.all([
+              a.run({ example: "superconducting-feedforward", outcomes: { c: 1 } }),
+              a.run({ example: "superconducting-design", outcomes: { c: 1 } }),
+            ]);
+            return firstArrival(designed, "qubit0") - firstArrival(built, "qubit0");
+          },
+        },
+      });
+
+      // The chip mover.
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const $ = (id) => document.getElementById(id);
+      let base, near;
+      const current = () => {
+        const d = moveChip(base.design, Number($("dx").value) || 0);
+        for (const w of d.wires) if (/^drive/.test(w.id)) w.medium = $("medium").value;
+        return d;
+      };
+      const showCheck = async () => {
+        $("moverState").textContent = "Checking…";
+        try {
+          const v = await api.design.check(current());
+          const rows = base.design.qubits.map((q, i) => {
+            const cell = (id) => { const w = wire(v, id); return "<td class='n'>" + w.lengthMm + "</td><td class='n'>" + w.delayPs + "</td>"; };
+            return "<tr><td>" + i + "</td>" + cell("drive" + i) + cell("tone" + i) + cell("return" + i) + "</tr>";
+          }).join("");
+          $("moverOut").innerHTML = (v.errors.length ? "<ul>" + v.errors.map((e) => "<li class='bad'>" + esc(e) + "</li>").join("") + "</ul>" : "") +
+            (v.warnings.length ? "<ul>" + v.warnings.map((e) => "<li class='warnline'>" + esc(e) + "</li>").join("") + "</ul>" : "") +
+            "<table><tr><th>qubit</th><th class='n'>drive mm</th><th class='n'>drive ps</th><th class='n'>tone mm</th><th class='n'>tone ps</th><th class='n'>return mm</th><th class='n'>return ps</th></tr>" + rows + "</table>";
+          $("moverState").textContent = "";
+        } catch (error) {
+          $("moverState").textContent = "The server could not be reached: " + error.message;
+        }
+      };
+      $("dxRange").addEventListener("input", () => ($("dx").value = $("dxRange").value));
+      $("dxRange").addEventListener("change", showCheck);
+      $("dx").addEventListener("change", showCheck);
+      $("medium").addEventListener("change", showCheck);
+      $("checkIt").addEventListener("click", showCheck);
+      $("runIt").addEventListener("click", async () => {
+        $("runIt").disabled = true;
+        $("moverState").textContent = "Compiling and running…";
+        try {
+          near ??= await bell(api, base, base.design);
+          const run = await bell(api, base, current());
+          const arrivals = (r) => r.frames.filter((f) => f.op === "effect" && f.state.detail.kind !== "acquire");
+          const ref = arrivals(near);
+          const rows = arrivals(run).map((f, k) => "<tr><td><code>" + esc(f.part) + "</code></td><td>" + esc(f.state.detail.kind) + "</td><td class='n'>" + f.atBatch +
+            "</td><td class='n'>" + ref[k].atBatch + "</td><td class='n'>" + ((f.state.arrivesPs - f.atPs) / 1000).toFixed(3) + "</td><td class='n'>" + ((ref[k].state.arrivesPs - ref[k].atPs) / 1000).toFixed(3) + "</td></tr>").join("");
+          $("runOut").innerHTML = "<p><b>Run on the moved design.</b> Faults: " + (run.summary.faults.length || "none") + ". Conditioned <code>x</code> opens at batch " + conditionedOpens(run) +
+            " (unmoved: " + conditionedOpens(near) + ").</p><table><tr><th>reaches</th><th>pulse</th><th class='n'>at converter (batch)</th><th class='n'>unmoved</th><th class='n'>wire delay (ns)</th><th class='n'>unmoved</th></tr>" + rows + "</table>";
+          $("moverState").textContent = "";
+        } catch (error) {
+          $("moverState").textContent = "";
+          $("runOut").innerHTML = "<p class='bad'>" + esc(error.message) + "</p>";
+        } finally {
+          $("runIt").disabled = false;
+        }
+      });
+      (async () => {
+        try {
+          const rules = await (await fetch("/api/riscq/design/rules")).json();
+          for (const [medium, speed] of Object.entries(rules.media)) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td><code>" + esc(medium) + "</code></td><td class='n'>" + speed.toFixed(2) + "</td><td class='n'>" + (1000 / speed).toFixed(3) + "</td>";
+            $("mediaTable").append(tr);
+            $("medium").append(new Option(medium + " · " + speed.toFixed(2) + " mm/ns", medium));
+          }
+          base = await template();
+          await showCheck();
+        } catch (error) {
+          $("moverState").textContent = "The server could not be reached: " + error.message;
+        }
+      })();
+    </script>
+  </body>
+</html>

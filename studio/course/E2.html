@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>E2 · System calls · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 8px; font-size: 14.5px; }
+      .lab textarea { width: 100%; min-height: 260px; font: 12.5px/1.5 var(--mono); padding: 10px; border: 1px solid #cfceca; border-radius: 8px; resize: vertical; background: #fcfcfa; color: var(--ink); }
+      .lab .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; font-size: 13.5px; }
+      .lab .row input { font: 13px var(--mono); padding: 6px 8px; border: 1px solid #cfceca; border-radius: 6px; min-width: 200px; flex: 1 1 200px; }
+      .lab .row select { font: 13px var(--sans); padding: 5px 6px; border: 1px solid #cfceca; border-radius: 6px; background: #fff; }
+      .lab .out { font-size: 13.5px; color: var(--ink2); }
+      .lab .out .err { color: var(--red); white-space: pre-wrap; font: 12.5px/1.5 var(--mono); }
+      .lab .out table { margin: 6px 0 10px; }
+      .lab .out .seg { display: inline-block; font: 11.5px var(--mono); padding: 2px 7px; border-radius: 10px; margin: 2px 4px 2px 0; background: var(--grid); }
+      .lab .out .seg.c { background: #fbf4e2; }
+    </style>
+  </head>
+  <body data-lesson="E2">
+    <article>
+      <p class="kicker">Part E · Lesson 2</p>
+      <h1>System calls</h1>
+      <p class="lead">
+        A fault-tolerant program asks for services: measure this, decode that, update the frame. A virtual machine charges each
+        request one latency and one share of a service. This lesson runs such a program on the controller model and measures what
+        each call actually costs.
+      </p>
+      <p class="pre">
+        Read lesson <a href="/course/E1">E1</a> first: this lesson reuses its feedback path. The
+        <a href="/course/background/qec">background chapter on measurement, feedback and decoding</a> explains syndromes and the
+        Pauli frame.
+      </p>
+
+      <h2 id="ftqvm"><span class="num">1</span>The virtual machine and its calls</h2>
+      <p class="q">How does a program for a million-qubit computer ask for a decoder?</p>
+      <p>
+        The companion paper of this project describes a fault-tolerant quantum virtual machine, the FTQVM. A program never names a
+        physical path or a pulse. It names qubit addresses and record bits, and obtains every shared resource through a
+        <span class="term" data-term="system call">system call</span>: <code>request_ancilla</code>, <code>route</code>,
+        <code>measure</code>, <code>decode_syndrome</code>, <code>pauli_frame_update</code>, <code>request_magic</code> and a few
+        more. A machine is a declaration: for every call, how long it takes and how much of each shared service it holds. The
+        paper puts the division of labor in one line: the program declares when, the machine declares how long, and the VM checks.
+      </p>
+      <p>
+        A call that moves <i>N</i> items (bits or qubits) in <i>D</i> nanoseconds holds a rate on the service that carries them for
+        its whole interval:
+      </p>
+      <div class="formula">r(N, D) = ⌈1000 · N / D⌉ items per µs</div>
+      <p>
+        Concurrent calls add their rates, and the sum must stay below the service's capacity at every instant. A measurement holds
+        <code>r(1, λm)</code> of the classical link, a decode holds the rate of its input bits, and a frame update a rate for the
+        bits it reads. A decode of <i>n</i> bits also holds one decoder for its latency <code>λd(n)</code>; if the rate
+        <code>r(n, λd(n))</code> exceeds what the link or the decoder's input can take, it gets an input phase of
+        <code>⌈1000 n / cap⌉</code> ns first. In the paper's text form a decode reads
+        <code>syndrome[s] -&gt; decode_syndrome rounds=1</code> and a frame update <code>c[i] -&gt; pauli_frame_update X data[1]</code>.
+      </p>
+      <p>
+        Those latencies are declared, not measured. The question this lesson starts to answer is whether one latency and one
+        capacity are a fair summary of what a real control system does when it serves the call.
+      </p>
+
+      <h2 id="calls"><span class="num">2</span>Four calls on the transmon ring</h2>
+      <p class="insection"><b>In this section:</b> the JSON form of a call program, which calls the ring realizes, and which it
+        refuses.</p>
+      <p>
+        The eight-transmon ring accepts a program of kind <code>"ftqvm-calls"</code>, a list of calls on <b>physical</b> qubits.
+        The scheduler is <code>scheduleCalls</code> in <code>riscq/platforms/superconducting.mjs</code>. Four calls have a
+        realization:
+      </p>
+      <div class="tw"><table>
+        <tr><th>Call</th><th>JSON</th><th>Realized as</th></tr>
+        <tr><td><code>gate</code></td><td><code>{ call: "gate", name, qubits, when? }</code></td><td>Calibrated pulses, as in lesson <a href="/course/C1">C1</a>. With <code>when</code> it runs only if that bit is 1.</td></tr>
+        <tr><td><code>measure</code></td><td><code>{ call: "measure", qubit, bit }</code></td><td>A readout tone and a demodulation window; the bit is published through the hub.</td></tr>
+        <tr><td><code>decode_syndrome</code></td><td><code>{ call: "decode_syndrome", bits, lut, into }</code></td><td>A table lookup on a decoder core. <code>lut[s]</code> is the correction word for syndrome <code>s</code>, and bit <i>j</i> of it becomes <code>into[j]</code>.</td></tr>
+        <tr><td><code>pauli_frame_update</code></td><td><code>{ call: "pauli_frame_update", when, pauli, qubit }</code></td><td>If <code>when</code> is 1, flip bits of the qubit's frame word: X = 1, Z = 2, Y = 3. No pulse is played.</td></tr>
+      </table></div>
+      <p>
+        For these calls the build gets a ninth RISC-Q core, named <code>decoder</code>. It drives no qubit. RISC-Q requires every
+        core to have a channel, so it carries one digital channel that it never uses. It keeps the
+        <span class="term" data-term="Pauli frame">Pauli frame</span> of every qubit as a word in its RAM and reports each new
+        frame word to the host.
+      </p>
+      <p>
+        Three calls are refused with an error: <code>request_ancilla</code>, <code>route</code> and <code>request_magic</code>. The
+        reasons are physical. Preparing a fresh ancilla needs a reset, and the calibration of this ring has no reset pulse. A route
+        brings qubits together, and the couplers of a transmon ring are fixed. A magic state needs a factory, and an eight-qubit
+        ring has none. The checker also refuses programs that break the virtual machine's rules for records: a decode must read
+        bits that were measured, and the bits it writes need new names, because every record is written once.
+      </p>
+      <div class="ex" data-id="E2.1" data-stars="1" data-kind="choice" data-answer="b">
+        <p>Why does the ring refuse <code>request_ancilla</code>?</p>
+        <ol class="choices">
+          <li data-k="a">All eight qubits are data qubits.</li>
+          <li data-k="b">Its calibration has no reset pulse to prepare a fresh ancilla in |0⟩.</li>
+          <li data-k="c">The decoder core has no free memory.</li>
+          <li data-k="d">Ancillas exist only on trapped-ion machines.</li>
+        </ol>
+        <div class="why">An ancilla request hands out qubits in |0⟩. On hardware that means an active reset, a pulse sequence
+          conditioned on a measurement, or waiting several T1 times. RISC-Q's example calibration lists drive, CZ and readout pulses
+          only. Realizing <code>request_ancilla</code> as an active reset is the first item on the project's list of next steps.</div>
+      </div>
+
+      <h2 id="example"><span class="num">3</span>A repetition-code round</h2>
+      <p class="insection"><b>In this section:</b> the example program, what each call is for, and how the compiler splits it into
+        segments.</p>
+      <p>
+        The example <code>superconducting-repetition</code> is one round of a three-qubit bit-flip code. Qubits 0, 2 and 4 hold
+        data. Qubits 1 and 3 are ancillas: two CNOTs copy the parity of qubits 0 and 2 onto qubit 1, two more the parity of 2 and 4
+        onto qubit 3. Measuring the ancillas gives two <span class="term" data-term="syndrome">syndrome</span> bits,
+        <code>s0</code> and <code>s1</code>.
+      </p>
+      <pre><code>{ "call": "gate", "name": "cx", "qubits": [0, 1] }      ... three more CNOTs
+{ "call": "measure", "qubit": 1, "bit": "s0" }
+{ "call": "measure", "qubit": 3, "bit": "s1" }
+{ "call": "decode_syndrome", "bits": ["s0", "s1"],
+  "lut": [0, 1, 4, 2], "into": ["e0", "e1", "e2"] }
+{ "call": "pauli_frame_update", "when": "e0", "pauli": "X", "qubit": 0 }
+{ "call": "pauli_frame_update", "when": "e2", "pauli": "X", "qubit": 4 }
+{ "call": "gate", "name": "x", "qubits": [2], "when": "e1" }</code></pre>
+      <p>
+        The syndrome <code>s = s0 + 2·s1</code> indexes the table. <code>s = 1</code> means only the first check fired: qubit 0
+        flipped, so the word is <code>0b001</code> and <code>e0 = 1</code>. <code>s = 2</code> means qubit 4, word <code>0b100</code>.
+        <code>s = 3</code> means both checks fired: qubit 2, word <code>0b010</code>. This is the
+        <span class="term" data-term="decoder">decoder</span> of a distance-3 repetition code, written out as a table.
+      </p>
+      <p>
+        The program corrects two qubits in two different ways on purpose. Errors on qubits 0 and 4 are recorded in the Pauli frame
+        and never played: a later measurement result of that qubit is reinterpreted instead. An error on qubit 2 is corrected with a
+        real <code>x</code> pulse. The first is how error-correcting machines normally work; the second shows the cost of a pulse
+        that waits for a decoder.
+      </p>
+      <div class="ex" data-id="E2.2" data-stars="2" data-kind="choice" data-answer="c">
+        <p>Both checks fire: <code>s0 = 1</code>, <code>s1 = 1</code>. What does the round do?</p>
+        <ol class="choices">
+          <li data-k="a">Flips the frame words of qubits 0 and 4.</li>
+          <li data-k="b">Nothing: a weight-2 syndrome cannot be decoded.</li>
+          <li data-k="c">Decodes <code>e1 = 1</code> and plays an <code>x</code> pulse on qubit 2.</li>
+          <li data-k="d">Plays <code>x</code> pulses on qubits 0, 2 and 4.</li>
+        </ol>
+        <div class="why"><code>lut[3] = 0b010</code>, so only <code>e1</code> is 1. Both frame updates find their bit at 0 and
+          store nothing; the conditioned <code>x</code> on qubit 2 plays. Run it in the editor below with
+          <code>s0=1, s1=1</code> and check <code>derived.bits</code>.</div>
+      </div>
+      <h3>Segments: pulses, then classical work, then pulses</h3>
+      <p>
+        The compiler groups the hardware instructions into three segments. The first holds every pulse of the CNOTs and the two
+        readouts. The second is <b>classical</b>: the decode and both frame updates, all on the decoder core, with no span of its
+        own, because the cores may go on as soon as the decoder is done. The third holds the conditioned <code>x</code>. Every
+        segment begins with a <span class="term" data-term="barrier">barrier</span> of all six active cores.
+      </p>
+      <p>
+        On the decoder core the decode is a short RV32I sequence (<code>Firmware.decode</code> in <code>riscq/firmware.mjs</code>):
+        load the shared word from the board register, shift and mask the syndrome field, load the correction word from the table in
+        RAM, then for each decoded bit store it, report it to the host and, if a gate on another core depends on it, publish it. A
+        frame update loads the frame word, XORs the mask and stores it back. The compiler places the syndrome bits in consecutive
+        slots of one shared word, so a single load reads the whole syndrome.
+      </p>
+
+      <h2 id="timeline"><span class="num">4</span>What each call costs</h2>
+      <p class="insection"><b>In this section:</b> the decode path from the last window to the conditioned pulse, read from the
+        trace by <code>decodeSamples</code> in <code>riscq/syscalls.mjs</code>.</p>
+      <figure>
+        <svg viewBox="0 0 760 230" role="img" aria-label="The decode path on a time axis from 0 to 490 ns">
+          <style>
+            .dp text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: #111827; }
+            .dp .s { font-size: 11px; fill: #586174; }
+            .dp .m { font: 11px ui-monospace, Consolas, monospace; fill: #586174; }
+            .dp .ax { stroke: #8a9a9c; stroke-width: 1; }
+          </style>
+          <g class="dp">
+            <!-- x = 30 + 1.4 * ns -->
+            <line class="ax" x1="30" y1="180" x2="730" y2="180" />
+            <rect x="30" y="40" width="120" height="26" fill="#eef0fe" stroke="#4338ca" /><text x="36" y="57">syndrome → decoder</text>
+            <rect x="150" y="72" width="37" height="26" fill="#efedf8" stroke="#5b4a8a" /><text x="154" y="89">bar.</text>
+            <rect x="187" y="40" width="90" height="26" fill="#fdf0ea" stroke="#c4622d" /><text x="193" y="57">lookup, store</text>
+            <rect x="277" y="72" width="28" height="26" fill="#eef3fb" stroke="#1e1b4b" /><text x="279" y="89">pub</text>
+            <rect x="305" y="104" width="53" height="26" fill="#efedf8" stroke="#5b4a8a" /><text x="309" y="121">barrier</text>
+            <rect x="358" y="40" width="358" height="26" fill="#fbf4e2" stroke="#d59a00" /><text x="366" y="57">SYNC_LEAD, 256 ns</text>
+            <g class="ax">
+              <line x1="30" y1="175" x2="30" y2="185" /><line x1="150" y1="175" x2="150" y2="185" /><line x1="187" y1="175" x2="187" y2="185" />
+              <line x1="276" y1="175" x2="276" y2="185" /><line x1="304" y1="175" x2="304" y2="185" /><line x1="358" y1="175" x2="358" y2="185" />
+              <line x1="716" y1="175" x2="716" y2="185" />
+            </g>
+            <text class="m" x="26" y="200">0</text><text class="m" x="142" y="200">86</text><text class="m" x="178" y="216">112</text>
+            <text class="m" x="266" y="200">176</text><text class="m" x="294" y="216">196</text><text class="m" x="348" y="200">234</text>
+            <text class="m" x="700" y="200">490 ns</text>
+            <text class="s" x="30" y="20">last syndrome window closes</text>
+            <text class="s" x="560" y="20">x opens on qubit 2</text>
+            <text class="s" x="370" y="90">decoded bit at every core: 196 ns</text>
+            <text class="s" x="370" y="121">release time of the second barrier: 234 ns</text>
+          </g>
+        </svg>
+        <figcaption><b>The decode path of the repetition round with both checks fired.</b> Times in ns after the last syndrome
+          window closes, read from the trace. <i>bar.</i>: the barrier before the decode; <i>pub</i>: the decoded bit <code>e1</code>
+          travels through the hub to every core. Schematic drawing, to scale on the time axis.</figcaption>
+      </figure>
+      <div class="tw"><table>
+        <tr><th>Moment</th><th class="n">ns</th><th>What happens</th></tr>
+        <tr><td>Syndrome at the decoder</td><td class="n">86</td><td>The last syndrome bit is in the decoder's board register: the path of lesson <a href="/course/E1">E1</a>.</td></tr>
+        <tr><td>Decode starts</td><td class="n">112</td><td>The six cores have met at the barrier, and the decoder loads the shared word.</td></tr>
+        <tr><td>Decoded</td><td class="n">176</td><td>The last decoded bit is stored. The lookup and stores took 64 ns.</td></tr>
+        <tr><td>Decoded bit at every core</td><td class="n">196</td><td><code>e1</code> was published through the hub.</td></tr>
+        <tr><td>Conditioned pulse opens</td><td class="n">490</td><td>After a second barrier and the 128-batch lead.</td></tr>
+      </table></div>
+      <p>
+        The decode itself costs 14 ns plus 14 ns per decoded bit in this firmware, and 8 ns more for each decoded bit it publishes:
+        3 bits and one publish give 14 + 42 + 8 = 64 ns. These are instruction counts under the <b>assumed</b> cost of one batch per
+        instruction plus a penalty per load, store and taken branch. A frame update whose bit is set is stored 22 ns after the decode
+        has finished. The second update of the program, when its bit is set, is stored 16 ns later still, 38 ns after the decode,
+        because the first update's test runs before it.
+      </p>
+      <p>
+        Compare the conditioned pulse with lesson <a href="/course/E1">E1</a>: conditioned directly on a measured bit it opened at
+        344 ns, conditioned on a decoded bit at 490 ns. The extra 146 ns are one more barrier and the decode. The schedule lead of 256
+        ns is paid once in each case.
+      </p>
+      <figure class="live" data-title="The decoder core reads the syndrome" data-src="/riscq-studio?example=superconducting-repetition&outcome=s0=1&outcome=s1=1&step=813&view=control">
+        <figcaption><span>The run with both checks fired, stopped where the decoder core loads the shared word (the syndrome, value 3).
+          Step on to see the host stores of <code>e0</code>, <code>e1</code>, <code>e2</code> and the publish of <code>e1</code>.</span></figcaption>
+      </figure>
+      <div class="ex" data-id="E2.3" data-stars="1" data-kind="number" data-unit="ns">
+        <p>Run the repetition round with <code>s0 = 1</code> and <code>s1 = 1</code>. How many ns after the last syndrome window
+          closes is the last syndrome bit in the decoder core's board register?</p>
+        <div class="why">The latest <code>board</code> frame on <code>decoder.inbox</code> caused by a syndrome publish. The path
+          is the one of lesson E1: decoder and report, the measuring core's instructions, the hub and back.</div>
+      </div>
+      <div class="ex" data-id="E2.4" data-stars="2" data-kind="number" data-unit="ns">
+        <p>In the same run, how long do the lookup and the stores take, from the decoder's load of the syndrome to its last stored
+          decoded bit?</p>
+        <div class="why">From the <code>read</code> of the board register to the last <code>host</code> store of the decode: 32
+          batches, 64 ns, for three decoded bits of which one is published.</div>
+      </div>
+      <div class="ex" data-id="E2.5" data-stars="2" data-kind="number" data-unit="ns">
+        <p>Now run it with only <code>s0 = 1</code>. The decoder sets <code>e0</code>, and the frame of qubit 0 is updated. How many
+          ns after the last decoded bit is stored is the new frame word stored?</p>
+        <div class="why">The frame update runs right after the decode on the same core: load the frame word, XOR, store and report.
+          The answer function reads the <code>host</code> store whose source is the frame update.</div>
+      </div>
+
+      <h2 id="editor"><span class="num">5</span>Write your own calls</h2>
+      <p class="insection"><b>In this section:</b> an editor that sends a call program to the simulator and shows the costs it
+        measured.</p>
+      <p>
+        Edit the program and the outcomes, then run it. The page sends
+        <code>{ platform: "superconducting", calls, outcomes }</code> to the server, which schedules the calls, compiles firmware for
+        nine cores, executes it in the Lean model and returns the run. The table below is computed from that run the way
+        <code>decodeSamples</code> computes it. Qubits are physical: 0 to 7. CZ is offered between ring neighbours except the
+        pairs (5, 6) and (6, 7), whose CZ needs a pulse on the second excited level. A lookup decode takes 1 to 10 syndrome bits. A conditioned gate may not change a frame, so
+        condition <code>x</code>, not <code>sx</code> or <code>h</code>.
+      </p>
+      <div class="lab" id="lab">
+        <h4>System-call program</h4>
+        <div class="row">
+          <label for="preset">Start from</label>
+          <select id="preset">
+            <option value="repetition">the repetition round</option>
+            <option value="four">a four-bit identity decode</option>
+            <option value="frame">a frame update on a measured bit</option>
+            <option value="ancilla">a program with request_ancilla</option>
+          </select>
+        </div>
+        <textarea id="program" spellcheck="false" aria-label="System-call program as JSON"></textarea>
+        <div class="row">
+          <label for="outcomes">Outcomes</label>
+          <input id="outcomes" value="s0=1, s1=1" aria-label="Measured bits, for example s0=1, s1=0" />
+          <button class="btn small" type="button" id="go">Run on the ring</button>
+        </div>
+        <div class="out" id="out" aria-live="polite">The result appears here.</div>
+      </div>
+      <p>
+        The same program runs from the command line with <code>node riscq/cli.mjs --calls program.json</code>. The workspace
+        opens the built-in example; a custom call program is not yet addressable by URL.
+      </p>
+      <div class="ex" data-id="E2.6" data-stars="3" data-kind="number" data-unit="ns">
+        <p>Load <i>a four-bit identity decode</i>: four qubits are measured into <code>s0</code> to <code>s3</code> and
+          decoded with <code>lut[s] = s</code> into four bits that no gate uses. Run it. How long does the decode take?</p>
+        <div class="why">14 ns plus 14 ns for each of the four decoded bits, and nothing is published because no gate reads the
+          decoded bits: 70 ns. The cost grows with the number of decoded bits, not with the size of the table: the lookup is one
+          load whatever the syndrome width.</div>
+      </div>
+
+      <h2 id="calibrate"><span class="num">6</span>From a run to a declaration</h2>
+      <p class="insection"><b>In this section:</b> what the measured times mean for the latencies and capacities a machine
+        declares.</p>
+      <p>
+        The FTQVM declares, among others, <code>decoder_latency_ns</code>, <code>decoder_bandwidth</code> and
+        <code>pauli_frame_update_ns</code>. The run gives candidates for each on this machine, together with what a single number
+        hides:
+      </p>
+      <ul>
+        <li><b>Decode latency.</b> From the last window to the decoded bits: 176 ns, of which only 64 ns are the lookup. The rest is
+          transport and a barrier. A declaration has to say which interval it means.</li>
+        <li><b>Frame update.</b> 22 ns after the decode, and it plays no pulse. The paper's sensitivity study finds that a 1 µs frame
+          update slows the Gidney–Ekerå program by 168 %, so this short interval is worth knowing.</li>
+        <li><b>Input bandwidth.</b> Two bits delivered in 86 ns is about 23 bits/µs. That is not a capacity: the hub passes one bit
+          per batch, 500 bits/µs at 500 MHz, and lesson <a href="/course/E4">E4</a> measures where it saturates.</li>
+        <li><b>Feed-forward through a decode.</b> 490 ns to a conditioned pulse, of which 256 ns are schedule lead. A machine that
+          declares only the decode latency undercharges a gate that waits for the decoded bit.</li>
+      </ul>
+      <div class="ex" data-id="E2.7" data-stars="2" data-kind="number" data-unit="bits/µs">
+        <p>Declare <code>decode_syndrome</code> on this machine with the latency from the last window close to the last decoded bit
+          stored, read from the run with both checks fired. What rate <code>r(N, D)</code> does a decode of its 2 syndrome bits then
+          reserve on the classical link?</p>
+        <div class="why">r(2, 176) = ⌈2000 / 176⌉ = 12 bits/µs. The answer function reads the 176 ns from the trace and applies the
+          formula of section 1.</div>
+      </div>
+      <div class="note"><b>What this does not show.</b> The lookup decoder is a table of 2<sup>n</sup> words; it is exact for
+        this tiny code and impossible for a surface code of useful size. Lesson <a href="/course/E3">E3</a> runs a real union-find
+        decoder on a control core. Nothing here says anything about gate fidelity: no quantum state is simulated, and the syndrome
+        is the input you type.</div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>The FTQVM charges each system call one latency and a rate r(N, D) = ⌈1000 N / D⌉ on a shared service.</li>
+          <li>The transmon ring realizes gate, measure, decode_syndrome and pauli_frame_update, and refuses ancilla, route and magic
+            requests for physical reasons.</li>
+          <li>Decoding and frame updates run on a ninth core in a classical segment between two barriers; a frame update plays no pulse.</li>
+          <li>In the model: syndrome at the decoder after 86 ns, decoded at 176 ns, frame stored 22 ns later, a dependent pulse at 490 ns.</li>
+          <li>A single declared latency must say which interval it covers; the lookup is a small part of it.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api, el } from "/course/course.js";
+
+      // ── the decode path of a run, as riscq/syscalls.mjs decodeSamples reads it ──
+      function decodeSamples(run) {
+        const periodNs = run.machine.dspPeriodPs / 1000;
+        const ops = run.hardware.segments.flatMap((s) => s.ops);
+        const { frames } = run;
+        return ops.filter((o) => o.op === "decode").map((op) => {
+          const measures = ops.filter((o) => o.op === "measure" && op.inputs.includes(o.result));
+          const closes = Math.max(...measures.map((m) => run.summary.pulses.find((p) => p.source === m.id && p.kind === "demod").closes));
+          const ns = (batch) => (batch - closes) * periodNs;
+          const reached = (publish) => frames.filter((f) => f.op === "board" && f.parents.includes(publish.id));
+          const inputs = measures.map((m) => reached(frames.find((f) => f.op === "publish" && f.source === m.id)).find((f) => f.part === "decoder.inbox").atBatch);
+          const read = frames.find((f) => f.part === "decoder" && f.source === op.id && f.state.register === "board");
+          const stored = frames.filter((f) => f.part === "decoder" && f.op === "host" && f.source === op.id);
+          const atCores = frames.filter((f) => f.op === "publish" && f.source === op.id).flatMap(reached).map((f) => f.atBatch);
+          const decoded = Math.max(...stored.map((f) => f.atBatch));
+          const updates = ops.filter((o) => o.op === "pauli-frame" && op.outputs.includes(o.when)).map((u) => {
+            const store = frames.find((f) => f.part === "decoder" && f.op === "host" && f.source === u.id);
+            return { qubit: u.qubits[0], pauli: u.pauli, when: u.when, frame: store?.state.store, storedNs: store ? ns(store.atBatch) : undefined };
+          });
+          const pulses = ops.filter((o) => o.op !== "pauli-frame" && op.outputs.includes(o.when))
+            .map((o) => run.summary.pulses.find((p) => p.source === o.id)).filter(Boolean);
+          return {
+            decode: op.id, syndromeBits: op.inputs.length, decodedBits: op.outputs.length,
+            inputAtDecoderNs: ns(Math.max(...inputs)), decodeStartNs: ns(read.atBatch), decodedNs: ns(decoded),
+            decodeNs: (decoded - read.atBatch) * periodNs,
+            decodedAtEveryCoreNs: atCores.length ? ns(Math.max(...atCores)) : undefined,
+            frameUpdates: updates,
+            firstConditionedPulseNs: pulses.length ? ns(Math.min(...pulses.map((p) => p.opens))) : undefined,
+          };
+        });
+      }
+      const repetition = (api, outcomes) => api.run({ example: "superconducting-repetition", outcomes });
+      const sample = async (api, outcomes) => decodeSamples(await repetition(api, outcomes))[0];
+
+      // ── presets of the editor ──
+      const presets = {
+        repetition: null, // read from the example run
+        four: { kind: "ftqvm-calls", version: 1, calls: [
+          ...[0, 1, 2, 3].map((q) => ({ call: "measure", qubit: q, bit: "s" + q })),
+          { call: "decode_syndrome", bits: ["s0", "s1", "s2", "s3"], lut: Array.from({ length: 16 }, (_, s) => s), into: ["d0", "d1", "d2", "d3"] }] },
+        frame: { kind: "ftqvm-calls", version: 1, calls: [
+          { call: "gate", name: "x", qubits: [1] },
+          { call: "measure", qubit: 1, bit: "s0" },
+          { call: "pauli_frame_update", when: "s0", pauli: "Z", qubit: 0 }] },
+        ancilla: { kind: "ftqvm-calls", version: 1, calls: [
+          { call: "request_ancilla", qubit: 1 },
+          { call: "measure", qubit: 1, bit: "s0" }] },
+      };
+      const outcomesFor = { repetition: "s0=1, s1=1", four: "s0=1, s1=0, s2=1, s3=0", frame: "s0=1", ancilla: "s0=0" };
+      const $ = (id) => document.getElementById(id);
+      const compact = (program) => JSON.stringify(program, null, 1)
+        .replace(/\n\s+(?=[^{\s])/g, " ").replace(/\[\s+/g, "[").replace(/\s+\]/g, "]").replace(/\{\s+/g, "{ ").replace(/\s+\}/g, " }");
+      async function loadPreset(name) {
+        let program = presets[name];
+        if (!program) program = JSON.parse((await repetition(api, {})).source.text);
+        $("program").value = compact(program);
+        $("outcomes").value = outcomesFor[name];
+      }
+      const parseOutcomes = (text) => Object.fromEntries(text.split(/[,;\s]+/).filter(Boolean).map((item) => {
+        const [bit, value] = item.split("=");
+        return [bit.trim(), Number(value)];
+      }));
+      const td = (value, cls) => el("td", { class: cls, text: value === undefined ? "–" : String(value) });
+      async function runLab() {
+        const out = $("out");
+        let calls, outcomes;
+        try {
+          calls = JSON.parse($("program").value);
+          outcomes = parseOutcomes($("outcomes").value);
+        } catch (error) {
+          out.replaceChildren(el("div", { class: "err", text: "The program is not valid JSON: " + error.message }));
+          return;
+        }
+        $("go").disabled = true;
+        out.textContent = "Scheduling, compiling and executing on the Lean model…";
+        try {
+          const run = await api.run({ platform: "superconducting", calls, outcomes });
+          const samples = decodeSamples(run);
+          const segs = run.hardware.segments.map((s, i) => el("span", { class: "seg" + (s.classical ? " c" : ""),
+            text: "segment " + i + (s.classical ? " · classical · " : " · pulses · ") + s.ops.filter((o) => o.op !== "frame").map((o) => o.op + (o.when ? "?" + o.when : "")).join(" ") }));
+          const rows = samples.map((s) => el("tr", {}, td(s.decode), td(s.syndromeBits + " → " + s.decodedBits), td(s.inputAtDecoderNs, "n"),
+            td(s.decodeStartNs, "n"), td(s.decodeNs, "n"), td(s.decodedNs, "n"), td(s.decodedAtEveryCoreNs, "n"), td(s.firstConditionedPulseNs, "n")));
+          // Every frame update, decoded or not: when its word was stored, in ns from the start of the run.
+          const periodNs = run.machine.dspPeriodPs / 1000;
+          const updates = run.hardware.segments.flatMap((s) => s.ops).filter((o) => o.op === "pauli-frame").map((u) => {
+            const store = run.frames.find((f) => f.part === "decoder" && f.op === "host" && f.source === u.id);
+            return u.pauli + " on qubit " + u.qubits[0] + " if " + u.when + ": " +
+              (store ? "frame word " + store.state.store + " stored at " + store.atBatch * periodNs + " ns into the run" : "bit was 0, nothing stored");
+          });
+          const bits = Object.entries(run.derived.bits).map(([k, v]) => k + " = " + v).join(", ");
+          out.replaceChildren(...[
+            el("div", {}, ...segs),
+            samples.length
+              ? el("div", { class: "tw" }, el("table", {},
+                  el("tr", {}, ...["decode", "bits", "at decoder", "starts", "lookup", "decoded", "at every core", "pulse"].map((h, i) => el("th", { class: i > 1 ? "n" : undefined, text: h }))),
+                  ...rows))
+              : el("p", { text: "No decode_syndrome in this program." }),
+            samples.length ? el("p", { class: "src", text: "ns after the last syndrome window closes; lookup = decoded − starts." }) : null,
+            updates.length ? el("p", { text: "Frame updates: " + updates.join("; ") + "." }) : null,
+            el("p", { text: "Bits reported to the host: " + (bits || "none") + "." }),
+            el("p", { text: "Run: " + run.machine.cores.length + " cores, " + run.frames.length + " trace frames, " + run.summary.elapsedPs / 1000 + " ns, " +
+              (run.summary.faults.length ? run.summary.faults.length + " faults: " + run.summary.faults[0].reason : "no faults") + "." }),
+          ].filter(Boolean));
+        } catch (error) {
+          out.replaceChildren(el("div", { class: "err", text: "Refused: " + error.message }));
+        } finally {
+          $("go").disabled = false;
+        }
+      }
+      $("preset").addEventListener("change", (e) => loadPreset(e.target.value));
+      $("go").addEventListener("click", runLab);
+      loadPreset("repetition");
+
+      course({
+        answers: {
+          "E2.3": async (api) => (await sample(api, { s0: 1, s1: 1 })).inputAtDecoderNs,
+          "E2.4": async (api) => (await sample(api, { s0: 1, s1: 1 })).decodeNs,
+          "E2.5": async (api) => {
+            const s = await sample(api, { s0: 1 });
+            return s.frameUpdates.find((u) => u.storedNs !== undefined).storedNs - s.decodedNs;
+          },
+          "E2.6": async (api) => {
+            const run = await api.run({ platform: "superconducting", calls: presets.four, outcomes: { s0: 1, s1: 0, s2: 1, s3: 0 } });
+            return decodeSamples(run)[0].decodeNs;
+          },
+          "E2.7": async (api) => Math.ceil((1000 * 2) / (await sample(api, { s0: 1, s1: 1 })).decodedNs),
+        },
+      });
+    </script>
+  </body>
+</html>

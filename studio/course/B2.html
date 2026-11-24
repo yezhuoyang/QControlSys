@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B2 · Timed queues and the lead · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="B2">
+    <article>
+      <p class="kicker">Part B · Lesson 2</p>
+      <h1>Timed queues and the lead</h1>
+      <p class="lead">
+        The firmware of every core works about 96 batches in the future. Its writes reach the channels long before they are
+        needed, and timed queues release each parameter exactly when it must leave. This lesson shows where the numbers come
+        from, what Lean proves about them, and what happens when a write is late.
+      </p>
+      <p class="pre">
+        You should know the channel registers of <a href="/course/B1">B1</a> and the path of one pulse in
+        <a href="/course/A3">A3</a>. The <a href="/course/background/timing">background chapter on deterministic timing</a>
+        goes deeper into why control systems schedule ahead.
+      </p>
+
+      <h2 id="problem"><span class="num">1</span>Different parameters, different delays</h2>
+      <p class="q">If every parameter of a pulse is written at the same moment, why do they not all arrive together?</p>
+      <p>
+        A pulse is played by a pulse generator next to the DAC. Its parameters travel different paths through it. The phase
+        goes through the carrier generator and a complex multiplier; the envelope address goes to a memory and then the
+        same multiplier; the duration only gates the output. Each path has a fixed number of pipeline stages, listed in
+        RISC-Q's <code>docs/dsp/PulseGenerator.md</code> and copied into the structure <code>Datapath</code> of
+        <code>QControl/RiscQ/Timing.lean</code>. The <b>lead</b> of a parameter is how many batches before the pulse starts
+        it must leave its queue:
+      </p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Path (batches)</th><th class="n">Lead</th></tr></thead>
+        <tbody>
+          <tr><td>Amplitude</td><td>carrier amplitude 27 + complex multiply 6 + gate 1</td><td class="n">34</td></tr>
+          <tr><td>Phase</td><td>carrier phase 28 + 6 + 1</td><td class="n">35</td></tr>
+          <tr><td>Carrier frequency</td><td>carrier frequency 29 + 6 + 1</td><td class="n">36</td></tr>
+          <tr><td>Phasors after a frequency change</td><td>16 lanes + CORDIC 19 + 2, phasor 8, + 6 + 1</td><td class="n">52</td></tr>
+          <tr><td>Envelope address</td><td>envelope reader 4 + 6 + 1</td><td class="n">11</td></tr>
+          <tr><td>Duration</td><td>gate 1 + 1</td><td class="n">2</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The theorem <code>default_leads</code> checks by computation that these sums equal 34, 35, 36, 52, 11 and 2, the
+        constants RISC-Q reports for a 16-lane DAC channel. <code>phase_is_slowest_fired_lead</code> states that of the four
+        parameters a fire sends, the phase has the largest lead.
+      </p>
+      <div class="ex" data-id="B2.1" data-stars="1" data-kind="choice" data-answer="b">
+        <p>Of the parameters a fire sends (amplitude, phase, envelope address, duration), which must leave its queue
+          earliest?</p>
+        <ol class="choices">
+          <li data-k="a">The amplitude, 34 batches before the start.</li>
+          <li data-k="b">The phase, 35 batches before the start.</li>
+          <li data-k="c">The envelope address, 11 batches before the start.</li>
+          <li data-k="d">The duration, 2 batches before the start.</li>
+        </ol>
+        <div class="why">The carrier phase stage is one batch longer than the amplitude stage. The carrier frequency (36) and
+          the phasors (52) are slower still, but they are written with <code>freq</code>, not with a fire.</div>
+      </div>
+
+      <h2 id="queues"><span class="num">2</span>Timed queues</h2>
+      <p class="insection"><b>In this section:</b> the rule a queue follows, and the three theorems about when a parameter lands.</p>
+      <p>
+        Each parameter of a channel has its own <span class="term" data-term="timed queue">timed queue</span>
+        (<code>TimedQueue.scala</code>). A fire pushes the entry's fields, together with the start time, into the queues 2
+        batches after the write arrives (<code>PulseParamBuffer.md</code>). Each queue then tests, every batch,
+      </p>
+      <p class="formula">time ≥ startTime − lead</p>
+      <p>
+        and pops its head when the test holds. Two more rules come from the register implementation: an entry can pop at the
+        earliest 3 batches after its push (<code>pushMargin</code>), and two pops of one queue are at least 2 batches apart
+        (<code>popInterval</code>). The Lean file proves them as <code>popCycle_ge_push</code> and
+        <code>popCycle_spacing</code>.
+      </p>
+      <p>
+        A popped parameter reaches the converter <code>lead</code> batches later. The main theorem says when that works:
+      </p>
+      <div class="key"><b><code>land_exact</code>.</b> If an entry is ready (pushed, plus the margin, plus the spacing
+        after the previous pop) no later than <code>lead</code> batches before its start time, and the start time is less
+        than 2³¹ batches away, the parameter lands exactly when the batch-time register reads the start time.</div>
+      <p>
+        The arrival time of the write does not appear in the conclusion. <code>land_independent_of_arrival</code> spells
+        that out: two writes that both meet the margin land on the same batch, whatever link latency separated them. This is
+        why the posted link can be pipelined freely. The third theorem covers the other case:
+        <code>land_late</code> says that an entry that misses the margin pops as soon as it is ready and lands late by
+        exactly the amount it missed.
+      </p>
+      <div class="note"><b>What kind of statement this is.</b> These are theorems about the model in
+        <code>Timing.lean</code>, proved by Lean from definitions taken from RISC-Q's Scala source and documents. They are not
+        proofs about the RTL. Conformance tests (<code>tests/riscq-firmware.test.mjs</code>) check that three RISC-Q firmware
+        binaries reproduce what RISC-Q's own RTL simulations assert, for example that <code>pulse_sched.elf</code> opens its
+        pulse exactly at its start time.</div>
+
+      <h2 id="example"><span class="num">3</span>One pulse, batch by batch</h2>
+      <p>
+        Here is the first <code>x90</code> of qubit 0 again (lesson <a href="/course/A3">A3</a>), now with the queue rules.
+        Its start time is 320.
+      </p>
+      <table>
+        <thead><tr><th class="n">Batch</th><th>Event</th><th>Where you see it</th></tr></thead>
+        <tbody>
+          <tr><td class="n">217</td><td>The core's wait for its issue time ends</td><td>frame <code>q0:129.resume</code></td></tr>
+          <tr><td class="n">227</td><td>The fire store leaves the core, after the phase offset (220) and start time (224)</td><td><code>q0:137</code> put</td></tr>
+          <tr><td class="n">230</td><td>The fire arrives at q0.gate</td><td><code>e162</code> fire</td></tr>
+          <tr><td class="n">232</td><td>The entry is pushed into the queues (fire + 2)</td><td>not a frame</td></tr>
+          <tr><td class="n">235</td><td>The entry is ready (push + 3)</td><td>not a frame</td></tr>
+          <tr><td class="n">285</td><td>Phase pops (320 − 35); amplitude at 286, envelope address at 309, duration at 318</td><td>not frames</td></tr>
+          <tr><td class="n">320</td><td>All parameters land; the window opens</td><td><code>e164</code> pulse: <code>phaseLands</code> = <code>ampLands</code> = <code>envLands</code> = 320</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The entry was ready at 235 and needed to be ready by 320 − 35 = 285. It had 50 batches to spare. With that margin
+        the hypothesis of <code>land_exact</code> holds and the window opens on batch 320 whatever happened on the way.
+      </p>
+      <figure class="live" data-title="The fire arrives 90 batches early" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=335&view=control">
+        <figcaption>Step 335: the fire frame <code>e162</code>. Its state shows <code>startTime</code> 320 and
+          <code>lands</code> 320. Press <b>Next pulse</b> to jump to the window opening.</figcaption>
+      </figure>
+      <div class="ex" data-id="B2.2" data-stars="1" data-kind="number" data-unit="batches">
+        <p>How many batches before its start time does the fire of <code>h2</code> reach q0.gate?</p>
+        <div class="why">The fire frame is at batch 230 and names start time 320: 90 batches. The queues absorb all of it.</div>
+      </div>
+      <div class="ex" data-id="B2.3" data-stars="2" data-kind="number" data-unit="batches">
+        <p>By how many batches does the <code>h2</code> entry beat the deadline of its slowest parameter? Compute
+          start − (fire + 2 + 3) − 35.</p>
+        <div class="why">320 − (230 + 2 + 3) − 35 = 50. The model's fire-to-push latency is in the run as
+          <code>program.model.fireToPush</code>; the push margin 3 and the phase lead 35 are proved constants.</div>
+      </div>
+
+      <h2 id="lead"><span class="num">4</span>Why 96</h2>
+      <p>
+        The firmware does not compute a lead per parameter. It issues every timed write a fixed
+        <span class="term" data-term="lead">lead</span> of 96 batches before its start time: <code>LEAD = 96</code> in
+        <code>riscq/soc.mjs</code>, the value of <code>LEAD</code> in RISC-Q's <code>map.py</code>, which covers the link,
+        the slowest fired queue lead and the jitter of the core. On the ring that is 192 ns.
+      </p>
+      <p>
+        The firmware waits for its issue time with two control registers: it stores the issue time to
+        <code>timeCmp</code> (<code>0x4000</code>) and reads <code>waitTimeCmp</code> (<code>0x4008</code>). The read stalls
+        the core until its time register has nearly reached the value (<code>time + 3 ≥ timeCmp</code>,
+        <code>ControlMemMaps.scala</code>). In the trace this is a <code>wait</code> frame followed by a
+        <code>resume</code> frame. Note that the core's <code>time</code> lags the converter's batch counter by the link
+        depth. RISC-Q says the lag is constant without giving a number; the model assumes it equals the link depth. At the
+        first read of the run, at batch 4, core q0 reads 2.
+      </p>
+
+      <h2 id="order"><span class="num">5</span>One write at a time: issue order and preroll</h2>
+      <p class="insection"><b>In this section:</b> how the compiler orders the writes of a core, and why a segment may start later than planned.</p>
+      <p>
+        A core issues one write at a time, and each costs it time. The compiler (<code>issueOrder</code> in
+        <code>riscq/firmware.mjs</code>) budgets an inline operation at 20 batches plus 5 for each field or phase offset it
+        sets plus 4 if it is conditioned. It sorts the operations by issue time and walks backward: each issue moves early
+        enough that the next one can still leave on time. A segment that only fires and changes carriers is issued by a loop
+        over a four-word table (issue time, start time, address, data) that costs 32 batches per write
+        (<code>TABLE_COST</code>).
+      </p>
+      <p>
+        Qubit 0 shows the effect. Its <code>x90</code> starts at 0 and its CZ tone 18 batches later. The CZ must be issued at
+        18 − 96 = −78 relative to the time base. The <code>x90</code> costs 25 batches (it sets the phase offset), so it
+        must be issued by −78 − 25 = −103, seven batches earlier than the lead allows. The compiler cannot move the first
+        write before the segment's time base minus 96, so it moves the whole segment 7 batches later. That shift is the
+        <span class="term" data-term="preroll">preroll</span>. The run lists it per segment in <code>preroll</code>, and the
+        Program section of the detailed debugger says "delayed 7 batches (14 ns) so that its widest burst of writes leaves
+        on time". It is also why the first <code>x90</code> opens at 320 = 313 + 7, where 313 is the time base after the
+        barrier.
+      </p>
+      <div class="ex" data-id="B2.4" data-stars="2" data-kind="number" data-unit="batches">
+        <p>By how many batches is segment 0 of the feed-forward run delayed?</p>
+        <div class="why">Seven, from the <code>x90</code> that must leave 25 batches before the CZ of the same core. Segment 1
+          holds one conditioned pulse and needs no preroll.</div>
+      </div>
+      <p>
+        The same mechanism limits how many pulses one core can start on the same batch. The limit sweeps in
+        <code>riscq/limits.mjs</code> build a one-core machine at 100 MHz and fire <i>n</i> channels on one batch with the
+        table loop. The tests (<code>tests/riscq-limits.test.mjs</code>) find that all <i>n</i> pulses open on the same batch,
+        on time, after a preroll of (<i>n</i> − 1) · 32 batches: 0, 32, 96, 224 and 480 for 1, 2, 4, 8 and 16 pulses.
+      </p>
+      <p>
+        Queues have a depth too. A channel's queues hold one entry more than the build's queue depth (5 on the default build
+        of depth 4, 33 on <code>x6y3</code>), and the compiler refuses a write that would need a sixth entry. For a long
+        back-to-back train of equal pulses on one channel, the tests find the shortest pulse that still fits at 48, 31, 29
+        and 16 batches for queue depths 1, 4, 8 and 32.
+      </p>
+      <div class="ex" data-id="B2.5" data-stars="2" data-kind="choice" data-answer="c">
+        <p>The table loop issues one timed write every 32 batches. How much preroll do 16 pulses need that must all open on
+          the same batch from one core?</p>
+        <ol class="choices">
+          <li data-k="a">32 batches.</li>
+          <li data-k="b">96 batches, one lead.</li>
+          <li data-k="c">480 batches.</li>
+          <li data-k="d">512 batches.</li>
+        </ol>
+        <div class="why">The last write can leave one lead before the start. Each earlier one must leave 32 batches before
+          the next, so the first leaves 15 · 32 = 480 batches earlier than the lead allows. That is the tested result.</div>
+      </div>
+
+      <h2 id="late"><span class="num">6</span>When a write is late</h2>
+      <p>
+        The lead hides the link, but only up to a point. Every stage of the link delays the write and, under the model's
+        assumption, also delays the core's copy of the time by one batch. On the one-core 100 MHz build of the limit sweeps,
+        the tests find that a pulse issued 96 batches ahead opens on time up to 13 link stages; at 14 the phase lands late
+        while the window still opens. That limit depends on the assumed lag.
+      </p>
+      <p>
+        You can force the same failure on the ring. The ring is also available as a hardware design document
+        (lesson <a href="/course/D1">D1</a>), whose board has a field <code>linkStages</code>, 2 by default. The exercises
+        below run the feed-forward program on that design with <code>linkStages</code> set to 30. From the command line:
+        <code>node riscq/cli.mjs --ring-design &gt; machine.json</code>, change <code>"linkStages": 2</code> to 30, then
+        <code>node riscq/cli.mjs --design machine.json --qasm program.qasm --outcome c=1</code>.
+      </p>
+      <p>
+        With 30 stages the fire of the first <code>x90</code> reaches its channel only 22 batches before its start time of
+        348. The entry is ready at 331, but the phase had to be ready by 348 − 35 = 313. It misses by 18 batches, and as
+        <code>land_late</code> says, it lands at 331 + 35 = 366, exactly 18 late. The envelope address and the duration,
+        with leads of 11 and 2, still land at 348, so the window does open on time. But its parameters did not land on the
+        same batch, and the model reports a fault: "pulse parameters did not land on the same batch". The window lasts 18
+        batches, 348 to 366, so its new amplitude and phase arrive only as it closes. The model records the landing batches;
+        it does not compute what the DAC would have played meanwhile.
+      </p>
+      <div class="ex" data-id="B2.6" data-stars="3" data-kind="number">
+        <p>Run the ring design with <code>linkStages</code> = 30 (the answer check does it for you). At which batch does the
+          phase of the first <code>x90</code> on qubit 0 land?</p>
+        <div class="why">The pulse frame reports <code>phaseLands</code> = 366 for a start time of 348: ready at 331, plus
+          the phase lead of 35. The amplitude lands at 365, one batch earlier, because its lead is one less.</div>
+      </div>
+      <div class="ex" data-id="B2.7" data-stars="2" data-kind="number" data-unit="faults">
+        <p>How many faults does that run report in all?</p>
+        <div class="why">Every one of the eight windows has misaligned parameters. The conditioned <code>x</code> is worse:
+          its window also opens a batch after its start time, which is a second fault. The detailed debugger draws all of
+          them in red on the Channel timeline, and <b>Next fault</b> in the workspace steps through them.</div>
+      </div>
+      <div class="ex" data-id="B2.8" data-stars="1" data-kind="text" data-answer="land_late|QControl.RiscQ.land_late">
+        <p>Which theorem of <code>Timing.lean</code> says that a parameter that misses its margin lands late by exactly the
+          amount it missed? Give its name.</p>
+        <div class="why"><code>land_late</code>. With <code>land_exact</code> it covers both cases, so a late write never
+          lands at an unpredictable time: it lands as soon as it is ready plus its lead.</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Each parameter has a lead, derived from the pulse generator's pipeline: 34, 35, 36, 52, 11 and 2 batches.</li>
+          <li>A timed queue pops a parameter its lead before the start time; <code>land_exact</code> proves it lands on the start batch if it was ready in time.</li>
+          <li>The firmware issues every timed write 96 batches ahead, which covers the link, the slowest lead and the core's jitter.</li>
+          <li>A core issues one write at a time; when a burst cannot fit, the segment starts later by its preroll.</li>
+          <li>A late write lands late by exactly what it missed (<code>land_late</code>), and the model reports the fault.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const fireOf = (run) => run.frames.find((f) => f.op === "fire" && f.source === "h2" && f.part === "q0.gate");
+      // The ring as a hardware design, with a deeper posted link on its board.
+      const deepLink = async (api) => {
+        const template = await api.design.template("ring");
+        const design = { ...template.design, board: { ...template.design.board, linkStages: 30 } };
+        return api.run({ platform: "superconducting", design, qasm: template.qasm, outcomes: { c: 1 } });
+      };
+      course({
+        answers: {
+          "B2.2": async (api) => {
+            const fire = fireOf(await feedforward(api));
+            return fire.state.startTime - fire.atBatch;
+          },
+          "B2.3": async (api) => {
+            const run = await feedforward(api), fire = fireOf(run);
+            const PUSH_MARGIN = 3, PHASE_LEAD = 35; // proved constants of QControl/RiscQ/Timing.lean
+            return fire.state.startTime - (fire.atBatch + run.program.model.fireToPush + PUSH_MARGIN) - PHASE_LEAD;
+          },
+          "B2.4": async (api) => (await feedforward(api)).preroll[0],
+          "B2.6": async (api) => (await deepLink(api)).frames.find((f) => f.op === "pulse" && f.source === "h2" && f.part === "q0.gate").state.phaseLands,
+          "B2.7": async (api) => (await deepLink(api)).summary.faults.length,
+        },
+      });
+    </script>
+  </body>
+</html>

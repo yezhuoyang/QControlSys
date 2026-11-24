@@ -41,6 +41,6 @@ try {
 } catch {
     if ($NoBrowser) { throw }
     Add-Type -AssemblyName System.Windows.Forms
-    [void][System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'QControl Studio')
+    [void][System.Windows.Forms.MessageBox]::Show($_.Exception.Message, 'QuantumOS')
     exit 1
 }

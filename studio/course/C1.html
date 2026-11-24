@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>C1 · Superconducting: from OpenQASM to microwaves · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab textarea { width: 100%; min-height: 150px; font: 12.5px/1.5 var(--mono); border: 1px solid #cfceca; border-radius: 8px; padding: 8px 10px; resize: vertical; }
+      .lab .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+      .lab .out { font-size: 13px; max-height: 360px; overflow: auto; }
+      .lab .out table { font-size: 12.5px; }
+      .lab .err { color: var(--red); font-size: 13.5px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body data-lesson="C1">
+    <article>
+      <p class="kicker">Part C · Lesson 1</p>
+      <h1>Superconducting: from OpenQASM to microwaves</h1>
+      <p class="lead">
+        On a transmon machine a gate is a calibrated microwave pulse, a Z rotation is a number added to later pulses, and a
+        measurement is a tone followed by an acquisition window. This lesson takes OpenQASM down to those three things on
+        a real calibration.
+      </p>
+      <p class="pre">
+        You should know what a batch, a pulse table and a fire are (lessons <a href="/course/A2">A2</a> and
+        <a href="/course/B1">B1</a>). The <a href="/course/background/qubits">background chapter on qubits</a> explains
+        what a transmon is. No quantum state is simulated in this lesson or anywhere in the simulator.
+      </p>
+
+      <h2 id="machine"><span class="num">1</span>The machine: an eight-transmon ring</h2>
+      <p class="insection"><b>In this section:</b> where the numbers come from, and which channels each control core owns.</p>
+      <p>
+        The superconducting machine is not invented for this course. It is the eight-qubit ring of
+        <a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">RISC-Q</a>'s example calibration,
+        <code>examples/cal-config-x6y3.yaml</code> at commit <code>243d814</code>. The script
+        <code>validation/riscq/extract_calibration.py</code> copies the control-relevant numbers into
+        <code>validation/riscq/x6y3-calibration.json</code> unchanged: qubit frequencies from 5.23 to 5.91 GHz, pulse
+        durations, amplitudes as a fraction of <span class="term" data-term="DAC">DAC</span> full scale, phases, and the
+        readout of each qubit. The controller is RISC-Q's <code>x6y3</code> build: a 500 MHz control clock, so one
+        <span class="term" data-term="batch">batch</span> is 2 ns; a DAC that takes 16 samples per batch (8 GS/s); an
+        <span class="term" data-term="ADC">ADC</span> that takes 4 samples per batch (2 GS/s).
+      </p>
+      <p>
+        There is one <span class="term" data-term="core">control core</span> per qubit. Each core owns a few
+        <span class="term" data-term="channel">channels</span>, and each channel sits in front of a converter:
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 270" role="img" aria-label="The channels of core q0 and the converters they use">
+          <style>
+            .c1 rect { stroke: #dde1ea; stroke-width: 1; }
+            .c1 text { font: 13px ui-sans-serif, system-ui, sans-serif; fill: #111827; }
+            .c1 .m { font: 12px ui-monospace, Consolas, monospace; fill: #586174; }
+            .c1 .h { font-weight: 650; }
+            .c1 line, .c1 path { stroke: #8a9a9c; stroke-width: 1.4; fill: none; }
+          </style>
+          <g class="c1">
+            <rect x="10" y="20" width="150" height="230" rx="10" fill="#f1f3f9" />
+            <text class="h" x="24" y="44">core q0</text>
+            <text class="m" x="24" y="64">RV32I, own RAM</text>
+            <rect x="200" y="20" width="150" height="38" rx="8" fill="#fff" /><text class="m" x="212" y="44">gate  (x90, x)</text>
+            <rect x="200" y="66" width="150" height="38" rx="8" fill="#fff" /><text class="m" x="212" y="90">cz0   (pair 0-1)</text>
+            <rect x="200" y="112" width="150" height="38" rx="8" fill="#fff" /><text class="m" x="212" y="136">cz1   (pair 7-0)</text>
+            <rect x="200" y="158" width="150" height="38" rx="8" fill="#fff" /><text class="m" x="212" y="182">ro    (tone)</text>
+            <rect x="200" y="204" width="150" height="38" rx="8" fill="#fff" /><text class="m" x="212" y="228">demod (window)</text>
+            <line x1="160" y1="39" x2="200" y2="39" /><line x1="160" y1="85" x2="200" y2="85" /><line x1="160" y1="131" x2="200" y2="131" />
+            <line x1="160" y1="177" x2="200" y2="177" /><line x1="160" y1="223" x2="200" y2="223" />
+            <rect x="400" y="66" width="120" height="38" rx="8" fill="#fdf0ea" /><text x="414" y="90">DAC 0</text>
+            <rect x="400" y="158" width="120" height="38" rx="8" fill="#fdf0ea" /><text x="414" y="182">DAC 8 (shared)</text>
+            <rect x="400" y="204" width="120" height="38" rx="8" fill="#efedf8" /><text x="414" y="228">ADC 12 (shared)</text>
+            <path d="M350 39 C 380 39, 380 85, 400 85" /><line x1="350" y1="85" x2="400" y2="85" /><path d="M350 131 C 380 131, 380 85, 400 85" />
+            <line x1="350" y1="177" x2="400" y2="177" /><line x1="350" y1="223" x2="400" y2="223" />
+            <rect x="580" y="66" width="160" height="38" rx="8" fill="#fbf4e2" /><text x="594" y="90">qubit 0 drive line</text>
+            <rect x="580" y="158" width="160" height="38" rx="8" fill="#fbf4e2" /><text x="594" y="182">readout line → resonators</text>
+            <rect x="580" y="204" width="160" height="38" rx="8" fill="#fbf4e2" /><text x="594" y="228">← returning signal</text>
+            <line x1="520" y1="85" x2="580" y2="85" /><line x1="520" y1="177" x2="580" y2="177" /><line x1="580" y1="223" x2="520" y2="223" />
+          </g>
+        </svg>
+        <figcaption><b>Core q0 and its five channels.</b> Gate and CZ channels feed qubit 0's DAC. Every core's readout tone
+          goes to DAC 8 and every acquisition reads ADC 12, as RISC-Q's <code>x6y3.json</code> maps them
+          (<code>dac_map</code>, <code>adc_map</code>). Schematic drawing.</figcaption>
+      </figure>
+      <ul>
+        <li><b><code>gate</code></b> plays the two calibrated single-qubit pulses, <code>x90</code> and <code>x</code>, from a pulse table of two entries.</li>
+        <li><b><code>cz0</code>, <code>cz1</code></b> play the qubit's half of each two-qubit gate it takes part in, one channel per partner.
+          They drive the same DAC as <code>gate</code>, but each has its own <span class="term" data-term="carrier">carrier</span>, so no carrier
+          is retuned between gates. That extra channel per partner is this project's build choice, not RISC-Q's.</li>
+        <li><b><code>ro</code></b> plays the readout tone. All eight cores send their tones to DAC 8, a single shared readout line.</li>
+        <li><b><code>demod</code></b> opens the acquisition window on ADC 12 and turns the returning signal into one bit.</li>
+      </ul>
+      <p>
+        You can see these channels in the workspace: open the run below in the <b>Control system</b> view and select
+        <code>q0</code>. The run bundle lists them too, under <code>machine.cores</code>.
+      </p>
+      <div class="note"><b>Two pairs are missing.</b> The ring has eight couplings, but the calibration realizes the CZ of
+        pairs (5, 6) and (6, 7) with extra pulses on qubit 6's second excited level, a "sandwich" of EF pulses before and
+        after the tone. The lowering does not model those pulses, so the two pairs are not offered. Qubit 6 has no CZ
+        channel at all, and qubits 5 and 7 have one each.</div>
+
+      <h2 id="pulses"><span class="num">2</span>A gate is a calibrated pulse</h2>
+      <p class="q">What exactly does the controller play for <code>sx q[0]</code>?</p>
+      <p>
+        A <span class="term" data-term="transmon">transmon</span> rotates about an axis in the X–Y plane when a microwave
+        tone at its frequency reaches its drive line. The angle depends on the pulse's area, and the axis depends on the
+        pulse's phase. A calibration fixes one shape for each rotation the machine offers. Here the calibration offers two:
+        <code>x90</code>, a 90° rotation, and <code>x</code>, a 180° rotation. On qubit 0 they are 35 ns and 70 ns long, with
+        amplitudes of 0.1056 and 0.1067 of full scale and the <code>FAST_DRAG</code> <span class="term" data-term="envelope">envelope</span>.
+        DRAG shapes are the standard way to keep a short pulse from leaking into the transmon's second excited level
+        (Motzoi et al., <i>Phys. Rev. Lett.</i> 103, 110501 (2009), <a href="https://arxiv.org/abs/0901.0534">arXiv:0901.0534</a>).
+      </p>
+      <p>
+        Each calibrated pulse becomes one row of the <code>gate</code> channel's <span class="term" data-term="pulse table">pulse table</span>:
+        an amplitude code (the fraction times 19,896), a phase code, an envelope address and a duration in batches. The
+        <span class="term" data-term="firmware">firmware</span> fires row 0 for an <code>x90</code> and row 1 for an
+        <code>x</code>. The amplitude, envelope and carrier are fixed in the table. Only the phase changes from one fire to
+        the next, for a reason the next section explains.
+      </p>
+      <div class="ex" data-id="C1.1" data-stars="1" data-kind="number" data-unit="ns">
+        <p>The calibration says 35 ns for qubit 0's <code>x90</code>. Run the feed-forward example. How long is the
+          <code>x90</code> pulse window on <code>q0.gate</code>?</p>
+        <div class="why">A pulse window is a whole number of batches. 35 ns is 17.5 batches of 2 ns, so the lowering rounds
+          up to 18 batches, 36 ns (<code>span</code> in <code>riscq/platforms/superconducting.mjs</code>). The envelope
+          carries the shape inside the window. The 70 ns <code>x</code> needs no rounding.</div>
+      </div>
+
+      <h2 id="virtualz"><span class="num">3</span>Z rotations play nothing</h2>
+      <p class="insection"><b>In this section:</b> virtual Z, the decomposition of every standard gate, and how a phase reaches the hardware.</p>
+      <p>
+        A rotation about Z changes only the phase between the qubit's two levels. Instead of playing a pulse for it, the
+        controller can rotate its own reference: every later drive pulse on that qubit is played with its phase shifted by
+        minus the angle. The result is the same as a physical Z rotation followed by those pulses, and it costs no time.
+        This is the <span class="term" data-term="virtual Z">virtual Z</span> gate (McKay et al., <i>Phys. Rev. A</i> 96,
+        022330 (2017), <a href="https://arxiv.org/abs/1612.00858">arXiv:1612.00858</a>).
+      </p>
+      <p>
+        With virtual Z, every single-qubit gate can be written with two <code>x90</code> pulses and three phase changes.
+        The lowering (<code>nativeGate</code> in <code>riscq/platforms/superconducting.mjs</code>) uses exactly that form for
+        a general unitary:
+      </p>
+      <div class="formula">U(θ, φ, λ) = Z(φ + π) · SX · Z(θ + π) · SX · Z(λ)    up to a global phase</div>
+      <p>
+        Read right to left: a frame update by λ, an <code>x90</code>, a frame update by θ + π, another <code>x90</code>, a
+        frame update by φ + π. That is the ZSXZSXZ form. The common gates have shorter forms in the same table:
+      </p>
+      <div class="tw"><table>
+        <tr><th>OpenQASM</th><th>Hardware instructions</th></tr>
+        <tr><td><code>x</code></td><td><code>x</code></td></tr>
+        <tr><td><code>sx</code></td><td><code>x90</code></td></tr>
+        <tr><td><code>z</code>, <code>s</code>, <code>t</code>, <code>rz(θ)</code>, <code>p(θ)</code></td><td>one <code>frame</code> (π, π/2, π/4, θ, θ)</td></tr>
+        <tr><td><code>h</code></td><td><code>frame</code>(π/2), <code>x90</code>, <code>frame</code>(π/2)</td></tr>
+        <tr><td><code>y</code></td><td><code>frame</code>(π), <code>x</code></td></tr>
+        <tr><td><code>rx(θ)</code>, <code>ry(θ)</code>, <code>U(θ,φ,λ)</code></td><td>the ZSXZSXZ form above</td></tr>
+        <tr><td><code>cx</code>, <code>cy</code>, <code>swap</code></td><td>Hadamards and S gates around one or three <code>cz</code></td></tr>
+      </table></div>
+      <p>
+        The calibration adds its own small frame updates. On qubit 0 it asks for a Z rotation of 0.0055 rad before and after
+        every <code>x90</code>, to correct a phase error of the pulse. The scheduler inserts them as more <code>frame</code>
+        instructions. The test file <code>tests/riscq-superconducting.test.mjs</code> checks every decomposition as a
+        2×2 matrix against the gate it replaces.
+      </p>
+      <div class="ex" data-id="C1.2" data-stars="1" data-kind="choice" data-answer="c">
+        <p>Which sequence does the lowering emit for <code>U(θ, φ, λ)</code>, in time order?</p>
+        <ol class="choices">
+          <li data-k="a">One <code>x</code> pulse with phase φ and amplitude set by θ.</li>
+          <li data-k="b"><code>x90</code>, <code>frame</code>(θ), <code>x90</code>.</li>
+          <li data-k="c"><code>frame</code>(λ), <code>x90</code>, <code>frame</code>(θ + π), <code>x90</code>, <code>frame</code>(φ + π).</li>
+          <li data-k="d">Three physical pulses about Z, X and Z.</li>
+        </ol>
+        <div class="why">The amplitude of a calibrated pulse never changes, so the angle θ cannot be set by amplitude. Two
+          fixed 90° pulses with three phase changes reach every single-qubit rotation. Only the two <code>x90</code> take
+          time.</div>
+      </div>
+      <p>
+        <b>How the phase reaches the channel.</b> The lowering keeps one running frame per qubit. A <code>frame</code>
+        instruction subtracts its angle. When a drive pulse fires, the core first writes the channel's
+        <code>phaseOffset</code> register with the current frame as a 16-bit code (one turn is 65,536), then fires the
+        table row. So the same table row plays with a different phase each time. The run bundle records the phase code each window landed
+        with (<code>summary.pulses[].phase</code>), and the box below lists it.
+      </p>
+      <div class="lab" id="qasmLab">
+        <h4>Try it: compile your own OpenQASM for the ring</h4>
+        <p>Edit the program and run it. The server compiles it with the same code as the workspace
+          (<code>POST /api/riscq/run</code> with <code>{ platform: "superconducting", qasm }</code>), runs the firmware in
+          the Lean model, and returns the run. Below are its hardware instructions and the pulse windows the trace recorded.
+          Qubits 0 to 7 exist. A two-qubit gate needs one of the six calibrated pairs: 0-1, 1-2, 2-3, 3-4, 4-5, 7-0.</p>
+        <textarea id="qasmText" spellcheck="false" aria-label="OpenQASM program">OPENQASM 3.0;
+include "stdgates.inc";
+qubit[8] q;
+bit c;
+ry(0.5) q[0];
+c = measure q[0];</textarea>
+        <div class="row"><button class="btn small" type="button" id="qasmRun">Compile and run</button><span class="src" id="qasmState"></span></div>
+        <div class="out" id="qasmOut"></div>
+      </div>
+      <div class="ex" data-id="C1.3" data-stars="2" data-kind="number">
+        <p>Compile a program whose only gate is <code>ry(0.5) q[0];</code> (keep the header lines, drop the measurement).
+          How many hardware instructions does it become?</p>
+        <div class="why"><code>ry(θ)</code> is <code>U(θ, 0, 0)</code>: three frame updates and two <code>x90</code>. Each
+          <code>x90</code> on qubit 0 brings two calibration frame updates with it, one before and one after. That makes
+          3 + 2 + 4 = 9 instructions, of which two play a pulse.</div>
+      </div>
+
+      <h2 id="cz"><span class="num">4</span>A CZ is two tones and a phase correction</h2>
+      <p>
+        The two-qubit gate of this calibration is a CZ. For the pair (0, 1) the calibration states one tone at 5.3327 GHz,
+        400 ns long, with the <code>cosine_square</code> envelope, played on both qubits' drive lines at the same time:
+        amplitude 0.394 on each, phase 0 on qubit 0 and 0.267 rad on qubit 1. The file gives the tone's parameters, not the
+        physical mechanism of the gate, and this course does not guess it.
+      </p>
+      <p>
+        The lowering turns one <code>cz</code> instruction into two fires on the same batch: <code>q0.cz0</code> on core q0
+        and <code>q1.cz0</code> on core q1. The two cores act independently. They land on the same batch because both
+        were given the same start time after a common <span class="term" data-term="barrier">barrier</span>, and the
+        <span class="term" data-term="timed queue">timed queues</span> make every parameter land exactly at its start time.
+      </p>
+      <p>
+        After the tones, the calibration asks for Z corrections, including on a spectator qubit that took no part in the
+        gate. For (0, 1) they are 1.467 rad on qubit 0, 1.994 rad on qubit 1, and 0.086 rad on qubit 2. The scheduler adds
+        them as <code>frame</code> instructions labeled <i>CZ frame correction</i> at the end of the CZ.
+      </p>
+      <div class="ex" data-id="C1.4" data-stars="2" data-kind="number">
+        <p>In the feed-forward example, <code>cx q[0], q[1]</code> contains one CZ. How many frame corrections does the
+          scheduler add after it?</p>
+        <div class="why">Three: one for each qubit of the pair and one for the spectator, qubit 2. Find them in the
+          <b>Hardware instructions</b> layer of the workspace at the CZ's end time, 436 ns. A spectator correction changes
+          qubit 2's frame, so it changes the phase of qubit 2's later pulses, here the conditioned <code>x</code>.</div>
+      </div>
+
+      <h2 id="readout"><span class="num">5</span>Readout: a tone, a delay, a window</h2>
+      <p class="insection"><b>In this section:</b> how a measurement becomes two pulses and one bit, and what the model assumes.</p>
+      <p>
+        A transmon is read through a resonator coupled to it. A tone near the resonator's frequency is sent in. The
+        resonator's response shifts with the qubit's state, and the returning signal is digitized and compared with a
+        reference (Blais et al., <i>Rev. Mod. Phys.</i> 93, 025005 (2021),
+        <a href="https://arxiv.org/abs/2005.12667">arXiv:2005.12667</a>). Many resonators at different frequencies can share
+        one line. That is why one DAC and one ADC serve all eight qubits here.
+      </p>
+      <p>
+        A <code>measure</code> instruction becomes three actions on the qubit's core. The <code>ro</code> channel fires the
+        readout tone: 500 ns for qubit 0. After the calibrated delay, the <code>demod</code> channel opens the
+        <span class="term" data-term="demodulation">demodulation</span> window on ADC 12: 398.57 ns after the tone for
+        qubit 0, rounded up to 200 batches, and 656.67 ns long, rounded up to 329 batches. The demodulation carrier is four
+        times the tone's frequency code, because the ADC takes 4 samples per batch where the DAC takes 16. The core then
+        reads the result register, which stalls until the window has closed and the decoder has settled.
+      </p>
+      <div class="warn"><b>What is an input here.</b> The bit is the sign of the real part of the integrated signal, as in
+        RISC-Q's <code>ReadoutDecoder</code>. The simulator does not compute that signal. You choose the outcome, for example
+        <code>c=1</code> in the address of a run, and the model returns it with an illustrative magnitude.</div>
+      <div class="ex" data-id="C1.5" data-stars="2" data-kind="number" data-unit="ns">
+        <p>In the feed-forward run, how many nanoseconds after the readout tone on <code>q0.ro</code> opens does the
+          acquisition window on <code>q0.demod</code> open?</p>
+        <div class="why">The calibration's 398.57 ns becomes 200 batches of 2 ns: 400 ns. The tone and the window overlap:
+          the window opens while the tone is still playing, and stays open after it ends, for the resonator's ring-down.</div>
+      </div>
+
+      <h2 id="coax"><span class="num">6</span>From the DAC to the chip</h2>
+      <p>
+        The pulse leaves the DAC and travels down coax into the cryostat. The model gives that path a length:
+        200 + 290 + 250 + 170 + 140 = 1,050 mm, the cable sections between the room-temperature flange and the chip listed in
+        Table 1 of Krinner et al., <i>EPJ Quantum Technology</i> 6, 2 (2019),
+        <a href="https://arxiv.org/abs/1806.07862">arXiv:1806.07862</a>. At an assumed signal speed of 0.7 c
+        (209.85 mm/ns) that is a delay of 5.003 ns. The value is listed in each run's <code>machine.provenance.delay</code>.
+      </p>
+      <p>
+        In the trace, a pulse window opening at the converter produces an <code>effect</code> frame on the qubit or resonator.
+        Its <code>state.arrivesPs</code> is the time the signal reaches the chip. The live run below starts at the step where
+        the two CZ tones reach qubit 0 and qubit 1. Step forward once and you see the second one.
+      </p>
+      <figure class="live" data-title="The CZ tones reach qubits 0 and 1" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=361&view=chip">
+        <figcaption>The feed-forward program on the ring, at the step where the CZ tone of <code>q0.cz0</code> reaches qubit 0.</figcaption>
+      </figure>
+      <div class="ex" data-id="C1.6" data-stars="1" data-kind="number" data-unit="ns" data-tolerance="0.002">
+        <p>Read the first <code>effect</code> frame on <code>qubit0</code>. How many nanoseconds after the window opens at
+          the DAC does the signal arrive at the qubit?</p>
+        <div class="why"><code>arrivesPs − atPs</code> is 5,003 ps: 1,050 mm at 209.85 mm/ns, rounded to a picosecond. In
+          the built-in ring every line has this length. In part <a href="/course/D2">D2</a> every wire gets its own routed
+          length.</div>
+      </div>
+
+      <h2 id="limits"><span class="num">7</span>What the ring cannot do</h2>
+      <p>
+        The ring has fixed couplings. A <code>cz</code> or <code>cx</code> between qubits that are not a calibrated pair is
+        rejected with the line that asked for it. There is no routing pass for this machine yet, so you place the circuit on
+        the ring yourself, for example with <code>swap</code> through neighbours. <code>ch</code> and <code>ccx</code> are
+        rejected too: lower them to one- and two-qubit gates first. Try both in the box above.
+      </p>
+      <div class="ex" data-id="C1.7" data-stars="2" data-kind="choice" data-answer="b">
+        <p>What happens to a program with the line <code>cz q[5], q[6];</code>?</p>
+        <ol class="choices">
+          <li data-k="a">It runs, with the EF sandwich pulses on qubit 6.</li>
+          <li data-k="b">It is rejected: the pair has no CZ the lowering offers.</li>
+          <li data-k="c">The compiler routes it through qubit 4.</li>
+          <li data-k="d">It runs as two single-qubit Z rotations.</li>
+        </ol>
+        <div class="why">The pair (5, 6) is calibrated with second-level pulses that the lowering does not model, so it is
+          left out of <code>machine().pairs</code>. The message is "no calibrated CZ between qubits 5 and 6. Route the
+          circuit onto the ring first."</div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>The ring is RISC-Q's own eight-qubit calibration on its <code>x6y3</code> build: 2 ns batches, 8 GS/s DACs, 2 GS/s ADCs.</li>
+          <li>Each qubit has one core with a gate channel, one CZ channel per partner, a readout tone and an acquisition window.</li>
+          <li>Single-qubit gates are two calibrated pulses and phase bookkeeping: <code>U</code> is ZSXZSXZ. A Z rotation changes the phase code of later fires.</li>
+          <li>A CZ is two simultaneous 400 ns tones on two cores, then frame corrections, including on spectators.</li>
+          <li>A measurement is a tone, a delayed demodulation window and a bit you choose. The coax adds 5.003 ns to every arrival.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const header = 'OPENQASM 3.0;\ninclude "stdgates.inc";\nqubit[8] q;\nbit c;\n';
+      const feedforward = (a) => a.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      const ops = (run) => run.hardware.segments.flatMap((s) => s.ops);
+      const nsOf = (run, batches) => (batches * run.machine.dspPeriodPs) / 1000;
+      course({
+        answers: {
+          "C1.1": async (a) => {
+            const run = await feedforward(a);
+            const x90 = ops(run).find((o) => o.op === "x90" && o.qubits[0] === 0);
+            return nsOf(run, run.summary.pulses.find((p) => p.source === x90.id).dur);
+          },
+          "C1.3": async (a) => ops(await a.run({ platform: "superconducting", qasm: header + "ry(0.5) q[0];\n" })).length,
+          "C1.4": async (a) => ops(await feedforward(a)).filter((o) => /CZ frame correction/.test(o.source)).length,
+          "C1.5": async (a) => {
+            const run = await feedforward(a);
+            const tone = run.summary.pulses.find((p) => p.part === "q0.ro"), window = run.summary.pulses.find((p) => p.part === "q0.demod");
+            return nsOf(run, window.opens - tone.opens);
+          },
+          "C1.6": async (a) => {
+            const run = await feedforward(a);
+            const f = run.frames.find((x) => x.op === "effect" && x.part === "qubit0");
+            return (f.state.arrivesPs - f.atPs) / 1000;
+          },
+        },
+      });
+
+      // The OpenQASM box: compile, run, and list the hardware instructions and pulse windows.
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const out = document.getElementById("qasmOut"), state = document.getElementById("qasmState"), button = document.getElementById("qasmRun");
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        state.textContent = "Compiling and running…";
+        out.replaceChildren();
+        try {
+          const run = await api.run({ platform: "superconducting", qasm: document.getElementById("qasmText").value });
+          const period = run.machine.dspPeriodPs;
+          const rows = ops(run).map((o) => "<tr><td class='n'>" + o.t / 1000 + "</td><td><code>" + esc(o.op) + "</code></td><td>" + o.qubits.join(", ") +
+            "</td><td class='n'>" + (o.angle !== undefined ? o.angle.toFixed(4) + " rad" : o.dur / 1000 + " ns") + "</td><td>" + esc(o.source) + "</td></tr>").join("");
+          const pulses = run.summary.pulses.map((p) => "<tr><td><code>" + esc(p.part) + "</code></td><td>" + esc(p.converter) + "</td><td class='n'>" + p.opens +
+            "</td><td class='n'>" + (p.dur * period) / 1000 + " ns</td><td class='n'>" + p.phase + "</td></tr>").join("");
+          out.innerHTML = "<p><b>" + ops(run).length + " hardware instructions</b>, " + run.summary.pulses.length + " pulse windows, run ends after " +
+            run.summary.elapsedPs / 1000 + " ns. Faults: " + (run.summary.faults.length || "none") + ".</p>" +
+            "<table><tr><th class='n'>t (ns)</th><th>op</th><th>qubits</th><th class='n'>angle or duration</th><th>source</th></tr>" + rows + "</table>" +
+            "<table><tr><th>channel</th><th>converter</th><th class='n'>opens (batch)</th><th class='n'>length</th><th class='n'>phase code</th></tr>" + pulses + "</table>";
+          state.textContent = "";
+        } catch (error) {
+          state.textContent = "";
+          out.innerHTML = "<p class='err'>" + esc(error.message) + "</p>";
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

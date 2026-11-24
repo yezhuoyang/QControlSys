@@ -9,8 +9,8 @@
 // Machine: one RISC-Q core per AOD with one pulse channel per row tone and column tone, and a
 // laser core. Each tone's position follows its RF frequency through a linear calibration.
 // Boundaries: a frequency step is not phase continuous on the RISC-Q pulse generator. The
-// 16-bit frequency code at 1.6 GS/s moves a tone in steps of 24.4 kHz, which is 244 nm at the
-// 10 nm/kHz design slope used elsewhere in this project. The path inside a move is an assumed
+// 16-bit frequency code at 1.6 GS/s moves a tone in steps of 24.4 kHz, which is 0.13 µm at the
+// 188 kHz/µm AOD scale of riscq/standards.mjs (Endres et al. 2016). The path inside a move is an assumed
 // constant-acceleration profile that matches ZAC's square-root duration law. ZAC does not say
 // which beams address single atoms, so a one-qubit instruction is one global pulse. Atoms are
 // assumed to follow their tones. Loss, heating and imaging are not modeled.
@@ -19,9 +19,9 @@ import { STANDARD } from "../standards.mjs";
 
 /** DSP clock of the atom controller: 100 MHz, so one batch is 10 ns. */
 const DSP_HZ = 100e6;
-/** RF calibration of an AOD axis: design slope 10 nm/kHz (machine/neutral-installation.mjs). */
+/** RF calibration of an AOD axis: Hz per µm of tweezer displacement (riscq/standards.mjs). */
 export const HZ_PER_UM = STANDARD.neutral.hzPerUm.value, BASE_HZ = 80e6;
-/** Acoustic transit from the transducer to the beam, as in machine/neutral-installation.mjs. */
+/** Acoustic response of the AOD: beam width over acoustic velocity (riscq/standards.mjs). */
 const ACOUSTIC_PS = STANDARD.neutral.acousticNs.value * 1000;
 /** Batches between frequency steps of a move: 2 µs. */
 export const STEP_BATCHES = 200;
@@ -59,7 +59,8 @@ export function machine(code, architecture) {
     umOf: (codeValue) => ((codeValue * 16 * DSP_HZ) / 65536 - BASE_HZ) / HZ_PER_UM,
     provenance: {
       schedule: "ZAC compiled program " + code.name,
-      calibration: "linear AOD map, 10 nm/kHz design slope and 120 ns acoustic transit (machine/neutral-installation.mjs)",
+      calibration: "linear AOD map, " + Math.round(HZ_PER_UM / 1000) + " kHz per µm (" + STANDARD.neutral.hzPerUm.source + ") and " +
+        STANDARD.neutral.acousticNs.value / 1000 + " µs acoustic response (derived, riscq/standards.mjs)",
       path: "assumed constant-acceleration profile inside each move",
     },
   };

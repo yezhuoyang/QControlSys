@@ -1,4 +1,4 @@
-# QControlSys architecture and development plan
+# QuantumOS architecture and development plan
 
 Proposal · 22 November 2026 · [Literature review and experimental evidence](literature-review.md)
 

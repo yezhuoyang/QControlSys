@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>C2 · Trapped ions: shuttling is a waveform · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+    <style>
+      .lab { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px 14px; margin: 20px 0; }
+      .lab h4 { margin: 0 0 4px; font-size: 14.5px; }
+      .lab p { margin: 4px 0 8px; font-size: 14px; color: var(--ink2); }
+      .lab textarea { width: 100%; min-height: 150px; font: 12.5px/1.5 var(--mono); border: 1px solid #cfceca; border-radius: 8px; padding: 8px 10px; resize: vertical; }
+      .lab .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+      .lab .out { font-size: 13px; max-height: 360px; overflow: auto; }
+      .lab .out table { font-size: 12.5px; }
+      .lab .err { color: var(--red); font-size: 13.5px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body data-lesson="C2">
+    <article>
+      <p class="kicker">Part C · Lesson 2</p>
+      <h1>Trapped ions: shuttling is a waveform</h1>
+      <p class="lead">
+        In a trapped-ion computer the qubits move. An ion travels from one zone of the trap to another because the voltages
+        on the electrodes around it change. For the controller, every hop is a set of DAC waveforms that must start on the
+        same clock cycle.
+      </p>
+      <p class="pre">
+        This lesson assumes lesson <a href="/course/C1">C1</a> and the idea of a timed write (lesson
+        <a href="/course/B2">B2</a>). The <a href="/course/background/qubits">background chapter on qubits</a> describes ion
+        traps. The examples here call QCCD Studio, which needs Python and the QCCD checkout next to this repository; the
+        course server has both.
+      </p>
+
+      <h2 id="qccd"><span class="num">1</span>A trap with zones</h2>
+      <p>
+        A <span class="term" data-term="QCCD">QCCD</span> machine holds ions in a segmented trap. Some zones are gate
+        zones, where lasers act on the ions held there. Other zones are for storage and transit. A two-qubit gate needs both
+        ions in the same gate zone, so programs are full of <span class="term" data-term="shuttle">shuttles</span>: an ion is
+        pushed from one site to the next by changing the voltages on the electrodes beneath it (Kielpinski, Monroe and
+        Wineland, <i>Nature</i> 417, 709 (2002)). Quantinuum's H-series machines work this way. The machine in this lesson is
+        QCCD Studio's model of the H2 race-track trap (Moses et al., <i>Phys. Rev. X</i> 13, 041052 (2023),
+        <a href="https://arxiv.org/abs/2305.03828">arXiv:2305.03828</a>).
+      </p>
+      <p>
+        <a href="https://github.com/yezhuoyang/QCCD/tree/compiler">QCCD Studio</a> is a separate project that compiles and
+        checks programs for such traps. QuantumOS does not recompute ion physics. It asks Studio for three things and builds
+        the controller underneath them:
+      </p>
+      <ol>
+        <li>Studio's compiler turns OpenQASM into a <b>TSIR</b> program, Studio's control IR: where each ion starts, which
+          gates run in which zone, and which ions move over which trap edges (<code>bridge/qccd_compile.py</code>).</li>
+        <li>Studio's replay executes that program on its architecture and reports a list of <b>cycles</b>. Each cycle states
+          its kind, the ions and sites involved, its time, and, for a shuttle, which <b>electrode control channels</b> act
+          (<code>bridge/qccd_studio.py</code>).</li>
+        <li>QuantumOS turns each cycle into one <span class="term" data-term="hardware instruction">hardware instruction</span>,
+          then into timed writes on RISC-Q cores (<code>riscq/platforms/qccd.mjs</code>).</li>
+      </ol>
+      <p>Here is the program this lesson follows, the example <code>qccd-ghz3</code>:</p>
+      <pre><code>OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[3];
+creg c[3];
+h q[0];
+cx q[0],q[1];
+cx q[1],q[2];
+measure q -> c;</code></pre>
+      <p>
+        Studio places <code>q0</code> in zone DG03, <code>q1</code> in DG02 and <code>q2</code> in DG01. To entangle q0 with
+        q1 it moves q0 through the transit site AUXD2 into DG02. Then it moves q1 through AUXD1 into DG01 for the second
+        gate. Open the run in the workspace and read the TSIR layer in the right-hand column to follow the moves.
+      </p>
+
+      <h2 id="instructions"><span class="num">2</span>Cycles become hardware instructions</h2>
+      <p class="insection"><b>In this section:</b> the six instruction kinds, and where each duration comes from.</p>
+      <div class="tw"><table>
+        <tr><th>Studio cycle</th><th>Hardware instruction</th><th>What the controller does</th><th class="n">Standard duration</th></tr>
+        <tr><td>shuttle</td><td><code>transport</code></td><td>one waveform on every engaged electrode control channel</td><td class="n">63.8 µs per Studio unit</td></tr>
+        <tr><td>gate R</td><td><code>rotate</code></td><td>one laser modulator pulse with the gate's angle and axis</td><td class="n">5 µs</td></tr>
+        <tr><td>gate MS</td><td><code>ms</code></td><td>one <span class="term" data-term="Mølmer–Sørensen">Mølmer–Sørensen</span> pulse per gate zone</td><td class="n">25 µs</td></tr>
+        <tr><td>measure</td><td><code>measure</code></td><td>a detection pulse and photon counting</td><td class="n">120 µs</td></tr>
+        <tr><td>cool</td><td><code>cool</code></td><td>one broadcast cooling pulse</td><td class="n">550 µs</td></tr>
+        <tr><td>gate VZ</td><td><code>frame</code></td><td>nothing: a virtual Z</td><td class="n">0</td></tr>
+      </table></div>
+      <p>
+        Studio's H2 model reports time in abstract units, not microseconds. When a program's cycles follow one another in
+        unit time, the lowering gives each cycle the published duration of its kind from <code>riscq/standards.mjs</code>.
+        All of them come from Pino et al., <i>Nature</i> 592, 209 (2021), <a href="https://arxiv.org/abs/2003.01293">arXiv:2003.01293</a>,
+        the paper that demonstrated the QCCD architecture on a Honeywell trap. Table III gives 5 µs for a single-qubit
+        rotation, 25 µs for a two-qubit gate, 120 µs for detection and 550 µs for Doppler cooling. Table II gives 58 µs for
+        an intrazone shift of 110 µm, and its caption adds about 10% to every operation for interpolation and electronics
+        delays: 58 × 1.1 = 63.8 µs.
+      </p>
+      <div class="warn"><b>An assumption.</b> One Studio time unit of a shuttle is mapped to one 63.8 µs shift. A Studio
+        cycle that spans two units takes 127.6 µs. That mapping is this project's, not Studio's or Pino's, and it is listed
+        among the assumptions in <code>docs/riscq-controller.md</code>. A Studio design that states its own times in µs,
+        such as the example <code>qccd-rotation</code>, keeps them.</div>
+      <div class="ex" data-id="C2.1" data-stars="2" data-kind="number" data-unit="µs" data-tolerance="0.01">
+        <p>Run <code>qccd-ghz3</code>. The second shuttle moves <code>q0</code> from AUXD2 into DG02 (hardware instruction
+          <code>tsir-5-0</code>). How long does it take?</p>
+        <div class="why">Studio reports this cycle as two time units, so it takes two standard shifts: 2 × 63.8 = 127.6 µs.
+          The first shuttle, DG03 to AUXD2, is one unit, 63.8 µs.</div>
+      </div>
+
+      <h2 id="machine"><span class="num">3</span>The control machine</h2>
+      <p>
+        The ion controller runs at 100 MHz, so one <span class="term" data-term="batch">batch</span> is 10 ns. A pulse-table
+        entry holds up to 65,535 batches, 655 µs, long enough for the 550 µs cooling pulse. The lowering builds three kinds
+        of <span class="term" data-term="core">core</span> from what the program uses:
+      </p>
+      <ul>
+        <li><b>Transport cores</b> <code>tr0</code>, <code>tr1</code>, … Each drives up to eight electrode control channels,
+          one <span class="term" data-term="DAC">DAC</span> channel per Studio control channel. A waveform is a baseband pulse
+          on that channel. The voltages themselves are Studio's model; the controller only has to start each waveform on time.</li>
+        <li><b>Gate-zone cores</b> <code>zone.DG01</code>, … One per zone that the program uses for gates, with three laser
+          modulator channels, <code>rotate</code>, <code>ms</code> and <code>detect</code>, and one digital input,
+          <code>pmt</code>, for the photon counter.</li>
+        <li><b>A light core</b> with one channel, <code>cool</code>, for the broadcast cooling beam.</li>
+      </ul>
+      <p>
+        A rotation sets its angle through the pulse area: the core writes the table entry's amplitude as
+        19,896 × |θ| / π before it fires, and its phase as the rotation axis φ (plus π for a negative angle). An MS pulse
+        scales its amplitude with θ / (π/2). The pulse length stays the standard duration.
+      </p>
+      <div class="ex" data-id="C2.2" data-stars="1" data-kind="number">
+        <p>How many control cores does the <code>qccd-ghz3</code> run use?</p>
+        <div class="why">One transport core for the four control channels the shuttles engage, one core for each of the
+          gate zones DG01, DG02 and DG03, and the light core. The <b>Control system</b> view of the workspace draws them.</div>
+      </div>
+      <div class="ex" data-id="C2.3" data-stars="2" data-kind="number">
+        <p>The first instruction after cooling is a rotation of q0 by θ = π/2 in DG03. Which amplitude code does its pulse
+          window on <code>zone.DG03.rotate</code> land with?</p>
+        <div class="why">19,896 × (π/2) / π = 9,948. Every rotation of this program is ±π/2, so every rotate pulse has this
+          amplitude. Only the phase code changes with the axis.</div>
+      </div>
+
+      <h2 id="waveform"><span class="num">4</span>A shuttle is a burst of waveforms</h2>
+      <p class="q">What does the controller do while an ion moves?</p>
+      <p>
+        For a <code>transport</code> instruction the lowering takes the control channels Studio names for that cycle and
+        fires one waveform on each of them, all with the same start time. In the GHZ program each shuttle engages a single
+        control channel, named after the zone it serves. In the example <code>qccd-rotation</code> each cycle engages 24:
+        twelve on a horizontal bank and twelve on a vertical bank, moving two ions at once.
+      </p>
+      <p>
+        The trace confirms the move only if every waveform of the cycle opened on time on the same batch
+        (<code>ionTimeline</code> in <code>riscq/platforms/qccd.mjs</code>). The workspace draws an ion on the straight line
+        between its sites, at the fraction of the move window that has passed. Start the run below: it opens at the step
+        where the first shuttle's waveform reaches the electrodes of zone DG03.
+      </p>
+      <figure class="live" data-title="Three ions in the H2 trap" data-src="/riscq-studio?example=qccd-ghz3&outcome=q0=1&outcome=q2=1&step=284&view=chip">
+        <figcaption>The GHZ program on Studio's H2 trap, at the first shuttle of q0. Press Play to watch q0 and then q1 move.</figcaption>
+      </figure>
+      <figure>
+        <img src="/docs/media/riscq-ions.gif" alt="The chip view of the GHZ run: ions move between zones while the cores drive electrodes and lasers" width="788" height="700" loading="lazy" />
+        <figcaption><b>The same run, recorded.</b> From the end of cooling to the last detection, one frame per batch time.
+          The card at the top names the trace step, the hardware instruction, the TSIR line, the OpenQASM line and the
+          firmware word.</figcaption>
+      </figure>
+
+      <h2 id="burst"><span class="num">5</span>The cost of a burst: preroll</h2>
+      <p class="insection"><b>In this section:</b> why many simultaneous waveforms delay the start of a segment.</p>
+      <p>
+        A core issues one write at a time. Each timed write is issued one <span class="term" data-term="lead">lead</span>
+        (96 batches) before it must start. If eight waveforms of one core must start on the same batch, the core cannot
+        issue all eight in the last 96 batches: the table loop that issues them is budgeted 32 core cycles per write
+        (<code>TABLE_COST</code> in <code>riscq/firmware.mjs</code>), and the model assumes one batch per core cycle. The
+        compiler moves the earlier writes back and, when they would have to leave before the segment begins, starts the whole
+        segment later. That delay is the <span class="term" data-term="preroll">preroll</span>.
+      </p>
+      <div class="formula">preroll = (n − 1) × 32 batches   for n simultaneous writes on one core</div>
+      <p>
+        The relation is tested in <code>tests/riscq-limits.test.mjs</code>. Every pulse still opens on the same batch; the
+        cost is time before the first one.
+      </p>
+      <div class="ex" data-id="C2.4" data-stars="2" data-kind="number" data-unit="µs" data-tolerance="0.001">
+        <p>Run <code>qccd-rotation</code>. Its 24 control channels are split over three transport cores. By how many
+          microseconds does the preroll delay its segment?</p>
+        <div class="why">Each core starts eight waveforms on one batch, so the preroll is (8 − 1) × 32 = 224 batches of
+          10 ns: 2.24 µs. The run bundle lists it per segment in <code>preroll</code>, in batches.</div>
+      </div>
+      <p>
+        <b>Why not one core for all channels?</b> Program memory. Each timed write of the table loop takes four words of
+        RAM. A core here has 16,384 words, of which 320 at the top hold the table of shared bits, so a program can use 16,064.
+        Running Studio's full H2 GHZ program with 16 control channels on one core needs 16,577 words, and the compiler rejects
+        it (<code>tests/riscq-qccd.test.mjs</code> checks the rejection). With eight channels per core the H2 program fits on
+        three transport cores.
+      </p>
+      <div class="ex" data-id="C2.5" data-stars="2" data-kind="choice" data-answer="c">
+        <p>Why does the lowering give a transport core at most eight electrode control channels?</p>
+        <ol class="choices">
+          <li data-k="a">RISC-Q allows at most eight channels on a core.</li>
+          <li data-k="b">A DAC has eight outputs.</li>
+          <li data-k="c">Program size and burst width grow with the channels per core; at 16 the H2 program no longer fits the core's RAM.</li>
+          <li data-k="d">Studio groups electrodes in banks of eight.</li>
+        </ol>
+        <div class="why">A RISC-Q core takes up to 16 channels. The limit of eight is a choice of the lowering
+          (<code>channelsPerCore</code>), made because every waveform of a channel is issued from its core's RAM and because
+          wider bursts cost more preroll.</div>
+      </div>
+
+      <h2 id="detect"><span class="num">6</span>Measurement is photon counting</h2>
+      <p>
+        An ion is measured by shining a laser that makes one qubit state fluoresce and leaves the other dark. A detector
+        counts the photons. Many photons mean "bright", one or none mean "dark". In the lowering, one
+        <code>detect</code> pulse per gate zone lights all its ions for 120 µs. Each ion in the zone is imaged onto its own
+        counter line, and the zone core runs one firmware loop that counts rising edges on those lines until the window
+        closes. A count of at least 2 reads as 1.
+      </p>
+      <p>
+        Those photon numbers are a composite of two machines, because no H-series paper states them: a bright
+        <sup>171</sup>Yb<sup>+</sup> ion gives about 10 photons per window (Wright et al., <i>Nat. Commun.</i> 10, 5464 (2019),
+        <a href="https://arxiv.org/abs/1903.08181">arXiv:1903.08181</a>), and an ion is called bright when more than one
+        photon is counted (Egan et al., <i>Nature</i> 598, 281 (2021), <a href="https://arxiv.org/abs/2009.11482">arXiv:2009.11482</a>).
+      </p>
+      <div class="note"><b>The outcome is still yours.</b> You choose which ions are bright, for example
+        <code>outcome=q0=1&amp;outcome=q2=1</code> in the workspace address. The model then puts 10 pulses on that ion's
+        counter line, each a rising and a falling edge, and the firmware counts them like real clicks.</div>
+      <div class="ex" data-id="C2.6" data-stars="2" data-kind="number">
+        <p>Run <code>qccd-ghz3</code> with q0 and q2 bright. How many <code>edge</code> frames does the trace record on the
+          counter lines?</p>
+        <div class="why">Two bright ions, 10 photons each, two edges per photon: 40. q0 is counted alone in DG02. q1 and q2
+          share DG01, one detection pulse and two counter lines. q1 is dark and produces no edge.</div>
+      </div>
+
+      <h2 id="time"><span class="num">7</span>Where the time goes</h2>
+      <p>
+        Add up the durations of the GHZ run's hardware instructions and you find that the controller is idle most of the
+        time. It is waiting for physics measured in hundreds of microseconds. Compare that with the 2.6 µs of a whole
+        superconducting run in lesson <a href="/course/C1">C1</a>.
+      </p>
+      <div class="ex" data-id="C2.7" data-stars="2" data-kind="number" data-unit="%" data-tolerance="0.1">
+        <p>What percentage of the GHZ program's hardware time (the span of its hardware instructions) is the initial cooling?</p>
+        <div class="why">550 µs of 1,331.6 µs, 41.3%. Transport takes 446.6 µs, detection 240 µs, and all gates together
+          95 µs. Cooling and shuttling, not gates, set the pace of this machine.</div>
+      </div>
+      <div class="lab" id="ionLab">
+        <h4>Try it: your own circuit on the ion trap</h4>
+        <p>Edit the OpenQASM 2 program and run it. The server calls QCCD Studio's compiler, replays the TSIR program in Studio,
+          lowers the cycles and runs the firmware (<code>POST /api/riscq/run</code> with <code>{ platform: "qccd", qasm }</code>).
+          This takes a few seconds.</p>
+        <textarea id="ionText" spellcheck="false" aria-label="OpenQASM program">OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[2];
+creg c[2];
+h q[0];
+cx q[0],q[1];
+measure q -> c;</textarea>
+        <div class="row"><button class="btn small" type="button" id="ionRun">Compile and run</button><span class="src" id="ionState"></span></div>
+        <div class="out" id="ionOut"></div>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>QCCD Studio compiles and replays the program; each Studio cycle becomes one hardware instruction.</li>
+          <li>A shuttle is one waveform per engaged electrode control channel, all started on the same batch by transport cores.</li>
+          <li>Durations are published values (Pino et al. 2021): 63.8 µs per shuttle unit, 5 µs, 25 µs, 120 µs, 550 µs. One unit per shift is an assumption.</li>
+          <li>Many simultaneous writes on one core cost preroll, (n − 1) × 32 batches; RAM limits a core to a few channels.</li>
+          <li>Detection counts photon edges in firmware; the photons come from outcomes you choose.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course, api } from "/course/course.js";
+      const ghz = (a) => a.run({ example: "qccd-ghz3", outcomes: { q0: 1, q2: 1 } });
+      const ops = (run) => run.hardware.segments.flatMap((s) => s.ops);
+      course({
+        answers: {
+          "C2.1": async (a) => ops(await ghz(a)).find((o) => o.id === "tsir-5-0").dur / 1e6,
+          "C2.2": async (a) => (await ghz(a)).machine.cores.length,
+          "C2.3": async (a) => {
+            const run = await ghz(a);
+            const first = ops(run).find((o) => o.op === "rotate");
+            return run.summary.pulses.find((p) => p.source === first.id).amp;
+          },
+          "C2.4": async (a) => {
+            const run = await a.run({ example: "qccd-rotation" });
+            return (run.preroll[0] * run.machine.dspPeriodPs) / 1e6;
+          },
+          "C2.6": async (a) => (await ghz(a)).frames.filter((f) => f.op === "edge").length,
+          "C2.7": async (a) => {
+            const run = await ghz(a);
+            const cool = ops(run).filter((o) => o.op === "cool").reduce((n, o) => n + o.dur, 0);
+            return Math.round((1000 * cool) / run.hardware.segments[0].span) / 10;
+          },
+        },
+      });
+
+      const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const out = document.getElementById("ionOut"), state = document.getElementById("ionState"), button = document.getElementById("ionRun");
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        state.textContent = "Compiling with QCCD Studio and running…";
+        out.replaceChildren();
+        try {
+          const run = await api.run({ platform: "qccd", qasm: document.getElementById("ionText").value });
+          const rows = ops(run).map((o) => "<tr><td><code>" + esc(o.id) + "</code></td><td><code>" + esc(o.op) + "</code></td><td class='n'>" + (o.t / 1e6).toFixed(1) +
+            "</td><td class='n'>" + (o.dur / 1e6).toFixed(1) + "</td><td>" + esc((o.ions ?? []).join(", ")) + "</td><td>" +
+            esc(o.moves ? o.moves.map((m) => m.ion + " " + m.from + "→" + m.to).join("; ") : (o.sites ?? []).join(", ")) + "</td></tr>").join("");
+          out.innerHTML = "<p><b>" + ops(run).length + " hardware instructions</b> on " + run.machine.cores.length + " cores (" +
+            run.machine.cores.map((c) => esc(c.name)).join(", ") + "). The run ends after " + (run.summary.elapsedPs / 1e6).toFixed(2) +
+            " µs. Faults: " + (run.summary.faults.length || "none") + ". " + esc(run.source.compiler ?? "") + ".</p>" +
+            "<table><tr><th>id</th><th>op</th><th class='n'>t (µs)</th><th class='n'>length (µs)</th><th>ions</th><th>sites or moves</th></tr>" + rows + "</table>";
+          state.textContent = "";
+        } catch (error) {
+          state.textContent = "";
+          out.innerHTML = "<p class='err'>" + esc(error.message) + "</p>";
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

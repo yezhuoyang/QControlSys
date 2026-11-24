@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Numbers and sources · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="numbers">
+    <article>
+      <p class="kicker">Background · Chapter 7 · Reference</p>
+      <h1>Numbers and sources</h1>
+      <p class="lead">
+        Every latency, duration, rate and size the simulator uses, in one place, with its unit, its source and its status. Use this
+        page to check a number you see in a run, or to find what to change when you want the simulator to model a different
+        machine.
+      </p>
+      <p class="pre">
+        Values were read from the files named in each table: <code>riscq/soc.mjs</code> (<code>model()</code>, <code>MAP</code> and the
+        constants), <code>QControl/RiscQ/Timing.lean</code>, <code>riscq/firmware.mjs</code>, <code>riscq/standards.mjs</code>,
+        <code>riscq/platforms/*.mjs</code>, <code>validation/riscq/x6y3.json</code>, <code>validation/riscq/<wbr />x6y3-calibration.json</code>,
+        <code>validation/neutral/zac/<wbr />full_architecture_2aod.json</code> and <code>machine/interconnect.mjs</code>. A run also lists the values
+        it used in <code>program.model</code> and <code>machine.provenance</code>.
+      </p>
+
+      <h2 id="status"><span class="num">1</span>How to read the status column</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><b>cited</b></td><td>Stated by the named document, paper or configuration file, used as stated.</td></tr>
+            <tr><td><b>derived</b></td><td>Arithmetic on cited numbers. The arithmetic is shown.</td></tr>
+            <tr><td><b>composite</b></td><td>Combines numbers from different machines because no one source states them all.</td></tr>
+            <tr><td><b>assumed</b></td><td>A model choice, within a documented range where one exists. Change it and the results change.</td></tr>
+            <tr><td><b>reference</b></td><td>Listed for comparison only; the simulator does not use it in a run.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        "Cited" refers to RISC-Q documents by their file names in the
+        <a href="https://github.com/Wu-Quantum-Application-System-Group/RISC-Q">RISC-Q repository</a>, as <code>riscq/soc.mjs</code> names
+        them. A cited RISC-Q number is a statement of RISC-Q's design documents, not a measurement of a board.
+      </p>
+
+      <h2 id="controller"><span class="num">2</span>The controller: latency model</h2>
+      <p class="insection"><b>In this section:</b> the latencies of <code>model()</code> in <code>riscq/soc.mjs</code>, in batches, for the
+        transmon build (link depth 2) and the ion and atom builds (link depth 4).</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th>Meaning</th><th class="n">x6y3 ring</th><th class="n">Ion, atom</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>linkPipe</code></td><td>register stages of the posted link, per direction</td><td class="n">2</td><td class="n">4</td><td><code>x6y3.json</code> <code>link_pipe</code>; ion and atom: <code>platforms/qccd.mjs</code>, <code>neutral.mjs</code></td><td>cited / assumed</td></tr>
+            <tr><td><code>bridge</code></td><td>store forwarded as one beat after a one-cycle ack</td><td class="n">1</td><td class="n">1</td><td><code>PutBridge.md</code></td><td>cited</td></tr>
+            <tr><td><code>fireToPush</code></td><td>fired pulse to queue push</td><td class="n">2</td><td class="n">2</td><td><code>PulseParamBuffer.md</code></td><td>cited</td></tr>
+            <tr><td><code>freqToPush</code></td><td>carrier write to queue push</td><td class="n">1</td><td class="n">1</td><td><code>PulseParamBuffer.scala</code></td><td>cited</td></tr>
+            <tr><td><code>waitSlack</code></td><td><code>waitTimeCmp</code> releases when <code>time + 3 ≥ timeCmp</code></td><td class="n">3</td><td class="n">3</td><td><code>ControlMemMaps.scala</code></td><td>cited</td></tr>
+            <tr><td><code>coreTimeLag</code></td><td>core's copy of the time behind the converter edge</td><td class="n">2</td><td class="n">4</td><td><code>ARCH.md</code> states a constant lag D without a number; set to <code>linkPipe</code></td><td>assumed</td></tr>
+            <tr><td><code>dacPipe</code></td><td>generator to DAC port: adder tree + 2</td><td class="n">6</td><td class="n">2 (ion), 4 (atom)</td><td><code>map.py</code> <code>dac_pipe</code>, computed from how many channels share each DAC</td><td>derived</td></tr>
+            <tr><td><code>redirectPenalty</code></td><td>extra batches after a taken branch or jump</td><td class="n">5</td><td class="n">5</td><td>upper bound from the stages of <code>RISCV.md</code></td><td>assumed</td></tr>
+            <tr><td><code>busPenalty</code></td><td>extra batch for a load or store</td><td class="n">1</td><td class="n">1</td><td><code>LsuPlugin.md</code></td><td>assumed</td></tr>
+            <tr><td><code>hubDown</code></td><td>core to hub: bridge, link, queue and arbiter, decode and dispatch (1 + L + 2 + 4)</td><td class="n">9</td><td class="n">11</td><td><code>PutHub.md</code></td><td>cited</td></tr>
+            <tr><td><code>hubUp</code></td><td>hub to every core: replica and link, merge, link, inbox (1 + L + 2 + L + 1)</td><td class="n">8</td><td class="n">12</td><td><code>PutHub.md</code></td><td>cited</td></tr>
+            <tr><td><code>reportUp</code></td><td>channel report to sink: up to three puts, merge, link, sink (3 + 2 + L + 1)</td><td class="n">8</td><td class="n">10</td><td><code>EventLink.md</code>, worst case</td><td>assumed</td></tr>
+            <tr><td><code>decoder</code></td><td>readout decoder: complex multiply 6 + 1 + log₂(4 lanes)</td><td class="n">9</td><td class="n">9</td><td><code>ReadoutDecoder.md</code></td><td>cited</td></tr>
+            <tr><td><code>sinkDepth</code></td><td>consume-on-read event queue</td><td class="n">8</td><td class="n">8</td><td><code>EventLink.md</code></td><td>cited</td></tr>
+            <tr><td><code>hubQueue</code></td><td>queue per core in front of the round-robin arbiter</td><td class="n">8</td><td class="n">8</td><td><code>PutHub.md</code></td><td>cited</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">At link depth 4, <code>hubDown + hubUp</code> = 23 batches, the publish latency RISC-Q documents and the conformance tests check.</p>
+
+      <h2 id="datapath"><span class="num">3</span>The controller: pulse generator and queues</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Quantity</th><th class="n">Value (batches)</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Complex multiply</td><td class="n">6</td><td><code>PulseGenerator.md</code>, "Latency"; <code>Datapath</code> in <code>Timing.lean</code></td><td>cited</td></tr>
+            <tr><td>Gate</td><td class="n">1</td><td>same</td><td>cited</td></tr>
+            <tr><td>Carrier amplitude, phase, frequency paths</td><td class="n">27, 28, 29</td><td>same</td><td>cited</td></tr>
+            <tr><td>Phasor</td><td class="n">8</td><td>same</td><td>cited</td></tr>
+            <tr><td>Envelope reader (memory latency 2)</td><td class="n">4</td><td>same</td><td>cited</td></tr>
+            <tr><td>CORDIC</td><td class="n">19</td><td>same</td><td>cited</td></tr>
+            <tr><td>Lead: amplitude 27+6+1</td><td class="n">34</td><td><code>default_leads</code> (proved)</td><td>derived</td></tr>
+            <tr><td>Lead: phase 28+6+1</td><td class="n">35</td><td>same</td><td>derived</td></tr>
+            <tr><td>Lead: carrier 29+6+1</td><td class="n">36</td><td>same</td><td>derived</td></tr>
+            <tr><td>Lead: phasors, 16 lanes: (16+19+2)+8+6+1</td><td class="n">52</td><td>same</td><td>derived</td></tr>
+            <tr><td>Lead: envelope address 4+6+1</td><td class="n">11</td><td>same</td><td>derived</td></tr>
+            <tr><td>Lead: duration 1+1</td><td class="n">2</td><td>same</td><td>derived</td></tr>
+            <tr><td>Queue push to earliest pop (<code>pushMargin</code>)</td><td class="n">3</td><td><code>TimedQueue.scala</code>, RegHead implementation</td><td>cited</td></tr>
+            <tr><td>Pops of one queue apart (<code>popInterval</code>)</td><td class="n">2</td><td>same</td><td>cited</td></tr>
+            <tr><td>Entries a channel's queues hold</td><td class="n">queue depth + 1</td><td><code>riscq/firmware.mjs</code>, <code>issueOrder</code></td><td>cited (RTL behavior as modeled)</td></tr>
+            <tr><td>Batch-time register width</td><td class="n">32 bits</td><td><code>Timing.lean</code> header</td><td>cited</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="firmware"><span class="num">4</span>The controller: firmware and address map</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Constant</th><th class="n">Value</th><th>Meaning</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>BATCH_SIZE</code>, <code>ADC_BATCH</code></td><td class="n">16, 4</td><td>DAC and ADC samples per batch</td><td><code>riscq/soc.mjs</code>; 8 GS/s and 2 GS/s over 500 MHz</td><td>derived</td></tr>
+            <tr><td><code>LEAD</code></td><td class="n">96 batches</td><td>schedule lead of every timed write</td><td>RISC-Q <code>map.py</code> <code>LEAD</code></td><td>cited</td></tr>
+            <tr><td><code>READOUT_LEAD</code></td><td class="n">48 batches</td><td>wait after a demod start before a result read returns this window</td><td><code>map.py</code></td><td>cited</td></tr>
+            <tr><td><code>AMP_SCALE</code></td><td class="n">19,896</td><td>largest amplitude code of the unsaturated datapath</td><td>RISC-Q <code>pulses/golden.py</code></td><td>cited</td></tr>
+            <tr><td><code>SYNC_LEAD</code></td><td class="n">128 batches</td><td>barrier release to the first start time: LEAD + 32</td><td><code>riscq/firmware.mjs</code></td><td>assumed (the 32)</td></tr>
+            <tr><td><code>MIN_ISSUE_LEAD</code></td><td class="n">64 batches</td><td>smallest issue-to-start distance kept, with margin</td><td><code>riscq/firmware.mjs</code></td><td>assumed</td></tr>
+            <tr><td><code>READ_SETTLE</code></td><td class="n">40 batches</td><td>window close to the return of a stalled result read</td><td><code>riscq/firmware.mjs</code></td><td>assumed</td></tr>
+            <tr><td><code>TABLE_COST</code></td><td class="n">32 cycles</td><td>budget to issue one write from the table loop</td><td><code>riscq/firmware.mjs</code></td><td>assumed</td></tr>
+            <tr><td>Inline issue cost</td><td class="n">20 + 5 per extra field + 4 if conditioned</td><td>budget per inline operation</td><td><code>riscq/firmware.mjs</code>, <code>inlineCost</code></td><td>assumed</td></tr>
+            <tr><td>Classical bits per core, shared bits</td><td class="n">256, 128</td><td>bit table size; four hub group words of 32</td><td><code>firmware.mjs</code>, <code>compile.mjs</code></td><td>assumed / cited (4 group nodes)</td></tr>
+            <tr><td>Lookup decode width</td><td class="n">1 to 10 bits</td><td>syndrome bits one table lookup reads</td><td><code>firmware.mjs</code>, <code>decode</code></td><td>assumed</td></tr>
+            <tr><td>RAM base</td><td class="n">0x80000000</td><td>start of each core's RAM</td><td><code>map.py</code></td><td>cited</td></tr>
+            <tr><td>Put window, node stride</td><td class="n">0x10000, 0x10000</td><td>node k at 0x10000 + k · 0x10000</td><td><code>map.py</code></td><td>cited</td></tr>
+            <tr><td>Nodes</td><td class="n">0–15, 16–19, 20–35, 36+</td><td>channels, groups, barriers, mailboxes</td><td><code>map.py</code></td><td>cited</td></tr>
+            <tr><td>Control block</td><td class="n">0x4000, 0x4008, 0x4010, 0xBFF8</td><td><code>timeCmp</code>, <code>waitTimeCmp</code>, <code>done</code>, <code>time</code></td><td><code>ControlMemMaps.scala</code></td><td>cited</td></tr>
+            <tr><td>Sinks, hub inbox</td><td class="n">0x4200 (+0x20), 0x4300, 0x4320, 0x4340</td><td>sinks, <code>board</code>, <code>release</code>, mailboxes</td><td><code>EventLink.scala</code>, <code>PutHub.scala</code></td><td>cited</td></tr>
+            <tr><td>Channel registers</td><td class="n">+0, +4, +8, +0xC, (i+1)·16, +0x4100</td><td><code>fire</code>, <code>freq</code>, <code>dcOffset</code>, <code>phaseOffset</code>, entry i, <code>startTime</code></td><td><code>PulseParamBuffer.scala</code></td><td>cited</td></tr>
+            <tr><td>Host window</td><td class="n">0x40000000</td><td>write-only results</td><td><code>HostWindow.md</code></td><td>cited</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="builds"><span class="num">5</span>The controller: builds per platform</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th>Transmon ring</th><th>Trapped ions</th><th>Neutral atoms</th><th>Source and status</th></tr></thead>
+          <tbody>
+            <tr><td>dspClk</td><td>500 MHz (2 ns)</td><td>100 MHz (10 ns)</td><td>100 MHz (10 ns)</td><td>ring: <code>x6y3.json</code>, cited; ions, atoms: <code>platforms/*.mjs</code>, assumed</td></tr>
+            <tr><td>Cores</td><td>8 (9 with the decoder)</td><td>transport cores, one per gate zone, one for light</td><td>one per AOD, one laser core</td><td>ring: cited; others derived from the program</td></tr>
+            <tr><td>RAM per core</td><td>8,192 words</td><td>16,384 words</td><td>16,384 words</td><td><code>x6y3.json</code> <code>mem_depth</code>, cited; others assumed</td></tr>
+            <tr><td>Queue depth</td><td>32</td><td>4</td><td>4</td><td><code>x6y3.json</code>, cited; others the RISC-Q default of <code>socSpec</code>, assumed</td></tr>
+            <tr><td>Link depth</td><td>2</td><td>4</td><td>4</td><td>as above</td></tr>
+            <tr><td>Envelope memory</td><td>4,096 lines</td><td>4,096 (transport), 1,024 (lasers)</td><td>4,096</td><td><code>x6y3.json</code> <code>env_depth</code>, cited; others assumed</td></tr>
+            <tr><td>Channels per core</td><td>gate, one per CZ partner, ro, demod</td><td>up to 8 electrode channels; rotate, ms, detect, pmt</td><td>one per row and column tone</td><td><code>platforms/*.mjs</code>; the CZ channels are this project's build choice</td></tr>
+            <tr><td>DAC and ADC map</td><td>drive on DAC q, readout on DAC 8, ADC 12</td><td>one DAC per channel</td><td>one DAC per AOD axis</td><td><code>x6y3.json</code> <code>dac_map</code>, <code>adc_map</code>, cited</td></tr>
+            <tr><td>Interpolation</td><td>gate 4, readout 16, demod 4</td><td>16 (transport), 4 (lasers)</td><td>16</td><td><code>x6y3.json</code>, cited; others assumed</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="transmon"><span class="num">6</span>Superconducting: the x6y3 ring</h2>
+      <p>
+        Calibration: RISC-Q <code>examples/cal-config-x6y3.yaml</code>, commit 243d814, extracted to
+        <code>validation/riscq/<wbr />x6y3-calibration.json</code> by <code>validation/riscq/extract_calibration.py</code>. Status: cited. Sample rates:
+        DAC 8 GS/s, ADC 2 GS/s.
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Qubit</th><th class="n">Frequency (GHz)</th><th class="n">T1 (µs)</th><th class="n">Readout (GHz)</th><th class="n">Tone (ns)</th><th class="n">Demod delay (ns)</th><th class="n">Window (ns)</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td class="n">5.4989</td><td class="n">50</td><td class="n">6.5554</td><td class="n">500</td><td class="n">398.6</td><td class="n">656.7</td></tr>
+            <tr><td>1</td><td class="n">5.3801</td><td class="n">74</td><td class="n">6.5594</td><td class="n">650</td><td class="n">453.3</td><td class="n">751.7</td></tr>
+            <tr><td>2</td><td class="n">5.2345</td><td class="n">96</td><td class="n">6.6583</td><td class="n">500</td><td class="n">347.6</td><td class="n">631.7</td></tr>
+            <tr><td>3</td><td class="n">5.2909</td><td class="n">118</td><td class="n">6.7007</td><td class="n">650</td><td class="n">335.2</td><td class="n">835.0</td></tr>
+            <tr><td>4</td><td class="n">5.4418</td><td class="n">92</td><td class="n">6.7108</td><td class="n">750</td><td class="n">574.8</td><td class="n">683.3</td></tr>
+            <tr><td>5</td><td class="n">5.6130</td><td class="n">51.2</td><td class="n">6.7106</td><td class="n">750</td><td class="n">750.0</td><td class="n">590.0</td></tr>
+            <tr><td>6</td><td class="n">5.9140</td><td class="n">49</td><td class="n">6.7839</td><td class="n">700</td><td class="n">380.0</td><td class="n">736.7</td></tr>
+            <tr><td>7</td><td class="n">5.3399</td><td class="n">24</td><td class="n">6.8364</td><td class="n">500</td><td class="n">389.1</td><td class="n">608.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th>Value</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>x90</code>, <code>x</code></td><td>35 ns, 70 ns, <code>FAST_DRAG</code>; windows of 18 and 35 batches</td><td>calibration</td><td>cited; windows derived (rounded up to whole batches)</td></tr>
+            <tr><td>CZ</td><td>400 ns <code>cosine_square</code> tone on both drive lines at the pair frequency (5.153–5.568 GHz), then virtual-Z corrections; 200 batches</td><td>calibration</td><td>cited</td></tr>
+            <tr><td>CZ pairs offered</td><td>(0,1), (1,2), (2,3), (3,4), (4,5), (7,0); not (5,6), (6,7), which need a pulse on the second excited level</td><td>calibration <code>sandwich</code> field</td><td>cited; exclusion is a model boundary</td></tr>
+            <tr><td>Coax, flange to chip</td><td>1,050 mm = 200 + 290 + 250 + 170 + 140</td><td>Krinner et al., EPJ Quantum Technol. 6, 2 (2019), Table 1</td><td>cited</td></tr>
+            <tr><td>Coax signal speed (built-in ring)</td><td>0.7 c = 209.85 mm/ns</td><td><code>platforms/superconducting.mjs</code></td><td>assumed</td></tr>
+            <tr><td>Converter to qubit</td><td>5,003 ps</td><td>1,050 / 209.85</td><td>derived</td></tr>
+            <tr><td>Readout, reset, cycle</td><td>500 ns, 160 ns, 1.1 µs</td><td>Google Quantum AI, Nature 614, 676 (2023), Fig. 1; Nature 638, 920 (2025)</td><td>reference</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="ions"><span class="num">7</span>Trapped ions</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th class="n">Value</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Shift, per Studio time unit (<code>shiftNs</code>)</td><td class="n">58 µs</td><td>Pino et al., Nature 592, 209 (2021), arXiv:2003.01293, Table II, intrazone shift of 110 µm</td><td>cited</td></tr>
+            <tr><td>Transport overhead</td><td class="n">10%</td><td>Pino et al., Table II caption</td><td>cited</td></tr>
+            <tr><td>Shuttle used per Studio unit</td><td class="n">63.8 µs</td><td>58 µs × 1.1</td><td>derived; one unit = one shift is assumed</td></tr>
+            <tr><td>Interzone shift, split or combine, swap</td><td class="n">283, 128, 200 µs</td><td>Pino et al., Table II</td><td>cited (listed; Studio's cycles use the shift)</td></tr>
+            <tr><td>X junction</td><td class="n">120 µs</td><td>Murali et al., ISCA 2020, arXiv:2004.04706, Table I</td><td>cited (listed)</td></tr>
+            <tr><td>Rotation, two-qubit gate</td><td class="n">5 µs, 25 µs</td><td>Pino et al., Table III</td><td>cited</td></tr>
+            <tr><td>Initialization</td><td class="n">10 µs</td><td>Pino et al., Table III</td><td>cited (listed)</td></tr>
+            <tr><td>Detection</td><td class="n">120 µs</td><td>Pino et al., Table III</td><td>cited</td></tr>
+            <tr><td>Cooling</td><td class="n">550 µs</td><td>Pino et al., Table III, Doppler stage</td><td>cited</td></tr>
+            <tr><td>Bright ion</td><td class="n">10 photons per window</td><td>Wright et al., Nat. Commun. 10, 5464 (2019), arXiv:1903.08181</td><td>composite</td></tr>
+            <tr><td>Bright threshold</td><td class="n">≥ 2 photons</td><td>Egan et al., Nature 598, 281 (2021), arXiv:2009.11482</td><td>composite</td></tr>
+            <tr><td>Electrode channels per transport core</td><td class="n">8</td><td><code>platforms/qccd.mjs</code> <code>channelsPerCore</code></td><td>assumed</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">A QCCD Studio design that states its own times in µs keeps them; the H2 program reports unit times and takes the values above.</p>
+      <div class="ex" data-id="numbers.1" data-stars="1" data-kind="number" data-unit="µs" data-tolerance="0.01">
+        <p>Run the <code>qccd-ghz3</code> example. How long does its shortest transport instruction last, in microseconds?</p>
+        <div class="why">One Studio time unit of transport is one intrazone shift of 58 µs plus Pino et al.'s 10% overhead, 63.8 µs. Longer
+          transports are whole multiples. The run states this in <code>machine.provenance.time</code>.</div>
+      </div>
+
+      <h2 id="atoms"><span class="num">8</span>Neutral atoms</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th class="n">Value</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>AOD scale (<code>hzPerUm</code>)</td><td class="n">188,462 Hz/µm</td><td>Endres et al., Science 354, 1024 (2016), arXiv:1607.03044: 0.49 MHz per 2.6 µm</td><td>derived</td></tr>
+            <tr><td>AOD acoustic response (<code>acousticNs</code>)</td><td class="n">6,154 ns</td><td>4 mm beam (Endres et al.) at 650 m/s (Lu et al., arXiv:2510.11451, supplement)</td><td>derived</td></tr>
+            <tr><td>Tone frequency at position 0 (<code>BASE_HZ</code>)</td><td class="n">80 MHz</td><td><code>platforms/neutral.mjs</code></td><td>assumed</td></tr>
+            <tr><td>Frequency step during a move</td><td class="n">every 2 µs (200 batches)</td><td><code>STEP_BATCHES</code></td><td>assumed</td></tr>
+            <tr><td>Frequency resolution</td><td class="n">24.4 kHz</td><td>1.6 GS/s / 65,536</td><td>derived</td></tr>
+            <tr><td>Path inside a move</td><td class="n">constant acceleration</td><td>matches ZAC's square-root duration law</td><td>assumed</td></tr>
+            <tr><td>Move law</td><td class="n">d / t² = 2,750 m/s²</td><td>Lin, Tan and Cong, HPCA 2025, arXiv:2411.11784, Sec. VII-B, after Bluvstein et al. 2022</td><td>cited (ZAC supplies its own times)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The ZAC architecture <code>validation/neutral/zac/<wbr />full_architecture_2aod.json</code>, used by <code>neutral-bv14</code> (status: cited from ZAC):</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Operation durations</td><td>Rydberg 0.36 µs, 1-qubit gate 52 µs, atom transfer 15 µs</td></tr>
+            <tr><td>Operation fidelities</td><td>two-qubit gate 0.995, single-qubit gate 0.9997, atom transfer 0.999</td></tr>
+            <tr><td>Qubit coherence <code>T</code></td><td>1,500,000 µs (1.5 s)</td></tr>
+            <tr><td>Storage zone</td><td>one SLM of 100 × 100 sites, 3 µm apart, 300 × 300 µm at (0, 0)</td></tr>
+            <tr><td>Entanglement zone</td><td>two SLMs of 7 × 20 sites, 12 × 10 µm apart, at (35, 307) and (37, 307), so pair partners sit 2 µm apart; zone 240 × 70 µm</td></tr>
+            <tr><td>AODs</td><td>2, each 100 × 100 tones, 2 µm minimum separation</td></tr>
+            <tr><td>Array range, Rydberg range</td><td>(0, 0) to (297, 402) µm; Rydberg beam over (5, 312) to (292, 402) µm</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">The compiled program <code>bv_n14_transpiled</code> states its own instruction durations, for example 8.75 µs for its first one-qubit layer.</p>
+
+      <h2 id="decoders"><span class="num">9</span>Published decoder latencies</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Entry in <code>STANDARD.decoders</code></th><th class="n">Value</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>heliosD3Ns</code></td><td class="n">56 ns</td><td>Liu et al., arXiv:2603.16203, Sec. V-B, worst-case d = 3 pattern, per decode</td><td>reference</td></tr>
+            <tr><td><code>heliosD5Ns</code>, <code>heliosD7Ns</code></td><td class="n">65 ns, 90 ns</td><td>same, Sec. V-C, p = 0.001</td><td>reference</td></tr>
+            <tr><td><code>heliosPerRoundD21Ns</code></td><td class="n">11.5 ns</td><td>Liyanage et al., arXiv:2301.08419 and arXiv:2406.08491, per round, phenomenological 0.1%</td><td>reference</td></tr>
+            <tr><td><code>feedbackD3Ns</code></td><td class="n">446 ns</td><td>Liu et al., arXiv:2603.16203, syndrome at the leaves to error data back at the leaves</td><td>reference</td></tr>
+            <tr><td><code>googleD5Ns</code></td><td class="n">63 µs</td><td>Google Quantum AI, arXiv:2408.13687, average, d = 5</td><td>reference</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="wires"><span class="num">10</span>Wires</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Medium</th><th class="n">Signal speed (mm/ns)</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Coax</td><td class="n">200</td><td><code>machine/interconnect.mjs</code></td><td>assumed reference design value</td></tr>
+            <tr><td>Fibre</td><td class="n">204</td><td>same</td><td>assumed reference design value</td></tr>
+            <tr><td>Free space</td><td class="n">299.792458</td><td>SI definition of the metre</td><td>cited (exact)</td></tr>
+            <tr><td>Coplanar trace</td><td class="n">125</td><td>same</td><td>assumed reference design value</td></tr>
+            <tr><td>Differential pair; logic, DC, contact</td><td class="n">195; 190</td><td>same</td><td>assumed reference design value</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">Hardware design documents (<code>riscq/design.mjs</code>) use these speeds. The built-in transmon ring uses its own 0.7 c for its fixed
+        1,050 mm path (section 6).</p>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Most controller latencies are cited from RISC-Q's documents; three are assumed: the core time lag, the report path and the core penalties.</li>
+          <li>The leads 34, 35, 36, 52, 11 and 2 are derived from cited block latencies, and the derivation is proved.</li>
+          <li>The transmon ring is RISC-Q's x6y3 build and calibration; the ion and atom controller clocks and sizes are this project's choices.</li>
+          <li>Ion durations come from Pino et al. 2021; atom durations from the ZAC program; photon statistics are a composite.</li>
+          <li>A run lists the values it used in <code>program.model</code> and <code>machine.provenance</code>.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      course({
+        answers: {
+          "numbers.1": async (api) => {
+            const run = await api.run({ example: "qccd-ghz3" });
+            const durs = run.hardware.segments.flatMap((s) => s.ops).filter((o) => o.op === "transport").map((o) => o.dur);
+            return Math.min(...durs) / 1e6;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A4 · Reading the workspace · QuantumOS course</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-lesson="A4">
+    <article>
+      <p class="kicker">Part A · Lesson 4</p>
+      <h1>Reading the workspace</h1>
+      <p class="lead">
+        The workspace puts one run of the simulator on one screen: a 3D stage of the machine, a time track, four program
+        layers and an inspector, all following the same trace step. This lesson tells you which region answers which
+        question, and how to move through a run quickly.
+      </p>
+      <p class="pre">
+        You have seen the workspace in lessons <a href="/course/A1">A1</a> to <a href="/course/A3">A3</a>. Open it in its own
+        tab at <a href="/riscq-studio?example=superconducting-feedforward&outcome=c=1">/riscq-studio</a> and follow along.
+        Its reference is <code>docs/riscq-workspace.md</code>.
+      </p>
+
+      <h2 id="screen"><span class="num">1</span>One screen, one step</h2>
+      <p class="q">Where on the screen is the answer to "what is happening now"?</p>
+      <p>
+        A run is a list of <span class="term" data-term="frame">frames</span>. The workspace always shows one of them, the
+        current <b>step</b>, and everything on screen is computed from the frames up to that step. Step 0 is the reset
+        state before the first frame; the feed-forward run has 451 steps after it. Five regions show that step:
+      </p>
+      <table>
+        <thead><tr><th>Region</th><th>Where</th><th>The question it answers</th></tr></thead>
+        <tbody>
+          <tr><td>Step card</td><td>Top left of the stage</td><td>What is executing: step, batch, time, frame, hardware instruction, source line, firmware word</td></tr>
+          <tr><td>Stage</td><td>Centre</td><td>Which parts act, which they target, how the cause got there, which windows are open</td></tr>
+          <tr><td>Time track</td><td>Under the stage</td><td>Where this step lies in the run, and which instructions overlap it</td></tr>
+          <tr><td>Dock</td><td>Bottom</td><td>The exact fields: the frame, its causes, the machine state, the trace</td></tr>
+          <tr><td>Program layers</td><td>Right column</td><td>Which line of each program produced this step</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The left rail lists the <b>Parts of this run</b> by kind, with counts. Hover a kind for what it is and which RISC-Q
+        source it follows; click it to select its parts one after another. Under it, <b>Highlights</b> is the legend of
+        the stage's colours and <b>Selection</b> holds the part you clicked, with buttons to jump to its previous or next
+        frame. If you are lost, press <b>Explain</b> (key <kbd>h</kbd>) in the header and hover any region for a label.
+      </p>
+      <figure class="live" data-title="The feed-forward run, whole machine" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=1&view=machine">
+        <figcaption>Step 1 in the Whole machine view: the first frame, a read of the batch-time register by core q0.</figcaption>
+      </figure>
+
+      <h2 id="layers"><span class="num">2</span>The four program layers</h2>
+      <p class="insection"><b>In this section:</b> the right column, its colour highlights, and how it links back to the stage.</p>
+      <p>
+        The program column stacks the layers of lesson A1 from top to bottom:
+      </p>
+      <ol>
+        <li><b>Source.</b> The program you wrote: OpenQASM, a ZAC program, a list of system calls, or C for the decoder.</li>
+        <li><b>Intermediate.</b> Only for trapped-ion runs: the TSIR program QCCD Studio compiled the OpenQASM to.</li>
+        <li><b>Hardware instructions.</b> The timed physical operations, with start and duration, grouped in segments. The
+          header states the count and the batch length ("21 in 2 segments · one batch is 2 ns").</li>
+        <li><b>Control firmware.</b> The RV32I words of one core: address, machine word, disassembly and the instruction
+          it was emitted for. The selector chooses the core; <i>acting core</i> follows the core of the current step.</li>
+      </ol>
+      <p>
+        Three highlights tie the layers together. <b>Yellow</b> marks the row of the current step in every layer.
+        <b>Blue</b> marks hardware instructions whose pulse windows are open at the current batch, and their source lines.
+        Hovering a row tints the related rows of the other layers <b>violet</b> and lights the channels and apparatus they act
+        on. In the firmware listing a pale green band marks the words emitted for the current hardware instruction.
+      </p>
+      <p>
+        Clicking a source, intermediate or hardware row jumps to its first frame. Clicking a firmware word jumps to its next
+        traced execution. With <b>Follow</b> ticked, every layer scrolls to keep its yellow row in view.
+      </p>
+      <div class="note"><b>Not every instruction is a step.</b> By default the trace records only the instructions that
+        touch a control register (<code>trace: "io"</code>): loads and stores of the control block, the put window and the
+        host window. Arithmetic and branches run but leave no frame, so many firmware words have no step of their own. The
+        detailed debugger can record every instruction ("Trace every instruction").</div>
+      <div class="ex" data-id="A4.1" data-stars="2" data-kind="number">
+        <p>Go to step 333 of the feed-forward run. The firmware layer highlights the store that fires the first
+          <code>x90</code> on qubit 0. What is its address? You may type it in hexadecimal, such as <code>0x8000…</code>.</p>
+        <div class="why">The store <code>sw x0, 0(x5)</code> sits at <code>0x80000224</code> in core q0's RAM, which starts
+          at <code>0x80000000</code>. The step card shows the same address on its firmware line.</div>
+      </div>
+
+      <h2 id="stage"><span class="num">3</span>The stage and its three views</h2>
+      <p>
+        The stage draws one 3D part for every core, posted link, inbox, channel, converter, the board hub, the host and the
+        apparatus: qubits and resonators, trap sites and ions, or atoms and tweezers. Drag to orbit, scroll to zoom,
+        <b>Fit</b> (key <kbd>f</kbd>) to frame it again. At each step:
+      </p>
+      <ul>
+        <li>the <b>acting part</b> of the frame is lit, and its <b>targets</b> in a second colour;</li>
+        <li>the <b>causal path</b> back to the core instruction, from <code>causalPath</code>, is lit in a third;</li>
+        <li>channels with an <b>open window</b>, and the apparatus they drive, stay lit while the window is open;</li>
+        <li>an ion or atom <b>in transit</b> and any <b>fault</b> have their own colours.</li>
+      </ul>
+      <p>
+        The exact colours are in the Highlights legend of the rail. The three view buttons in the header only choose which
+        parts are drawn; every part keeps running in every view, and its instructions stay in the program column.
+      </p>
+      <table>
+        <thead><tr><th>View</th><th>What it draws</th></tr></thead>
+        <tbody>
+          <tr><td>Chip</td><td>The apparatus in the centre, converters on a ring around it, channels on an outer ring, coax from each converter to its parts</td></tr>
+          <tr><td>Control system</td><td>Host, hub, cores, links, inboxes, channels and converters at their schematic floorplan positions</td></tr>
+          <tr><td>Whole machine</td><td>Every part</td></tr>
+        </tbody>
+      </table>
+      <p>
+        When the acting part is not drawn in the current view, a badge <b>Acting off view</b> appears on the stage. Click it
+        to switch to a view that shows the part. Positions outside the apparatus are schematic, and the rail's
+        <b>Display geometry</b> note says so for each run.
+      </p>
+      <div class="ex" data-id="A4.2" data-stars="1" data-kind="choice" data-answer="b">
+        <p>You want to watch a posted write cross the link from core q0 to its channel. Which view draws the link?</p>
+        <ol class="choices">
+          <li data-k="a">Chip only.</li>
+          <li data-k="b">Control system and Whole machine.</li>
+          <li data-k="c">None: links are not drawn.</li>
+          <li data-k="d">Chip and Control system.</li>
+        </ol>
+        <div class="why">In the Chip view the rail marks Posted link, Core inbox, RV32I control core, Board hub and Host
+          processor as <i>off</i>. The Control system view draws them at their floorplan positions, and the Whole machine
+          view draws everything.</div>
+      </div>
+
+      <h2 id="moving"><span class="num">4</span>Moving through a run</h2>
+      <p class="insection"><b>In this section:</b> the transport bar, the two kinds of playback, and the time track.</p>
+      <p>
+        The transport bar under the time track steps one frame at a time with <b>‹ Step</b> and <b>Step ›</b> (arrow keys),
+        and returns to reset with <b>⏮</b> (Home). Three buttons skip ahead to the next step of a kind, using predicates
+        from <code>stops</code> in <code>studio/riscq-model.js</code>:
+      </p>
+      <ul>
+        <li><b>Next instruction</b> (<kbd>n</kbd>): the first frame of the next hardware instruction.</li>
+        <li><b>Next pulse</b> (<kbd>p</kbd>): the next frame in which a pulse or demodulation window opens, or digital lines update.</li>
+        <li><b>Next fault</b>: the next frame that reports a fault. It is disabled in a clean run.</li>
+      </ul>
+      <p>
+        <b>Play</b> (space) has two modes, chosen in the menu beside the counter. <b>Real-time playback</b>, the default
+        <i>Whole run in 30 s</i>, advances the batch time continuously and draws moving things between steps, so an ion is
+        drawn partway along its segment. <b>Step playback</b> (<i>5 steps/s</i> up to <i>500 steps/s</i>) jumps from frame to
+        frame at a fixed rate. On the transmon ring the difference is small. On the ion machine a 64 µs shuttle covers few
+        trace steps, so step playback shows the ion jumping between sites while real-time playback shows it gliding.
+      </p>
+      <p>
+        The <b>time track</b> draws each hardware instruction as a bar over its windows, one lane per kind of operation. A
+        gold line marks the current batch, red lines mark faults. Hover it to list the instructions open at that time;
+        click it to go to the last step at or before that time.
+      </p>
+      <div class="ex" data-id="A4.3" data-stars="1" data-kind="number">
+        <p>Press ⏮ to return to the reset state, then <b>Next pulse</b> once. Which step number does the counter show?</p>
+        <div class="why">The first window of the run is the <code>x90</code> on qubit 0, opening at batch 320. Steps before it
+          are the cores programming their pulse tables and meeting at the first barrier.</div>
+      </div>
+
+      <h2 id="dock"><span class="num">5</span>The dock: inspector, state, trace</h2>
+      <p>
+        The dock under the stage has four tabs.
+      </p>
+      <ul>
+        <li><b>Step</b>, the inspector: the frame's title and a one-sentence explanation, its ID, part, targets, time in
+          batches and nanoseconds, hardware instruction and firmware address; every field of the <b>state committed by this
+          frame</b>; and its <b>causes</b>, with the chain back to the core instruction as clickable frame IDs.</li>
+        <li><b>Machine state</b>: every core's status (running, stalled and on which register, or stopped), its last
+          instruction, the windows open at this batch, and the hub's group words, open barriers and waiting messages. It is
+          rebuilt from the frames up to this step by <code>stateAt</code> and from nothing else.</li>
+        <li><b>Trace</b>: every frame with step, batch, time, operation, part, source and frame ID. Click a row to go there.</li>
+        <li><b>Write a program</b>: edit the OpenQASM or the system calls of the run and compile it again on the server.</li>
+      </ul>
+      <figure class="live" data-title="A readout result settles" data-src="/riscq-studio?example=superconducting-feedforward&outcome=c=1&step=404&view=control">
+        <figcaption>Step 404: the readout result reaches q0's inbox. Look at the Step tab, then switch to Machine state and
+          find core q0 still stalled on its result read.</figcaption>
+      </figure>
+      <div class="ex" data-id="A4.4" data-stars="1" data-kind="text">
+        <p>In the Trace tab, find the first frame whose operation is <code>result</code>. What is its frame ID?</p>
+        <div class="why">It is the readout result of qubit 0 settling in q0's inbox. Lesson <a href="/course/B3">B3</a>
+          follows it from the demodulation window to the stalled load that receives it.</div>
+      </div>
+      <div class="ex" data-id="A4.5" data-stars="2" data-kind="number" data-unit="windows">
+        <p>Go to step 355 and open the Machine state tab. How many windows are open at that batch?</p>
+        <div class="why">Two: the <code>x90</code> windows of <code>h2</code> on q0.gate and <code>h7</code> on q1.gate, both
+          opening at batch 320. The Hardware instructions layer marks both rows in blue.</div>
+      </div>
+
+      <h2 id="hover"><span class="num">6</span>Hover cards</h2>
+      <p>
+        Almost everything answers a hover. A <b>part</b> on the stage shows what it is, the RISC-Q source it follows, and
+        live lines at this step: a core's status and last instruction, a channel's open window and start time, a converter's
+        open windows, the hub's open barriers. A <b>row</b> in a program layer shows its links: a source line lists its
+        hardware instructions; a hardware instruction shows its schedule, the batches its windows open and close, and how
+        many frames carry it; a firmware word shows its address, machine word, region and how many times it executed. On
+        the superconducting stage, the moving signal packets on the coax have cards too, with the window, the converter and
+        the wire delay.
+      </p>
+      <div class="ex" data-id="A4.6" data-stars="2" data-kind="number">
+        <p>Hover hardware instruction <code>h20</code>, the conditioned <code>x</code>. Its card gives the batches its window
+          opens and closes. At which batch does it close?</p>
+        <div class="why">It opens at batch 1,239 and lasts 35 batches, the 70 ns <code>x</code> pulse, so it closes at
+          1,274. That is also the last batch of the run's work: segment 1 ends when this window closes.</div>
+      </div>
+
+      <h2 id="debugger"><span class="num">7</span>The detailed debugger and headless use</h2>
+      <p>
+        The header link <b>Detailed debugger</b> opens the same run at <a href="/riscq?example=superconducting-feedforward&outcome=c=1">/riscq</a>.
+        It trades the program column for a long page: a controller schematic with a step inspector, a <b>Channel timeline</b>
+        of every pulse window, carrier update and digital update (late, misaligned or overlapping windows in red), the list
+        of faults, the apparatus parts and the effects that reached them, the program with a firmware table per core, and
+        the execution trace. Use it when you need every field at once.
+      </p>
+      <p>
+        Neither page computes anything that a script cannot. Save a run with
+        <code>node riscq/cli.mjs --example superconducting-feedforward --outcome c=1 --out run.json</code> and call the same
+        functions the pages call: <code>stateAt</code>, <code>causalChain</code>, <code>nextIndex</code> and
+        <code>stops</code> from <code>studio/riscq-model.js</code>, or <code>focusAt</code> and <code>firmware</code> from
+        <code>studio/riscq-layers.js</code>. A person at the workspace and an agent reading <code>run.json</code> see the
+        same step. The answer checks of this course do exactly that.
+      </p>
+      <div class="key"><b>A reading habit.</b> Start at the step card. If the part is off view, click its badge. Read the
+        causes in the Step tab, then hover the yellow row in the hardware layer to see what else that instruction touches.</div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>Every region shows the same step, rebuilt from the frames up to it.</li>
+          <li>Yellow is the current step, blue the instructions with open windows, violet the rows linked to the one you hover.</li>
+          <li>Views choose what is drawn, not what runs.</li>
+          <li><b>Next instruction</b> and <b>Next pulse</b> skip to the events you usually want; real-time playback shows motion between steps.</li>
+          <li>The detailed debugger and <code>studio/riscq-model.js</code> read the same trace.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      const feedforward = (api) => api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } });
+      course({
+        answers: {
+          // The store that fires h2 on q0's drive channel: a put of h2 to the fire register (offset 0).
+          "A4.1": async (api) => (await feedforward(api)).frames.find((f) => f.part === "q0" && f.op === "put" && f.source === "h2" && f.state.offset === 0).pc,
+          "A4.3": async (api) => {
+            const run = await feedforward(api), m = await api.model();
+            return m.nextIndex(run, -1, m.stops(run).pulse) + 1;
+          },
+          "A4.4": async (api) => (await feedforward(api)).frames.find((f) => f.op === "result").id,
+          "A4.5": async (api) => {
+            const run = await feedforward(api), m = await api.model();
+            return m.stateAt(run, 354).openWindows.length;
+          },
+          "A4.6": async (api) => (await feedforward(api)).frames.find((f) => f.op === "pulse" && f.source === "h20").state.closes,
+        },
+      });
+    </script>
+  </body>
+</html>

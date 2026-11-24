@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Deterministic timing · QuantumOS background</title>
+    <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/course/course.css" />
+  </head>
+  <body data-chapter="timing">
+    <article>
+      <p class="kicker">Background · Chapter 4</p>
+      <h1>Deterministic timing</h1>
+      <p class="lead">
+        A control core is a processor with branches, stalls and shared buses, and its timing wanders. The pulses it schedules
+        must not. This chapter explains how RISC-Q separates the two: the firmware issues every write well ahead of its start time,
+        and the hardware next to the converter lands it on exactly the right batch. It states what the Lean proofs guarantee, and
+        what the simulator measures where proofs stop.
+      </p>
+      <p class="pre">
+        You need the channel, pulse table, fire and timed queue of <a href="/course/background/riscq">chapter 3</a>. The theorems quoted
+        here are in <a href="/model/RiscQ/Timing.lean"><code>QControl/RiscQ/Timing.lean</code></a>, which you can open and read beside this
+        page. Lesson <a href="/course/B2">B2</a> works through the same ideas with exercises on live runs.
+      </p>
+
+      <h2 id="why"><span class="num">1</span>Why schedule ahead</h2>
+      <p class="q">If the core is fast, why not just write <code>fire</code> at the moment the pulse should start?</p>
+      <p class="insection"><b>In this section:</b> the sources of timing variation between a store instruction and the converter, and
+        the idea that removes them.</p>
+      <p>
+        Count what lies between a store instruction and the DAC. The store crosses the bridge and the link, 1 + L batches. The channel
+        pushes the fired entry into its queues, 2 more. Each parameter then crosses its part of the pulse generator, from 2 batches for
+        the duration to 35 for the phase. The samples cross the adder tree to the DAC port, 6 more on the ring. And before any of this,
+        the core itself has to reach the store: a taken branch costs 5 extra batches in the model's cost model, a load or store 1, a
+        read of a measurement result stalls until the result has settled, and a message to the hub can wait behind other cores'
+        messages. If the start of a pulse depended on all of that, it would move whenever the program changed.
+      </p>
+      <p>
+        RISC-Q's answer is to make the start time <b>data</b> instead of a moment. The firmware writes the start time into the channel's
+        <code>startTime</code> register and then fires; the channel's <span class="term" data-term="timed queue">timed queues</span> hold
+        every parameter until its own release batch, <code>startTime − lead</code>. Writing early is harmless; the value just waits in a
+        queue. Writing late is the only failure. The firmware therefore issues each write a fixed number of batches before its start
+        time, the <span class="term" data-term="lead">lead</span>.
+      </p>
+      <figure>
+        <svg viewBox="0 0 760 250" role="img" aria-label="Timeline of one write from issue to landing">
+          <style>
+            .tl text { font: 12.5px ui-sans-serif, system-ui, sans-serif; fill: #0b0b0b; }
+            .tl .s { font-size: 11.5px; fill: #52514e; }
+            .tl .ax { stroke: #8a8985; stroke-width: 1; }
+            .tl .seg { stroke-width: 10; stroke-linecap: butt; }
+          </style>
+          <g class="tl">
+            <line class="ax" x1="30" y1="200" x2="740" y2="200" />
+            <text class="s" x="30" y="222">batch 217</text><text class="s" x="680" y="222">batch 320</text>
+            <line class="ax" x1="40" y1="190" x2="40" y2="210" /><line class="ax" x1="700" y1="60" x2="700" y2="210" />
+            <text x="40" y="40">core issues at start − 103</text>
+            <text x="560" y="40">pulse opens at startTime</text>
+            <line class="seg" x1="40" y1="70" x2="105" y2="70" stroke="#1baf7a" /><text class="s" x="40" y="92">3 stores: phase offset, startTime, fire (217 → 227)</text>
+            <line class="seg" x1="105" y1="110" x2="124" y2="110" stroke="#2a78d6" /><text class="s" x="100" y="130">bridge + link: 1 + L = 3</text>
+            <line class="seg" x1="124" y1="150" x2="157" y2="150" stroke="#4a3aa7" /><text class="s" x="124" y="172">push 2 + push margin 3</text>
+            <line class="seg" x1="157" y1="110" x2="476" y2="110" stroke="#e6e5e1" /><text class="s" x="250" y="130">entry waits in the queue: slack</text>
+            <line class="seg" x1="476" y1="150" x2="700" y2="150" stroke="#eb6834" /><text class="s" x="480" y="172">phase lead 35: generator pipeline</text>
+          </g>
+        </svg>
+        <figcaption><b>One write, issue to landing.</b> The first <code>x90</code> of the feed-forward run on qubit 0: the core waits until
+          batch 217, stores the phase offset, the start time 320 and the fire, and the fire reaches <code>q0.gate</code> at batch 230.
+          The entry waits in the queues until each parameter's release batch; the phase, the slowest, is released 35 batches early.
+          The window opens at batch 320 and reaches the DAC port at 326. Times are from the run's trace; the bar lengths are to scale
+          in batches.</figcaption>
+      </figure>
+
+      <h2 id="lead"><span class="num">2</span>The lead of 96 batches</h2>
+      <p class="q">What does the lead have to cover?</p>
+      <p>
+        RISC-Q's own software issues each timed write 96 batches ahead (<code>LEAD</code> in <code>map.py</code>; <code>LEAD = 96</code> in
+        <code>riscq/soc.mjs</code>). Its comment says what the number covers: the link, the slowest fired queue lead, and core jitter. On the
+        x6y3 build the deterministic part is small:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Stage</th><th class="n">Batches on x6y3 (L = 2)</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td>Bridge and link</td><td class="n">1 + 2 = 3</td><td><code>PutBridge.md</code>, <code>PutLink.md</code></td></tr>
+            <tr><td>Fire to queue push</td><td class="n">2</td><td><code>PulseParamBuffer.md</code></td></tr>
+            <tr><td>Push to earliest pop</td><td class="n">3</td><td><code>TimedQueue.scala</code></td></tr>
+            <tr><td>Phase lead, the slowest fired parameter</td><td class="n">35</td><td>derived, <code>default_leads</code></td></tr>
+            <tr><td><b>Sum</b></td><td class="n"><b>43</b></td><td></td></tr>
+            <tr><td>Remaining for core jitter, the core's time lag and several stores per pulse</td><td class="n">53</td><td>96 − 43</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The remainder pays for what the core does between reading the time and the last store of a pulse: a pulse that sets a phase
+        offset and a start time and then fires takes three stores and the arithmetic around them, and the core's copy of the time lags the
+        converter edge (assumed equal to L). The simulator's firmware uses the same 96 (<code>riscq/firmware.mjs</code> imports
+        <code>LEAD</code>). After a barrier it adds 32 more batches for the delivery of the release time: the first start time of a segment
+        is the barrier's release time plus <code>SYNC_LEAD = LEAD + 32 = 128</code>.
+      </p>
+      <p>
+        How much margin is left is something the simulator measures. <code>deepestLink</code> in <code>riscq/limits.mjs</code> issues one
+        pulse 96 batches ahead on a 100 MHz build and deepens the link one stage at a time. Run for this chapter, it reports: on time up to
+        13 link stages; at 14 "pulse parameters did not land on the same batch". The phase lands late while the window still opens on
+        time. This number depends on the assumed core time lag, which grows with L, so it is a property of the model, not of a RISC-Q
+        bitstream.
+      </p>
+
+      <h2 id="theorems"><span class="num">3</span>What is proved: landing exactly</h2>
+      <p class="q">What exactly does "early enough" mean, and what happens otherwise?</p>
+      <p class="insection"><b>In this section:</b> the model of one timed queue, and the three theorems about when its entry lands.</p>
+      <h3>The model</h3>
+      <p>
+        <code>Timing.lean</code> models one queue entry with five numbers, all in dspClk cycles: <code>offset</code>, the batch-time
+        register's value at cycle 0; <code>push</code>, the cycle the entry enters the queue; <code>startTime</code>, the batch at which the
+        parameter must take effect; <code>lead</code>, the parameter's pipeline latency; and <code>prev</code>, the cycle of the previous pop
+        of the same queue, if any. From them:
+      </p>
+      <pre><code>def pushMargin : Nat := 3      -- FIFO write, head register, registered compare
+def popInterval : Nat := 2     -- a queue pops at most every other cycle
+
+def readyCycle (push : Nat) (prev : Option Nat) : Nat :=
+  max (push + pushMargin) (match prev with | some q =&gt; q + popInterval | none =&gt; 0)
+
+def popCycle (offset push startTime lead : Nat) (prev : Option Nat) : Nat :=
+  let ready := readyCycle push prev
+  ready + dueWait (ready + offset) startTime lead
+
+def landCycle (offset push startTime lead : Nat) (prev : Option Nat) : Nat :=
+  popCycle offset push startTime lead prev + lead</code></pre>
+      <p>
+        <code>dueWait</code> is the registered due test of the RTL, <code>signed(time − (startTime − lead)) ≥ 0</code>, computed modulo 2³²
+        because the time register is 32 bits wide. An entry pops at the first cycle at which it is both ready and due, and the parameter
+        takes effect <code>lead</code> cycles later. Units: every quantity is a count of dspClk cycles, one batch each.
+      </p>
+      <h3>The three theorems</h3>
+      <div class="key"><b><code>land_exact</code>.</b> If the entry is ready no later than <code>lead</code> cycles before its start time
+        (<code>readyCycle push prev + offset + lead ≤ startTime</code>), and the start time is less than 2³¹ cycles away, then the
+        parameter lands exactly when the time register reads <code>startTime</code>:
+        <code>landCycle offset push startTime lead prev + offset = startTime</code>. The arrival cycle does not appear in the result.</div>
+      <div class="key"><b><code>land_independent_of_arrival</code>.</b> Two writes that both meet that margin, with any push cycles
+        <code>push</code>, <code>push'</code> and any previous pops <code>prev</code>, <code>prev'</code>, produce the same landing cycle:
+        <code>landCycle offset push startTime lead prev = landCycle offset push' startTime lead prev'</code>. This is why the posted link can
+        be pipelined freely.</div>
+      <div class="key"><b><code>land_late</code>.</b> A write that misses the margin
+        (<code>startTime &lt; readyCycle push prev + offset + lead</code>) by less than 2³¹ cycles pops as soon as it is ready and lands late
+        by exactly the amount it missed: <code>landCycle offset push startTime lead prev = readyCycle push prev + lead</code>.</div>
+      <p>
+        Two more theorems bound the queue itself: <code>popCycle_ge_push</code> (an entry never pops sooner than 3 cycles after its push)
+        and <code>popCycle_spacing</code> (consecutive pops of one queue are at least 2 cycles apart). Each statement is proved in Lean by
+        unfolding the definitions and deciding the resulting linear arithmetic with <code>omega</code>; read them in
+        <a href="/model/RiscQ/Timing.lean"><code>Timing.lean</code></a>.
+      </p>
+      <p>
+        Read the hypotheses carefully, because they say what the theorems do not cover. They are about one queue entry and one
+        parameter. They assume the start time is within 2³¹ cycles of the entry's ready time, the half-range of the wrapping
+        comparison; at 500 MHz that is more than four seconds. They do not say that the firmware issues its writes early enough. That
+        is a property of each program, and the simulator checks it on every run: every pulse frame carries <code>onTime</code> and
+        <code>aligned</code> flags, and the channel timeline draws late or misaligned pulses in red.
+      </p>
+      <div class="ex" data-id="timing.1" data-stars="1" data-kind="number" data-unit="batches" data-answer="7">
+        <p>A phase entry becomes ready 7 cycles after the latest cycle that would still meet <code>land_exact</code>'s margin. By how many
+          batches does the phase land late?</p>
+        <div class="why"><code>land_late</code>: the entry pops as soon as it is ready and takes effect <code>lead</code> cycles later,
+          so it lands at <code>readyCycle + lead</code>, exactly 7 cycles after <code>startTime</code>. Lateness never compounds or
+          rounds; it equals the miss.</div>
+      </div>
+      <div class="note"><b>Proof, test and measurement.</b> The three theorems are statements about the model's definitions, proved for
+        all inputs. That the definitions match RISC-Q's RTL is a separate claim, supported by conformance tests: RISC-Q's
+        <code>pulse_sched.elf</code> runs unmodified in the model and opens its gate pulse on DAC 8 exactly at its start time for six
+        batches, as RISC-Q's RTL simulation asserts. The link-depth limit above is neither: it is a measurement of the model.</div>
+
+      <h2 id="queues"><span class="num">4</span>Queue depth and the shortest pulse in a train</h2>
+      <p class="q">How fast can one channel play pulse after pulse?</p>
+      <p>
+        Each fire pushes one entry into each parameter queue of its channel, and each queue holds the build's queue depth plus one
+        entry. The firmware cannot issue a fire whose queue is still full of entries that have not started, so a long back-to-back train
+        is limited by how quickly entries drain. Two effects combine: the core can issue only so many writes per batch, and the queues
+        can only hold so many issued-but-not-started pulses. The generator in <code>riscq/firmware.mjs</code> enforces the second limit and
+        rejects a schedule that would overflow, with a message naming the channel and both batches:
+      </p>
+      <pre><code>Channel q0.gate cannot take this write on time: the core must issue it at batch …, before the entry 5 places
+ahead of it starts at batch …. The schedule exceeds the queue depth or the issue rate of the core.</code></pre>
+      <p>
+        <code>shortestTrainPulse</code> in <code>riscq/limits.mjs</code> finds the shortest pulse that a train of 60 back-to-back pulses on one
+        channel can use and still be accepted. Run for this chapter on its 100 MHz test build:
+      </p>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="n">Queue depth</th><th class="n">1</th><th class="n">4</th><th class="n">8</th><th class="n">32</th></tr></thead>
+          <tbody><tr><td class="n">Shortest pulse (batches)</td><td class="n">48</td><td class="n">31</td><td class="n">29</td><td class="n">16</td></tr></tbody>
+        </table>
+      </div>
+      <p class="src">Model result, <code>riscq/limits.mjs</code>, 60 pulses on one channel at 100 MHz with the table-loop issue cost. Not a hardware measurement.</p>
+      <p>
+        A deeper queue lets the core work further ahead, so the shortest pulse approaches the issue cost of the loop. The x6y3 build has a
+        queue depth of 32; the ion and atom builds of the simulator use the default of 4.
+      </p>
+
+      <h2 id="issue"><span class="num">5</span>Issue rate and preroll</h2>
+      <p class="q">What if sixteen pulses must start on the same batch?</p>
+      <p class="insection"><b>In this section:</b> how fast one core issues writes, and how a segment starts later when it must issue a
+        wide burst.</p>
+      <p>
+        A core issues one write at a time. The simulator's firmware issues a segment of plain timed writes with a loop over a four-word
+        table (issue time, start time, register address, data), budgeted at 32 core cycles per write (<code>TABLE_COST</code> in
+        <code>riscq/firmware.mjs</code>); other segments are issued inline at a cost of 20 cycles plus 5 per extra field and 4 for a
+        condition. Each timed write is at least two posted writes, <code>startTime</code> and <code>fire</code>. The measured peak at 100 MHz
+        is 29 posted writes per microsecond per core (<code>docs/riscq-controller.md</code>; the system-call report of the atom run,
+        computed for this chapter, gives a peak of 29 puts per µs on each AOD core).
+      </p>
+      <p>
+        When <i>n</i> writes start on the same batch, the last can be issued at the lead, but the others have to be issued earlier, one
+        issue cost apart. A backward pass in <code>issueOrder</code> moves each issue early enough for the ones after it. If the earliest
+        issue then falls before the segment's time base, the whole segment starts later, by the <span class="term" data-term="preroll">preroll</span>:
+      </p>
+      <div class="formula">preroll(n simultaneous writes from one core) = (n − 1) · 32 batches &nbsp;&nbsp; (table loop)</div>
+      <p>
+        <code>concurrency</code> in <code>riscq/limits.mjs</code>, run for this chapter, confirms it: 0, 32, 96 and 480 batches of preroll for 1, 2,
+        4 and 16 pulses, and in every case all pulses open on the same batch. On the real examples: the ion loop rotation starts 24 waveforms at
+        once on three transport cores, eight per core, and its segment starts (8 − 1) · 32 = 224 batches (2.24 µs) late. The transmon
+        feed-forward run has a preroll of 7 batches (14 ns) in its first segment: core q0 must issue the <code>x90</code> at the segment's
+        start, with its phase offset, at least one inline issue cost before the CZ tone that starts 18 batches later. A run records the preroll of each segment in its bundle.
+      </p>
+      <div class="ex" data-id="timing.2" data-stars="2" data-kind="number" data-unit="batches">
+        <p>Run the feed-forward program. What is the preroll of its first segment, in batches?</p>
+        <div class="why">The bundle's <code>preroll</code> lists one value per segment. The first segment starts 7 batches later than the
+          barrier's release plus <code>SYNC_LEAD</code>, so that the core can issue all of its first writes on time. In the trace, qubit 0's
+          first <code>x90</code> is issued at batch 217 for a start at 320: 96 + 7 batches ahead.</div>
+      </div>
+      <div class="ex" data-id="timing.3" data-stars="2" data-kind="number" data-unit="batches" data-answer="96">
+        <p>One core must open four pulses on four of its channels on the same batch, issued by the table loop. How many batches of preroll
+          does the segment need?</p>
+        <div class="why">(4 − 1) · 32 = 96 batches. The core needs 32 cycles per write, the last write can go out at the lead, and the first
+          must go out three issue costs earlier. Spreading the channels over more cores removes the preroll, which is one reason RISC-Q
+          gives each qubit its own core.</div>
+      </div>
+
+      <h2 id="segments"><span class="num">6</span>Segments, barriers and the common time base</h2>
+      <p>
+        All of this assumes that the cores agree on the time base their start times are relative to. They do because every segment starts
+        with a barrier in the board hub: each active core arrives, the last arrival releases all of them with one release time, and each
+        core sets its time base to that release time plus <code>SYNC_LEAD</code>. In the feed-forward run the three active cores arrive at
+        barrier 0 at batches 181, 183 and 185 (two batches apart, as the hub counts arrivals) and all receive the release time 185 at batch
+        193. A barrier costs time, but it is the only point where the cores' schedules have to be synchronized; between barriers each core
+        follows its own table.
+      </p>
+
+      <h2 id="return"><span class="num">7</span>Timing on the way back</h2>
+      <p class="q">If writes are issued ahead, how does the core handle a result that does not exist yet?</p>
+      <p>
+        A measurement reverses the direction of the problem. The core cannot schedule a result ahead of time; it has to wait for it. RISC-Q
+        handles this with a stalling read: a load of the result sink's <code>res</code> register does not return until the current window's
+        result has settled. RISC-Q's software waits <code>READOUT_LEAD = 48</code> batches after a demodulation start before such a read
+        returns the new window rather than the previous one (<code>map.py</code>; the result latch holds the previous window until this one
+        opens). The simulator's firmware budgets <code>READ_SETTLE = 40</code> batches from the close of the window until the stalled read has
+        returned, an assumed value (<code>riscq/firmware.mjs</code>).
+      </p>
+      <p>
+        While a core is stalled on a read it cannot issue anything else. <code>issueOrder</code> therefore treats every result read, and every
+        photon-count loop, as a <b>hold</b>: a result read holds the core from 48 batches after its window starts until the window's end plus the settle time,
+        and a count loop from the start of its window until 8 batches after its end. A write whose issue time
+        falls inside a hold is moved to before the hold begins, with a margin of 25 batches. This is safe because of
+        <code>land_independent_of_arrival</code>: issuing a write earlier never changes when it lands, only how long it waits in its queue.
+        It costs queue space, and the queue-depth check of section 4 still applies to the moved write.
+      </p>
+      <p>
+        One more boundary is the width of the time register. It counts dspClk cycles in 32 bits and wraps after 2³² batches: about 8.6 seconds
+        at 500 MHz and 43 seconds at 100 MHz. The queue's due test and the firmware's own time comparisons (<code>countEdges</code> compares a
+        signed difference) are written to be correct across the wrap, and the theorems carry the matching hypothesis that a start time is
+        less than 2³¹ batches from the moment its entry is ready.
+      </p>
+
+      <h2 id="summary"><span class="num">8</span>What is guaranteed and what is measured</h2>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Statement</th><th>Kind</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>A write that meets the margin lands exactly on its start time, independent of arrival</td><td>Proved about the model</td><td><code>land_exact</code>, <code>land_independent_of_arrival</code></td></tr>
+            <tr><td>A write that misses it lands late by exactly the miss</td><td>Proved about the model</td><td><code>land_late</code></td></tr>
+            <tr><td>Queue pops 3 after push, 2 apart</td><td>Proved about the model</td><td><code>popCycle_ge_push</code>, <code>popCycle_spacing</code></td></tr>
+            <tr><td>The leads are 34, 35, 36, 52, 11, 2</td><td>Proved from cited block latencies</td><td><code>default_leads</code></td></tr>
+            <tr><td>The model's queue matches RISC-Q's RTL</td><td>Conformance test</td><td><code>pulse_sched.elf</code>, <code>tests/riscq-firmware.test.mjs</code></td></tr>
+            <tr><td>Every pulse of a run is on time and aligned</td><td>Checked per run</td><td><code>onTime</code>, <code>aligned</code> in each pulse frame</td></tr>
+            <tr><td>96 batches suffice up to 13 link stages</td><td>Model measurement, depends on an assumed lag</td><td><code>deepestLink</code></td></tr>
+            <tr><td>Shortest train pulse, preroll per burst</td><td>Model measurement</td><td><code>shortestTrainPulse</code>, <code>concurrency</code></td></tr>
+            <tr><td>Core instruction timing</td><td>Assumed cost model</td><td><code>riscq/soc.mjs</code>, <code>redirectPenalty</code>, <code>busPenalty</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <section class="remember">
+        <h3>What to remember</h3>
+        <ol>
+          <li>The core's timing varies; pulse timing must not. The start time is written as data, and the hardware waits for it.</li>
+          <li>Each write is issued 96 batches ahead, the lead of RISC-Q's software. On x6y3 the fixed path needs 43 of them.</li>
+          <li><code>land_exact</code>: a write ready one lead before its start time lands exactly on it. <code>land_independent_of_arrival</code>: when it arrived does not matter.</li>
+          <li><code>land_late</code>: a write that misses the margin lands late by exactly the miss.</li>
+          <li>A queue pops at least 3 batches after a push and 2 after the previous pop; its depth limits how short a pulse train can be.</li>
+          <li>One core issues one write at a time: n simultaneous writes from one core delay the segment by (n − 1) · 32 batches.</li>
+          <li>Proofs are about the model; conformance tests tie the model to RISC-Q; limit sweeps are measurements of the model.</li>
+        </ol>
+      </section>
+    </article>
+    <script type="module">
+      import { course } from "/course/course.js";
+      course({
+        answers: {
+          "timing.2": async (api) => (await api.run({ example: "superconducting-feedforward", outcomes: { c: 1 } })).preroll[0],
+        },
+      });
+    </script>
+  </body>
+</html>
