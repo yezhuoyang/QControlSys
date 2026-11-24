@@ -933,20 +933,7 @@ $("toDebug").onclick = (e) => {
   e.preventDefault();
   $("runIt").click();
 };
-$("grip").addEventListener("pointerdown", (e) => {
-  const grip = $("grip");
-  grip.setPointerCapture(e.pointerId);
-  const move = (ev) => {
-    $("row").style.setProperty("--col", Math.max(300, Math.min(innerWidth * 0.6, innerWidth - ev.clientX)) + "px");
-    render();
-  };
-  const end = () => {
-    grip.removeEventListener("pointermove", move);
-    grip.removeEventListener("pointerup", end);
-  };
-  grip.addEventListener("pointermove", move);
-  grip.addEventListener("pointerup", end);
-});
+// Panel sizes, hiding and present mode: panels.js. The canvas redraws through its ResizeObserver.
 document.addEventListener("mouseover", (e) => {
   const target = e.target.closest?.("[data-explain]");
   if (!target || !document.body.classList.contains("explaining") || target === svg || svg.contains(e.target)) return;

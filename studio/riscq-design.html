@@ -7,8 +7,9 @@
     <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/riscq-studio.css" />
     <link rel="stylesheet" href="/riscq-design.css" />
+    <link rel="stylesheet" href="/panels.css" />
   </head>
-  <body>
+  <body data-panels="design" data-col="400" data-present-hint="drag to pan · scroll to zoom · 1–4 projections">
     <header class="head">
       <div class="brand"><i aria-hidden="true"></i>QuantumOS</div>
       <nav class="modes" aria-label="Workspace" data-explain="modes">
@@ -102,5 +103,6 @@
     <input type="file" id="designFile" accept=".json,application/json" hidden />
     <script type="module" src="/site-nav.js"></script>
     <script type="module" src="/riscq-design.js"></script>
+    <script type="module" src="/panels.js"></script>
   </body>
 </html>

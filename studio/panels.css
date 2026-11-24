@@ -1,0 +1,57 @@
+/* Resizable, hideable panels and present mode (panels.js). Load after the page's own stylesheet. */
+
+/* Fixed tracks, so that a hidden panel does not shift the others into its column. */
+.row.panels > .rail { grid-column: 1; grid-row: 1; }
+.row.panels > .grip-rail { grid-column: 2; grid-row: 1; }
+.row.panels > .stage { grid-column: 3; grid-row: 1; }
+.row.panels > #grip { grid-column: 4; grid-row: 1; }
+.row.panels > .progcol { grid-column: 5; grid-row: 1; }
+.row.panels > .rail { border-right: 0; }
+.grip-rail { border-left: 0; border-right: 1px solid var(--line); }
+
+.hgrip { flex: 0 0 6px; cursor: row-resize; background: var(--bg); border-top: 1px solid var(--line); touch-action: none; }
+.grip { touch-action: none; }
+.hgrip:hover, .hgrip.dragging, .grip:focus-visible, .hgrip:focus-visible { background: var(--pale); }
+.grip:focus-visible, .hgrip:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.hgrip + .dock { border-top: 0; }
+body.resizing { user-select: none; }
+body.resizing-x, body.resizing-x * { cursor: col-resize !important; }
+body.resizing-y, body.resizing-y * { cursor: row-resize !important; }
+
+body.hide-rail .row.panels > .rail, body.hide-rail .row.panels > .grip-rail { display: none; }
+body.hide-col .row.panels > .progcol, body.hide-col .row.panels > #grip { display: none; }
+body.hide-dock #dock, body.hide-dock .hgrip { display: none; }
+
+/* Layout buttons in the head */
+.layout { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; flex: 0 0 auto; background: var(--panel); }
+.layout button { border: 0; border-radius: 0; padding: 3px 7px; display: inline-flex; align-items: center; gap: 5px; color: var(--muted); background: transparent; }
+.layout button + button { border-left: 1px solid var(--line); }
+.layout svg { width: 18px; height: 13px; display: block; }
+.layout svg .fill { fill: none; stroke: currentColor; stroke-width: 1; }
+.layout button[aria-pressed="true"] { color: var(--green); }
+.layout button[aria-pressed="true"] svg .fill { fill: currentColor; stroke: none; }
+.layout .present-btn { color: var(--ink); font-weight: 600; font-size: 12px; }
+.layout .present-btn svg { width: 13px; height: 13px; }
+
+/* Present mode: full screen, the stage only */
+body.present .qn, body.present .head, body.present #alert, body.present .rail, body.present .grip,
+body.present .progcol, body.present #dock, body.present .hgrip, body.present .ctool,
+body.present .track, body.present .transport { display: none !important; }
+.present-bar { position: fixed; z-index: 50; top: 12px; left: 50%; transform: translate(-50%, -160%); display: none; align-items: center; gap: 10px;
+  background: #111827e6; color: #f3f4f6; border-radius: 999px; padding: 6px 8px 6px 16px; font-size: 13px; box-shadow: 0 6px 22px #0004;
+  transition: transform 0.25s ease, opacity 0.25s ease; opacity: 0; }
+body.present .present-bar { display: flex; }
+.present-bar.shown { transform: translate(-50%, 0); opacity: 1; }
+.present-bar button { background: #ffffff1f; color: #fff; border: 1px solid #ffffff40; border-radius: 999px; padding: 3px 12px; }
+.present-bar button:hover:not(:disabled) { background: #ffffff33; color: #fff; border-color: #ffffff80; }
+
+@media (max-width: 1100px) {
+  .layout .present-btn span { display: none; }
+}
+@media (max-width: 760px) {
+  .hgrip { display: none; }
+  .row.panels > * { grid-column: auto; }
+  /* The row stacks; give the stage a height of its own so the panels below cannot cover it. */
+  .row.panels > .stage { flex: 0 0 auto; height: 78vh; }
+  .row.panels > .progcol { flex: 0 0 auto; }
+}

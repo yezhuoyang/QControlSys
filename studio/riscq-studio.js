@@ -1039,20 +1039,7 @@ $("resetSource").onclick = () => {
   if (run) $("sourceEdit").value = run.source.text;
   sourceError("");
 };
-// Column resize.
-$("grip").addEventListener("pointerdown", (e) => {
-  const grip = $("grip"), rowEl = $("row");
-  grip.setPointerCapture(e.pointerId);
-  grip.classList.add("dragging");
-  const move = (ev) => rowEl.style.setProperty("--col", Math.max(300, Math.min(innerWidth * 0.65, innerWidth - ev.clientX)) + "px");
-  const end = () => {
-    grip.classList.remove("dragging");
-    grip.removeEventListener("pointermove", move);
-    grip.removeEventListener("pointerup", end);
-  };
-  grip.addEventListener("pointermove", move);
-  grip.addEventListener("pointerup", end);
-});
+// Panel sizes, hiding and present mode: panels.js.
 document.addEventListener("keydown", (e) => {
   if (!run || e.ctrlKey || e.metaKey || e.altKey || ["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
   const move = { ArrowLeft: index - 1, ArrowRight: index + 1, Home: -1, End: run.frames.length - 1 }[e.key];

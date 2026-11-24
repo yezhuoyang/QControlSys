@@ -39,6 +39,9 @@ const routes = new Map([
   ["/favicon.ico", "studio/quantumos.svg"],
   ["/learn", "studio/learn.html"],
   ["/site-nav.js", "studio/site-nav.js"],
+  // Resizable and hideable panels and present mode of the design editor and the workspace.
+  ["/panels.js", "studio/panels.js"],
+  ["/panels.css", "studio/panels.css"],
   // Optics: Gaussian beams through each platform's optical bench, and the world the stage draws.
   ["/riscq-optics.js", "studio/riscq-optics.js"],
   ["/riscq-benches.js", "studio/riscq-benches.js"],

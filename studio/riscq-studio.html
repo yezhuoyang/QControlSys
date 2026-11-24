@@ -6,11 +6,12 @@
     <title>RISC-Q workspace · QuantumOS</title>
     <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/riscq-studio.css" />
+    <link rel="stylesheet" href="/panels.css" />
     <script type="importmap">
       { "imports": { "three": "/three/three.module.js" } }
     </script>
   </head>
-  <body>
+  <body data-panels="workspace" data-col="470" data-present-hint="space plays · ← → step · drag to orbit">
     <header class="head">
       <div class="brand"><i aria-hidden="true"></i>QuantumOS</div>
       <label class="program-pick" title="Reference program. Each one runs on the server, down to firmware executed by the Lean model."
@@ -144,5 +145,6 @@
     <input type="file" id="runFile" accept=".json,application/json" hidden />
     <script type="module" src="/site-nav.js"></script>
     <script type="module" src="/riscq-studio.js"></script>
+    <script type="module" src="/panels.js"></script>
   </body>
 </html>
