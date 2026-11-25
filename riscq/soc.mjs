@@ -215,12 +215,16 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 // QCONTROL_BIN pins a copy of the executable, so a long run survives a rebuild of .lake/build/bin.
 const executable = process.env.QCONTROL_BIN || path.join(root, ".lake", "build", "bin", process.platform === "win32" ? "qcontrol.exe" : "qcontrol");
 
-/** Run or check a document with the Lean executable. */
-export function execute(document, { checkTrace = false } = {}) {
+/**
+ * Run or check a document with the Lean executable. A run is stopped after `timeoutMs`: four minutes,
+ * or six hours for a summary run (a medium program takes hundreds of millions of steps).
+ */
+export function execute(document, { checkTrace = false, timeoutMs = document?.trace === "summary" ? 6 * 3600_000 : 240_000 } = {}) {
   return new Promise((resolve, reject) => {
     const child = execFile(executable, checkTrace ? ["--check-trace"] : [],
-      { windowsHide: true, timeout: 240000, maxBuffer: 1 << 30 },
+      { windowsHide: true, timeout: timeoutMs, maxBuffer: 1 << 30 },
       (error, stdout, stderr) => {
+        if (error?.killed) return reject(Error("The Lean model did not finish within " + Math.round(timeoutMs / 1000) + " s." + (stderr.trim() ? " " + stderr.trim() : "")));
         if (error) return reject(Error(stderr.trim() || error.message));
         try {
           resolve(JSON.parse(stdout));
