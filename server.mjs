@@ -53,6 +53,10 @@ const routes = new Map([
   ["/riscq/os/schedule.mjs", "riscq/os/schedule.mjs"],
   ["/riscq/os/teaching-examples.mjs", "riscq/os/teaching-examples.mjs"],
   ["/riscq/ftqvm/qsysasm.mjs", "riscq/ftqvm/qsysasm.mjs"],
+  // Language: the languages of QuantumOS (riscq/language-study.mjs writes its data).
+  ["/language", "studio/language.html"],
+  ["/language.js", "studio/language.js"],
+  ["/lang/language.json", "validation/language/language.json"],
   ["/site-nav.js", "studio/site-nav.js"],
   // Resizable and hideable panels and present mode of the design editor and the workspace.
   ["/panels.js", "studio/panels.js"],

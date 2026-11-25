@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Language · QuantumOS</title>
+  <meta name="description" content="The languages of QuantumOS, stated as a programming-language definition: QSysASM (physical instructions and system calls), the hardware description language and its assertion rules, and RISC-Q's instruction set and memory map, with the Lean model behind it.">
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+  <style>
+    .page { grid-template-columns: 210px minmax(0, 860px); max-width: 1180px; }
+    .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); margin: 12px 0 16px; }
+    .tbl table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .tbl th { text-align: left; font: 600 11px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--ink2); background: #f7f8fc; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .tbl td { padding: 6px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+    .tbl tr:last-child td { border-bottom: 0; }
+    .tbl.scroll { max-height: 460px; overflow-y: auto; }
+    .tbl td.f { font: 12px/1.45 var(--mono); color: var(--navy); }
+    .tbl td.msg { font-size: 12.5px; color: var(--ink2); }
+    pre.bnf { font: 12.5px/1.6 var(--mono); background: #f7f6f2; border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; overflow-x: auto; }
+    pre.bnf .nt { color: var(--navy); } pre.bnf .kw { color: #b45309; } pre.bnf .cm { color: var(--ink3); }
+    .judg { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 12px 0; font-size: 14px; }
+    .judg code { font-size: 13px; }
+    .rules { display: flex; flex-wrap: wrap; gap: 22px 34px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 12px 0; }
+    .ir { display: inline-grid; grid-template-columns: auto auto; align-items: center; column-gap: 8px; font: 13px/1.5 var(--mono); }
+    .ir .top { text-align: center; padding: 0 6px 3px; }
+    .ir .bot { text-align: center; padding: 3px 6px 0; border-top: 1.5px solid var(--ink); }
+    .ir .name { grid-row: 1 / span 2; grid-column: 2; font: 600 12px var(--sans); color: var(--accent); align-self: center; }
+    .ir .cell { grid-column: 1; }
+    .stmts { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 14px; }
+    .stmts a { font: 12.5px var(--mono); background: var(--accent-soft); color: var(--navy); padding: 2px 8px; border-radius: 5px; }
+    .card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; border-top: 1px solid var(--line); padding: 18px 0 8px; }
+    @media (max-width: 860px) { .card { grid-template-columns: minmax(0, 1fr); } }
+    .card h3 { margin: 0 0 6px; font: 600 16px var(--mono); color: var(--ink); grid-column: 1 / -1; scroll-margin-top: 64px; }
+    .card dl { display: grid; grid-template-columns: 92px 1fr; gap: 4px 10px; font-size: 13.5px; margin: 8px 0; }
+    .card dt { font: 600 11px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--ink3); padding-top: 2px; }
+    .card dd { margin: 0; }
+    .live { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: 10px 12px; font-size: 13px; }
+    .live pre { margin: 0 0 8px; font: 12px/1.5 var(--mono); background: #f7f6f2; padding: 8px 10px; white-space: pre-wrap; }
+    .live .verdict { font-weight: 600; margin: 4px 0; } .live .verdict.ok { color: var(--green); } .live .verdict.no { color: var(--red); }
+    .live svg { display: block; width: 100%; height: auto; } .live svg text { font: 10px var(--sans); fill: var(--ink2); }
+    .live .bar { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+    .live button { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 2px 9px; font: 12.5px var(--sans); cursor: pointer; }
+    .live input[type=range] { flex: 1; accent-color: var(--accent); }
+    .tag { display: inline-block; font: 600 10.5px var(--sans); letter-spacing: .05em; text-transform: uppercase; border-radius: 4px; padding: 1px 6px; }
+    .tag.lean { background: #e3f5ec; color: #11734f; } .tag.js { background: #eef0fe; color: var(--accent); } .tag.todo { background: #fdf1dc; color: #8a5a00; }
+    .decoder { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 12px 0; font-size: 13.5px; }
+    .decoder input { font: 13px var(--mono); padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px; width: 120px; }
+    .decoder output { font: 600 13.5px var(--mono); color: var(--navy); }
+    .stack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+    @media (max-width: 760px) { .stack { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+    .stack div { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--ink2); }
+    .stack b { display: block; color: var(--ink); font-size: 14px; margin-bottom: 2px; }
+    .stack a { font-size: 12.5px; }
+    .muted { color: var(--ink2); font-size: 13.5px; }
+    .yes { color: var(--green); font-weight: 600; } .no { color: var(--red); font-weight: 600; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <nav class="side" aria-label="On this page"><h5>On this page</h5><ol id="toc"></ol></nav>
+  <article id="page" aria-live="polite">Loading…</article>
+</main>
+<script type="module" src="/site-nav.js"></script>
+<script type="module">
+  import { render } from "/language.js";
+  render(document.getElementById("page"), document.getElementById("toc"));
+</script>
+</body>
+</html>

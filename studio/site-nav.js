@@ -44,6 +44,7 @@ const LINKS = [
   ["Reproduce", "/reproduce"],
   ["Examples", "/examples"],
   ["Schedule", "/schedule"],
+  ["Language", "/language"],
   ["Platforms", null],
   ["Design", "/riscq-design"],
   ["Workspace", "/riscq-studio"],
