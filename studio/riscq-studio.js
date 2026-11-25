@@ -121,6 +121,26 @@ const stage = createWorkspaceStage($("viewport"), {
   hover: (id, x, y) => (id ? card(partCard(id), x, y) : card(null)),
 });
 
+// A reproduced paper's run (riscq/ftqvm/studio-runs.mjs) carries the track its reproduce page plays: the
+// stage is then that same 3D twin (studio/reproduce/twin3d.js), set to the machine time of this step.
+let twin = null, twinBox = null;
+const TWIN_VIEW = { chip: "device", control: "control", machine: "all" };
+async function mountReproduction() {
+  twin?.dispose();
+  twin = null;
+  twinBox?.remove();
+  twinBox = null;
+  const track = run?.derived?.track;
+  if (!track) return;
+  const { mountTwin } = await import("/reproduce/twin3d.js");
+  twinBox = document.createElement("div");
+  twinBox.className = "studio-twin";
+  $("viewport").append(twinBox);
+  twin = mountTwin(twinBox, track, { external: true });
+  twin.setView(TWIN_VIEW[view] ?? "all");
+  schedule();
+}
+
 const period = () => run.machine.dspPeriodPs;
 const timeOf = (batch) => model.formatTime(batch * period());
 const partLabel = (id) => run.system.parts.find((p) => p.id === id)?.label ?? id;
@@ -160,6 +180,7 @@ function setView(next) {
   view = next;
   for (const b of document.querySelectorAll(".views button")) b.setAttribute("aria-selected", String(b.dataset.view === view));
   stage.setView(view);
+  twin?.setView(TWIN_VIEW[view] ?? "all");
   paintKinds();
   syncAddress();
   schedule();
@@ -789,6 +810,7 @@ function paint() {
     return { ...s, glowAt: s.to, glowSize: 9 };
   });
   stage.show(frame, state, frame ? model.causalPath(run, frame.id) : [], chosen, fault, extra);
+  twin?.setTime(((shown - run.derived.trackBaseBatch) * period()) / 1000);
   paintNow(frame, fault);
   paintOffview(frame);
   paintTrack();
@@ -883,6 +905,7 @@ function show(bundle, text, keepStep) {
   }
   opticIndex = new Map(benchElements.map((e) => ["optic:" + e.label, e]));
   stage.setRun(run, view);
+  mountReproduction();
   paintKinds();
   paint();
   // The hardware editor opens the design of this run, or a fresh one when the run has none.

@@ -55,7 +55,7 @@ async function circuitRun(exampleId, paper, choice, value) {
   const { captureRuns } = await import("./studio-capture.mjs");
   const registry = await registryOf(paper.id);
   if (!registry) throw Error("no design registry for " + paper.id);
-  const { pieces } = await captureRuns(() => registry.run({ [choice]: value }));
+  const { value: ran, pieces } = await captureRuns(() => registry.run({ [choice]: value }));
   const piece = pieces.at(-1);
   if (!piece) throw Error(exampleId + ": the run captured nothing for the studio");
   const label = (await registry.params())[0].options?.find((o) => String(o.value) === String(value))?.label ?? value;
@@ -63,7 +63,7 @@ async function circuitRun(exampleId, paper, choice, value) {
   return bundle({
     exampleId, paper, label, platform: PLATFORM[paper.platform] ?? "superconducting", spec: piece.spec, period: piece.period,
     hardware: { kind: "hardware-program", version: 1, platform: PLATFORM[paper.platform], machine: paper.id, timeUnit: "ps", segments: piece.segments },
-    built: piece.built, result: piece.result, design: piece.design,
+    built: piece.built, result: piece.result, design: piece.design, track: ran?.rows?.[0]?.track,
     source: { language: "Circuit schedule", text: ["# " + paper.title + " · " + label + ": the paper's circuit as this twin schedules it, one operation per line.", ...lines].join("\n") },
     program: "the paper's circuit as the reproduction schedules it (riscq/ftqvm/" + (paper.id.includes("cultivation") || paper.id.includes("distillation") ? "magic" : "logical") + ".mjs)",
   });
@@ -113,13 +113,17 @@ export async function studioRun(exampleId, { trace = "io" } = {}) {
     ({ report, result, built, spec, hardware } = await twin.run(src.listing, placement, d, { outcomes: {}, distance: src.distance }));
     period = spec.dspPeriodPs;
   }
-  return bundle({ exampleId, paper, label: src.label, platform, spec, period, hardware, built, result, design, m,
+  return bundle({ exampleId, paper, label: src.label, platform, spec, period, hardware, built, result, design, m, track: report?.track, baseBatch: report?.baseBatch,
     source: { language: "FormalRV listing", text: listingText(src.listing, paper.title + " · " + src.label) },
     program: "the listing FormalRV compiled for this twin (validation/ftqvm/twins/" + id + "/" + key + ".json)", conforms: report?.conforms });
 }
 
 /** The studio's run bundle (riscq/examples.mjs `run`'s shape). */
-function bundle({ exampleId, paper, label, platform, spec, period, hardware, built, result, design, m, source, program, conforms }) {
+function bundle({ exampleId, paper, label, platform, spec, period, hardware, built, result, design, m, source, program, conforms, track, baseBatch }) {
+  // The reproduce pages' 3D twin plays `track` in ns from `baseBatch`; the studio plays the same view at its step.
+  // A run that does not state its base gets it from its first pulse, which the track's controller lists first.
+  const first = result.summary.pulses?.[0], listed = track?.controller?.pulses?.[0];
+  const base = baseBatch ?? (first && listed ? first.opens - Math.round((listed[2] * 1000) / period) : undefined);
   return {
     kind: "riscq-run", version: 1,
     example: { id: exampleId, title: "Reproduction · " + paper.title + " · " + label, description: paper.summary },
@@ -137,7 +141,8 @@ function bundle({ exampleId, paper, label, platform, spec, period, hardware, bui
     hardware,
     firmware: built.images,
     preroll: (built.plans?.find((plan) => plan.segments.length)?.segments ?? []).map((segment) => segment.preroll),
-    derived: { bits: measuredBits(result, built), reproduction: { id: paper.id, label, conforms } },
+    derived: { bits: measuredBits(result, built), reproduction: { id: paper.id, label, conforms },
+      ...(track && base !== undefined ? { track, trackBaseBatch: base } : {}) },
     ...result,
   };
 }

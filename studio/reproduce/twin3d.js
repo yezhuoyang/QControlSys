@@ -37,7 +37,7 @@ function haloTexture() {
 /**
  * Mount the viewer. `track` = { device, endNs, events, moves }. Returns { dispose }.
  */
-export function mountTwin(root, track, { caption = "" } = {}) {
+export function mountTwin(root, track, { caption = "", external = false } = {}) {
   root.innerHTML = `
     <div class="twin-stage"><canvas></canvas>
       <div class="twin-hud"><div class="twin-time"></div><ol class="twin-now"></ol></div>
@@ -52,6 +52,8 @@ export function mountTwin(root, track, { caption = "" } = {}) {
       <input type="range" min="0" max="1000" value="0" data-act="scrub" aria-label="Machine time">
     </div>
     <p class="twin-caption">${caption}</p>`;
+  // `external`: another player (the RISC-Q studio) sets the time and the view; this one keeps its stage only.
+  if (external) for (const sel of [".twin-controls", ".twin-caption", ".twin-views"]) root.querySelector(sel).style.display = "none";
   const canvas = root.querySelector("canvas"), hudTime = root.querySelector(".twin-time"), hudNow = root.querySelector(".twin-now");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(2, devicePixelRatio));
@@ -223,11 +225,14 @@ export function mountTwin(root, track, { caption = "" } = {}) {
   }
   const viewsEl = root.querySelector(".twin-views");
   if (!control) viewsEl.hidden = true;
+  const showView = (v) => {
+    for (const b of viewsEl.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.view === v));
+    if (!control) return look(deviceBox);
+    look(v === "device" ? deviceBox : v === "control" ? control.controlBounds.clone().expandByScalar(0.8) : control.bounds, v === "control" ? 1.2 : 1);
+  };
   viewsEl.onclick = (e) => {
     const v = e.target.dataset?.view;
-    if (!v) return;
-    for (const b of viewsEl.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b === e.target));
-    look(v === "device" ? deviceBox : v === "control" ? control.controlBounds.clone().expandByScalar(0.8) : control.bounds, v === "control" ? 1.2 : 1);
+    if (v) showView(v);
   };
   // Hover inspector for the control system's parts.
   const tip = root.querySelector(".twin-tip"), ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
@@ -348,7 +353,7 @@ export function mountTwin(root, track, { caption = "" } = {}) {
     if (disposed) return;
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    if (playing) {
+    if (playing && !external) {
       t += (dt * speed * endNs) / runSeconds;
       if (t > endNs) t = 0;
     }
@@ -359,5 +364,10 @@ export function mountTwin(root, track, { caption = "" } = {}) {
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
-  return { dispose: () => { disposed = true; renderer.dispose(); } };
+  return {
+    dispose: () => { disposed = true; renderer.dispose(); },
+    // For an external player: machine time in ns from the track's base, and "all" | "device" | "control".
+    setTime: (ns) => { t = Math.max(0, Math.min(endNs, ns)); },
+    setView: showView,
+  };
 }

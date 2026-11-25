@@ -21,21 +21,6 @@ pre.code { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 12p
 details.block { border-top: 1px solid var(--line); padding: 8px 0; }
 details.block > summary { cursor: pointer; font-weight: 600; }
 .twin { margin: 8px 0 24px; }
-.twin-stage { position: relative; height: min(68vh, 600px); border-radius: 10px; overflow: hidden; background: #0b1020; }
-.twin-stage canvas { width: 100%; height: 100%; display: block; }
-.twin-hud { position: absolute; left: 12px; top: 10px; color: #e2e8f0; font: 12.5px/1.45 var(--mono); pointer-events: none; max-width: 62%; }
-.twin-time { font-weight: 700; color: #fff; margin-bottom: 4px; }
-.twin-now { list-style: none; margin: 0; padding: 0; }
-.twin-now li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.twin-legend { position: absolute; right: 10px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px 12px; max-width: 70%; justify-content: flex-end; color: #cbd5e1; font-size: 12px; }
-.twin-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
-.twin-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; font-size: 13px; }
-.twin-controls input[type=range] { flex: 1 1 240px; }
-.twin-caption { font-size: 12.5px; color: var(--ink3); margin: 6px 0 0; }
-.twin-tip { position: absolute; z-index: 3; max-width: 300px; background: rgba(15,23,42,.94); color: #e2e8f0; border: 1px solid #334155; border-radius: 8px; padding: 8px 10px; font: 12.5px/1.45 var(--sans); pointer-events: none; }
-.twin-views { position: absolute; right: 10px; top: 10px; display: flex; gap: 4px; }
-.twin-views button { font: 600 12px/1 var(--sans); padding: 6px 9px; border-radius: 6px; border: 1px solid #334155; background: rgba(15,23,42,.8); color: #cbd5e1; cursor: pointer; }
-.twin-views button[aria-pressed="true"] { background: #e2e8f0; color: #0f172a; }
 .design-grid { display: grid; grid-template-columns: minmax(270px, 340px) minmax(0, 1fr); gap: 18px; align-items: start; margin: 14px 0; }
 @media (max-width: 860px) { .design-grid { grid-template-columns: 1fr; } }
 .dform fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 4px; margin: 0 0 12px; background: #fff; }

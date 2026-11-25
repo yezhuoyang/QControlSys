@@ -227,3 +227,7 @@ body.explaining .views button[data-explain] { outline-offset: -3px; }
 
 /* Under the site's menu bar (site-nav.js) the page's own brand would repeat it. */
 .qn ~ .head .brand { display: none; }
+
+/* A reproduced paper's run: its 3D twin (studio/reproduce/twin3d.js) covers the stage. */
+.studio-twin { position: absolute; inset: 0; z-index: 2; }
+.studio-twin .twin-stage { height: 100%; border-radius: 0; }
