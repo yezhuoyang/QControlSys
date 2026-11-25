@@ -9,11 +9,14 @@
 //   With a coupler for every gated pair, `route` needs no SWAP: it is realized by couplers that
 //   already exist. This is one design point; a nearest-neighbour chip that realizes `route` with
 //   SWAP chains is the other (not built yet).
-// - One RISC-Q core per transmon, plus a decoder core. Each core has a drive channel (x90, x and
-//   reset in slots 0–2), one CZ channel per coupler, a readout channel and a demodulation
-//   channel. Drive and CZ channels of a qubit share its drive DAC; readout tones of eight
-//   qubits share one DAC and their returns one ADC, frequency-multiplexed as in RISC-Q's x6y3
-//   build (all eight readouts on DAC 8 and ADC 12).
+// - One RISC-Q core per transmon (RISC-Q builds exactly one demod channel into every core, so a core
+//   reads out one transmon), plus a frame core and the decoder cores. Each transmon's core has a drive
+//   channel (x90, x and reset in slots 0–2), one CZ channel per coupler, a readout channel and a
+//   demodulation channel. Drive and CZ channels of a qubit share its drive DAC; readout tones of eight
+//   qubits share one DAC and their returns one ADC, frequency-multiplexed as in RISC-Q's x6y3 build.
+// - Cores are placed on boards (AMD ZCU216, riscq/board.mjs): a board takes transmons in site order
+//   while it holds at most 14 cores and its DSP48E2 estimate stays under the ceiling where RISC-Q's
+//   builds collapse; every board has its own 16 DACs and 16 ADCs. Boards are joined by RISC-Q's PutLane.
 //
 // Calibration (assumption, stated in `provenance`): site k reuses the measured calibration of
 // qubit k mod 8 of RISC-Q's x6y3 example (validation/riscq/x6y3-calibration.json), and every
@@ -24,6 +27,7 @@
 import { readFileSync } from "node:fs";
 import { gatedPairs } from "./place.mjs";
 import { STANDARD } from "../standards.mjs";
+import { ZCU216, DSP_PER, SHARED_DSP } from "../board.mjs";
 
 const calibrationUrl = new URL("../../validation/riscq/x6y3-calibration.json", import.meta.url);
 const buildUrl = new URL("../../validation/riscq/x6y3.json", import.meta.url);
@@ -47,73 +51,96 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
   const coax = (id, from, to) => wires.push({ id, from: from.id, to: to.id, medium: "coax",
     routeMm: [from.centerMm, [to.centerMm[0], from.centerMm[1], from.centerMm[2]], [to.centerMm[0], to.centerMm[1], from.centerMm[2]], to.centerMm] });
   const sites = placement.sites;
-  // Sites fill cores in order: at most `qubitsPerCore` transmons and 16 channels per core
-  // (a transmon takes its drive, readout and demodulation channels and one per coupler).
-  const coreOfSite = [];
-  {
-    let core = 0, used = 0, count = 0;
-    sites.forEach((_, k) => {
-      const need = 3 + pairs.filter((p) => p.sites.includes(k)).length;
-      if (count && (count >= qubitsPerCore || used + need > 16)) (core++, (used = 0), (count = 0));
-      coreOfSite.push(core);
-      used += need;
-      count++;
-    });
-  }
-  const qubitCores = (coreOfSite.at(-1) ?? -1) + 1, decoderCores = decoders * coresPerDecoder;
-  if (qubitCores + 1 + decoderCores > 64)
-    throw Error("A RISC-Q board carries 64 cores; this design needs " + qubitCores + " qubit cores, a frame core and " + decoderCores + " decoder cores.");
-  const groups = Math.ceil(sites.length / 8);
-  // Drive lines: one DAC per transmon when the board has enough; otherwise `drivesPerDac`
-  // transmons share one DAC, their drive tones summed (frequency-multiplexed drive).
-  const perDac = drivesPerDac ?? Math.max(1, Math.ceil(sites.length / (64 - groups)));
-  if (Math.ceil(sites.length / perDac) + groups > 64 || groups > 64) throw Error("The chip needs more than 64 DACs or ADCs.");
-  const driveDacs = new Map();
-  const dac = (index, row) => { const p = { id: "dac" + index, type: "dac", index, centerMm: add(boardMm, [60, 6 * row - 200, 0]) }; parts.push(p); return p; };
-  const adc = (index, row) => { const p = { id: "adc" + index, type: "adc", index, centerMm: add(boardMm, [60, 6 * row - 200, -20]) }; parts.push(p); return p; };
-  const roDacs = [], adcs = [];
-  for (let g = 0; g < groups; g++) {
-    roDacs.push(dac(64 - groups + g, 64 - groups + g));
-    adcs.push(adc(g, g));
-  }
+  if (qubitsPerCore !== 1)
+    throw Error("RISC-Q builds exactly one demod channel (decoder + ADC) into every core, so a core reads out one transmon: qubitsPerCore must be 1.");
   const partnersOf = (s) => pairs.filter((p) => p.sites.includes(s));
-  const out = [];
-  const coreParts = [];
-  sites.forEach((site, k) => {
-    const cal = calibration.qubits[k % 8];
-    // With `qubitsPerCore` > 1 one core drives several transmons: its channel names carry the site.
-    const c = coreOfSite[k];
-    if (!coreParts[c]) {
-      coreParts[c] = { id: qubitsPerCore === 1 ? "c" + site.id : "core" + c, type: "core", centerMm: add(boardMm, [0, 6 * c - 200, 0]) };
-      parts.push(coreParts[c]);
+  // Boards: transmons in site order while a board holds ≤ 14 cores and stays under the DSP ceiling.
+  const coreDsp = (k) => DSP_PER.core + (2 + partnersOf(k).length) * DSP_PER.pulse + DSP_PER.demod;
+  const classicalDsp = DSP_PER.core + DSP_PER.demod; // a status line and the demod channel RISC-Q requires
+  const boardSites = [[]];
+  let dsp = SHARED_DSP;
+  sites.forEach((_, k) => {
+    if (boardSites.at(-1).length + 1 > ZCU216.cores.value || dsp + coreDsp(k) > ZCU216.dspCeiling.value) {
+      boardSites.push([]);
+      dsp = SHARED_DSP;
     }
-    const core = coreParts[c];
-    const ch = (role) => (qubitsPerCore === 1 ? role : site.id + "." + role);
-    const at = add(chipMm, [site.rc[1] * pitchMm, -site.rc[0] * pitchMm, 0]);
-    const qubit = { id: "q" + site.id, type: "qubit", centerMm: at };
-    const resonator = { id: "r" + site.id, type: "resonator", centerMm: add(at, [0.6, 0.6, 0]) };
-    parts.push(qubit, resonator);
-    const di = Math.floor(k / perDac);
-    const drive = driveDacs.get(di) ?? driveDacs.set(di, dac(di, di)).get(di), ro = roDacs[Math.floor(k / 8)], back = adcs[Math.floor(k / 8)];
-    const id = (role) => core.id + "." + ch(role);
-    channels.push({ id: id("gate"), core: core.id, name: ch("gate"), kind: "pulse", converter: drive.id, slots: 3, interp: build.gate_interp, site: k });
-    partnersOf(k).forEach((p, j) => channels.push({ id: id("cz" + j), core: core.id, name: ch("cz" + j), kind: "pulse", converter: drive.id, slots: 1, interp: build.gate_interp, pairKey: p.sites.join("-"), site: k }));
-    channels.push({ id: id("ro"), core: core.id, name: ch("ro"), kind: "pulse", converter: ro.id, slots: 1, interp: build.readout_interp, site: k },
-      { id: id("demod"), core: core.id, name: ch("demod"), kind: "demod", converter: back.id, slots: 1, interp: build.demod_interp ?? 4, site: k });
-    coax("drive-" + site.id, drive, qubit);
-    coax("tone-" + site.id, ro, resonator);
-    wires.push({ id: "return-" + site.id, from: resonator.id, to: back.id, medium: "coax",
-      routeMm: [resonator.centerMm, [resonator.centerMm[0], resonator.centerMm[1], back.centerMm[2]], [resonator.centerMm[0], back.centerMm[1], back.centerMm[2]], back.centerMm] });
-    const gate = (g) => ({ amp: g.amp, phaseRad: g.phase, durNs: g.time * 1e9, envelope: g.env, virtualZ: g.virtualZ });
-    qubits.push({ part: qubit.id, resonator: resonator.id, gate: id("gate"), ro: id("ro"), demod: id("demod"), freqHz: cal.freq,
-      x90: dur ? { ...gate(cal.X90), durNs: dur.x90Ns.value } : gate(cal.X90), x: dur ? { ...gate(cal.X), durNs: dur.xNs.value } : gate(cal.X),
-      reset: { amp: cal.X.amp, durNs: dur ? dur.resetNs.value : STANDARD.superconducting.resetNs.value, envelope: "cosine_square" },
-      // A twin's readout: the tone over the published duration, integrated over the same window.
-      readout: dur
-        ? { freqHz: cal.readout.freq, amp: cal.readout.amp, durNs: dur.readoutNs.value, envelope: cal.readout.env, demodDelayNs: 0, demodNs: dur.readoutNs.value, demodPhaseRad: cal.readout.demod.phase }
-        : { freqHz: cal.readout.freq, amp: cal.readout.amp, durNs: cal.readout.time * 1e9, envelope: cal.readout.env,
-          demodDelayNs: cal.readout.demod.delay * 1e9, demodNs: cal.readout.demod.time * 1e9, demodPhaseRad: cal.readout.demod.phase } });
-    out.push({ site: k, qubit: k, part: qubit.id, address: site.address, rc: site.rc });
+    boardSites.at(-1).push(k);
+    dsp += coreDsp(k);
+  });
+  // The frame core and the decoder cores, where a board has room, else on a board of their own.
+  const classical = ["decoder", ...Array.from({ length: decoders * coresPerDecoder }, (_, i) => "dec" + Math.floor(i / coresPerDecoder) + "." + (i % coresPerDecoder))];
+  const boardClassical = boardSites.map(() => []);
+  const boardDsp = boardSites.map((list) => SHARED_DSP + list.reduce((n, k) => n + coreDsp(k), 0));
+  for (const id of classical) {
+    let b = boardSites.findIndex((list, i) => list.length + boardClassical[i].length < ZCU216.cores.value && boardDsp[i] + classicalDsp <= ZCU216.dspCeiling.value);
+    if (b < 0) {
+      boardSites.push([]);
+      boardClassical.push([]);
+      boardDsp.push(SHARED_DSP);
+      b = boardSites.length - 1;
+    }
+    boardClassical[b].push(id);
+    boardDsp[b] += classicalDsp;
+  }
+  const boardPart = boardSites.map((_, b) => {
+    const part = { id: b === 0 ? "board" : "board" + b, type: "control-board", centerMm: add(boardMm, [0, 450 * b, 0]) };
+    if (b > 0) parts.push(part);
+    return part;
+  });
+  parts[0].centerMm = boardPart[0].centerMm;
+  const at = (b, off) => add(boardPart[b].centerMm, off);
+  const out = [];
+  const perDacOf = [];
+  boardSites.forEach((list, b) => {
+    const board = boardPart[b].id;
+    // Readout: eight tones share one DAC and their returns one ADC. Drive: the remaining DACs, one per
+    // transmon while enough, else `perDac` transmons summed on one DAC (frequency-multiplexed drive).
+    const groups = Math.ceil(list.length / 8);
+    const driveSlots = ZCU216.dacs.value - groups;
+    const perDac = Math.max(drivesPerDac ?? 1, Math.ceil(list.length / Math.max(1, driveSlots)));
+    perDacOf.push(perDac);
+    const conv = (type, index) => {
+      const id = board + "." + type + index;
+      if (!parts.some((p) => p.id === id)) parts.push({ id, type, index, board, centerMm: at(b, [60, 6 * index - 48, type === "adc" ? -20 : 0]) });
+      return parts.find((p) => p.id === id);
+    };
+    list.forEach((k, i) => {
+      const site = sites[k];
+      const cal = calibration.qubits[k % 8];
+      const core = { id: "c" + site.id, type: "core", board, centerMm: at(b, [0, 6 * i - 48, 0]) };
+      parts.push(core);
+      const pos = add(chipMm, [site.rc[1] * pitchMm, -site.rc[0] * pitchMm, 0]);
+      const qubit = { id: "q" + site.id, type: "qubit", centerMm: pos };
+      const resonator = { id: "r" + site.id, type: "resonator", centerMm: add(pos, [0.6, 0.6, 0]) };
+      parts.push(qubit, resonator);
+      const drive = conv("dac", Math.floor(i / perDac)), ro = conv("dac", ZCU216.dacs.value - 1 - Math.floor(i / 8)), back = conv("adc", Math.floor(i / 8));
+      const id = (role) => core.id + "." + role;
+      channels.push({ id: id("gate"), core: core.id, name: "gate", kind: "pulse", converter: drive.id, slots: 3, interp: build.gate_interp, site: k });
+      partnersOf(k).forEach((p, j) => channels.push({ id: id("cz" + j), core: core.id, name: "cz" + j, kind: "pulse", converter: drive.id, slots: 1, interp: build.gate_interp, pairKey: p.sites.join("-"), site: k }));
+      channels.push({ id: id("ro"), core: core.id, name: "ro", kind: "pulse", converter: ro.id, slots: 1, interp: build.readout_interp, site: k },
+        { id: id("demod"), core: core.id, name: "demod", kind: "demod", converter: back.id, slots: 1, interp: build.demod_interp ?? 4, site: k });
+      coax("drive-" + site.id, drive, qubit);
+      coax("tone-" + site.id, ro, resonator);
+      wires.push({ id: "return-" + site.id, from: resonator.id, to: back.id, medium: "coax",
+        routeMm: [resonator.centerMm, [resonator.centerMm[0], resonator.centerMm[1], back.centerMm[2]], [resonator.centerMm[0], back.centerMm[1], back.centerMm[2]], back.centerMm] });
+      const gate = (g) => ({ amp: g.amp, phaseRad: g.phase, durNs: g.time * 1e9, envelope: g.env, virtualZ: g.virtualZ });
+      qubits[k] = { part: qubit.id, resonator: resonator.id, gate: id("gate"), ro: id("ro"), demod: id("demod"), freqHz: cal.freq,
+        x90: dur ? { ...gate(cal.X90), durNs: dur.x90Ns.value } : gate(cal.X90), x: dur ? { ...gate(cal.X), durNs: dur.xNs.value } : gate(cal.X),
+        reset: { amp: cal.X.amp, durNs: dur ? dur.resetNs.value : STANDARD.superconducting.resetNs.value, envelope: "cosine_square" },
+        // A twin's readout: the tone over the published duration, integrated over the same window.
+        readout: dur
+          ? { freqHz: cal.readout.freq, amp: cal.readout.amp, durNs: dur.readoutNs.value, envelope: cal.readout.env, demodDelayNs: 0, demodNs: dur.readoutNs.value, demodPhaseRad: cal.readout.demod.phase }
+          : { freqHz: cal.readout.freq, amp: cal.readout.amp, durNs: cal.readout.time * 1e9, envelope: cal.readout.env,
+            demodDelayNs: cal.readout.demod.delay * 1e9, demodNs: cal.readout.demod.time * 1e9, demodPhaseRad: cal.readout.demod.phase } };
+      out[k] = { site: k, qubit: k, part: qubit.id, address: site.address, rc: site.rc, board: b };
+    });
+    // The frame core keeps the Pauli frame and computes parities; the decoder cores run the compiled
+    // decoder (riscq/ftqvm/decoder.mjs). Each has the demod channel RISC-Q requires, on this board's ADC 0.
+    boardClassical[b].forEach((cid, i) => {
+      parts.push({ id: cid, type: "core", board, centerMm: at(b, [30, 6 * i - 48, 0]) });
+      channels.push({ id: cid + ".status", core: cid, name: "status", kind: "dio", slots: 1 },
+        { id: cid + ".demod", core: cid, name: "demod", kind: "demod", converter: conv("adc", 0).id, slots: 1, interp: build.demod_interp ?? 4 });
+    });
   });
   pairs.forEach((p, i) => {
     const ref = czPairs[i % czPairs.length];
@@ -126,21 +153,13 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
       virtualZ: ref.virtualZ.filter((z) => ref.pair.includes(z.qubit)).map((z) => ({ qubit: p.sites[ref.pair.indexOf(z.qubit)], phaseRad: z.phase })),
     });
   });
-  // The frame core keeps the Pauli frame and computes parities; the decoder cores run the
-  // compiled decoder (riscq/ftqvm/decoder.mjs), `coresPerDecoder` of them per decoder unit.
-  parts.push({ id: "decoder", type: "core", centerMm: add(boardMm, [0, 6 * qubitCores - 200, 0]) });
-  channels.push({ id: "decoder.status", core: "decoder", name: "status", kind: "dio", slots: 1 });
-  for (let u = 0; u < decoders; u++)
-    for (let c = 0; c < coresPerDecoder; c++) {
-      const id = "dec" + u + "." + c;
-      parts.push({ id, type: "core", centerMm: add(boardMm, [30, 6 * (u * coresPerDecoder + c) - 200, 0]) });
-      channels.push({ id: id + ".status", core: id, name: "status", kind: "dio", slots: 1 });
-    }
+  const perDac = Math.max(...perDacOf);
   const design = JSON.parse(JSON.stringify({
     kind: "riscq-design", version: 1, name,
     board: { dspHz: build.dsp_freq_hz, linkStages: build.link_pipe, memWords: build.mem_depth, queueDepth: build.queue_depth, envDepth: build.env_depth },
     parts, channels: channels.map(({ pairKey: _k, site: _s, ...c }) => c), wires, qubits, couplings: couplings.map(({ lengthLattice: _l, ...c }) => c), decoder: "decoder",
-    control: { qubitsPerCore, decoders, coresPerDecoder, drivesPerDac: perDac },
+    control: { qubitsPerCore, decoders, coresPerDecoder, drivesPerDac: perDac, boards: boardSites.length,
+      boardsOf: "riscq/board.mjs ZCU216: ≤ " + ZCU216.cores.value + " cores and ≤ " + ZCU216.dspCeiling.value + " DSP48E2 per board" },
     provenance: {
       placement: "riscq/ftqvm/place.mjs: data at row-major lattice points, ancillas at the nearest free half-integer point",
       calibration: "site k reuses qubit k mod 8 of " + calibration.source + "; every coupler reuses a non-sandwich CZ of that file (400 ns)",

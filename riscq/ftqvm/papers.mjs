@@ -96,7 +96,7 @@ export async function googleExperiment({ distances = [3, 5, 7], rounds = 10, dir
       decoderNs: m.decoder_latency_ns, makespanNs: last.makespanNs,
       paper: { cycleNs: device.published.cycleNs.value, decoderLatencyNsAtD5: device.published.decoderLatencyNs.value },
       ...details(last, qec),
-      _twin: twinSource("d" + d, "d = " + d + ", " + rounds + " rounds", { kind: "transmonTwin", device: "willow", options: { qubitsPerCore: 2, decoders: 1, coresPerDecoder: 4 } }, d, last.listing),
+      _twin: twinSource("d" + d, "d = " + d + ", " + rounds + " rounds", { kind: "transmonTwin", device: "willow", options: { qubitsPerCore: 1, decoders: 1, coresPerDecoder: 4 } }, d, last.listing),
     });
   }
   return { device: { id: device.id, title: device.title, basis: device.basis, durations: device.durations, published: device.published }, rows };

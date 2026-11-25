@@ -28,7 +28,7 @@ export const ZCU216 = Object.freeze({
  * the records give (2,786 − 1,623) / 6 = 193.8 per qubit core and 72.6 shared (8 cores: 1,623; 14: 2,786).
  */
 const VIVADO_SCALE = 193.8 / 235;
-const SHARED_DSP = 72.6;
+export const SHARED_DSP = 72.6;
 export const DSP_PER = Object.freeze({
   pulse: 97 * VIVADO_SCALE, // PulseDriveChannel: PulseGenerator, 97 (RISC-Q docs/dsp/PulseGenerator.md says 97 too)
   demod: (25 + 12) * VIVADO_SCALE, // DemodChannel carrier 25 + ReadoutDecoder 12
@@ -83,4 +83,69 @@ export function boardsNeeded(spec, board = ZCU216) {
   const boards = Math.max(1, ...Object.values(bound));
   const binding = Object.entries(bound).filter(([, v]) => v === boards).map(([k]) => k);
   return { boards, bound, binding, use };
+}
+
+/**
+ * Place a controller's cores on as many boards as it needs, in order. `cores` are riscq/soc.mjs `socSpec`
+ * cores whose channels name a logical converter (`dac` or `adc`: any value; channels with one value share
+ * that converter, and so their cores share a board). A board takes cores while it holds at most
+ * `board.cores` and its DSP48E2 estimate stays under the ceiling; every core is charged the demod channel
+ * RISC-Q builds into it whether its program uses it or not. On each board the logical converters take the
+ * board's converters in order of first use; past 16, they are summed onto them in turn (several tones on
+ * one RF-DAC). Returns { cores (with `board` and per-board `dac`/`adc` indices), boards, summed }.
+ */
+export function placeOnBoards(cores, board = ZCU216) {
+  // Units: cores tied together by a shared converter go on one board.
+  const parent = cores.map((_, i) => i);
+  const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  const owner = new Map();
+  cores.forEach((core, i) => core.channels.forEach((ch) => {
+    for (const kind of ["dac", "adc"]) {
+      if (ch[kind] === undefined) continue;
+      const key = kind + ":" + String(ch[kind]);
+      if (owner.has(key)) parent[find(i)] = find(owner.get(key));
+      else owner.set(key, i);
+    }
+  }));
+  const units = [];
+  const unitOf = new Map();
+  cores.forEach((_, i) => {
+    const r = find(i);
+    if (!unitOf.has(r)) { unitOf.set(r, units.length); units.push([]); }
+    units[unitOf.get(r)].push(i);
+  });
+  const dspOf = (core) => DSP_PER.core + DSP_PER.demod * (core.channels.some((ch) => ch.kind === "demod") ? 0 : 1)
+    + core.channels.reduce((n, ch) => n + (DSP_PER[ch.kind] ?? 0), 0);
+  const boardOf = new Array(cores.length);
+  let b = 0, count = 0, dsp = SHARED_DSP;
+  for (const unit of units) {
+    const need = unit.reduce((n, i) => n + dspOf(cores[i]), 0);
+    if (unit.length > board.cores.value || SHARED_DSP + need > board.dspCeiling.value)
+      throw Error("cores " + unit.map((i) => cores[i].name).join(", ") + " share converters but do not fit on one board (" + unit.length + " cores, about " + Math.round(SHARED_DSP + need) + " DSP48E2)");
+    if (count && (count + unit.length > board.cores.value || dsp + need > board.dspCeiling.value)) { b++; count = 0; dsp = SHARED_DSP; }
+    unit.forEach((i) => (boardOf[i] = b));
+    count += unit.length;
+    dsp += need;
+  }
+  // Keep the cores' order but number boards in it: a later unit may not sit on an earlier board.
+  const maps = Array.from({ length: b + 1 }, () => ({ dac: new Map(), adc: new Map() }));
+  let summed = 0;
+  const physical = (bd, kind, value) => {
+    const m = maps[bd][kind];
+    if (!m.has(value)) {
+      const limit = kind === "dac" ? board.dacs.value : board.adcs.value;
+      if (m.size >= limit) summed++;
+      m.set(value, m.size % limit);
+    }
+    return m.get(value);
+  };
+  const placed = cores.map((core, i) => ({ ...core, board: boardOf[i], channels: core.channels.map((ch) => {
+    const out = { ...ch };
+    if (ch.dac !== undefined) out.dac = physical(boardOf[i], "dac", ch.dac);
+    if (ch.adc !== undefined) out.adc = physical(boardOf[i], "adc", ch.adc);
+    return out;
+  }) }));
+  // Boards in ascending core order: socSpec and the Lean model take a board's cores contiguously.
+  placed.sort((x, y) => x.board - y.board);
+  return { cores: placed, boards: b + 1, summed };
 }

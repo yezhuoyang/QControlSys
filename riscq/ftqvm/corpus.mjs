@@ -33,8 +33,10 @@ export function programs() {
 /** The design points each platform is run on: two per platform. */
 export const DESIGNS = Object.freeze({
   superconducting: [
-    { id: "sc-A", title: "2 transmons per control core, one single-core decoder", options: { qubitsPerCore: 2, decoders: 1, coresPerDecoder: 1 } },
-    { id: "sc-B", title: "4 transmons per control core, two 4-core decoders", options: { qubitsPerCore: 4, decoders: 2, coresPerDecoder: 4 } },
+    // RISC-Q builds one demod channel into every core, so every design reads out one transmon per core;
+    // the two points differ in their decoders, and both are placed on as many ZCU216 boards as they need.
+    { id: "sc-A", title: "one transmon per control core, one single-core decoder", options: { qubitsPerCore: 1, decoders: 1, coresPerDecoder: 1 } },
+    { id: "sc-B", title: "one transmon per control core, two 4-core decoders", options: { qubitsPerCore: 1, decoders: 2, coresPerDecoder: 4 } },
   ],
   neutral: [
     { id: "atoms-moving", title: "atoms on a 10 µm lattice; every route moves atoms into gate sites", options: { id: "atoms-moving" } },

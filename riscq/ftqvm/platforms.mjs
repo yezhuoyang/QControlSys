@@ -100,7 +100,7 @@ export function optical(id, overrides = {}) {
  * Transmons on a digital twin (riscq/ftqvm/twins.mjs): the listing is placed, then checked
  * against the device's qubits and couplers; the chip is the device with its published durations.
  */
-export function transmonTwin(device, { qubitsPerCore = 2, decoders = 1, coresPerDecoder = 4 } = {}) {
+export function transmonTwin(device, { qubitsPerCore = 1, decoders = 1, coresPerDecoder = 4 } = {}) {
   const base = transmon({ qubitsPerCore, decoders, coresPerDecoder });
   return {
     ...base, name: device.id, options: { device: device.id, qubitsPerCore, decoders, coresPerDecoder },

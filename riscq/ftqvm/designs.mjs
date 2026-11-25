@@ -40,7 +40,6 @@ async function willowParams() {
     num("czNs", "CZ through the tunable coupler", d.czNs.value, "ns", 2, 400, 1, d.czNs.source, dev),
     num("readoutNs", "Readout tone and integration", d.readoutNs.value, "ns", 50, 5000, 10, d.readoutNs.source, dev),
     num("resetNs", "Reset", d.resetNs.value, "ns", 10, 2000, 10, d.resetNs.source, dev),
-    num("qubitsPerCore", "Transmons per control core", 2, "", 1, 8, 1, "the reproduction's choice: 2 per core (16 channels at most per core)", "Control system: RISC-Q board"),
     num("decoders", "Decoder units", 1, "", 1, 8, 1, "the reproduction's choice", "Control system: RISC-Q board"),
     num("coresPerDecoder", "Cores per decoder unit", 4, "", 1, 8, 1, "the reproduction's choice: each Helios job on its own core", "Control system: RISC-Q board"),
   ];
@@ -57,7 +56,8 @@ async function willowRun(src, p) {
   };
   const int = (value, fallback) => (Number.isFinite(Number(value)) && value !== undefined && value !== "" ? Number(value) : fallback);
   set("x90Ns", p.xyNs); set("xNs", p.xyNs); set("czNs", p.czNs); set("readoutNs", p.readoutNs); set("resetNs", p.resetNs);
-  const platform = transmonTwin(device, { qubitsPerCore: int(p.qubitsPerCore, 2), decoders: int(p.decoders, 1), coresPerDecoder: int(p.coresPerDecoder, 4) });
+  // One transmon per core: RISC-Q builds exactly one demod channel into every core.
+  const platform = transmonTwin(device, { qubitsPerCore: 1, decoders: int(p.decoders, 1), coresPerDecoder: int(p.coresPerDecoder, 4) });
   const placement = platform.place(src.listing, { distance: src.distance });
   const design = platform.design(src.listing, placement);
   const { report } = await platform.run(src.listing, placement, design, { outcomes: {}, distance: src.distance });

@@ -29,12 +29,19 @@
 import { execute, socSpec, AMP_SCALE } from "../soc.mjs";
 import { assemble, measuredBits } from "../compile.mjs";
 import { STANDARD } from "../standards.mjs";
+import { placeOnBoards } from "../board.mjs";
 import { gatedPairs } from "./place.mjs";
 import { layers, checks } from "./surface.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
 import { conformance, addRows } from "./sc-run.mjs";
 import { buildTrack, controllerTrack } from "./track.mjs";
 
+// Every optical controller runs at RISC-Q's dspClk on the ZCU216, 500 MHz: the clock its RTL is measured
+// at here (validation/riscq/rtl), and the only one the board-to-board lane is measured at.
+const RISCQ_DSP_HZ = 500e6;
+// How far before a gate's listed start a shared global pulse may have started (see beamPulse): the
+// width of one batch of the 100 MHz controller this module first ran on, which shared within a batch.
+const GLOBAL_LEAD_NS = 10;
 const bluvstein = "Bluvstein et al., Nature 626, 58 (2024), arXiv:2312.03982, Methods";
 const norcia = "Norcia et al., PRX 13, 041034 (2023), arXiv:2305.19119";
 const zac = "Lin, Tan, Cong, HPCA 2025, arXiv:2411.11784, Sec. VII-B";
@@ -45,7 +52,7 @@ const jones = "arXiv:2510.23519 (QCCD Studio's qccdsim_jones table in arch/h2_ra
 /** Platform constants, each with its source. Times in ns, lengths in µm. */
 export const PROFILES = Object.freeze({
   atoms: {
-    platform: "neutral", dspHz: 100e6,
+    platform: "neutral", dspHz: RISCQ_DSP_HZ,
     oneQubitNs: { value: 8000, source: bluvstein + ": local gates, \"the duration of each row is 5-8 μs\" (upper value)" },
     twoQubitNs: { value: 270, source: bluvstein + ": \"Entangling gates (270-ns duration)\"" },
     measureNs: { value: 500000, source: bluvstein + ": \"the 500-μs midcircuit imaging\"" },
@@ -56,7 +63,7 @@ export const PROFILES = Object.freeze({
   },
   // The device of Bluvstein et al. 2024, with the paper's own numbers wherever it gives one.
   bluvstein: {
-    platform: "neutral", dspHz: 100e6,
+    platform: "neutral", dspHz: RISCQ_DSP_HZ,
     oneQubitNs: { value: 8000, source: bluvstein + ": local gates, \"the duration of each row is 5-8 μs\" (upper value)" },
     twoQubitNs: { value: 270, source: bluvstein + ": \"Entangling gates (270-ns duration)\", one global pulse for every gate site" },
     measureNs: { value: 500000, source: bluvstein + ": \"the 500-μs midcircuit imaging\"" },
@@ -72,7 +79,7 @@ export const PROFILES = Object.freeze({
   // Quantinuum H2 as QCCD Studio describes it (arch/h2_racetrack.arch.json): a race track of 2 × 20
   // trap zones in one loop, no junctions, two ions per zone; its primitives' cited durations.
   h2: {
-    platform: "qccd", dspHz: 100e6,
+    platform: "qccd", dspHz: RISCQ_DSP_HZ,
     oneQubitNs: { value: 5000, source: h2 + ": one-qubit gate 5 µs" },
     twoQubitNs: { value: 25000, source: h2 + ": MS gate 25 µs" },
     measureNs: { value: 120000, source: h2 + ": measurement 120 µs" },
@@ -85,7 +92,7 @@ export const PROFILES = Object.freeze({
     qubits: { value: 32, source: h2 + ": 32 qubits (arch provenance)" },
   },
   ions: {
-    platform: "qccd", dspHz: 100e6,
+    platform: "qccd", dspHz: RISCQ_DSP_HZ,
     oneQubitNs: { value: STANDARD.qccd.rotationNs.value, source: pino + ", Table III" },
     twoQubitNs: { value: STANDARD.qccd.twoQubitNs.value, source: pino + ", Table III" },
     measureNs: { value: STANDARD.qccd.measureNs.value, source: pino + ", Table III" },
@@ -315,24 +322,30 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
       zone[crowd[0]] = from;
     }
     const ch = movers.take(t, b(ns));
-    push(op, { op: "move", pool: "mover", channel: ch, at: t, dur: Math.min(65535, b(ns)), job: { ns, hops, ions } });
+    push(op, { op: "move", pool: "mover", channel: ch, at: t, dur: b(ns), job: { ns, hops, ions } });
     return t + b(ns);
   };
+  const globalByKind = {};
   const globalPulses = new Map(), globalBusy = {}, aodJobs = new Map(), sharedMoves = [], lentEnd = new Map(); // kind and batch → native of a shared global pulse
   const beamPulse = (op, kind, t, ns) => {
     const global = (kind === "entangle" && design.point.globalEntangle) || (kind === "raman" && design.point.globalOneQubit) || (kind === "pump" && design.point.globalPump);
     if (global) {
-      // One global pulse acts on every atom of the zone at once; gates in one batch share it. A
-      // one-qubit layer is the paper's global Raman rotation, which takes its own duration.
+      // One global pulse acts on every atom of the zone at once. A one-qubit layer is the paper's
+      // global Raman rotation, which takes its own duration.
       if (kind === "raman") ns = prof.globalOneQubitNs.value;
-      const existing = globalPulses.get(kind + t);
+      // FormalRV's VM issues the gates of one layer a nanosecond apart (its trace), and a global beam
+      // cannot follow that: a gate shares the pulse of its kind that started at most GLOBAL_LEAD_NS
+      // before it and ends inside its window. Its rotation then starts up to that much before its
+      // listed start; each share records how much (`earlyNs`, the report's `globalEarlyNs`).
+      const windowEnd = Math.floor((op.end * 1000) / period);
+      const existing = [...(globalByKind[kind] ?? [])].reverse().find((g) => g.at <= t && t - g.at <= b(GLOBAL_LEAD_NS) && g.at + b(ns) <= windowEnd);
       if (existing) {
         existing.sites++;
         if (existing.sites > design.prof.gateSites.value) existing.overfull = true;
         const id = "h" + counter++;
         origin.set(id, op.uid);
-        shared.push({ id, of: existing.id });
-        return t + b(ns);
+        shared.push({ id, of: existing.id, earlyNs: ((t - existing.at) * period) / 1000 });
+        return existing.at + b(ns);
       }
       // A pulse that would overlap the previous one of its kind has no beam: it is lent (not
       // run, and its operation does not conform). Its operation reports the end it would have
@@ -340,7 +353,6 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
       // inside this run, so nothing compounds.
       const busy = (globalBusy[kind] ??= []);
       // Wait for the beam while the gate still ends inside its listed window.
-      const windowEnd = Math.floor((op.end * 1000) / period);
       let w = t;
       for (let moved = true; moved; ) {
         moved = false;
@@ -357,12 +369,16 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
         const idw = push(op, { op: kind, pool: "global", channel: { entangle: 0, raman: 1, pump: 2 }[kind], at: w, dur: b(ns) });
         busy.push([w, w + b(ns)]);
         globalPulses.set(kind + w, { id: idw, sites: 1 });
+        (globalByKind[kind] ??= []).push({ id: idw, at: w, sites: 1 });
         return w + b(ns);
       }
       const over = w > t;
       const id = push(op, { op: kind, pool: "global", channel: over ? 3 : { entangle: 0, raman: 1, pump: 2 }[kind], at: t, dur: b(ns) });
       if (over) lentEnd.set(op.uid, Math.max(lentEnd.get(op.uid) ?? 0, w + b(ns)));
-      else busy.push([t, t + b(ns)]);
+      else {
+        busy.push([t, t + b(ns)]);
+        (globalByKind[kind] ??= []).push({ id, at: t, sites: 1 });
+      }
       globalPulses.set(kind + t, { id, sites: 1 });
       return t + b(ns);
     }
@@ -437,9 +453,9 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
           : plan.moves.map((mv) => ({ ns: mv.ns, ions: [mv] }));
         if (design.prof.platform === "neutral" && jobs.length && aodJobs.has(t0)) {
           const shared = aodJobs.get(t0), want = b(jobs[0].ns);
-          if (want > shared.native.dur && shared.native.dur + want <= 65535 * 2) {
+          if (want > shared.native.dur) {
             movers.extend(shared.native.channel, t0, t0 + want);
-            shared.native.dur = Math.min(65535, want);
+            shared.native.dur = want;
           }
           const id = "h" + counter++;
           origin.set(id, op.uid);
@@ -448,16 +464,10 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
           break;
         }
         for (const job of jobs) {
-          // A move longer than one pulse-table entry is played as consecutive entries.
-          let left = b(job.ns), t = t0;
-          const ch = movers.take(t0, left);
-          while (left > 0) {
-            const part = Math.min(left, 65535);
-            const nid = push(op, { op: "move", pool: "mover", channel: ch, at: t, dur: part, job });
-            if (t === t0 && design.prof.platform === "neutral") aodJobs.set(t0, { native: natives.find((x) => x.id === nid) });
-            t += part;
-            left -= part;
-          }
+          const dur = b(job.ns);
+          const ch = movers.take(t0, dur);
+          const nid = push(op, { op: "move", pool: "mover", channel: ch, at: t0, dur, job });
+          if (design.prof.platform === "neutral") aodJobs.set(t0, { native: natives.find((x) => x.id === nid) });
         }
         break;
       }
@@ -519,7 +529,8 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   const globalCount = [0, 0, 0];
   for (const n of natives) if (n.pool === "global") n.globalIndex = globalCount[n.channel]++;
   const globalCoresOf = globalCount.map((c) => (c ? Math.ceil(c / PULSES_PER_CORE) : 0));
-  const globalDac = [61, 62, 63];
+  // Each global beam is one RF-DAC (a logical converter, placed on a board with every core that drives it).
+  const globalDac = GLOBAL_KINDS.map((kind) => "global-" + kind);
   const globalCores = GLOBAL_KINDS.flatMap((kind, k) => Array.from({ length: globalCoresOf[k] }, (_, i) =>
     ({ name: "global-" + kind + i, channels: [{ name: kind, kind: "pulse", dac: globalDac[k], slots: 64, env_depth: 1024, interp: 4 }] })));
   // The controller: beam, mover and readout cores of at most 16 channels, a frame core.
@@ -528,8 +539,8 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     for (let i = 0; i < count; i += PER_CORE) cores.push({ name: prefix + i / PER_CORE, channels: Array.from({ length: Math.min(PER_CORE, count - i) }, (_, k) => make(i + k)) });
     return cores;
   };
-  let dac = 0;
-  const pulse = (name) => ({ name, kind: "pulse", dac: dac++ % 61, slots: 64, env_depth: 1024, interp: 4 });
+  // Every other channel names its own logical DAC; placeOnBoards gives it one of its board's 16.
+  const pulse = (name) => ({ name, kind: "pulse", dac: name, slots: 64, env_depth: 1024, interp: 4 });
   const cores = [
     ...group("beams", used("beam"), (k) => pulse("b" + k)),
     // Each global beam (Rydberg, Raman, pumping) is one DAC driven by several cores in turn, so
@@ -538,11 +549,12 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     ...group("pumps", used("pump"), (k) => pulse("p" + k)),
     ...group("movers", used("mover"), (k) => pulse("m" + k)),
     // A readout core per readout channel: its pulse and its counter line; a count holds the core.
-    ...Array.from({ length: used("readout") }, (_, k) => ({ name: "readout" + k, channels: [pulse("detect"), { name: "pmt", kind: "dio", slots: 1 }] })),
+    ...Array.from({ length: used("readout") }, (_, k) => ({ name: "readout" + k, channels: [{ ...pulse("detect"), dac: "detect" + k }, { name: "pmt", kind: "dio", slots: 1 }] })),
     { name: "frame", channels: [{ name: "status", kind: "dio", slots: 1 }] },
   ];
-  if (cores.length > 64) throw Error(design.id + ": the controller needs " + cores.length + " cores, more than one board's 64");
-  const spec = socSpec({ name: design.id, dsp_freq_hz: prof.dspHz, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores }); // queue depth of RISC-Q's x6y3 build
+  // The cores on as many ZCU216 boards as they need (riscq/board.mjs); boards are joined by RISC-Q's PutLane.
+  const onBoards = placeOnBoards(cores);
+  const spec = socSpec({ name: design.id, dsp_freq_hz: prof.dspHz, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores: onBoards.cores }); // queue depth of RISC-Q's x6y3 build
   const coreOf = (name) => spec.cores.findIndex((c) => c.name === name);
   const where = (n) => n.pool === "global" ? { core: coreOf("global-" + GLOBAL_KINDS[n.channel] + (n.globalIndex % globalCoresOf[n.channel])), channel: GLOBAL_KINDS[n.channel] }
     : n.pool === "readout" ? { core: coreOf("readout" + n.channel), channel: "detect" }
@@ -562,9 +574,19 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     }
     return t.keys.get(kind + dur);
   };
+  // A native longer than one pulse-table entry (a 16-bit duration: 65,535 dspClk cycles, 131 µs at
+  // 500 MHz) is played as consecutive entries. `firstPulse` is the index of a native's first pulse on its channel.
+  const firstPulse = new Map(), pulsesOn = new Map();
   for (const n of natives) {
-    const w = where(n);
-    actions.push({ segment: 0, core: w.core, at: n.at, fire: { channel: w.channel, slot: slotOf(w.core, w.channel, n.dur, n.op) }, source: n.id });
+    const w = where(n), key = w.core + "/" + w.channel;
+    firstPulse.set(n.id, pulsesOn.get(key) ?? 0);
+    for (let t = n.at, left = n.dur; left > 0; ) {
+      const part = Math.min(left, 65535);
+      actions.push({ segment: 0, core: w.core, at: t, fire: { channel: w.channel, slot: slotOf(w.core, w.channel, part, n.op) }, source: n.id });
+      pulsesOn.set(key, (pulsesOn.get(key) ?? 0) + 1);
+      t += part;
+      left -= part;
+    }
     if (n.op === "detect") actions.push({ segment: 0, core: w.core, at: n.at, bits: [n.bit], source: n.id, count: { channel: "pmt", lines: [0], until: n.at + n.dur, threshold: 2, atEnd: true } });
   }
   const frameCore = coreOf("frame");
@@ -577,10 +599,8 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   // Photons: a bright readout pulses its counter line 3 times inside the exposure. The counter is
   // read when the exposure ends, and RISC-Q's event queue holds 8 events (EventLink.md), so a
   // bright readout is 3 photons (6 edges), above the threshold of 2; a dark one is none.
-  const seen = new Map();
   const responses = measures.map((mm) => {
-    const core = coreOf("readout" + mm.channel), occurrence = seen.get(core) ?? 0;
-    seen.set(core, occurrence + 1);
+    const core = coreOf("readout" + mm.channel), occurrence = firstPulse.get(mm.id);
     const gap = Math.max(40, Math.floor(mm.dur / 8)), edges = [];
     if (outcomes[mm.bit]) for (let k = 0; k < 3; k++) edges.push({ after: gap * (2 * k + 1), levels: 1 }, { after: gap * (2 * k + 1) + 5, levels: 0 });
     const channels = spec.cores[core].channels;
@@ -636,6 +656,8 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     sitesOfOp: (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) });
   report.pools = { beams: beams.peak, movers: movers.peak, readouts: readouts.peak, pumps: pumps.peak, lent: beams.lent + movers.lent + readouts.lent + pumps.lent };
   report.bits = measuredBits(result, built);
+  report.globalEarlyNs = Math.max(0, ...shared.map((sh) => sh.earlyNs ?? 0));
+  report.boards = { count: onBoards.boards, summedDacs: onBoards.summed, cores: spec.cores.map((c) => c.board ?? 0) };
   void gatedPairs; void checks;
   return { report, result, built };
 }

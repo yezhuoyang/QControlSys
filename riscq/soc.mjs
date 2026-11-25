@@ -89,7 +89,7 @@ export function dacPipe(spec) {
 }
 
 /** Latency model in dspClk cycles, with the source of each number. */
-export function model(spec, overrides = {}) {
+export function model(spec, { laneWords = 3, ...overrides } = {}) {
   const linkPipe = spec.linkPipe;
   return {
     linkPipe,
@@ -129,7 +129,7 @@ export function model(spec, overrides = {}) {
     // word-clock phase (one edge per 8 cycles; the phase is fixed at power-up and arbitrary), and a lane
     // carries one frame per 160 cycles. L, the GTY TX + RX latency and cable in 16 ns word clocks, is not
     // in the RTL: 3 is the stand-in of RISC-Q's own simulation, `laneWords` overrides it.
-    laneCross: 310 + 8 * ((overrides.laneWords ?? 3) - 3),
+    laneCross: 310 + 8 * (laneWords - 3),
     laneFrame: 160,
     laneWord: 8,
     lanePhase: overrides.lanePhase ?? 0,

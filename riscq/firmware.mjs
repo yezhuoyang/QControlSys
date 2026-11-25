@@ -7,7 +7,7 @@
 // Register use: s0 = time base of the current segment, s1 = control block (0x4000),
 // s2 = classical bit table, t0–t2 and a0–a2 = scratch.
 import { Assembler } from "./rv32.mjs";
-import { MAP, LEAD, READOUT_LEAD, channelBase, sinkAddress, pack16 } from "./soc.mjs";
+import { MAP, LEAD, READOUT_LEAD, channelBase, sinkAddress, pack16, model } from "./soc.mjs";
 
 /**
  * Cycles from a segment's time read (now() or the barrier release) to the core's first issue wait:
@@ -22,7 +22,24 @@ export const FETCH_COST = 14;
  * age of the release stamp when the core reads it (the hub stamps it at dispatch; it reaches the core's
  * inbox 3 + 2·linkPipe later and the read returns 4 after that, riscq/soc.mjs hubUp).
  */
-export const syncLead = (spec) => LEAD + SEGMENT_SETUP + 1 + spec.linkPipe + 2 + spec.linkPipe + 4;
+export const syncLead = (spec) => LEAD + SEGMENT_SETUP + 1 + spec.linkPipe + 2 + spec.linkPipe + 4 + remoteReleaseLead(spec);
+/**
+ * On several boards a release carries the root's stamp but reaches the other boards later (QControl/
+ * RiscQ/Soc.lean, the barrier release): board 0 sends one release frame per remote board, the i-th
+ * one cycle after the previous, and a frame reaches the far hub's lane input `laneCross` cycles after
+ * it leaves, on the next of the lane's word-clock edges (laneWord cycles apart); that hub dispatches
+ * it 7 cycles later (validation/riscq/rtl/QosLaneTiming.scala: 317–324 cycles root to far dispatch),
+ * after at most one grant to each of its other sources. Every member of a barrier shares one time base,
+ * so every core waits for the last board's release. `spec.laneModel` takes riscq/soc.mjs model()'s
+ * overrides (`laneWords`) when the program runs with them.
+ */
+export function remoteReleaseLead(spec) {
+  const boards = new Set(spec.cores.map((c) => c.board ?? 0)).size;
+  if (boards < 2) return 0;
+  const m = model(spec, spec.laneModel ?? {});
+  const perBoard = Math.max(...[...new Set(spec.cores.map((c) => c.board ?? 0))].map((b) => spec.cores.filter((c) => (c.board ?? 0) === b).length));
+  return 1 + (boards - 2) + m.laneCross + (m.laneWord - 1) + 7 + perBoard;
+}
 export const SYNC_LEAD = LEAD + 32; // kept for older callers; compileCore uses syncLead(spec)
 /** Smallest distance from a fire's issue to its start that still lands on time, with margin. */
 export const MIN_ISSUE_LEAD = 64;

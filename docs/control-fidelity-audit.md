@@ -76,7 +76,7 @@ a document, the document is cited and the item says so.
 
 | # | Status | Evidence |
 |---|---|---|
-| S1 | **checked, not yet split** | `riscq/board.mjs` states what one ZCU216 holds and reproduces both of RISC-Q's Vivado DSP records exactly (`tests/riscq-board.test.mjs`). Each reproduction twin needs several boards (below); its runs still model one. |
+| S1 | **placed on boards** | `riscq/board.mjs` states what one ZCU216 holds and reproduces both of RISC-Q's Vivado DSP records exactly (`tests/riscq-board.test.mjs`). Generated designs are now placed on as many boards as they need: transmon chips in site order (`riscq/ftqvm/sc-chip.mjs`; Willow d = 7 takes 19 boards, the DSP ceiling binding at about 5 qubit cores of 4 couplers each), optical controllers by `placeOnBoards` (cores sharing a DAC stay together; each board's logical converters take its 16 DACs and ADCs, summed past 16). `riscq/design.mjs` checks every board's cores, converter indices and DSP estimate. |
 | S2 | **closed** | `QControl/RiscQ/Pipe.lean` replaces the cost model. Instruction by instruction, every commit equals RISC-Q's RTL in Verilator: 16 micro-benchmarks, the Helios decoder (274,388 instructions), `pulse_sched.elf`, `xcore.elf`, the feed-forward and repetition examples. |
 | S3–S7 | in progress | Parallel session (decode service). It reads every time from the Lean run, so it inherits S2 and S8. |
 | S8 | **closed** | The hub is modeled register by register from `PutHub.scala`, checked under contention (`validation/riscq/rtl/hub-rtl.mjs`). These latencies are measured on the RTL: the time register, the system-put path, hub delivery, the readout result path, halting reads. Each is stated in `riscq/soc.mjs` `model()`. |
@@ -85,7 +85,7 @@ a document, the document is cited and the item says so.
 | S11 | evidence gathered | See "Sizing a board" below. The board model built on it is next. |
 | S12 | open | |
 | S14 | open | |
-| S15 | open | The RTL refuses a core without exactly one demod channel. `riscq/rtl.mjs` adds the channel RISC-Q requires, but QuantumOS's own designs must too. |
+| S15 | **enforced** | `riscq/design.mjs` refuses a core without exactly one demod channel, a converter index past 15, a converter on another board than its core, and a board past the DSP ceiling. Generated transmon designs read out one transmon per core (qubitsPerCore = 1); classical cores carry the unused demod channel RISC-Q builds into them, and board placement charges it. |
 | S16 | **closed** | Part of S2: `fetchLatency = 4`, URAM, `aluNoFastForward`, the posted-store shim and the bus pipes are in the model. |
 
 ## What the RTL changed
@@ -170,3 +170,10 @@ What this means: a syndrome bit that crosses a board takes at least 616 ns more 
 - A frame dispatched at cycle `d` reaches the far hub's lane input at the first cycle ≥ `d + 310 + 8·(L − 3)` on the lane's word-clock phase. That phase is fixed at power-up and arbitrary; `lanePhase` chooses it. The frame also arrives at least 160 cycles after the lane's previous frame, and enters the far hub as one more round-robin source with an 8-deep FIFO.
 - Measured at a 500 MHz dspClk only. A multi-board build at another clock is refused until it is measured there.
 - More than two boards is QuantumOS's extension: board 0 has a lane to every other board and forwards between them, and every frame between two non-root boards crosses twice.
+
+**Optical controllers at 500 MHz** (S10, partly): `riscq/ftqvm/optical.mjs` ran its controllers at an unsourced 100 MHz. They now run at RISC-Q's 500 MHz dspClk, the clock every RTL measurement here uses and the only one the lane is measured at. At 100 MHz the lane's 16 ns word would be 1.6 cycles.
+
+- A native longer than one pulse-table entry is played as consecutive entries. A duration is 16 bits: 65,535 cycles, 131 µs.
+- FormalRV's VM issues the gates of one layer 1 ns apart. A global beam (Rydberg, Raman, pumping) is one pulse for the whole layer. A gate shares the pulse of its kind that started at most 10 ns before it (`GLOBAL_LEAD_NS`, one batch of the old 100 MHz controller, which shared within a batch) and ends inside its window. The run reports the worst early start as `globalEarlyNs`. Conformance checks ends, not starts.
+
+**Barriers across boards** (`riscq/firmware.mjs` `remoteReleaseLead`): a release carries the root's stamp but reaches the i-th remote board `1 + i + laneCross + (laneWord − 1) + 7` cycles after the root dispatches it, after at most one grant per other source at that hub. Every member of a barrier shares one time base, so a multi-board segment starts that much later, about 0.7 µs at L = 3.

@@ -38,29 +38,25 @@ test("a wire's routed length sets when its signal arrives: moving the board 2 m 
   assert.ok(new Set(nearArrivals.map(([, delay]) => delay)).size > 1);
 });
 
-test("control hardware can be allocated freely: three qubits driven from one core", async () => {
+test("one core may drive three qubits, but reads out only one: RISC-Q builds one demod channel per core", async () => {
   const d = design.ringDesign();
-  // Move every channel of qubits 1 and 2 onto the core of qubit 0, then remove the empty cores.
+  // Move the drive and coupler channels of qubits 1 and 2 onto the core of qubit 0. Their readout tones
+  // and demodulation stay on their own cores: a RISC-Q core has exactly one demod channel.
   for (const channel of d.channels)
-    if (["q1", "q2"].includes(channel.core)) Object.assign(channel, { name: channel.core + "_" + channel.name, core: "q0" });
-  d.parts = d.parts.filter((part) => !["q1", "q2"].includes(part.id));
+    if (["q1", "q2"].includes(channel.core) && channel.kind === "pulse" && channel.name !== "ro")
+      Object.assign(channel, { name: channel.core + "_" + channel.name, core: "q0" });
+  assert.deepEqual(design.check(d).errors, []);
   const merged = await run({ platform: "superconducting", qasm: bell, design: d, outcomes: { c: 1 } });
   assert.equal(merged.summary.status, "quiescent");
   assert.deepEqual(merged.summary.faults, []);
   assert.deepEqual(merged.derived.bits, { c: 1 });
   assert.ok(merged.summary.pulses.every((p) => p.onTime && p.aligned !== false));
-  // One core now issues every write of the program. No bit crosses the hub, so no barrier is needed.
-  assert.deepEqual(merged.firmware.filter((f) => f.writes).map((f) => f.core), ["q0"]);
-  assert.equal(merged.frames.filter((f) => f.op === "publish").length, 0);
-  // The measured bit conditions the X without leaving the core: the pulse opens sooner than
-  // across three cores.
-  const split = await run({ platform: "superconducting", qasm: bell, design: design.ringDesign(), outcomes: { c: 1 } });
-  const conditioned = (bundle) => {
-    const op = bundle.hardware.segments.flatMap((s) => s.ops).find((o) => o.when === "c" && o.op === "x");
-    const window = bundle.summary.pulses.find((p) => p.kind === "demod");
-    return bundle.summary.pulses.find((p) => p.source === op.id).opens - window.closes;
-  };
-  assert.ok(conditioned(merged) <= conditioned(split));
+  // Moving their demodulation too would give q0 three demod channels: RISC-Q cannot build that core.
+  const three = design.ringDesign();
+  for (const channel of three.channels)
+    if (["q1", "q2"].includes(channel.core)) Object.assign(channel, { name: channel.core + "_" + channel.name, core: "q0" });
+  three.parts = three.parts.filter((part) => !["q1", "q2"].includes(part.id));
+  assert.ok(design.check(three).errors.some((e) => /Core q0 has 3 demod channels/.test(e)));
 });
 
 test("a design that breaks a rule is rejected with the rule", () => {

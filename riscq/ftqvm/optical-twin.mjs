@@ -13,6 +13,7 @@
 // batches) is played as consecutive entries. Every native is checked against its operation's
 // window, as on the transmon twins.
 import { execute, socSpec, AMP_SCALE } from "../soc.mjs";
+import { placeOnBoards } from "../board.mjs";
 import { measuredBits } from "../compile.mjs";
 import { conformance } from "./sc-run.mjs";
 import { bitLatency } from "./magic.mjs";
@@ -37,8 +38,8 @@ export async function runOpticalTwin({ name, channels, natives, listing, measure
   measures = measures.map((m) => ({ ...m, at: down(m.at), dur: upNs(m.dur) }));
   listing = { ...listing, ops: listing.ops.map((o) => ({ ...o, start: down(o.start), end: upNs(o.end), duration: upNs(o.end) - down(o.start) })) };
   const coreNames = [...new Set(channels.map((c) => c.core))];
-  let dac = 0;
-  const pulse = (n) => ({ name: n, kind: "pulse", dac: dac++ % 61, slots: 32, env_depth: 1024, interp: 4 });
+  // Each channel names its own logical DAC; placeOnBoards gives it one of its board's 16.
+  const pulse = (n) => ({ name: n, kind: "pulse", dac: n, slots: 32, env_depth: 1024, interp: 4 });
   // Exposures: the measurements a camera core takes at once (up to four lines). A measurement may
   // name its camera; by default every four measurements in order share one. A camera takes its
   // exposures one after another.
@@ -56,8 +57,9 @@ export async function runOpticalTwin({ name, channels, natives, listing, measure
     { name: "frame", channels: [{ name: "status", kind: "dio", slots: 1 }] },
     { name: "dec0.0", channels: [{ name: "dstatus", kind: "dio", slots: 1 }] },
   ];
-  if (cores.length > 64) throw Error(name + ": the controller needs " + cores.length + " cores, more than one board's 64");
-  const spec = socSpec({ name, dsp_freq_hz: dspHz, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores });
+  // The cores on as many ZCU216 boards as they need (riscq/board.mjs), joined by RISC-Q's PutLane.
+  const onBoards = placeOnBoards(cores);
+  const spec = socSpec({ name, dsp_freq_hz: dspHz, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores: onBoards.cores });
   const coreOf = (n) => spec.cores.findIndex((c) => c.name === n);
   const coreOfChannel = (ch) => spec.cores.findIndex((c) => c.channels.some((x) => x.name === ch));
   const tables = new Map(), actions = [], bindings = [], hardwareOps = [], origin = new Map();

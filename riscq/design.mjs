@@ -7,7 +7,8 @@
 // Document (kind "riscq-design", version 1). Lengths are mm, times ns, frequencies Hz,
 // amplitudes a fraction of DAC full scale, phases rad.
 //   board     { dspHz, linkStages, memWords, queueDepth, envDepth }
-//   parts     [{ id, type, centerMm: [x, y, z], index? }]   type: see COMPONENTS
+//   parts     [{ id, type, centerMm: [x, y, z], index?, board? }]   type: see COMPONENTS; `board` places a
+//               core, DAC or ADC on a control board (the first one when left out)
 //   channels  [{ id, core, name, kind: "pulse" | "demod" | "dio", converter?, slots?, interp? }]
 //   wires     [{ id, from, to, medium, routeMm: [[x, y, z], …] }]   medium: see MEDIA
 //   qubits    [{ part, resonator, gate, ro, demod, freqHz, x90, x, readout }]
@@ -27,10 +28,11 @@ import { readFileSync } from "node:fs";
 import { defineInterconnect, transportTiming } from "../machine/interconnect.mjs";
 import { pathLengthMm } from "../machine/wiring.mjs";
 import { socSpec, freqCode, phaseCode, ampCode, BATCH_SIZE, ADC_BATCH, AMP_SCALE, MAP } from "./soc.mjs";
+import { ZCU216, boardUse } from "./board.mjs";
 
 /** The parts a design may contain, and what each is. */
 export const COMPONENTS = Object.freeze({
-  "control-board": "A RISC-Q board: the hub and the clock of the cores placed on it. One per design.",
+  "control-board": "A RISC-Q board (AMD ZCU216): the hub, the clock, and the cores and converters placed on it. The first is board 0, the barrier root; several are joined by RISC-Q's PutLane.",
   core: "One RV32I control core with up to 16 channels.",
   dac: "One DAC output. `index` is its number on the board. Pulse channels that name it are summed.",
   adc: "One ADC input. `index` is its number on the board.",
@@ -66,13 +68,24 @@ export function check(design) {
     parts.set(part.id, part);
   }
   const ofType = (type) => [...parts.values()].filter((part) => part.type === type);
-  if (ofType("control-board").length !== 1) fail("A design has exactly one control-board.");
+  const boards = ofType("control-board");
+  if (!boards.length) fail("A design has at least one control-board.");
+  const boardOf = (part) => part.board ?? boards[0]?.id;
+  for (const part of parts.values())
+    if (["core", "dac", "adc"].includes(part.type) && part.board !== undefined && parts.get(part.board)?.type !== "control-board")
+      fail("Part " + part.id + " is placed on " + part.board + ", which is not a control-board.");
   const cores = ofType("core");
-  if (!cores.length || cores.length > 64) fail("A board carries 1 to 64 cores.");
-  for (const type of ["dac", "adc"]) {
-    const indices = ofType(type).map((part) => part.index);
-    if (indices.some((i) => !Number.isInteger(i) || i < 0 || i > 63) || new Set(indices).size !== indices.length)
-      fail("Every " + type + " has its own index from 0 to 63.");
+  if (!cores.length || cores.length > 1024) fail("A design has 1 to 1,024 cores.");
+  // Per board: what one ZCU216 holds (riscq/board.mjs, from RISC-Q's floorplan and its converters).
+  for (const board of boards) {
+    const mine = cores.filter((core) => boardOf(core) === board.id);
+    if (mine.length > ZCU216.cores.value) fail("Board " + board.id + " carries " + mine.length + " cores; a ZCU216 holds " + ZCU216.cores.value + " (" + ZCU216.cores.source + ").");
+    for (const type of ["dac", "adc"]) {
+      const limit = type === "dac" ? ZCU216.dacs.value : ZCU216.adcs.value;
+      const indices = ofType(type).filter((part) => boardOf(part) === board.id).map((part) => part.index);
+      if (indices.some((i) => !Number.isInteger(i) || i < 0 || i >= limit) || new Set(indices).size !== indices.length)
+        fail("Every " + type + " of board " + board.id + " has its own index from 0 to " + (limit - 1) + " (a ZCU216 has " + limit + ").");
+    }
   }
   const channels = new Map();
   for (const channel of design.channels ?? []) {
@@ -82,11 +95,24 @@ export function check(design) {
     const want = { pulse: "dac", demod: "adc" }[channel.kind];
     if (!["pulse", "demod", "dio"].includes(channel.kind)) fail("Channel " + channel.id + " has the unknown kind " + channel.kind + ".");
     else if (want && parts.get(channel.converter)?.type !== want) fail("Channel " + channel.id + " of kind " + channel.kind + " needs a " + want + " as its converter.");
+    else if (want && parts.get(channel.core) && boardOf(parts.get(channel.converter)) !== boardOf(parts.get(channel.core)))
+      fail("Channel " + channel.id + " drives " + channel.converter + " on another board than its core " + channel.core + ".");
   }
   for (const core of cores) {
     const mine = [...channels.values()].filter((channel) => channel.core === core.id);
     if (mine.length < 1 || mine.length > MAP.LOCAL_NODES) fail("Core " + core.id + " has " + mine.length + " channels. A core has 1 to 16.");
     if (new Set(mine.map((channel) => channel.name)).size !== mine.length) fail("Core " + core.id + " has two channels of one name.");
+    const demods = mine.filter((channel) => channel.kind === "demod").length;
+    if (demods !== 1) fail("Core " + core.id + " has " + demods + " demod channels; RISC-Q builds exactly one (decoder + ADC) into every core.");
+  }
+  // DSP slices per board, against the ceiling where RISC-Q's builds collapse (riscq/board.mjs).
+  for (const board of boards) {
+    const mine = cores.filter((core) => boardOf(core) === board.id);
+    const spec = { cores: mine.map((core) => ({ name: core.id, memWords: design.board?.memWords ?? 4096,
+      channels: [...channels.values()].filter((channel) => channel.core === core.id).map((channel) => ({ kind: channel.kind })) })) };
+    const { use } = boardUse(spec);
+    if (use.dsp > ZCU216.dspCeiling.value)
+      fail("Board " + board.id + " needs about " + use.dsp + " DSP48E2; past " + ZCU216.dspCeiling.value + " RISC-Q's builds collapse (" + ZCU216.dspCeiling.source + ").");
   }
   for (const wire of design.wires ?? []) {
     const from = parts.get(wire.from), to = parts.get(wire.to);
@@ -173,11 +199,13 @@ export function machine(design) {
   const parts = new Map(design.parts.map((part) => [part.id, part]));
   const coreParts = design.parts.filter((part) => part.type === "core");
   const board = design.board;
+  const boardIds = design.parts.filter((part) => part.type === "control-board").map((part) => part.id);
+  const boardIndex = (part) => Math.max(0, boardIds.indexOf(part.board ?? boardIds[0]));
   const channelsOf = (core) => design.channels.filter((channel) => channel.core === core.id);
   const spec = socSpec({
     name: design.name ?? "design", dsp_freq_hz: board.dspHz, link_pipe: board.linkStages ?? 4,
     core_defaults: { mem_depth: board.memWords ?? 4096, with_mul: true, queue_depth: board.queueDepth ?? 4 },
-    cores: coreParts.map((core) => ({ name: core.id, channels: channelsOf(core).map((channel) => ({
+    cores: coreParts.map((core) => ({ name: core.id, board: boardIndex(core), channels: channelsOf(core).map((channel) => ({
       name: channel.name, kind: channel.kind, slots: channel.slots ?? 2, env_depth: board.envDepth ?? 1024, interp: channel.interp ?? 4,
       ...(channel.kind === "pulse" ? { dac: parts.get(channel.converter).index } : {}),
       ...(channel.kind === "demod" ? { adc: parts.get(channel.converter).index } : {}),
@@ -321,7 +349,9 @@ export function ringDesign({ boardMm = [0, 0, 0], chipMm = [700, 0, -350], decod
       virtualZ: p.virtualZ.map((z) => ({ qubit: z.qubit, phaseRad: z.phase })) });
   if (decoder) {
     parts.push({ id: "decoder", type: "core", centerMm: add(boardMm, [0, 12 * n - 42, 0]) });
-    channels.push({ id: "decoder.status", core: "decoder", name: "status", kind: "dio", slots: 1 });
+    channels.push({ id: "decoder.status", core: "decoder", name: "status", kind: "dio", slots: 1 },
+      // RISC-Q builds a demod channel into every core; the decoder's shares the readout ADC and is unused.
+      { id: "decoder.demod", core: "decoder", name: "demod", kind: "demod", converter: converter("adc", build.adc_map[0]).id, slots: 1, interp: build.demod_interp ?? 4 });
   }
   // A plain document: no part and route share an array.
   return JSON.parse(JSON.stringify({
