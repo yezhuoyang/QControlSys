@@ -1,2 +1,6 @@
 .pager { display: flex; justify-content: space-between; gap: 16px; margin: 28px 0 8px; font-size: 14px; }
 .tbl table td code { font-size: 12px; }
+/* A run's timetable (QSysASM), folded; long programs scroll inside the box. */
+details.qsys { margin: 14px 0; }
+details.qsys summary { cursor: pointer; font-weight: 600; }
+details.qsys pre { max-height: 28em; overflow: auto; font-size: 12px; }

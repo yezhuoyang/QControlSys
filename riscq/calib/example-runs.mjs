@@ -22,6 +22,8 @@ import { simulate, machineModel } from "../os/des.mjs";
 import { buildTrack } from "../ftqvm/track.mjs";
 import { transmon, optical } from "../ftqvm/platforms.mjs";
 import { DESIGNS } from "../ftqvm/corpus.mjs";
+import { programRow } from "../os/program-runs.mjs";
+import { PROGRAMS as OS_PROGRAMS } from "../os/programs.mjs";
 
 const RUNS = new URL("../../validation/calib/site/runs/", import.meta.url);
 const ADAPTERS = { superconducting: transmon, neutral: (o) => optical(o.id), qccd: (o) => optical(o.id) };
@@ -145,6 +147,17 @@ export const STUDY_RUNS = {
     { label: "Bell pair, runtime schedule, superconducting", params: { program: "bell-d3", design: "sc-B", execution: "ordered" } },
     { label: "Bell pair, runtime schedule, neutral atoms", params: { program: "bell-d3", design: "atoms-moving", execution: "ordered" } },
   ],
+  // Logical programs scheduled by the operating system (riscq/os/program-runs.mjs programRow): `os`.
+  programs: [
+    { label: "Bell pair · superconducting", os: true, params: { program: "bell", design: "sc-B" } },
+    { label: "Bell pair · neutral atoms", os: true, params: { program: "bell", design: "atoms-moving" } },
+    { label: "Bell pair · trapped ions", os: true, params: { program: "bell", design: "ions-qccd" } },
+    { label: "T gate by injection · superconducting", os: true, params: { program: "t-injection", design: "sc-B" } },
+    { label: "Two T gates, one factory · superconducting", os: true, params: { program: "two-t", design: "sc-B" } },
+    { label: "Four memories, one decoder · neutral atoms", os: true, params: { program: "four-memories", design: "atoms-static" } },
+    { label: "Z⊗Z parity check · trapped ions", os: true, params: { program: "parity", design: "ions-modules" } },
+    { label: "Bell pair on atoms, readout channels not counted", os: true, params: { program: "bell", design: "atoms-moving", readouts: "not counted" } },
+  ],
   scale: [
     { label: "Z⊗Z merge at d = 5 on 109 transmons", params: { program: "zzmerge-d5", design: "sc-B" } },
     { label: "Bell pair at d = 5 on 131 transmons", params: { program: "bell-d5", design: "sc-B" } },
@@ -153,8 +166,33 @@ export const STUDY_RUNS = {
 
 const INTRO = "Choose a program, a hardware design and how the operating system runs it, then run it on the cycle-exact model of the RISC-Q control hardware. The timetable is the compiler's QSysASM listing; a runtime policy runs the same program as soon as its dependencies and resources allow and the hardware then plays that schedule. Every operation is checked against its window.";
 
+/** A study's run: the operating system's (programRow) or the corpus listing's (exampleRun). */
+export const studyRun = (r) => (r.os ? programRow({ ...r.params, label: r.label }) : exampleRun({ ...r.params, label: r.label }));
+
+const OS_INTRO = "Choose a logical program, a hardware design and how the operating system schedules it. The OS counts the design's capacities, schedules the untimed QSysASM program, compiles the timetable to RISC-Q firmware and runs it on the cycle-exact model; every latency the hardware needed beyond what the OS was told is learned, and the program is scheduled again until every operation fits its window.";
+
+/** The design page of the operating-system study: a program of riscq/os/programs.mjs on a design. */
+const osDesign = (runs) => ({
+  intro: OS_INTRO,
+  params() {
+    const d = runs[0].params;
+    const opt = (xs, labels = {}) => xs.map((x) => ({ value: x, label: labels[x] ?? String(x) }));
+    return [
+      { key: "program", label: "Logical program", value: d.program, group: "Program", source: "flat QSysASM without times (riscq/os/programs.mjs)", options: OS_PROGRAMS.map((p) => ({ value: p.id, label: p.title })) },
+      { key: "design", label: "Hardware design", value: d.design, group: "Machine", source: "two designs per platform (riscq/ftqvm/corpus.mjs)", options: DESIGN_IDS.map((x) => ({ value: x, label: x + " · " + Object.values(DESIGNS).flat().find((p) => p.id === x).title })) },
+      { key: "policy", label: "Scheduler policy", value: d.policy ?? "fifo", group: "Operating system", source: "riscq/os/des.mjs", options: opt(["fifo", "order", "deadline"], { fifo: "first ready, first served", order: "program order", deadline: "earliest listed start" }) },
+      { key: "ordered", label: "Ancilla acquisition", value: d.ordered ?? "on", group: "Operating system", source: "ordered acquisition cannot deadlock", options: opt(["on", "off"], { on: "in program order", off: "greedy (may deadlock)" }) },
+      { key: "readouts", label: "Readout channels", value: d.readouts ?? "counted", group: "Operating system", source: "not a field of the interface's machine line", options: opt(["counted", "not counted"], { counted: "counted on the design", "not counted": "not counted (the interface alone)" }) },
+    ];
+  },
+  async run(params = {}) {
+    const p = { ...runs[0].params, ...Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v !== undefined && v !== null)) };
+    return { rows: [await programRow(p)] };
+  },
+});
+
 /** The design page of every Examples study: same machinery, the study's runs as starting points. */
-export const EXAMPLE_DESIGNS = Object.fromEntries(Object.entries(STUDY_RUNS).map(([id, runs]) => [id, {
+export const EXAMPLE_DESIGNS = Object.fromEntries(Object.entries(STUDY_RUNS).map(([id, runs]) => [id, runs[0].os ? osDesign(runs) : {
   intro: INTRO,
   params() {
     const d = runs[0].params;

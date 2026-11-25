@@ -89,5 +89,13 @@ function runDetail(r) {
   return `${verdict}
     ${cols.length ? table({ head: ["", ""], rows: cols }) : ""}
     ${kinds.length ? `<h3>Every kind of operation against its window</h3>${table({ head: ["Operation", "In window", "Longest hardware time (ns)", "Longest overrun (ns)"], rows: kinds.map(([k, v]) => [k, v.ok + " / " + v.count, String(v.maxHardwareNs ?? "–"), String(v.maxOverrunNs ?? 0)]) })}` : ""}
-    ${r.failures?.length ? `<h3>${r.deadlock ? "Operations waiting at the deadlock" : "First operations outside their window"}</h3>${table({ head: ["Operation", "Listing line", "Window (ns)", "Hardware (ns)", "Why"], rows: r.failures.map((f) => [f.kind, String(f.line ?? "–"), f.start !== undefined ? Math.round(f.start) + " – " + Math.round(f.end) : "–", f.hardwareNs ? Math.round(f.hardwareNs[0]) + " – " + Math.round(f.hardwareNs[1]) : "–", f.reason ?? ""]) })}` : ""}`;
+    ${r.failures?.length ? `<h3>${r.deadlock ? "Operations waiting at the deadlock" : "First operations outside their window"}</h3>${table({ head: ["Operation", "Listing line", "Window (ns)", "Hardware (ns)", "Why"], rows: r.failures.map((f) => [f.kind, String(f.line ?? "–"), f.start !== undefined ? Math.round(f.start) + " – " + Math.round(f.end) : "–", f.hardwareNs ? Math.round(f.hardwareNs[0]) + " – " + Math.round(f.hardwareNs[1]) : "–", f.reason ?? ""]) })}` : ""}
+    ${timetable(r.program)}`;
+}
+
+/** The QSysASM timetable a run played (the operating system's schedule), folded. */
+export function timetable(text) {
+  if (!text) return "";
+  const n = text.split("\n").filter((l) => /^@/.test(l)).length;
+  return `<details class="qsys"><summary>The timetable the operating system produced: ${n} timed QSysASM statements</summary><pre class="code">${esc(text)}</pre></details>`;
 }

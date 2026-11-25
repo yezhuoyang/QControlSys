@@ -44,6 +44,10 @@ export function machineModel(machine, { latency } = {}) {
   const pools = {
     gates: m.max_parallel_gates, decoders: m.decoders, factories: m.factories, qubits: m.qubits,
     classical: m.classical_data_bandwidth, routing: m.qubit_routing_bandwidth, ancillaRate: m.ancilla_bandwidth,
+    // Not an interface field: the readout channels the OS counted on the design (optional). The
+    // interface states no readout concurrency, so a program that measures more qubits at once than
+    // the design has channels runs past it (riscq/os/program-runs.mjs, a finding).
+    ...(m.readout_channels !== undefined ? { readouts: m.readout_channels } : {}),
   };
   const listed = (op) => op.duration;
   return {
@@ -53,11 +57,15 @@ export function machineModel(machine, { latency } = {}) {
       const n = op.qubits.length;
       if (GATE1.has(op.kind) || GATE2.has(op.kind)) return [["gates", 1]];
       switch (op.kind) {
-        case "measure": return [["classical", rate(1, ns)]];
+        case "measure": return [["classical", rate(1, ns)], ...(pools.readouts !== undefined ? [["readouts", 1]] : [])];
         case "route": return [["routing", rate(n, ns)]];
         case "request_ancilla": return [["qubits", op.arg ?? n], ["ancillaRate", rate(op.arg ?? n, ns)]];
         case "decode_syndrome": return [["decoders", 1]];
-        case "request_magic": return [["factories", 1]];
+        // On a design whose factory runs on the program's own channels (atoms, ions), it also holds
+        // the gate slots and readout channels it uses (factory_gates, factory_readouts; optional,
+        // not interface fields), for its whole duration.
+        case "request_magic": return [["factories", 1], ...(m.factory_gates ? [["gates", m.factory_gates]] : []),
+          ...(m.factory_readouts && pools.readouts !== undefined ? [["readouts", m.factory_readouts]] : [])];
         case "pauli_frame_update": case "parity": return [["classical", rate(Math.max(1, op.reads.length), ns)]];
         default: return [];
       }

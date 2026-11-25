@@ -133,6 +133,7 @@ export async function renderDesign(el, id, { section = "reproduce" } = {}) {
     result.innerHTML = `
       <h2>Every operation against its window</h2>${byKindTable(row.byKind)}
       ${failuresTable(row.failures)}
+      ${row.program ? `<details class="qsys"><summary>The timetable the operating system produced (QSysASM)</summary><pre class="code">${esc(row.program)}</pre></details>` : ""}
       <h2>The control system</h2>${controllerTable(row.track?.controller)}
       ${design ? `<p><button type="button" class="btn" data-act="editor">Open the chip in the hardware editor</button> <span class="cite">The edited chip, its control board and every cable, in the RISC-Q design editor.</span></p>` : ""}
       ${studioRows.includes(studioKey()) ? `<p><a class="btn" href="/riscq-studio?${new URLSearchParams({ example: "reproduction:" + id + ":" + studioKey() })}">Open this run in the RISC-Q studio</a> <span class="cite">The paper's twin, without your edits, in the studio: the QSysASM listing, the hardware instructions, every core's firmware and the Lean trace, step by step.</span></p>` : ""}`;
@@ -152,7 +153,10 @@ export async function renderDesign(el, id, { section = "reproduce" } = {}) {
   // A stored row is shown only when it is the run of these parameters (its twin key is the row's).
   // An Examples study keys its stored runs by all their parameters (riscq/calib/example-runs.mjs key()).
   const exampleKey = (p) => JSON.stringify([p.program, p.design, p.execution || "timetable", String(p.decoders ?? ""), String(p.factories ?? ""), String(p.ancillas ?? 100), p.windows || "spec"]);
-  const storedRow = (key) => (stored?.rows ?? []).find((r) => r.twinKey !== undefined && r.twinKey === (ex ? exampleKey(current()) : key) && r.track);
+  // A row with a `formKey` (the operating-system study) answers the form values it names.
+  const answers = (r, key) => (r.formKey ? Object.entries(r.formKey).every(([k, v]) => String(current()[k]) === String(v))
+    : r.twinKey !== undefined && r.twinKey === (ex ? exampleKey(current()) : key));
+  const storedRow = (key) => (stored?.rows ?? []).find((r) => answers(r, key) && r.track);
   let running = false;
   async function rerun() {
     if (running) return;

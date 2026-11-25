@@ -1,5 +1,11 @@
 [
  {
+  "id": "programs",
+  "title": "Logical programs scheduled by the operating system",
+  "kicker": "Operating system · logical circuits on every design",
+  "summary": "Small logical circuits on distance-3 surface-code blocks, written as QSysASM without a single time. The operating system schedules each one, the timetable is compiled to RISC-Q firmware and run on the design's cycle-exact model, and every latency the hardware needed beyond what the OS was told is learned, until every operation of the program fits its window. 11 programs on 6 designs of three platforms."
+ },
+ {
   "id": "fabric",
   "title": "The classical fabric of a RISC-Q system",
   "kicker": "Calibration · every platform",

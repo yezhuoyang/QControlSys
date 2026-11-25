@@ -172,8 +172,23 @@ function pool(name, size) {
       const iv = (busy[i] ?? []).find(([a]) => a === t);
       if (iv) iv[1] = Math.max(iv[1], end);
     },
-    take(t, dur) {
+    take(t, dur, prefer) {
       const free = (i) => (busy[i] ??= []).every(([a, b]) => t + dur <= a || b <= t);
+      // A caller's own channel (a factory check's detector, round after round), when it is free.
+      if (prefer !== undefined && prefer < size && free(prefer)) {
+        busy[prefer].push([t, t + dur]);
+        this.peak = Math.max(this.peak, prefer + 1);
+        return prefer;
+      }
+      // A pulse that starts as another ends continues on that channel (a beam stays on its atom
+      // for the next pulse of a sequence). Rotating instead would scatter one sequence over
+      // several channels, and a pulse that spans a boundary between its steps would find every
+      // channel touched although few are busy at any instant.
+      for (let i = 0; i < size; i++) if (busy[i]?.some(([, b]) => b === t) && free(i)) {
+        busy[i].push([t, t + dur]);
+        this.peak = Math.max(this.peak, i + 1);
+        return i;
+      }
       for (let k = 0; k < size; k++) {
         const i = (next + k) % size;
         if (free(i)) {
@@ -478,7 +493,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
         let t = t0 + b(prof.resetNs.value);
         for (const _w of f.workspace.slice(0, patch.length)) beamPulse(op, "pump", t0, prof.resetNs.value);
         t = oneQubit(op, "H", t);
-        const records = [];
+        const records = [], detector = [];
         for (let r = 0; r < distance; r++) {
           let layerEnd = t;
           for (let layer = 0; layer < 4; layer++) {
@@ -495,7 +510,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
           patch.forEach((ch, i) => {
             const name = "factory" + op.uid + ".r" + r + ".c" + i;
             records.push({ name, round: r, check: i, type: ch.type, support: ch.data });
-            const c = readouts.take(layerEnd, b(prof.measureNs.value) + 8);
+            const c = (detector[i] = readouts.take(layerEnd, b(prof.measureNs.value) + 8, detector[i]));
             const id = push(op, { op: "detect", pool: "readout", channel: c, at: layerEnd, dur: b(prof.measureNs.value), bit: name });
             measures.push({ id, channel: c, bit: name, dur: b(prof.measureNs.value) });
           });
@@ -624,6 +639,12 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   const report = conformance(listing, { hardware, lowered, origin, unrealized: [], classical, quantization: { gridPs: period } }, result, built, m);
   // Readout bits are stored by the counting core: the measurement row's bit is its count's end.
   const bitStoredNs = report.bitNs;
+  // The readout channel stays held 8 batches past the exposure (its count is read): when that
+  // channel is free again, for a scheduler that shares the channels (riscq/os/program-runs.mjs).
+  for (const mm of measures) {
+    const n = natives.find((x) => x.id === mm.id), row = n && report.rows.find((r) => r.uid === origin.get(mm.id));
+    if (row && row.kind === "measure") row.channelNs = ((n.at + mm.dur + 8) * period) / 1000;
+  }
   for (const r of report.rows) {
     if (r.kind === "measure" && r.bitNs === undefined) r.ok = false;
     if (lentOps.has(r.uid)) {

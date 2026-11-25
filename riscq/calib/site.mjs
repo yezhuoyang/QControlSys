@@ -6,7 +6,9 @@
 //   node riscq/calib/site.mjs   → validation/calib/site/index.json and <id>.json
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { gzipSync } from "node:zlib";
-import { PROGRAMS, DESIGN_IDS, STUDY_RUNS, exampleRun } from "./example-runs.mjs";
+import { PROGRAMS, DESIGN_IDS, STUDY_RUNS, studyRun } from "./example-runs.mjs";
+import { PROGRAMS as OS_PROGRAMS, programText } from "../os/programs.mjs";
+import { parse as parseQsysasm } from "../ftqvm/qsysasm.mjs";
 
 const DIR = new URL("../../validation/calib/", import.meta.url);
 const OUT = new URL("site/", DIR);
@@ -234,6 +236,75 @@ function scaleStudy() {
   };
 }
 
+/** Logical programs scheduled by the operating system on every design (riscq/os/program-runs.mjs). */
+function programsStudy() {
+  const dir = new URL("programs/", DIR);
+  const all = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(new URL(f, dir), "utf8"))) : [];
+  const at = (p, d) => all.find((r) => r.program === p && r.design === d);
+  const designs = DESIGN_IDS;
+  const titleOf = (d) => all.find((r) => r.design === d)?.designTitle ?? d;
+  const CALLS = ["request_ancilla", "route", "decode_syndrome", "pauli_frame_update", "request_magic"];
+  const ns = (x) => (x === undefined || x === null ? "–" : x >= 10000 ? fmt(x / 1000, x >= 1e6 ? 0 : 1) + " µs" : fmt(x) + " ns");
+  const programRows = OS_PROGRAMS.map((p) => {
+    const ops = parseQsysasm(programText(p.id, "superconducting")).ops;
+    const count = (k) => ops.filter((o) => o.kind === k).length;
+    return [p.title, p.summary, String(p.blocks), fmt(ops.length), CALLS.filter(count).map((k) => k + " ×" + count(k)).join(", ")];
+  });
+  const cell = (r) => (!r ? "–" : r.error ? "error" : r.conforms ? "✓ " + ms(r.makespanNs, r.makespanNs < 1e6 ? 3 : 1) + " ms" : "✗ " + (r.late ?? "?") + " late");
+  const matrix = OS_PROGRAMS.map((p) => [p.title, ...designs.map((d) => cell(at(p.id, d)))]);
+  const ok = all.filter((r) => r.conforms).length;
+  const FIELDS = [["gate2q_ns", "Two-qubit gate"], ["measure_ns", "Measurement"], ["route_latency_ns", "Route"], ["magic_state_latency_ns", "Magic state"], ["pauli_frame_update_ns", "Frame update"]];
+  const spread = (d, f) => {
+    const rs = all.filter((r) => r.design === d && r.conforms && r.learned?.[f] !== undefined && (f !== "magic_state_latency_ns" || /t-injection|two-t/.test(r.program)));
+    if (!rs.length) return "–";
+    const told = rs[0].told[f], vals = rs.map((r) => r.learned[f]);
+    const lo = Math.min(...vals), hi = Math.max(...vals);
+    return lo === told && hi === told ? ns(told) + " (held)" : ns(told) + " → " + (lo === hi ? ns(lo) : ns(lo) + " – " + ns(hi));
+  };
+  const learnedRows = designs.map((d) => [d + " · " + titleOf(d), ...FIELDS.map(([f]) => spread(d, f))]);
+  const countedRows = designs.map((d) => {
+    // Some capacities grow with the program's placed sites (a transmon each): their range over the programs.
+    const rs = all.filter((r) => r.design === d && r.counted), c = rs[0]?.counted ?? {};
+    const range = (k) => { const v = rs.map((r) => r.counted[k]), lo = Math.min(...v), hi = Math.max(...v); return lo === hi ? fmt(lo) : fmt(lo) + " – " + fmt(hi); };
+    return [d, range("qubits"), range("max_parallel_gates"), range("decoders"), range("qubit_routing_bandwidth"), c.readout_channels === undefined ? "one per transmon" : fmt(c.readout_channels)];
+  });
+  const iters = [...new Set(all.filter((r) => r.conforms).map((r) => r.iterations.length))].sort();
+  const third = all.filter((r) => r.conforms && r.iterations.length > 2);
+  const routeSpread = (d) => {
+    const v = all.filter((r) => r.design === d && r.conforms && r.learned.route_latency_ns !== r.told.route_latency_ns).map((r) => r.learned.route_latency_ns);
+    return v.length ? [Math.min(...v), Math.max(...v)] : null;
+  };
+  const rs = routeSpread("ions-qccd"), ra = routeSpread("atoms-moving");
+  const magicSc = at("t-injection", "sc-B")?.learned.magic_state_latency_ns, magicAt = at("t-injection", "atoms-moving")?.learned.magic_state_latency_ns;
+  const twoT = at("two-t", "sc-B"), oneT = at("t-injection", "sc-B");
+  return {
+    id: "programs", title: "Logical programs scheduled by the operating system", kicker: "Operating system · logical circuits on every design",
+    summary: "Small logical circuits on distance-3 surface-code blocks, written as QSysASM without a single time. The operating system schedules each one, the timetable is compiled to RISC-Q firmware and run on the design's cycle-exact model, and every latency the hardware needed beyond what the OS was told is learned, until every operation of the program fits its window. " + OS_PROGRAMS.length + " programs on " + designs.length + " designs of three platforms.",
+    method: [
+      "Each program is a logical circuit written out at the physical level: every syndrome round requests 8 ancillas, routes each to its stabilizer's data qubits, entangles and measures them, and releases them; rounds are decoded by `decode_syndrome` and the correction applied with `pauli_frame_update`; logical CNOTs are transversal, and a magic state arrives by `request_magic` into a requested ancilla block with the factory's workspace. No statement carries a time.",
+      "The operating system first counts the design's capacities: qubits, gate slots (beams or channels), decoders, factories, movers, the readout channels, and on atoms and ions the beams and channels a factory borrows; the interface's machine line has no field for the last two. It is told only typical latencies for the platform. It then schedules the program (list scheduling, first ready first served, ancillas acquired in program order so that no schedule deadlocks). The timetable is placed on the design, compiled to firmware for every control core and run on the Lean model of RISC-Q, and each operation is checked against the window the OS gave it.",
+      "Every latency the hardware needed beyond the declared one is raised to what was measured (rounded to the controller's 2 ns or 10 ns grid) and the program is scheduled again. A program conforms when one run fits every window.",
+    ],
+    sections: [
+      { heading: "The programs", table: { head: ["Program", "What it does", "Blocks", "Statements", "System calls"], rows: programRows } },
+      { heading: "Every program on every design", text: ok + " of " + all.length + " runs conform. A cell gives the makespan of the OS's final schedule.",
+        table: { head: ["Program", ...designs], rows: matrix } },
+      { heading: "What the operating system learned", text: "Told → learned. Where programs needed different amounts, the range over the programs on that design.",
+        table: { head: ["Design", ...FIELDS.map(([, w]) => w)], rows: learnedRows } },
+      { heading: "What the operating system counted", table: { head: ["Design", "Qubits (placed sites, by program)", "Gate slots", "Decoders", "Routing (qubits/µs)", "Readout channels"], rows: countedRows } },
+    ],
+    findings: [
+      "The schedule-then-measure loop converges in " + iters.join(" or ") + " runs on every design. Gate, measurement, decode and factory times do not depend on the schedule, so one run measures them; a route's time depends on where the qubits are, which the schedule changes" + (third.length ? " (" + third.length + " of " + all.length + " runs needed a third run for a longer route)" : "") + ". The OS does not need to be told the hardware's latencies; it needs its capacities.",
+      "The interface's machine line has no field for readout concurrency. Atoms and ions have a fixed number of imaging or detection channels, and a schedule that measures more qubits at once than there are channels loses bits on the hardware. Counted on the design and given to the scheduler as a pool, the same programs conform (compare the last run above).",
+      "On atoms and ions a magic-state factory is not a separate machine: its checks run on the same addressing beams and readout channels as the program (8 of each at once for a distance-3 patch). The interface counts factories but not what they borrow; the OS reserves those beams and channels for as long as `request_magic` runs, and without that the program's gates and readouts find no free channel.",
+      ...(rs && ra ? ["One route latency is not enough on atoms and ions: the time a route needs depends on where the qubits are, so different programs on the same design need different route latencies (" + ns(ra[0]) + " – " + ns(ra[1]) + " on moving atoms, " + ns(rs[0]) + " – " + ns(rs[1]) + " on the trapped-ion QCCD). The OS has to declare the worst one, or schedule with positions."] : []),
+      ...(magicSc ? ["A magic state takes " + ns(magicSc) + " from the injection factory on the superconducting design and " + ns(magicAt) + " on atoms; told 10 µs and 1 ms, the OS learns both from one run." + (twoT && oneT ? " With one factory, two T gates take " + ms(twoT.makespanNs, 3) + " ms against " + ms(oneT.makespanNs, 3) + " ms for one: the second request waits for the factory." : "")] : []),
+      "Every run is reproducible from its timetable alone: each run above shows the QSysASM the OS produced, and replaying that text on the same design gives the same run.",
+    ],
+    command: "node riscq/os/program-runs.mjs && node riscq/calib/site.mjs",
+  };
+}
+
 /**
  * The listings the Examples run (validation/calib/site/runs/<program>.<design>.json): the compiler's
  * admitted listing of each in-situ run, its distance, and for every field the number fitted on the
@@ -266,7 +337,7 @@ function writeRuns() {
 }
 
 export async function build({ runs = true } = {}) {
-  const studies = [fabricStudy(), decoderStudy(), tableStudy(), methodsStudy(), backlogStudy(), factoryStudy(), contentionStudy(), gateStudy(), scaleStudy()];
+  const studies = [programsStudy(), fabricStudy(), decoderStudy(), tableStudy(), methodsStudy(), backlogStudy(), factoryStudy(), contentionStudy(), gateStudy(), scaleStudy()];
   mkdirSync(OUT, { recursive: true });
   if (runs) console.log("stored listings:", writeRuns());
   for (const s of studies) {
@@ -277,7 +348,7 @@ export async function build({ runs = true } = {}) {
       rows = [];
       for (const r of STUDY_RUNS[s.id]) {
         const t0 = Date.now();
-        rows.push(await exampleRun({ ...r.params, label: r.label }));
+        rows.push(await studyRun(r));
         const last = rows.at(-1);
         console.log("  " + s.id + ": " + r.label + " · " + (last.conforms ? "conforms" : last.deadlock ? "deadlock" : "does not conform") + " · " + (Date.now() - t0) / 1000 + " s");
       }

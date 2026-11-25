@@ -10,3 +10,5 @@ ft-compiler.local
 docs/ftqvm-*.md
 # Raw per-operation calibration samples (about 12 MB; regenerate with node riscq/calib/insitu.mjs)
 validation/calib/insitu/
+# Raw scale study (riscq/calib/scale.mjs); its machine names stay out of the repository
+validation/calib/scale.json
