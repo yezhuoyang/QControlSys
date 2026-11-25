@@ -1,0 +1,2469 @@
+{
+ "generated": "2026-11-25T13:24:40.709Z",
+ "runs": 65,
+ "failed": [
+  {
+   "program": "measurement-d3",
+   "design": "ions-qccd",
+   "why": "listing line 143: zone of the route's hub is full (12 ions, capacity 12; the route gathers 13; others there: )"
+  }
+ ],
+ "rows": [
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "reset_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2280,
+   "derived": 100000,
+   "needed": {
+    "n": 2280,
+    "min": 100000,
+    "p50": 100000,
+    "p99": 100000,
+    "max": 100000,
+    "mean": 100000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 1000,
+    "CainXu2026": 100000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "gate1q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 1297,
+   "derived": 8000,
+   "needed": {
+    "n": 1297,
+    "min": 8000,
+    "p50": 8000,
+    "p99": 8000,
+    "max": 8000,
+    "mean": 8000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 1000,
+    "CainXu2026": 10000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "route_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2390,
+   "derived": 187570,
+   "needed": {
+    "n": 2390,
+    "min": 73340,
+    "p50": 92766,
+    "p99": 161114,
+    "max": 187568,
+    "mean": 95065.07280334728
+   },
+   "slackAtMedian": 94804,
+   "coverageOfP50": 0.900836820083682,
+   "audits": {
+    "Zhou2025": 500000,
+    "CainXu2026": 1000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "gate2q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 7681,
+   "derived": 16270,
+   "needed": {
+    "n": 7681,
+    "min": 270,
+    "p50": 16270,
+    "p99": 16270,
+    "max": 16270,
+    "mean": 15570.091133966931
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 100000,
+    "CainXu2026": 20000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "measure_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2413,
+   "derived": 508070,
+   "needed": {
+    "n": 2413,
+    "min": 500066,
+    "p50": 508066,
+    "p99": 508066,
+    "max": 508066,
+    "mean": 504289.7878159967
+   },
+   "slackAtMedian": 4,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 500000,
+    "CainXu2026": 400000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "decoder_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 66,
+   "derived": 190480,
+   "needed": {
+    "n": 66,
+    "min": 154,
+    "p50": 35678,
+    "p99": 190480,
+    "max": 190480,
+    "mean": 38458.545454545456
+   },
+   "slackAtMedian": 154802,
+   "coverageOfP50": 0.8787878787878788,
+   "audits": {
+    "Zhou2025": 1000000,
+    "CainXu2026": 1000000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "pauli_frame_update_ns",
+   "programs": [
+    "dj-d3",
+    "loop-d3",
+    "measurement-d3",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 9,
+   "derived": 330,
+   "needed": {
+    "n": 9,
+    "min": 182,
+    "p50": 182,
+    "p99": 322,
+    "max": 322,
+    "mean": 197.55555555555554
+   },
+   "slackAtMedian": 148,
+   "coverageOfP50": 0.8888888888888888,
+   "audits": {
+    "Zhou2025": 40,
+    "CainXu2026": 1000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "magic_state_latency_ns",
+   "programs": [
+    "tinject-d3"
+   ],
+   "samples": 2,
+   "derived": 2074770,
+   "needed": {
+    "n": 2,
+    "min": 2074770,
+    "p50": 2074770,
+    "p99": 2074770,
+    "max": 2074770,
+    "mean": 2074770
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 34000000,
+    "CainXu2026": 1000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "decoders",
+   "derived": 1,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": 100000,
+    "CainXu2026": 1000000000000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "classical_data_bandwidth",
+   "derived": 100,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": 100000000,
+    "CainXu2026": 1000000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "max_parallel_gates",
+   "derived": 16,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "qubit_routing_bandwidth",
+   "derived": 4,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "ancilla_bandwidth",
+   "derived": 64,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "factories",
+   "derived": 1,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "field": "qubits",
+   "derived": 131,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "reset_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2280,
+   "derived": 100000,
+   "needed": {
+    "n": 2280,
+    "min": 100000,
+    "p50": 100000,
+    "p99": 100000,
+    "max": 100000,
+    "mean": 100000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 1000,
+    "CainXu2026": 100000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "gate1q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 1297,
+   "derived": 8000,
+   "needed": {
+    "n": 1297,
+    "min": 8000,
+    "p50": 8000,
+    "p99": 8000,
+    "max": 8000,
+    "mean": 8000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 1000,
+    "CainXu2026": 10000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "route_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2390,
+   "derived": 117440,
+   "needed": {
+    "n": 2390,
+    "min": 0,
+    "p50": 0,
+    "p99": 95016,
+    "max": 117440,
+    "mean": 9961.289539748954
+   },
+   "slackAtMedian": 117440,
+   "coverageOfP50": 0.8527196652719665,
+   "audits": {
+    "Zhou2025": 500000,
+    "CainXu2026": 1000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "gate2q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 7681,
+   "derived": 16270,
+   "needed": {
+    "n": 7681,
+    "min": 270,
+    "p50": 16270,
+    "p99": 16270,
+    "max": 16270,
+    "mean": 15570.091133966931
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 100000,
+    "CainXu2026": 20000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "measure_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2413,
+   "derived": 508070,
+   "needed": {
+    "n": 2413,
+    "min": 500066,
+    "p50": 508066,
+    "p99": 508066,
+    "max": 508066,
+    "mean": 504289.7878159967
+   },
+   "slackAtMedian": 4,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 500000,
+    "CainXu2026": 400000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "decoder_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 66,
+   "derived": 190480,
+   "needed": {
+    "n": 66,
+    "min": 154,
+    "p50": 35678,
+    "p99": 190480,
+    "max": 190480,
+    "mean": 38458.545454545456
+   },
+   "slackAtMedian": 154802,
+   "coverageOfP50": 0.8787878787878788,
+   "audits": {
+    "Zhou2025": 1000000,
+    "CainXu2026": 1000000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "pauli_frame_update_ns",
+   "programs": [
+    "dj-d3",
+    "loop-d3",
+    "measurement-d3",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 9,
+   "derived": 330,
+   "needed": {
+    "n": 9,
+    "min": 182,
+    "p50": 182,
+    "p99": 322,
+    "max": 322,
+    "mean": 197.55555555555554
+   },
+   "slackAtMedian": 148,
+   "coverageOfP50": 0.8888888888888888,
+   "audits": {
+    "Zhou2025": 40,
+    "CainXu2026": 1000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "magic_state_latency_ns",
+   "programs": [
+    "tinject-d3"
+   ],
+   "samples": 2,
+   "derived": 2074770,
+   "needed": {
+    "n": 2,
+    "min": 2074770,
+    "p50": 2074770,
+    "p99": 2074770,
+    "max": 2074770,
+    "mean": 2074770
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "Zhou2025": 34000000,
+    "CainXu2026": 1000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "decoders",
+   "derived": 1,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": 100000,
+    "CainXu2026": 1000000000000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "classical_data_bandwidth",
+   "derived": 100,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": 100000000,
+    "CainXu2026": 1000000
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "max_parallel_gates",
+   "derived": 16,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "qubit_routing_bandwidth",
+   "derived": 4,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "ancilla_bandwidth",
+   "derived": 64,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "factories",
+   "derived": 1,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "neutral",
+   "design": "atoms-static",
+   "field": "qubits",
+   "derived": 131,
+   "source": "derived",
+   "audits": {
+    "Zhou2025": null,
+    "CainXu2026": null
+   }
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "reset_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2280,
+   "derived": 10000,
+   "needed": {
+    "n": 2280,
+    "min": 10000,
+    "p50": 10000,
+    "p99": 10000,
+    "max": 10000,
+    "mean": 10000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "gate1q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 1297,
+   "derived": 5000,
+   "needed": {
+    "n": 1297,
+    "min": 5000,
+    "p50": 5000,
+    "p99": 5000,
+    "max": 5000,
+    "mean": 5000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "route_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2390,
+   "derived": 1500200,
+   "needed": {
+    "n": 2390,
+    "min": 0,
+    "p50": 0,
+    "p99": 1372600,
+    "max": 1500200,
+    "mean": 503022.51046025107
+   },
+   "slackAtMedian": 1500200,
+   "coverageOfP50": 0.5732217573221757,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "gate2q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 7681,
+   "derived": 35000,
+   "needed": {
+    "n": 7681,
+    "min": 25000,
+    "p50": 35000,
+    "p99": 35000,
+    "max": 35000,
+    "mean": 34562.556958729336
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "measure_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2413,
+   "derived": 125070,
+   "needed": {
+    "n": 2413,
+    "min": 120066,
+    "p50": 125066,
+    "p99": 125066,
+    "max": 125066,
+    "mean": 122705.86738499792
+   },
+   "slackAtMedian": 4,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "decoder_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 66,
+   "derived": 190630,
+   "needed": {
+    "n": 66,
+    "min": 154,
+    "p50": 35678,
+    "p99": 190480,
+    "max": 190480,
+    "mean": 38458.545454545456
+   },
+   "slackAtMedian": 154952,
+   "coverageOfP50": 0.8787878787878788,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "pauli_frame_update_ns",
+   "programs": [
+    "dj-d3",
+    "loop-d3",
+    "measurement-d3",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 9,
+   "derived": 330,
+   "needed": {
+    "n": 9,
+    "min": 182,
+    "p50": 182,
+    "p99": 322,
+    "max": 322,
+    "mean": 197.55555555555554
+   },
+   "slackAtMedian": 148,
+   "coverageOfP50": 0.8888888888888888,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "magic_state_latency_ns",
+   "programs": [
+    "tinject-d3"
+   ],
+   "samples": 2,
+   "derived": 886530,
+   "needed": {
+    "n": 2,
+    "min": 886530,
+    "p50": 886530,
+    "p99": 886530,
+    "max": 886530,
+    "mean": 886530
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "decoders",
+   "derived": 1,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "classical_data_bandwidth",
+   "derived": 100,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "max_parallel_gates",
+   "derived": 16,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "qubit_routing_bandwidth",
+   "derived": 32,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "ancilla_bandwidth",
+   "derived": 64,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "factories",
+   "derived": 1,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-modules",
+   "field": "qubits",
+   "derived": 131,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "reset_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2206,
+   "derived": 10000,
+   "needed": {
+    "n": 2206,
+    "min": 10000,
+    "p50": 10000,
+    "p99": 10000,
+    "max": 10000,
+    "mean": 10000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "gate1q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 1254,
+   "derived": 5000,
+   "needed": {
+    "n": 1254,
+    "min": 5000,
+    "p50": 5000,
+    "p99": 5000,
+    "max": 5000,
+    "mean": 5000
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "route_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2312,
+   "derived": 1500200,
+   "needed": {
+    "n": 2312,
+    "min": 869800,
+    "p50": 1053600,
+    "p99": 1308800,
+    "max": 1500200,
+    "mean": 1009898.5294117647
+   },
+   "slackAtMedian": 446600,
+   "coverageOfP50": 0.9407439446366782,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "gate2q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 7426,
+   "derived": 35000,
+   "needed": {
+    "n": 7426,
+    "min": 25000,
+    "p50": 35000,
+    "p99": 35000,
+    "max": 35000,
+    "mean": 34567.73498518718
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "measure_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2334,
+   "derived": 125070,
+   "needed": {
+    "n": 2334,
+    "min": 120066,
+    "p50": 125066,
+    "p99": 125066,
+    "max": 125066,
+    "mean": 122705.24592973436
+   },
+   "slackAtMedian": 4,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "decoder_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 64,
+   "derived": 190630,
+   "needed": {
+    "n": 64,
+    "min": 154,
+    "p50": 35678,
+    "p99": 190480,
+    "max": 190480,
+    "mean": 38543.03125
+   },
+   "slackAtMedian": 154952,
+   "coverageOfP50": 0.890625,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "pauli_frame_update_ns",
+   "programs": [
+    "dj-d3",
+    "loop-d3",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 8,
+   "derived": 330,
+   "needed": {
+    "n": 8,
+    "min": 182,
+    "p50": 182,
+    "p99": 322,
+    "max": 322,
+    "mean": 199.5
+   },
+   "slackAtMedian": 148,
+   "coverageOfP50": 0.875,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "magic_state_latency_ns",
+   "programs": [
+    "tinject-d3"
+   ],
+   "samples": 2,
+   "derived": 886530,
+   "needed": {
+    "n": 2,
+    "min": 886530,
+    "p50": 886530,
+    "p99": 886530,
+    "max": 886530,
+    "mean": 886530
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "decoders",
+   "derived": 1,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "classical_data_bandwidth",
+   "derived": 100,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "max_parallel_gates",
+   "derived": 16,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "qubit_routing_bandwidth",
+   "derived": 32,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "ancilla_bandwidth",
+   "derived": 64,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "factories",
+   "derived": 1,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "field": "qubits",
+   "derived": 131,
+   "source": "derived",
+   "audits": {}
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "reset_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2280,
+   "derived": 160,
+   "needed": {
+    "n": 2280,
+    "min": 160,
+    "p50": 160,
+    "p99": 160,
+    "max": 160,
+    "mean": 160
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 250,
+    "Gidney2025": 250,
+    "Beverland2022": 100,
+    "Pinnacle": 200,
+    "Jacinto2026": 250
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "gate1q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 1297,
+   "derived": 36,
+   "needed": {
+    "n": 1297,
+    "min": 36,
+    "p50": 36,
+    "p99": 36,
+    "max": 36,
+    "mean": 36
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 25,
+    "Gidney2025": 25,
+    "Beverland2022": 50,
+    "Pinnacle": 100,
+    "Jacinto2026": 25
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "route_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2390,
+   "derived": 2,
+   "needed": {
+    "n": 2390,
+    "min": 0,
+    "p50": 0,
+    "p99": 0,
+    "max": 0,
+    "mean": 0
+   },
+   "slackAtMedian": 2,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 100,
+    "Gidney2025": 100,
+    "Beverland2022": 400,
+    "Pinnacle": 1000,
+    "Jacinto2026": 100
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "gate2q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 7681,
+   "derived": 472,
+   "needed": {
+    "n": 7681,
+    "min": 400,
+    "p50": 472,
+    "p99": 472,
+    "max": 472,
+    "mean": 468.8504101028512
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 50,
+    "Gidney2025": 50,
+    "Beverland2022": 50,
+    "Pinnacle": 100,
+    "Jacinto2026": 50
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "measure_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2413,
+   "derived": 1440,
+   "needed": {
+    "n": 2413,
+    "min": 1044,
+    "p50": 1236,
+    "p99": 1440,
+    "max": 1440,
+    "mean": 1225.1048487360133
+   },
+   "slackAtMedian": 204,
+   "coverageOfP50": 0.5971819312059676,
+   "audits": {
+    "GE2021": 550,
+    "Gidney2025": 550,
+    "Beverland2022": 100,
+    "Pinnacle": 200,
+    "Jacinto2026": 475
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "decoder_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 66,
+   "derived": 2015286,
+   "needed": {
+    "n": 66,
+    "min": 154,
+    "p50": 71356,
+    "p99": 761920,
+    "max": 761920,
+    "mean": 103904.09090909091
+   },
+   "slackAtMedian": 1943930,
+   "coverageOfP50": 0.7727272727272727,
+   "audits": {
+    "GE2021": 10000,
+    "Gidney2025": 10000,
+    "Beverland2022": 10000,
+    "Pinnacle": 10000,
+    "Jacinto2026": 10000
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "pauli_frame_update_ns",
+   "programs": [
+    "dj-d3",
+    "loop-d3",
+    "measurement-d3",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 9,
+   "derived": 322,
+   "needed": {
+    "n": 9,
+    "min": 182,
+    "p50": 182,
+    "p99": 322,
+    "max": 322,
+    "mean": 197.55555555555554
+   },
+   "slackAtMedian": 140,
+   "coverageOfP50": 0.8888888888888888,
+   "audits": {
+    "GE2021": 40,
+    "Gidney2025": 40,
+    "Beverland2022": 40,
+    "Pinnacle": 40,
+    "Jacinto2026": 40
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "magic_state_latency_ns",
+   "programs": [
+    "tinject-d3"
+   ],
+   "samples": 2,
+   "derived": 135000,
+   "needed": {
+    "n": 2,
+    "min": 81724,
+    "p50": 81724,
+    "p99": 81724,
+    "max": 81724,
+    "mean": 81724
+   },
+   "slackAtMedian": 53276,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 135000,
+    "Gidney2025": 150000,
+    "Beverland2022": 72800,
+    "Pinnacle": 18000,
+    "Jacinto2026": 109300
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "decoders",
+   "derived": 1,
+   "source": "derived",
+   "audits": {
+    "GE2021": 12276,
+    "Gidney2025": 1550,
+    "Beverland2022": 25481,
+    "Pinnacle": 166,
+    "Jacinto2026": 100000
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "classical_data_bandwidth",
+   "derived": 500,
+   "source": "derived",
+   "audits": {
+    "GE2021": 17873856,
+    "Gidney2025": 922272,
+    "Beverland2022": 43062890,
+    "Pinnacle": 23984930,
+    "Jacinto2026": 100000000
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "max_parallel_gates",
+   "derived": 131,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "qubit_routing_bandwidth",
+   "derived": 65500,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "ancilla_bandwidth",
+   "derived": 819,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "factories",
+   "derived": 1,
+   "source": "provisional",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-A",
+   "field": "qubits",
+   "derived": 131,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "reset_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2280,
+   "derived": 160,
+   "needed": {
+    "n": 2280,
+    "min": 160,
+    "p50": 160,
+    "p99": 160,
+    "max": 160,
+    "mean": 160
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 250,
+    "Gidney2025": 250,
+    "Beverland2022": 100,
+    "Pinnacle": 200,
+    "Jacinto2026": 250
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "gate1q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 1297,
+   "derived": 36,
+   "needed": {
+    "n": 1297,
+    "min": 36,
+    "p50": 36,
+    "p99": 36,
+    "max": 36,
+    "mean": 36
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 25,
+    "Gidney2025": 25,
+    "Beverland2022": 50,
+    "Pinnacle": 100,
+    "Jacinto2026": 25
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "route_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2390,
+   "derived": 2,
+   "needed": {
+    "n": 2390,
+    "min": 0,
+    "p50": 0,
+    "p99": 0,
+    "max": 0,
+    "mean": 0
+   },
+   "slackAtMedian": 2,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 100,
+    "Gidney2025": 100,
+    "Beverland2022": 400,
+    "Pinnacle": 1000,
+    "Jacinto2026": 100
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "gate2q_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 7681,
+   "derived": 472,
+   "needed": {
+    "n": 7681,
+    "min": 400,
+    "p50": 472,
+    "p99": 472,
+    "max": 472,
+    "mean": 468.8504101028512
+   },
+   "slackAtMedian": 0,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 50,
+    "Gidney2025": 50,
+    "Beverland2022": 50,
+    "Pinnacle": 100,
+    "Jacinto2026": 50
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "measure_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 2413,
+   "derived": 1440,
+   "needed": {
+    "n": 2413,
+    "min": 1044,
+    "p50": 1236,
+    "p99": 1440,
+    "max": 1440,
+    "mean": 1225.1048487360133
+   },
+   "slackAtMedian": 204,
+   "coverageOfP50": 0.5971819312059676,
+   "audits": {
+    "GE2021": 550,
+    "Gidney2025": 550,
+    "Beverland2022": 100,
+    "Pinnacle": 200,
+    "Jacinto2026": 475
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "decoder_latency_ns",
+   "programs": [
+    "bell-d3",
+    "bell-d5",
+    "dj-d3",
+    "ghz3-d3",
+    "loop-d3",
+    "measurement-d3",
+    "memory-d3",
+    "memory-d5",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 66,
+   "derived": 191410,
+   "needed": {
+    "n": 66,
+    "min": 154,
+    "p50": 35678,
+    "p99": 190520,
+    "max": 190520,
+    "mean": 38464.606060606064
+   },
+   "slackAtMedian": 155732,
+   "coverageOfP50": 0.7878787878787878,
+   "audits": {
+    "GE2021": 10000,
+    "Gidney2025": 10000,
+    "Beverland2022": 10000,
+    "Pinnacle": 10000,
+    "Jacinto2026": 10000
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "pauli_frame_update_ns",
+   "programs": [
+    "dj-d3",
+    "loop-d3",
+    "measurement-d3",
+    "tinject-d3",
+    "zzmerge-d3",
+    "zzmerge-d5"
+   ],
+   "samples": 9,
+   "derived": 322,
+   "needed": {
+    "n": 9,
+    "min": 182,
+    "p50": 182,
+    "p99": 322,
+    "max": 322,
+    "mean": 197.55555555555554
+   },
+   "slackAtMedian": 140,
+   "coverageOfP50": 0.8888888888888888,
+   "audits": {
+    "GE2021": 40,
+    "Gidney2025": 40,
+    "Beverland2022": 40,
+    "Pinnacle": 40,
+    "Jacinto2026": 40
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "magic_state_latency_ns",
+   "programs": [
+    "tinject-d3"
+   ],
+   "samples": 2,
+   "derived": 135000,
+   "needed": {
+    "n": 2,
+    "min": 81724,
+    "p50": 81724,
+    "p99": 81724,
+    "max": 81724,
+    "mean": 81724
+   },
+   "slackAtMedian": 53276,
+   "coverageOfP50": 1,
+   "audits": {
+    "GE2021": 135000,
+    "Gidney2025": 150000,
+    "Beverland2022": 72800,
+    "Pinnacle": 18000,
+    "Jacinto2026": 109300
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "decoders",
+   "derived": 2,
+   "source": "derived",
+   "audits": {
+    "GE2021": 12276,
+    "Gidney2025": 1550,
+    "Beverland2022": 25481,
+    "Pinnacle": 166,
+    "Jacinto2026": 100000
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "classical_data_bandwidth",
+   "derived": 500,
+   "source": "derived",
+   "audits": {
+    "GE2021": 17873856,
+    "Gidney2025": 922272,
+    "Beverland2022": 43062890,
+    "Pinnacle": 23984930,
+    "Jacinto2026": 100000000
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "max_parallel_gates",
+   "derived": 131,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "qubit_routing_bandwidth",
+   "derived": 65500,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "ancilla_bandwidth",
+   "derived": 819,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "factories",
+   "derived": 1,
+   "source": "provisional",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  },
+  {
+   "platform": "superconducting",
+   "design": "sc-B",
+   "field": "qubits",
+   "derived": 131,
+   "source": "derived",
+   "audits": {
+    "GE2021": null,
+    "Gidney2025": null,
+    "Beverland2022": null,
+    "Pinnacle": null,
+    "Jacinto2026": null
+   }
+  }
+ ],
+ "fabric": {
+  "publish": {
+   "2": {
+    "local": {
+     "n": 8,
+     "min": 29,
+     "median": 29,
+     "max": 29
+    },
+    "toRoot": {
+     "n": 8,
+     "min": 346,
+     "median": 350,
+     "max": 353
+    },
+    "toOther": null,
+    "runs": [
+     [
+      348,
+      29
+     ],
+     [
+      349,
+      29
+     ],
+     [
+      350,
+      29
+     ],
+     [
+      351,
+      29
+     ],
+     [
+      352,
+      29
+     ],
+     [
+      353,
+      29
+     ],
+     [
+      346,
+      29
+     ],
+     [
+      347,
+      29
+     ]
+    ]
+   },
+   "4": {
+    "local": {
+     "n": 8,
+     "min": 29,
+     "median": 29,
+     "max": 29
+    },
+    "toRoot": {
+     "n": 8,
+     "min": 346,
+     "median": 350,
+     "max": 353
+    },
+    "toOther": {
+     "n": 8,
+     "min": 666,
+     "median": 670,
+     "max": 673
+    },
+    "runs": [
+     [
+      348,
+      668,
+      668,
+      29
+     ],
+     [
+      349,
+      669,
+      669,
+      29
+     ],
+     [
+      350,
+      670,
+      670,
+      29
+     ],
+     [
+      351,
+      671,
+      671,
+      29
+     ],
+     [
+      352,
+      672,
+      672,
+      29
+     ],
+     [
+      353,
+      673,
+      673,
+      29
+     ],
+     [
+      346,
+      666,
+      666,
+      29
+     ],
+     [
+      347,
+      667,
+      667,
+      29
+     ]
+    ]
+   },
+   "8": {
+    "local": {
+     "n": 8,
+     "min": 29,
+     "median": 29,
+     "max": 29
+    },
+    "toRoot": {
+     "n": 8,
+     "min": 346,
+     "median": 350,
+     "max": 353
+    },
+    "toOther": {
+     "n": 8,
+     "min": 666,
+     "median": 670,
+     "max": 673
+    },
+    "runs": [
+     [
+      348,
+      668,
+      668,
+      668,
+      668,
+      668,
+      668,
+      29
+     ],
+     [
+      349,
+      669,
+      669,
+      669,
+      669,
+      669,
+      669,
+      29
+     ],
+     [
+      350,
+      670,
+      670,
+      670,
+      670,
+      670,
+      670,
+      29
+     ],
+     [
+      351,
+      671,
+      671,
+      671,
+      671,
+      671,
+      671,
+      29
+     ],
+     [
+      352,
+      672,
+      672,
+      672,
+      672,
+      672,
+      672,
+      29
+     ],
+     [
+      353,
+      673,
+      673,
+      673,
+      673,
+      673,
+      673,
+      29
+     ],
+     [
+      346,
+      666,
+      666,
+      666,
+      666,
+      666,
+      666,
+      29
+     ],
+     [
+      347,
+      667,
+      667,
+      667,
+      667,
+      667,
+      667,
+      29
+     ]
+    ]
+   }
+  },
+  "barrier": {
+   "1": {
+    "lastOnRoot": {
+     "n": 8,
+     "min": 32,
+     "median": 32,
+     "max": 32
+    },
+    "lastOnOther": null
+   },
+   "2": {
+    "lastOnRoot": {
+     "n": 8,
+     "min": 420,
+     "median": 424,
+     "max": 427
+    },
+    "lastOnOther": {
+     "n": 8,
+     "min": 826,
+     "median": 830,
+     "max": 833
+    }
+   },
+   "4": {
+    "lastOnRoot": {
+     "n": 8,
+     "min": 428,
+     "median": 432,
+     "max": 435
+    },
+    "lastOnOther": {
+     "n": 8,
+     "min": 826,
+     "median": 830,
+     "max": 833
+    }
+   },
+   "8": {
+    "lastOnRoot": {
+     "n": 8,
+     "min": 444,
+     "median": 448,
+     "max": 451
+    },
+    "lastOnOther": {
+     "n": 8,
+     "min": 834,
+     "median": 838,
+     "max": 841
+    }
+   }
+  },
+  "flood": {
+   "hub": {
+    "senders": 8,
+    "count": 48,
+    "from": 0,
+    "sent": 384,
+    "delivered": 349,
+    "dropped": 35,
+    "bitsPerUs": 500.00000000000006,
+    "firstLatency": 29,
+    "lastLatency": 115
+   },
+   "lane": {
+    "senders": 8,
+    "count": 48,
+    "from": 1,
+    "sent": 384,
+    "delivered": 349,
+    "dropped": 35,
+    "bitsPerUs": 3.125,
+    "firstLatency": 348,
+    "lastLatency": 55766
+   }
+  },
+  "ops": [
+   {
+    "op": "frame",
+    "k": 1,
+    "cycles": 23,
+    "ns": 46,
+    "emptyStamp": 16
+   },
+   {
+    "op": "publish",
+    "k": 1,
+    "cycles": 7,
+    "ns": 14,
+    "emptyStamp": 16
+   },
+   {
+    "op": "parity",
+    "k": 1,
+    "cycles": 23,
+    "ns": 46,
+    "emptyStamp": 16
+   },
+   {
+    "op": "parity",
+    "k": 2,
+    "cycles": 31,
+    "ns": 62,
+    "emptyStamp": 16
+   },
+   {
+    "op": "parity",
+    "k": 4,
+    "cycles": 47,
+    "ns": 94,
+    "emptyStamp": 16
+   },
+   {
+    "op": "parity",
+    "k": 8,
+    "cycles": 79,
+    "ns": 158,
+    "emptyStamp": 16
+   },
+   {
+    "op": "parity",
+    "k": 16,
+    "cycles": 143,
+    "ns": 286,
+    "emptyStamp": 16
+   },
+   {
+    "op": "parity",
+    "k": 32,
+    "cycles": 271,
+    "ns": 542,
+    "emptyStamp": 16
+   },
+   {
+    "op": "decode",
+    "k": 1,
+    "cycles": 41,
+    "ns": 82,
+    "emptyStamp": 16
+   },
+   {
+    "op": "decode",
+    "k": 2,
+    "cycles": 41,
+    "ns": 82,
+    "emptyStamp": 16
+   },
+   {
+    "op": "decode",
+    "k": 4,
+    "cycles": 41,
+    "ns": 82,
+    "emptyStamp": 16
+   },
+   {
+    "op": "decode",
+    "k": 8,
+    "cycles": 41,
+    "ns": 82,
+    "emptyStamp": 16
+   },
+   {
+    "op": "decode",
+    "k": 10,
+    "cycles": 41,
+    "ns": 82,
+    "emptyStamp": 16
+   }
+  ],
+  "laneDelay": [
+   {
+    "laneWords": 3,
+    "publishCycles": 348,
+    "barrierWorstCycles": 832
+   },
+   {
+    "laneWords": 6,
+    "publishCycles": 372,
+    "barrierWorstCycles": 880
+   },
+   {
+    "laneWords": 12,
+    "publishCycles": 420,
+    "barrierWorstCycles": 976
+   },
+   {
+    "laneWords": 24,
+    "publishCycles": 516,
+    "barrierWorstCycles": 1168
+   }
+  ]
+ },
+ "decoder": {
+  "fields": {
+   "decoder_latency_ns": {
+    "value": 203934,
+    "source": "measured",
+    "note": "the longest decode of every workload, bits in (392 ns) + compute"
+   },
+   "decoder_latency_model": {
+    "value": "0 + 1988*n",
+    "source": "measured",
+    "note": "a + b·n above every (input bits, latency) of every workload"
+   },
+   "decoder_bandwidth": {
+    "value": 1,
+    "source": "measured",
+    "note": "input bits per µs of the slowest decode (d = 5, 2 rounds, p = 0.0023)"
+   },
+   "decoder_window_rounds": {
+    "value": 4,
+    "source": "derived",
+    "note": "rounds of one block a decode takes: the board hub shares 128 bits (riscq/compile.mjs); per distance d = 3: 14, d = 5: 4"
+   },
+   "classical_memory": {
+    "value": 524288,
+    "source": "derived",
+    "note": "the decoder core's RAM; the largest compiled image takes 3417 of its 16384 words"
+   }
+  },
+  "model": {
+   "a": 0,
+   "b": 1988,
+   "expression": "0 + 1988*n"
+  },
+  "inRun": {
+   "bitsInNs": 392,
+   "computeNs": 25222,
+   "resultOutNs": 476,
+   "toPulseNs": 26090,
+   "circuit": "rotated surface-code memory, d = 3, 3 rounds, on 17 transmons; shot 1 with 4 detectors fired",
+   "decoderBytes": 9020
+  }
+ }
+}

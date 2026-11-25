@@ -1,0 +1,1248 @@
+{
+ "generated": "2026-11-25T09:58:31.973Z",
+ "calibration": "2026-11-25T04:56:35.773Z",
+ "rounds": {
+  "superconducting": [
+   {
+    "name": "Willow cycle (Google 2025)",
+    "ns": 1100,
+    "source": "Google Quantum AI, Nature 638, 920 (2025): 1.1 µs cycle"
+   }
+  ],
+  "neutral": [
+   {
+    "name": "Bluvstein 2025 round",
+    "ns": 4450000,
+    "source": "Bluvstein et al., Nature 649, 39 (2025): 4.45 ms per round (this tree's twin reproduces it)"
+   }
+  ],
+  "qccd": [
+   {
+    "name": "H2 round (QCCD Studio model)",
+    "ns": 2000000,
+    "source": "order of the H2 twin's d = 3 memory round in this tree (riscq/calib/insitu); replace with the derived surfaceRound runtime"
+   }
+  ]
+ },
+ "rows": [
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 3,
+   "w": 1,
+   "p": 0.001,
+   "criticalDecoders": 5,
+   "vmDecoders": 21,
+   "loadWithOne": 2.403081818181818,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 1723.6621,
+    "waitP99": 511248
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 17832,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 1450,
+   "serviceMax": 22032
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 3,
+   "w": 1,
+   "p": 0.003,
+   "criticalDecoders": 5,
+   "vmDecoders": 21,
+   "loadWithOne": 4.4475454545454545,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 3725.7952,
+    "waitP99": 1077478
+   },
+   "atCritical": {
+    "waitP99": 10272,
+    "responseP99": 22122,
+    "lateVsWorst": 0.006666666666666667
+   },
+   "serviceP50": 1450,
+   "serviceMax": 22122
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 3,
+   "w": 2,
+   "p": 0.001,
+   "criticalDecoders": 4,
+   "vmDecoders": 13,
+   "loadWithOne": 2.7008227272727274,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 3032.3643000000006,
+    "waitP99": 896286
+   },
+   "atCritical": {
+    "waitP99": 1578,
+    "responseP99": 27734,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 2726,
+   "serviceMax": 28460
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 3,
+   "w": 2,
+   "p": 0.003,
+   "criticalDecoders": 7,
+   "vmDecoders": 17,
+   "loadWithOne": 5.414413636363636,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 8528.5172,
+    "waitP99": 2453672
+   },
+   "atCritical": {
+    "waitP99": 5092,
+    "responseP99": 37090,
+    "lateVsWorst": 0.006666666666666667
+   },
+   "serviceP50": 14408,
+   "serviceMax": 37090
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 3,
+   "w": 3,
+   "p": 0.001,
+   "criticalDecoders": 3,
+   "vmDecoders": 14,
+   "loadWithOne": 2.943657575757576,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 5458.9517000000005,
+    "waitP99": 1717310
+   },
+   "atCritical": {
+    "waitP99": 33754,
+    "responseP99": 56380,
+    "lateVsWorst": 0.04666666666666667
+   },
+   "serviceP50": 4038,
+   "serviceMax": 43428
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "criticalDecoders": 6,
+   "vmDecoders": 16,
+   "loadWithOne": 5.915566666666666,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 15267.354099999999,
+    "waitP99": 4417118
+   },
+   "atCritical": {
+    "waitP99": 16224,
+    "responseP99": 53708,
+    "lateVsWorst": 0.01
+   },
+   "serviceP50": 20686,
+   "serviceMax": 50974
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "criticalDecoders": 12,
+   "vmDecoders": 40,
+   "loadWithOne": 8.99070909090909,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 9333.3548,
+    "waitP99": 2808906
+   },
+   "atCritical": {
+    "waitP99": 1416,
+    "responseP99": 37036,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 4152,
+   "serviceMax": 43066
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 1,
+   "p": 0.003,
+   "criticalDecoders": 22,
+   "vmDecoders": 65,
+   "loadWithOne": 17.75062727272727,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 19826.096400000002,
+    "waitP99": 5722116
+   },
+   "atCritical": {
+    "waitP99": 1296,
+    "responseP99": 60126,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 20556,
+   "serviceMax": 71112
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 2,
+   "p": 0.001,
+   "criticalDecoders": 15,
+   "vmDecoders": 33,
+   "loadWithOne": 11.19569090909091,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 23306.1388,
+    "waitP99": 6851744
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 62892,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 8136,
+   "serviceMax": 70804
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 2,
+   "p": 0.003,
+   "criticalDecoders": 25,
+   "vmDecoders": 54,
+   "loadWithOne": 21.634336363636365,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 45618.845499999996,
+    "waitP99": 13732158
+   },
+   "atCritical": {
+    "waitP99": 3178,
+    "responseP99": 118776,
+    "lateVsWorst": 0.0033333333333333335
+   },
+   "serviceP50": 49228,
+   "serviceMax": 118776
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 3,
+   "p": 0.001,
+   "criticalDecoders": 17,
+   "vmDecoders": 31,
+   "loadWithOne": 13.266227272727274,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 44216.209,
+    "waitP99": 13030520
+   },
+   "atCritical": {
+    "waitP99": 2104,
+    "responseP99": 94602,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 51500,
+   "serviceMax": 99520
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 3,
+   "p": 0.003,
+   "criticalDecoders": 24,
+   "vmDecoders": 43,
+   "loadWithOne": 22.44329090909091,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 72281.5701,
+    "waitP99": 21562024
+   },
+   "atCritical": {
+    "waitP99": 8768,
+    "responseP99": 131516,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 74458,
+   "serviceMax": 141014
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 4,
+   "p": 0.001,
+   "criticalDecoders": 19,
+   "vmDecoders": 30,
+   "loadWithOne": 15.31757272727273,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 66492.6934,
+    "waitP99": 19740166
+   },
+   "atCritical": {
+    "waitP99": 6002,
+    "responseP99": 129732,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 71992,
+   "serviceMax": 131482
+  },
+  {
+   "platform": "superconducting",
+   "round": "Willow cycle (Google 2025)",
+   "roundNs": 1100,
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "criticalDecoders": 26,
+   "vmDecoders": 44,
+   "loadWithOne": 24.00010909090909,
+   "oneDecoder": {
+    "stable": false,
+    "backlogNsPerWindow": 104206.7958,
+    "waitP99": 31215782
+   },
+   "atCritical": {
+    "waitP99": 12172,
+    "responseP99": 176172,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 105190,
+   "serviceMax": 189296
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 3,
+   "w": 1,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0005940202247191011,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 17832,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 1450,
+   "serviceMax": 22032
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 3,
+   "w": 1,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0010993932584269664,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 16600,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 1450,
+   "serviceMax": 22122
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 3,
+   "w": 2,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0006676191011235955,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 27734,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 2726,
+   "serviceMax": 28460
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 3,
+   "w": 2,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0013383943820224717,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 37090,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 14408,
+   "serviceMax": 37090
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 3,
+   "w": 3,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0007276456928838951,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 33138,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 4038,
+   "serviceMax": 43428
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.001462274906367041,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 50974,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 20686,
+   "serviceMax": 50974
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0022224224719101125,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 37036,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 4152,
+   "serviceMax": 43066
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 1,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.004387795505617977,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 60126,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 20556,
+   "serviceMax": 71112
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 2,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0027674741573033707,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 62892,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 8136,
+   "serviceMax": 70804
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 2,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.005347813483146067,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 118776,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 49228,
+   "serviceMax": 118776
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 3,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0032792921348314607,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 94602,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 51500,
+   "serviceMax": 99520
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 3,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.005547779775280899,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 131516,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 74458,
+   "serviceMax": 141014
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 4,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0037863662921348317,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 129732,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 71992,
+   "serviceMax": 131482
+  },
+  {
+   "platform": "neutral",
+   "round": "Bluvstein 2025 round",
+   "roundNs": 4450000,
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.005932611235955056,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 175844,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 105190,
+   "serviceMax": 189296
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 3,
+   "w": 1,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.001321695,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 17832,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 1450,
+   "serviceMax": 22032
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 3,
+   "w": 1,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0024461500000000002,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 16600,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 1450,
+   "serviceMax": 22122
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 3,
+   "w": 2,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0014854525000000001,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 27734,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 2726,
+   "serviceMax": 28460
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 3,
+   "w": 2,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0029779274999999997,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 37090,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 14408,
+   "serviceMax": 37090
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 3,
+   "w": 3,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0016190116666666666,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 33138,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 4038,
+   "serviceMax": 43428
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0032535616666666666,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 50974,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 20686,
+   "serviceMax": 50974
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.00494489,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 37036,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 4152,
+   "serviceMax": 43066
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 1,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.009762845,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 60126,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 20556,
+   "serviceMax": 71112
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 2,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.00615763,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 62892,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 8136,
+   "serviceMax": 70804
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 2,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.011898885,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 118776,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 49228,
+   "serviceMax": 118776
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 3,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.0072964250000000005,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 94602,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 51500,
+   "serviceMax": 99520
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 3,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.01234381,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 131516,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 74458,
+   "serviceMax": 141014
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 4,
+   "p": 0.001,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.008424665000000001,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 129732,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 71992,
+   "serviceMax": 131482
+  },
+  {
+   "platform": "qccd",
+   "round": "H2 round (QCCD Studio model)",
+   "roundNs": 2000000,
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "loadWithOne": 0.01320006,
+   "oneDecoder": {
+    "stable": true,
+    "backlogNsPerWindow": 0,
+    "waitP99": 0
+   },
+   "atCritical": {
+    "waitP99": 0,
+    "responseP99": 175844,
+    "lateVsWorst": 0
+   },
+   "serviceP50": 105190,
+   "serviceMax": 189296
+  }
+ ],
+ "tradeoff": [
+  {
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "decoders": 26,
+   "critical": 26,
+   "vmDecoders": 44,
+   "responseP50": 110496,
+   "responseP99": 176172,
+   "responseMax": 184172,
+   "worstNs": 189296,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "decoders": 27,
+   "critical": 26,
+   "vmDecoders": 44,
+   "responseP50": 108954,
+   "responseP99": 175844,
+   "responseMax": 177680,
+   "worstNs": 189296,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "decoders": 28,
+   "critical": 26,
+   "vmDecoders": 44,
+   "responseP50": 107904,
+   "responseP99": 175844,
+   "responseMax": 177680,
+   "worstNs": 189296,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "decoders": 35,
+   "critical": 26,
+   "vmDecoders": 44,
+   "responseP50": 107904,
+   "responseP99": 175844,
+   "responseMax": 177680,
+   "worstNs": 189296,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 4,
+   "p": 0.003,
+   "decoders": 44,
+   "critical": 26,
+   "vmDecoders": 44,
+   "responseP50": 107904,
+   "responseP99": 175844,
+   "responseMax": 177680,
+   "worstNs": 189296,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "decoders": 12,
+   "critical": 12,
+   "vmDecoders": 40,
+   "responseP50": 4152,
+   "responseP99": 37036,
+   "responseMax": 43066,
+   "worstNs": 43066,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "decoders": 13,
+   "critical": 12,
+   "vmDecoders": 40,
+   "responseP50": 4152,
+   "responseP99": 37036,
+   "responseMax": 43066,
+   "worstNs": 43066,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "decoders": 14,
+   "critical": 12,
+   "vmDecoders": 40,
+   "responseP50": 4152,
+   "responseP99": 37036,
+   "responseMax": 43066,
+   "worstNs": 43066,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "decoders": 26,
+   "critical": 12,
+   "vmDecoders": 40,
+   "responseP50": 4152,
+   "responseP99": 37036,
+   "responseMax": 43066,
+   "worstNs": 43066,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 5,
+   "w": 1,
+   "p": 0.001,
+   "decoders": 40,
+   "critical": 12,
+   "vmDecoders": 40,
+   "responseP50": 4152,
+   "responseP99": 37036,
+   "responseMax": 43066,
+   "worstNs": 43066,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "decoders": 6,
+   "critical": 6,
+   "vmDecoders": 16,
+   "responseP50": 21390,
+   "responseP99": 53708,
+   "responseMax": 59336,
+   "worstNs": 50974,
+   "lateVsWorst": 0.01
+  },
+  {
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "decoders": 7,
+   "critical": 6,
+   "vmDecoders": 16,
+   "responseP50": 20626,
+   "responseP99": 50974,
+   "responseMax": 50974,
+   "worstNs": 50974,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "decoders": 8,
+   "critical": 6,
+   "vmDecoders": 16,
+   "responseP50": 20500,
+   "responseP99": 50974,
+   "responseMax": 50974,
+   "worstNs": 50974,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "decoders": 11,
+   "critical": 6,
+   "vmDecoders": 16,
+   "responseP50": 20500,
+   "responseP99": 50974,
+   "responseMax": 50974,
+   "worstNs": 50974,
+   "lateVsWorst": 0
+  },
+  {
+   "d": 3,
+   "w": 3,
+   "p": 0.003,
+   "decoders": 16,
+   "critical": 6,
+   "vmDecoders": 16,
+   "responseP50": 20500,
+   "responseP99": 50974,
+   "responseMax": 50974,
+   "worstNs": 50974,
+   "lateVsWorst": 0
+  }
+ ],
+ "sharing": [
+  {
+   "platform": "neutral",
+   "roundNs": 4450000,
+   "logical": 10,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "logicalPerDecoder": 10,
+   "responseP99": 1184888
+  },
+  {
+   "platform": "neutral",
+   "roundNs": 4450000,
+   "logical": 100,
+   "criticalDecoders": 1,
+   "vmDecoders": 2,
+   "logicalPerDecoder": 100,
+   "responseP99": 10681300
+  },
+  {
+   "platform": "neutral",
+   "roundNs": 4450000,
+   "logical": 400,
+   "criticalDecoders": 3,
+   "vmDecoders": 5,
+   "logicalPerDecoder": 133.33333333333334,
+   "responseP99": 14059260
+  },
+  {
+   "platform": "qccd",
+   "roundNs": 2000000,
+   "logical": 10,
+   "criticalDecoders": 1,
+   "vmDecoders": 1,
+   "logicalPerDecoder": 10,
+   "responseP99": 1184888
+  },
+  {
+   "platform": "qccd",
+   "roundNs": 2000000,
+   "logical": 100,
+   "criticalDecoders": 2,
+   "vmDecoders": 3,
+   "logicalPerDecoder": 50,
+   "responseP99": 5369164
+  },
+  {
+   "platform": "qccd",
+   "roundNs": 2000000,
+   "logical": 400,
+   "criticalDecoders": 6,
+   "vmDecoders": 10,
+   "logicalPerDecoder": 66.66666666666667,
+   "responseP99": 7050910
+  }
+ ]
+}

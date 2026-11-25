@@ -90,9 +90,8 @@ test("Google's kickback circuit runs on the Willow twin with every operation in 
   assert.equal(run.readBack, true);
   assert.equal(run.schedule.durations.pulseNs, 36); // 35 ns on the 2 ns grid
   assert.equal(run.report.byKind["T pulse"].count, 42);
-  // Two transmons per core cannot keep up with back-to-back 36 ns layers on the busiest qubits: the
-  // firmware generator refuses the schedule (a channel would need more writes ahead than its queue).
-  await assert.rejects(mg.runWillow(c, { qubitsPerCore: 2 }), /cannot take this write on time/);
+  // RISC-Q builds exactly one demodulation channel into every core, so a core drives one transmon.
+  await assert.rejects(mg.runWillow(c, { qubitsPerCore: 2 }), /qubitsPerCore must be 1/);
 });
 
 test("QuEra's d = 3 factory runs on the Gemini twin with every operation in its window", { skip: noStim, timeout: 300_000 }, async () => {

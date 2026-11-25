@@ -18,7 +18,9 @@ export function formalrvRoot() {
   return resolve(process.env.FORMALRV_ROOT || join(REPO, "..", "FormalRV"));
 }
 
-const bin = (name) => join(formalrvRoot(), "compiler", "_build", "default", "bin", name + EXE);
+// FORMALRV_BUILD names a dune build directory of FormalRV's compiler outside its checkout (a build
+// of its current source, `dune build --root compiler --build-dir <dir>`); default: the checkout's own.
+const bin = (name) => join(process.env.FORMALRV_BUILD || join(formalrvRoot(), "compiler", "_build"), "default", "bin", name + EXE);
 
 /** Whether a built FormalRV is present (tests skip without one). */
 export function available() {

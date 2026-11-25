@@ -1,0 +1,631 @@
+{
+ "generated": "2026-11-25T10:00:17.161Z",
+ "factories": [
+  {
+   "id": "cultivation",
+   "name": "magic state cultivation, Willow twin (fig4-graft-N2)",
+   "attemptNs": 7244,
+   "accept": 0.6284911666666667,
+   "source": "validation/ftqvm/papers/google-cultivation-2025.json"
+  },
+  {
+   "id": "distillation",
+   "name": "5-to-1 distillation, Gemini twin, d = 3",
+   "attemptNs": 1627790,
+   "accept": 0.05216083333333329,
+   "source": "validation/ftqvm/papers/quera-distillation-2025.json"
+  }
+ ],
+ "provisioning": [
+  {
+   "factory": "cultivation",
+   "attemptNs": 7244,
+   "accept": 0.6284911666666667,
+   "intervalNs": 11526,
+   "critical": 2,
+   "vmWithAttempt": 1,
+   "vmWithMean": 2,
+   "vmWithP99": 4,
+   "responseP99AtCritical": 36220,
+   "utilizationAtCritical": 0.4980160019348546,
+   "with_attempt": {
+    "factories": 1,
+    "stable": false,
+    "responseP99": 570772,
+    "waitMax": 569452
+   },
+   "with_mean": {
+    "factories": 2,
+    "stable": true,
+    "responseP99": 36220,
+    "waitMax": 13168
+   },
+   "with_p99": {
+    "factories": 4,
+    "stable": true,
+    "responseP99": 36220,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "cultivation",
+   "attemptNs": 7244,
+   "accept": 0.6284911666666667,
+   "intervalNs": 5763,
+   "critical": 3,
+   "vmWithAttempt": 2,
+   "vmWithMean": 3,
+   "vmWithP99": 7,
+   "responseP99AtCritical": 36220,
+   "utilizationAtCritical": 0.6636043194209947,
+   "with_attempt": {
+    "factories": 2,
+    "stable": false,
+    "responseP99": 292308,
+    "waitMax": 283937
+   },
+   "with_mean": {
+    "factories": 3,
+    "stable": true,
+    "responseP99": 36220,
+    "waitMax": 13168
+   },
+   "with_p99": {
+    "factories": 7,
+    "stable": true,
+    "responseP99": 36220,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "cultivation",
+   "attemptNs": 7244,
+   "accept": 0.6284911666666667,
+   "intervalNs": 2882,
+   "critical": 5,
+   "vmWithAttempt": 3,
+   "vmWithMean": 4,
+   "vmWithP99": 13,
+   "responseP99AtCritical": 36220,
+   "utilizationAtCritical": 0.7951885914655535,
+   "with_attempt": {
+    "factories": 3,
+    "stable": false,
+    "responseP99": 1892284,
+    "waitMax": 1888390
+   },
+   "with_mean": {
+    "factories": 4,
+    "stable": false,
+    "responseP99": 155650,
+    "waitMax": 142098
+   },
+   "with_p99": {
+    "factories": 13,
+    "stable": true,
+    "responseP99": 36220,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "cultivation",
+   "attemptNs": 7244,
+   "accept": 0.6284911666666667,
+   "intervalNs": 1153,
+   "critical": 11,
+   "vmWithAttempt": 7,
+   "vmWithMean": 10,
+   "vmWithP99": 32,
+   "responseP99AtCritical": 36872,
+   "utilizationAtCritical": 0.9000808813341284,
+   "with_attempt": {
+    "factories": 7,
+    "stable": false,
+    "responseP99": 975381,
+    "waitMax": 972574
+   },
+   "with_mean": {
+    "factories": 10,
+    "stable": false,
+    "responseP99": 77375,
+    "waitMax": 58052
+   },
+   "with_p99": {
+    "factories": 32,
+    "stable": true,
+    "responseP99": 36220,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "distillation",
+   "attemptNs": 1627790,
+   "accept": 0.05216083333333329,
+   "intervalNs": 31207132,
+   "critical": 2,
+   "vmWithAttempt": 1,
+   "vmWithMean": 1,
+   "vmWithP99": 5,
+   "responseP99AtCritical": 141617730,
+   "utilizationAtCritical": 0.4924008617567904,
+   "with_attempt": {
+    "factories": 1,
+    "stable": false,
+    "responseP99": 1951599898,
+    "waitMax": 1966218246
+   },
+   "with_mean": {
+    "factories": 1,
+    "stable": false,
+    "responseP99": 1951599898,
+    "waitMax": 1966218246
+   },
+   "with_p99": {
+    "factories": 5,
+    "stable": true,
+    "responseP99": 139989940,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "distillation",
+   "attemptNs": 1627790,
+   "accept": 0.05216083333333329,
+   "intervalNs": 15603566,
+   "critical": 3,
+   "vmWithAttempt": 1,
+   "vmWithMean": 2,
+   "vmWithP99": 9,
+   "responseP99AtCritical": 146501100,
+   "utilizationAtCritical": 0.6561751197512634,
+   "with_attempt": {
+    "factories": 1,
+    "stable": false,
+    "responseP99": 30077743684,
+    "waitMax": 30242893956
+   },
+   "with_mean": {
+    "factories": 2,
+    "stable": false,
+    "responseP99": 1001705028,
+    "waitMax": 976737524
+   },
+   "with_p99": {
+    "factories": 9,
+    "stable": true,
+    "responseP99": 139989940,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "distillation",
+   "attemptNs": 1627790,
+   "accept": 0.05216083333333329,
+   "intervalNs": 7801783,
+   "critical": 6,
+   "vmWithAttempt": 1,
+   "vmWithMean": 4,
+   "vmWithP99": 18,
+   "responseP99AtCritical": 139989940,
+   "utilizationAtCritical": 0.6554575734888334,
+   "with_attempt": {
+    "factories": 1,
+    "stable": false,
+    "responseP99": 45532738640,
+    "waitMax": 45838658173
+   },
+   "with_mean": {
+    "factories": 4,
+    "stable": false,
+    "responseP99": 537360434,
+    "waitMax": 498724525
+   },
+   "with_p99": {
+    "factories": 18,
+    "stable": true,
+    "responseP99": 139989940,
+    "waitMax": 0
+   }
+  },
+  {
+   "factory": "distillation",
+   "attemptNs": 1627790,
+   "accept": 0.05216083333333329,
+   "intervalNs": 3120713,
+   "critical": 12,
+   "vmWithAttempt": 1,
+   "vmWithMean": 11,
+   "vmWithP99": 45,
+   "responseP99AtCritical": 141617730,
+   "utilizationAtCritical": 0.8124472614076383,
+   "with_attempt": {
+    "factories": 1,
+    "stable": false,
+    "responseP99": 54801257240,
+    "waitMax": 55196117103
+   },
+   "with_mean": {
+    "factories": 11,
+    "stable": false,
+    "responseP99": 146501100,
+    "waitMax": 44712602
+   },
+   "with_p99": {
+    "factories": 45,
+    "stable": true,
+    "responseP99": 139989940,
+    "waitMax": 0
+   }
+  }
+ ],
+ "starvation": [
+  {
+   "factory": "cultivation",
+   "load": 0.7,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 0,
+    "p99": 5268,
+    "max": 6256,
+    "mean": 307.52
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 0,
+    "p99": 5268,
+    "max": 9384,
+    "mean": 224.06603174603174
+   },
+   "stable": true
+  },
+  {
+   "factory": "cultivation",
+   "load": 0.7,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 0,
+    "p99": 3292,
+    "max": 5596,
+    "mean": 212.99764705882353
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 0,
+    "p99": 5268,
+    "max": 13500,
+    "mean": 241.41714285714286
+   },
+   "stable": true
+  },
+  {
+   "factory": "cultivation",
+   "load": 0.9,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 840,
+    "p99": 18164,
+    "max": 23728,
+    "mean": 3487.4635294117647
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 840,
+    "p99": 19004,
+    "max": 24568,
+    "mean": 3057.6965079365077
+   },
+   "stable": false
+  },
+  {
+   "factory": "cultivation",
+   "load": 0.9,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 158,
+    "p99": 7876,
+    "max": 10712,
+    "mean": 1184.4329411764706
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 840,
+    "p99": 26198,
+    "max": 34856,
+    "mean": 3650.6819047619047
+   },
+   "stable": false
+  },
+  {
+   "factory": "cultivation",
+   "load": 0.95,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 5227,
+    "p99": 30425,
+    "max": 33025,
+    "mean": 8234.390588235294
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 4360,
+    "p99": 29369,
+    "max": 33959,
+    "mean": 7632.409523809524
+   },
+   "stable": false
+  },
+  {
+   "factory": "cultivation",
+   "load": 0.95,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 1178,
+    "p99": 7745,
+    "max": 12931,
+    "mean": 1785.4729411764706
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 4902,
+    "p99": 43830,
+    "max": 50329,
+    "mean": 9341.274285714286
+   },
+   "stable": false
+  },
+  {
+   "factory": "cultivation",
+   "load": 1,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 69408,
+    "p99": 139294,
+    "max": 141786,
+    "mean": 64853.16705882353
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 61852,
+    "p99": 138358,
+    "max": 142098,
+    "mean": 58829.18984126984
+   },
+   "stable": false
+  },
+  {
+   "factory": "cultivation",
+   "load": 1,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 1504,
+    "p99": 10060,
+    "max": 10928,
+    "mean": 2193.510588235294
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 73770,
+    "p99": 192884,
+    "max": 200050,
+    "mean": 75801.79301587302
+   },
+   "stable": false
+  },
+  {
+   "factory": "distillation",
+   "load": 0.7,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 0,
+    "p99": 35163152,
+    "max": 57320926,
+    "mean": 3011573.350588235
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 0,
+    "p99": 33303178,
+    "max": 47803312,
+    "mean": 2308735.4895238094
+   },
+   "stable": true
+  },
+  {
+   "factory": "distillation",
+   "load": 0.7,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 0,
+    "p99": 22888210,
+    "max": 31675388,
+    "mean": 1797046.654117647
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 0,
+    "p99": 41807346,
+    "max": 85392458,
+    "mean": 2632280.2387301587
+   },
+   "stable": true
+  },
+  {
+   "factory": "distillation",
+   "load": 0.9,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 7686644,
+    "p99": 99810284,
+    "max": 118736674,
+    "mean": 20920490.607058823
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 6549856,
+    "p99": 94099694,
+    "max": 114963442,
+    "mean": 17972716.088888887
+   },
+   "stable": false
+  },
+  {
+   "factory": "distillation",
+   "load": 0.9,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 1705182,
+    "p99": 33639288,
+    "max": 39763488,
+    "mean": 4902314.630588235
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 6549856,
+    "p99": 121423860,
+    "max": 151137690,
+    "mean": 21739382.86095238
+   },
+   "stable": false
+  },
+  {
+   "factory": "distillation",
+   "load": 0.95,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 36998452,
+    "p99": 158772048,
+    "max": 177497545,
+    "mean": 46770757.654117644
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 31527458,
+    "p99": 152272712,
+    "max": 176163567,
+    "mean": 42438754.82412698
+   },
+   "stable": false
+  },
+  {
+   "factory": "distillation",
+   "load": 0.95,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 4327988,
+    "p99": 36924999,
+    "max": 43274199,
+    "mean": 7472675.929411764
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 37315191,
+    "p99": 209382953,
+    "max": 246368860,
+    "mean": 53182151.52063492
+   },
+   "stable": false
+  },
+  {
+   "factory": "distillation",
+   "load": 1,
+   "policy": "fifo",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 260798183,
+    "p99": 488261245,
+    "max": 498724525,
+    "mean": 229269985.4635294
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 238815710,
+    "p99": 478201750,
+    "max": 494821877,
+    "mean": 206915210.7384127
+   },
+   "stable": false
+  },
+  {
+   "factory": "distillation",
+   "load": 1,
+   "policy": "priority",
+   "factories": 4,
+   "urgentWait": {
+    "n": 425,
+    "min": 0,
+    "p50": 5327490,
+    "p99": 44251658,
+    "max": 64808725,
+    "mean": 8368371.364705882
+   },
+   "backgroundWait": {
+    "n": 1575,
+    "min": 0,
+    "p50": 283183458,
+    "p99": 657821954,
+    "max": 683355292,
+    "mean": 265184262.40380952
+   },
+   "stable": false
+  }
+ ]
+}

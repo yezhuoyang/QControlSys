@@ -73,7 +73,6 @@ export const WILLOW_EDITS = Object.freeze({
   czNs: { label: "CZ gate", unit: "ns", min: 10, max: 400, step: 1 },
   readoutNs: { label: "Readout", unit: "ns", min: 100, max: 3000, step: 10 },
   resetNs: { label: "Reset", unit: "ns", min: 20, max: 2000, step: 10 },
-  qubitsPerCore: { label: "Transmons per RISC-Q core", unit: "", min: 1, max: 4, step: 1 },
 });
 
 export function willowTwin(circuit, edits = {}) {
@@ -129,7 +128,7 @@ export function uncoupled(circuit, device) {
  * drive-table entry per transmon: a 45° pulse (half the 90° amplitude, same 35 ns) for the T
  * gates exp(∓iπσy/8) that cultivation plays.
  */
-export function willowDesign(device, { qubitsPerCore = 2 } = {}) {
+export function willowDesign(device, { qubitsPerCore = 1 } = {}) {
   const placement = { sites: device.sites.map((s) => ({ id: s.id, rc: s.rc, kind: s.kind })) };
   const { design } = chipDesign({ ops: [] }, placement, { device, qubitsPerCore, decoders: 1, coresPerDecoder: 1, name: device.title, pitchMm: 1 });
   for (const ch of design.channels) if (ch.name.endsWith("gate")) ch.slots = 4;
@@ -960,18 +959,16 @@ function fields(table, values, group) {
  */
 export const MAGIC_DESIGNS = {
   "google-cultivation-2025": {
-    intro: "The program is the paper's own circuit, qubit for qubit, as its supplement links it: injection, cultivation and, for Figure 4, the graft into the distance-5 code. Change the gate, readout and reset durations or how many transmons one RISC-Q core drives, and run it again: every pulse is timed on the edited chip, played in the Lean model of the board, and checked against its window. Two transmons per core, for example, is refused: the firmware generator finds a channel whose writes the core cannot issue on time.",
+    intro: "The program is the paper's own circuit, qubit for qubit, as its supplement links it: injection, cultivation and, for Figure 4, the graft into the distance-5 code. Change the gate, readout and reset durations or how many transmons one RISC-Q core drives, and run it again: every pulse is timed on the edited chip, played in the Lean model of the board, and checked against its window.",
     params() {
       const t = willowTwin(mc.googleCircuit("fig3-kickback")).durations;
       const values = {
         gate1qNs: t.x90Ns, czNs: t.czNs, readoutNs: t.readoutNs, resetNs: t.resetNs,
-        qubitsPerCore: v(1, "this twin: with two transmons per core the firmware generator refuses the kickback circuit (a channel would have to be 33 writes ahead of a 32-entry queue)"),
       };
       return [
         { key: "circuit", label: "Circuit", value: "fig3-kickback", group: "Program", source: mc.GOOGLE_SOURCE,
           options: ["fig2-cultivation", "fig3-kickback", "fig4-graft-N2"].map((c) => ({ value: c, label: mc.GOOGLE_CIRCUITS[c] })) },
         ...fields({ gate1qNs: WILLOW_EDITS.gate1qNs, czNs: WILLOW_EDITS.czNs, readoutNs: WILLOW_EDITS.readoutNs, resetNs: WILLOW_EDITS.resetNs }, values, "Device"),
-        ...fields({ qubitsPerCore: WILLOW_EDITS.qubitsPerCore }, values, "Controller"),
         { key: "shots", label: "Noise simulation (SI1000, p = 2.3×10⁻³)", value: 0, group: "Noise", source: rosenfeld + ", the paper's simulation model",
           options: [{ value: 0, label: "none" }, { value: 1_000_000, label: "10⁶ shots (a few seconds)" }] },
       ];
@@ -980,7 +977,7 @@ export const MAGIC_DESIGNS = {
       const name = mc.GOOGLE_CIRCUITS[params.circuit] ? params.circuit : "fig3-kickback";
       const edits = Object.fromEntries(["gate1qNs", "czNs", "readoutNs", "resetNs"].filter((k) => params[k] !== undefined).map((k) => [k, Number(params[k])]));
       const outcomes = storedOutcomes("google-cultivation-2025", (r) => r.circuit === name);
-      const { row, run } = await googleRow(name, { edits, qubitsPerCore: Math.max(1, Math.min(4, Math.round(Number(params.qubitsPerCore ?? 1)))), shots: Number(params.shots ?? 0), outcomes });
+      const { row, run } = await googleRow(name, { edits, shots: Number(params.shots ?? 0), outcomes });
       return { rows: [row], design: run.design };
     },
   },

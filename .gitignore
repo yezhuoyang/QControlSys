@@ -3,3 +3,8 @@ node_modules/
 output/
 .playwright-cli/
 __pycache__/
+
+# Private planning notes (they name an unpublished paper): never commit
+docs/ftqvm-*.md
+# Raw per-operation calibration samples (about 12 MB; regenerate with node riscq/calib/insitu.mjs)
+validation/calib/insitu/

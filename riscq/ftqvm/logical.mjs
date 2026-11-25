@@ -498,7 +498,6 @@ function designOf(paper) {
         field("x90Ns", "Single-qubit gate (π/2)", d.x90Ns, "ns", 4, 400, 2, g), field("czNs", "CZ gate", d.czNs, "ns", 4, 600, 2, g),
         field("readoutNs", "Readout", d.readoutNs, "ns", 50, 5000, 2, g)];
       if (d.resetNs.value > 0) out.push(field("resetNs", "Reset", d.resetNs, "ns", 20, 5000, 2, g));
-      out.push(field("qubitsPerCore", "Transmons per RISC-Q core", v(1, "this twin: one core per qubit"), "", 1, 4, 1, "Controller"));
       if (paper.timeline) out.push({ key: "schedule", label: "Moment windows", value: "paper", group: "Program", source: "the paper's layer timeline (" + paper.dir + "/meta.json)",
         options: [{ value: "paper", label: "the paper's timeline" }, { value: "durations", label: "from the (edited) durations" }] });
       return out;
@@ -508,7 +507,7 @@ function designOf(paper) {
       const keys = ["x90Ns", "czNs", "readoutNs", "resetNs", "imageNs", "oneQubitNs", "twoQubitNs", "measureNs", "splitNs", "mergeNs", "shuttleNs"];
       const edits = Object.fromEntries(keys.filter((k) => params[k] !== undefined && params[k] !== "").map((k) => [k, Number(params[k])]));
       if (edits.x90Ns !== undefined) edits.xNs = edits.x90Ns;
-      const { row, run } = await logicalRow(paper, c, { edits, cached: true, qubitsPerCore: Math.max(1, Math.min(4, Math.round(Number(params.qubitsPerCore ?? 1)))), schedule: params.schedule === "durations" ? "durations" : "paper" });
+      const { row, run } = await logicalRow(paper, c, { edits, cached: true, schedule: params.schedule === "durations" ? "durations" : "paper" });
       return { rows: [row], design: run.design };
     },
   };

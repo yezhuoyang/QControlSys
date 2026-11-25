@@ -1,0 +1,420 @@
+{
+ "generated": "2026-11-25T09:51:07.590Z",
+ "clockHz": 500000000,
+ "model": "riscq/soc.mjs multi-board Lean model (core, hub and two-board lane checked against RISC-Q's RTL; more than two boards forward through board 0, a QuantumOS extension)",
+ "publish": {
+  "2": {
+   "local": {
+    "n": 8,
+    "min": 29,
+    "median": 29,
+    "max": 29
+   },
+   "toRoot": {
+    "n": 8,
+    "min": 346,
+    "median": 350,
+    "max": 353
+   },
+   "toOther": null,
+   "runs": [
+    [
+     348,
+     29
+    ],
+    [
+     349,
+     29
+    ],
+    [
+     350,
+     29
+    ],
+    [
+     351,
+     29
+    ],
+    [
+     352,
+     29
+    ],
+    [
+     353,
+     29
+    ],
+    [
+     346,
+     29
+    ],
+    [
+     347,
+     29
+    ]
+   ]
+  },
+  "4": {
+   "local": {
+    "n": 8,
+    "min": 29,
+    "median": 29,
+    "max": 29
+   },
+   "toRoot": {
+    "n": 8,
+    "min": 346,
+    "median": 350,
+    "max": 353
+   },
+   "toOther": {
+    "n": 8,
+    "min": 666,
+    "median": 670,
+    "max": 673
+   },
+   "runs": [
+    [
+     348,
+     668,
+     668,
+     29
+    ],
+    [
+     349,
+     669,
+     669,
+     29
+    ],
+    [
+     350,
+     670,
+     670,
+     29
+    ],
+    [
+     351,
+     671,
+     671,
+     29
+    ],
+    [
+     352,
+     672,
+     672,
+     29
+    ],
+    [
+     353,
+     673,
+     673,
+     29
+    ],
+    [
+     346,
+     666,
+     666,
+     29
+    ],
+    [
+     347,
+     667,
+     667,
+     29
+    ]
+   ]
+  },
+  "8": {
+   "local": {
+    "n": 8,
+    "min": 29,
+    "median": 29,
+    "max": 29
+   },
+   "toRoot": {
+    "n": 8,
+    "min": 346,
+    "median": 350,
+    "max": 353
+   },
+   "toOther": {
+    "n": 8,
+    "min": 666,
+    "median": 670,
+    "max": 673
+   },
+   "runs": [
+    [
+     348,
+     668,
+     668,
+     668,
+     668,
+     668,
+     668,
+     29
+    ],
+    [
+     349,
+     669,
+     669,
+     669,
+     669,
+     669,
+     669,
+     29
+    ],
+    [
+     350,
+     670,
+     670,
+     670,
+     670,
+     670,
+     670,
+     29
+    ],
+    [
+     351,
+     671,
+     671,
+     671,
+     671,
+     671,
+     671,
+     29
+    ],
+    [
+     352,
+     672,
+     672,
+     672,
+     672,
+     672,
+     672,
+     29
+    ],
+    [
+     353,
+     673,
+     673,
+     673,
+     673,
+     673,
+     673,
+     29
+    ],
+    [
+     346,
+     666,
+     666,
+     666,
+     666,
+     666,
+     666,
+     29
+    ],
+    [
+     347,
+     667,
+     667,
+     667,
+     667,
+     667,
+     667,
+     29
+    ]
+   ]
+  }
+ },
+ "barrier": {
+  "1": {
+   "lastOnRoot": {
+    "n": 8,
+    "min": 32,
+    "median": 32,
+    "max": 32
+   },
+   "lastOnOther": null
+  },
+  "2": {
+   "lastOnRoot": {
+    "n": 8,
+    "min": 420,
+    "median": 424,
+    "max": 427
+   },
+   "lastOnOther": {
+    "n": 8,
+    "min": 826,
+    "median": 830,
+    "max": 833
+   }
+  },
+  "4": {
+   "lastOnRoot": {
+    "n": 8,
+    "min": 428,
+    "median": 432,
+    "max": 435
+   },
+   "lastOnOther": {
+    "n": 8,
+    "min": 826,
+    "median": 830,
+    "max": 833
+   }
+  },
+  "8": {
+   "lastOnRoot": {
+    "n": 8,
+    "min": 444,
+    "median": 448,
+    "max": 451
+   },
+   "lastOnOther": {
+    "n": 8,
+    "min": 834,
+    "median": 838,
+    "max": 841
+   }
+  }
+ },
+ "laneDelay": [
+  {
+   "laneWords": 3,
+   "publishCycles": 348,
+   "barrierWorstCycles": 832
+  },
+  {
+   "laneWords": 6,
+   "publishCycles": 372,
+   "barrierWorstCycles": 880
+  },
+  {
+   "laneWords": 12,
+   "publishCycles": 420,
+   "barrierWorstCycles": 976
+  },
+  {
+   "laneWords": 24,
+   "publishCycles": 516,
+   "barrierWorstCycles": 1168
+  }
+ ],
+ "flood": {
+  "hub": {
+   "senders": 8,
+   "count": 48,
+   "from": 0,
+   "sent": 384,
+   "delivered": 349,
+   "dropped": 35,
+   "bitsPerUs": 500.00000000000006,
+   "firstLatency": 29,
+   "lastLatency": 115
+  },
+  "lane": {
+   "senders": 8,
+   "count": 48,
+   "from": 1,
+   "sent": 384,
+   "delivered": 349,
+   "dropped": 35,
+   "bitsPerUs": 3.125,
+   "firstLatency": 348,
+   "lastLatency": 55766
+  }
+ },
+ "ops": [
+  {
+   "op": "frame",
+   "k": 1,
+   "cycles": 23,
+   "ns": 46,
+   "emptyStamp": 16
+  },
+  {
+   "op": "publish",
+   "k": 1,
+   "cycles": 7,
+   "ns": 14,
+   "emptyStamp": 16
+  },
+  {
+   "op": "parity",
+   "k": 1,
+   "cycles": 23,
+   "ns": 46,
+   "emptyStamp": 16
+  },
+  {
+   "op": "parity",
+   "k": 2,
+   "cycles": 31,
+   "ns": 62,
+   "emptyStamp": 16
+  },
+  {
+   "op": "parity",
+   "k": 4,
+   "cycles": 47,
+   "ns": 94,
+   "emptyStamp": 16
+  },
+  {
+   "op": "parity",
+   "k": 8,
+   "cycles": 79,
+   "ns": 158,
+   "emptyStamp": 16
+  },
+  {
+   "op": "parity",
+   "k": 16,
+   "cycles": 143,
+   "ns": 286,
+   "emptyStamp": 16
+  },
+  {
+   "op": "parity",
+   "k": 32,
+   "cycles": 271,
+   "ns": 542,
+   "emptyStamp": 16
+  },
+  {
+   "op": "decode",
+   "k": 1,
+   "cycles": 41,
+   "ns": 82,
+   "emptyStamp": 16
+  },
+  {
+   "op": "decode",
+   "k": 2,
+   "cycles": 41,
+   "ns": 82,
+   "emptyStamp": 16
+  },
+  {
+   "op": "decode",
+   "k": 4,
+   "cycles": 41,
+   "ns": 82,
+   "emptyStamp": 16
+  },
+  {
+   "op": "decode",
+   "k": 8,
+   "cycles": 41,
+   "ns": 82,
+   "emptyStamp": 16
+  },
+  {
+   "op": "decode",
+   "k": 10,
+   "cycles": 41,
+   "ns": 82,
+   "emptyStamp": 16
+  }
+ ]
+}
