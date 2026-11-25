@@ -14,8 +14,9 @@ const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) }
  *   decoders         decoder units; coresPerDecoder  cores of one unit
  *   gap              empty lattice columns between code blocks
  *   memWords         words of RAM per control core (default: RISC-Q's x6y3 build; at most 16,384)
+ *   trace            "summary" for medium programs: no trace frames, slim pulse records (default "io")
  */
-export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords } = {}) {
+export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords, trace } = {}) {
   const options = { qubitsPerCore, decoders, coresPerDecoder, ...(memWords ? { memWords } : {}) };
   return {
     name: name ?? "transmon " + JSON.stringify(options),
@@ -23,7 +24,7 @@ export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1,
     gridNs: 2, // 500 MHz RISC-Q board
     place: (listing, { distance }) => place(listing, { d: distance, gap }),
     design: (listing, placement) => chipDesign(listing, placement, options).design,
-    run: (listing, placement, design, { outcomes, distance }) => runListing(listing, placement, design, { outcomes, distance }),
+    run: (listing, placement, design, { outcomes, distance }) => runListing(listing, placement, design, { outcomes, distance, ...(trace ? { trace } : {}) }),
     capacities: (design, placement, durations) => {
       const sites = placement.sites.length;
       const route = Math.max(2, durations.route_latency_ns?.value ?? 2), reset = Math.max(2, durations.reset_ns?.value ?? 160);

@@ -239,7 +239,8 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
     const { uid: _u, id, ...rest } = c;
     lowered.actions.push({ segment: 0, core: m.decoderCore, timed: true, ...rest, source: id });
   }
-  const built = assemble(m.spec, lowered, { trace, maxEvents: 400_000, maxSteps: 20_000_000, forceCompact,
+  // A summary run keeps no frames, so its budget is the model's largest: a medium program takes hundreds of millions of steps.
+  const built = assemble(m.spec, lowered, { trace, maxEvents: 400_000, maxSteps: trace === "summary" ? 2_000_000_000 : 20_000_000, forceCompact,
     bindings: m.bindings, readouts: superconducting.readoutOracle(lowered, m, outcomes) });
   // A core on the compact interpreter: name its repeated rounds' pulses after their operations.
   const result = remapSources(await execute(built.document), built);

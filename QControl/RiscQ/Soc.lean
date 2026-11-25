@@ -190,7 +190,8 @@ def Program.validate (p : Program) : Except String Unit := do
   unless p.kind == "riscq-soc" && p.version == 1 do throw "Unknown RISC-Q program version."
   unless 0 < p.dspPeriodPs && p.dspPeriodPs ≤ 1000000 && p.timeOffset < 4294967296 do
     throw "Use a dspClk period of 1 ps to 1 µs and a 32-bit time offset."
-  unless ["full", "io"].contains p.trace do throw "Trace detail is full or io."
+  -- `summary`: no frames, and slim pulse records (a medium program plays millions of pulses).
+  unless ["full", "io", "summary"].contains p.trace do throw "Trace detail is full, io or summary."
   unless 0 < p.maxEvents && p.maxEvents ≤ 400000 && 0 < p.maxSteps && p.maxSteps ≤ 2000000000 &&
       0 < p.maxBatches && p.maxBatches ≤ 2000000000 do throw "Run budget is out of range."
   let m := p.model
@@ -492,6 +493,7 @@ def World.schedule (w : World) (cycle : Nat) (cause : String) (pc : Option Nat) 
   { w with agenda := w.agenda.push itemBefore item, seq := w.seq + 1 }
 
 def World.emit (w : World) (p : Program) (f : Frame) : World :=
+  if p.trace == "summary" then w else
   { w with frames := w.frames.push { f with atPs := f.atBatch * p.dspPeriodPs } }
 
 def World.fault (w : World) (cycle : Nat) (part reason : String) : World :=
@@ -934,7 +936,10 @@ def applyItem (p : Program) (w : World) (item : Item) : World := Id.run do
     if overlap then w := w.fault t part "pulse window opened before the previous one closed"
     let core := modifyChannel core ch fun s ↦ { s with windowEnd := t + dur, windows := window + 1 }
     w := setCore w ci core
-    w := { w with pulses := w.pulses.push record }
+    let slim := Json.mkObj [("core", ci), ("channel", ch), ("part", part), ("startTime", f.startTime), ("opens", t),
+      ("closes", t + dur), ("amp", f.entry.amp), ("phase", phaseCode), ("aligned", aligned), ("onTime", onTime),
+      ("overlap", overlap), ("source", toJson item.source)]
+    w := { w with pulses := w.pulses.push (if p.trace == "summary" then slim else record) }
     w := w.emit p (frame "pulse" part [converter] record)
     for (b, bi) in p.bindings.zipIdx do
       if b.core == ci && b.channel == ch && b.slot == f.slot then
