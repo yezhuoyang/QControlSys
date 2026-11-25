@@ -6,27 +6,31 @@ import {runCell} from "../studio/course/labs/cell.mjs";
 import {runManila, manilaProgram, sampleEnvelope} from "../studio/course/labs/manila.mjs";
 import {runTransport, transportProgram, compareParity} from "../studio/course/labs/lukin.mjs";
 import {linkProgram, runLink} from "../studio/course/labs/helios.mjs";
-import {apparatusMarkers} from "../studio/course/labs/published-layout.mjs";
+import {hardwareLayout,componentState,planY} from "../studio/course/labs/hardware-layout.mjs";
 
 const read = name => readFileSync(new URL("../studio/course/labs/manila/"+name+"_manila.json", import.meta.url));
 const archive = Object.fromEntries(["conf","props","defs"].map(k => [k,JSON.parse(read(k))]));
 
-test("Manila figure highlights hardware addressed by pulse instructions and excludes delays",()=>{
+test("Manila hardware represents every archive channel and highlights the scheduled targets",()=>{
   const {machine,frames}=runManila([{gate:"sx",qubits:[3]},{gate:"measure",qubits:[0]}],archive);
-  const dots=apparatusMarkers(machine,frames[0],"d3");
-  assert.deepEqual(dots.filter(d=>d.selected&&d.active).map(d=>d.id),["q3"]);
+  const owners=new Set(hardwareLayout(machine).solids.map(s=>s.owner));
+  for(const p of machine.parts)assert.ok(owners.has(p.id),p.id);
+  const state=componentState(machine,frames[0],"d3");
+  assert.deepEqual([...state.active].sort(),["d3","q3"]);
+  assert.deepEqual([...state.chosen].sort(),["d3","q3"]);
   const waiting=frames.find(f=>f.state.m0?.instruction?.name==="delay" && f.state.acquire0?.signal==="idle");
   assert.ok(waiting);
-  assert.equal(apparatusMarkers(machine,waiting,"m0").find(d=>d.id==="q0").active,false);
+  assert.equal(componentState(machine,waiting,"m0").active.has("q0"),false);
 });
 
-test("transport overlay preserves the paper scale through a move and a stationary control",()=>{
+test("native tweezer wells and atoms follow the executed trajectory on one fixed scale",()=>{
   for(const moving of [false,true]){
     const {machine,frames}=runTransport({...transportProgram,moving});
-    for(const f of [frames[0],frames.at(-1)]){
-      const [lower,upper]=apparatusMarkers(machine,f,"atom1");
-      assert.equal(upper.selected,true);
-      assert.ok(Math.abs((lower.y-upper.y)*110/240-(f.state.atom1.yUm-f.state.atom0.yUm))<1e-10);
+    const layout=hardwareLayout(machine);
+    const [lower,upper]=["atom0","atom1"].map(id=>layout.solids.find(s=>s.key===id));
+    for(const f of frames){
+      assert.ok(Math.abs((planY(lower,f)-planY(upper,f))/lower.motion.units-(f.state.atom1.yUm-f.state.atom0.yUm))<1e-10);
+      assert.equal(planY(upper,f),planY(layout.solids.find(s=>s.key==="well1"),f));
     }
   }
 });

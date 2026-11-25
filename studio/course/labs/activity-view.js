@@ -1,6 +1,7 @@
 import {activities,circuits,settingsFor,executeActivity} from "./activities.mjs";
 import {el} from "../course.js";
-import {publishedView} from "./published-view.js";
+import {hardwarePlan} from "./hardware-plan.js";
+import {references,hardwareReading} from "./hardware-layout.mjs";
 
 const fmt=v=>typeof v==="number" ? Number(v.toPrecision(6)).toString() : String(v);
 const svg=(name,attrs={})=>{
@@ -103,7 +104,11 @@ export function mountActivity(article,id) {
     el("p",{class:"src",text:"Download the experiment to replay it from the project folder with node studio/course/labs/run.mjs experiment <file.json>. Machine and validation experiments use the running QuantumOS server."}));
   const diagram=el("div",{class:"lab-diagram",tabindex:0});
   const apparatus=el("div");
-  let paperView;
+  const hardwareOutput=el("output",{class:"lab-reading"});
+  let plan;
+  const planDetails=el("details",{},el("summary",{text:"Inspect the hardware in plan view"}));
+  const planHolder=el("div",{class:"hardware-plan"});
+  planDetails.append(planHolder);
   const description=el("p",{class:"lab-port-note"});
   const range=el("input",{type:"range",min:0,max:0,value:0,"aria-label":"Trace step"});
   const time=el("output",{class:"lab-time"});
@@ -162,7 +167,10 @@ export function mountActivity(article,id) {
   function paint(){
     if(!execution || dirty)return;
     const {run}=execution,f=run.frames[step];
-    paperView?.update(f,part);
+    if(plan){
+      plan.update(f,part);
+      hardwareOutput.textContent=hardwareReading(run.machine,f,part);
+    }
     const meta=run.machine.parts.find(p=>p.id===part), p=circuit.ports.find(p=>p.id===part);
     const read=p?.read??(v=>typeof v==="number"?v:null);
     const origin=selectedEvent ? locations.get(selectedEvent) : lastEvent(part,step);
@@ -199,7 +207,8 @@ export function mountActivity(article,id) {
       const {drawScene}=await import("./scene.js");
       draw=drawScene(canvas,execution.run.machine,probe);sceneStatus.textContent="Drag to rotate. Select a component to inspect its trace.";
       paint();
-    }catch{sceneStatus.textContent="3D rendering is unavailable in this browser. The diagram and probe show the same trace.";}
+    }catch{sceneStatus.textContent="3D rendering is unavailable in this browser. The diagram and probe show the same trace.";
+      if(plan){planDetails.open=true;canvas.hidden=true;}}
     finally{scenePending=false;}
   }
   scene.ontoggle=ensureScene;
@@ -227,9 +236,15 @@ export function mountActivity(article,id) {
       step=evaluation.index;part=spec.focus;selectedEvent=null;select.value=part;range.max=run.frames.length-1;
       const signal=signalDiagram(circuit,probe,program.connected);
       if(run.machine.apparatus){
-        traceTitle.textContent="Read the published apparatus";
-        paperView=publishedView(run.machine,probe);
-        apparatus.replaceChildren(paperView.element);
+        const ref=references[run.machine.apparatus];
+        traceTitle.textContent=ref.title;
+        if(!plan){
+          scene.querySelector("summary").textContent="Schematic control hardware · 3D";
+          apparatus.append(scene,hardwareOutput,planDetails,el("p",{class:"src"},ref.note," ",el("a",{href:ref.url,text:ref.source})));
+          scene.open=true;
+        }
+        plan=hardwarePlan(run.machine,probe);
+        planHolder.replaceChildren(plan.element);
         diagram.replaceChildren(el("details",{class:"signal-detail"},el("summary",{text:"Inspect the control signal path"}),signal));
       }else diagram.replaceChildren(signal);
       traceBox.hidden=false;

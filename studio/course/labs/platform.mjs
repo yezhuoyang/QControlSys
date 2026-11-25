@@ -78,6 +78,13 @@ export async function runNative(engine, options, request) {
     document:program,comparison:{observed:r.observed,predicted:r.predicted,unit:r.source.unit},
     workspace:"/validation?"+new URLSearchParams(program)
   });
-  if(engine==="h2")result.machine.apparatus="h2";
+  if(engine==="h2"){
+    const chip=r.system.parts.find(p=>p.id==="endpoint");
+    result.machine.apparatus="h2";
+    // Fig. 2c,d in Moses et al. specify 70 µm height and 750 µm gate pitch.
+    // These display constants are checked against the native installation profile.
+    result.machine.trapGeometry={spanMm:chip.fieldSpanMm,widthMm:chip.isthmusWidthMm,
+      pitchMm:0.75,ionHeightMm:0.07};
+  }
   return result;
 }

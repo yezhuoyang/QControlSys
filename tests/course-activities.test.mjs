@@ -6,6 +6,7 @@ import {activities,circuits,settingsFor,executeActivity} from "../studio/course/
 import {debugDesign} from "../validation/board/bench.mjs";
 import {runMachine} from "../server.mjs";
 import {run as runController} from "../riscq/examples.mjs";
+import {hardwareLayout} from "../studio/course/labs/hardware-layout.mjs";
 
 const json=async url=>JSON.parse(await readFile(url,"utf8"));
 const io={json,request:async(path,data)=>{
@@ -52,6 +53,18 @@ for(const [id,fix] of Object.entries(repaired)){
     const frame=run.frames[evaluation.index];
     assert.ok(frame && evaluation.reading);
     const parts=new Set(run.machine.parts.map(p=>p.id));
+    if(id==="M3"){
+      const {chipModel}=await json(new URL("../physical/qccd-installation.json",import.meta.url));
+      assert.deepEqual(run.machine.trapGeometry,{spanMm:chipModel.electrodeSpanMm,widthMm:chipModel.isthmusWidthMm,
+        pitchMm:chipModel.h2PitchMm,ionHeightMm:chipModel.ionHeightMm});
+      const solids=hardwareLayout(run.machine).solids;
+      assert.equal(new Set(solids.map(s=>s.key)).size,solids.length);
+      solids.filter(s=>s.owner).forEach(s=>assert.ok(parts.has(s.owner),s.owner));
+      const gates=solids.filter(s=>/^gate\d$/.test(s.key));
+      assert.equal(gates.length,4);
+      assert.equal((gates[1].points[0][0]-gates[0].points[0][0])/94,0.75);
+      assert.ok(Math.abs((solids.find(s=>s.key.startsWith("reference-ion")).base-3)/94-0.07)<1e-12);
+    }
     for(const port of circuits[activities[id].engine].ports)assert.ok(parts.has(port.id),port.id);
     const seen=new Set(run.frames.flatMap(f=>f.events.map(e=>e.id)));
     for(const f of run.frames)for(const event of f.events){

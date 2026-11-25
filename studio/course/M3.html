@@ -13,7 +13,9 @@
 <p class="lead">Start with the first interacting pair in a published 32-ion circuit. Follow the pair into a gate zone, then ask why the experiment ends with 32 measurements at each of many different phases.</p>
 
 <h2>Find the first pair</h2>
+<details><summary>View the original paper figure</summary>
 <figure class="paper-figure"><a href="/course/figures/ion-trap.png" aria-label="Enlarge figure"><img src="/course/figures/ion-trap.png" alt="Plan of the H2 racetrack with repeated electrodes and enlarged views of operating zones."></a><figcaption>Trace one straight section of the loop. Panel b enlarges the repeating metal segments that move the electric wells along it. <a href="https://doi.org/10.1103/PhysRevX.13.041052">Moses et al., A Race-Track Trapped-Ion Quantum Processor, Phys. Rev. X 13, 041052 (2023), Fig. 2</a>. Figure cropped from the paper. <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</figcaption></figure>
+</details>
 <p>Quantinuum’s original H2 benchmark prepares a shared state across 32 ions. It begins with a superposition on ion 0, then entangles pairs in a branching tree. The released circuit first pairs q0 with q1. In the QuantumOS compiled replay the ions meet at DG01. Open the first twelve control cycles and inspect the laser pulse associated with that pair. The controller executes a reconstructed program on the RISC-Q hardware model. <a href="/riscq-studio?example=quantinuum-h2-theta1&amp;view=chip">Inspect the first gate in the workspace</a>.</p>
 
 <h2>Change the measurement question</h2>
