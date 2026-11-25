@@ -55,7 +55,11 @@ structure CoreSpec where
   channels : Array ChannelSpec
   image : Array Nat
   sourceMap : Array SourceEntry
+  /-- The board the core sits on (0 when the build has one board). -/
+  board? : Option Nat := none
   deriving FromJson, ToJson, Inhabited
+
+def CoreSpec.board (c : CoreSpec) : Nat := c.board?.getD 0
 
 /-- Latencies in dspClk cycles. Stage counts follow RISC-Q `docs/soc`. -/
 structure Model where
@@ -89,6 +93,14 @@ structure Model where
   sinkDepth : Nat
   /-- System puts one source may have waiting at the hub arbiter before one is dropped. -/
   hubQueue : Nat
+  /-- Board to board (RISC-Q PutLane on the White Rabbit GTY lane), measured on RISC-Q's RTL
+      (validation/riscq/rtl/QosLaneTiming.scala): from a hub's dispatch of a frame to the far hub's
+      lane input, at least `laneCross` cycles, on the first cycle `≡ lanePhase (mod laneWord)` (the lane's
+      word clock), and no sooner than `laneFrame` cycles after the lane's previous frame. -/
+  laneCross? : Option Nat := none
+  laneFrame? : Option Nat := none
+  laneWord? : Option Nat := none
+  lanePhase? : Option Nat := none
   deriving FromJson, ToJson
 
 /-- Result of one demodulation window. Windows of a channel consume their entries in order. -/
@@ -178,7 +190,7 @@ def Program.validate (p : Program) : Except String Unit := do
   unless 0 < p.dspPeriodPs && p.dspPeriodPs ≤ 1000000 && p.timeOffset < 4294967296 do
     throw "Use a dspClk period of 1 ps to 1 µs and a 32-bit time offset."
   unless ["full", "io"].contains p.trace do throw "Trace detail is full or io."
-  unless 0 < p.maxEvents && p.maxEvents ≤ 400000 && 0 < p.maxSteps && p.maxSteps ≤ 20000000 &&
+  unless 0 < p.maxEvents && p.maxEvents ≤ 400000 && 0 < p.maxSteps && p.maxSteps ≤ 2000000000 &&
       0 < p.maxBatches && p.maxBatches ≤ 2000000000 do throw "Run budget is out of range."
   let m := p.model
   unless m.linkPipe ≤ 64 && m.bridge ≤ 8 && m.fireToPush ≤ 8 && m.freqToPush ≤ 8 && m.coreTimeLag ≤ 256 &&
@@ -186,7 +198,7 @@ def Program.validate (p : Program) : Except String Unit := do
       m.hubDown ≤ 256 && m.hubUp ≤ 256 && m.reportUp ≤ 256 && m.decoder ≤ 256 &&
       0 < m.sinkDepth && m.sinkDepth ≤ 1024 && 0 < m.hubQueue && m.hubQueue ≤ 64 do
     throw "A latency parameter is out of range."
-  unless 0 < p.cores.size && p.cores.size ≤ 64 do throw "Use 1–64 cores."
+  unless 0 < p.cores.size && p.cores.size ≤ 1024 do throw "Use 1–1024 cores (at most 16 per board)."
   for c in p.cores do
     unless 0 < c.memWords && c.memWords ≤ 16384 && c.image.size ≤ c.memWords do
       throw s!"Core {c.name}: the image must fit a RAM of at most 16384 words."
@@ -337,11 +349,14 @@ inductive Action where
   | sinkSettle (core sink : Nat) (res real imag : UInt32)
   | sinkEvent (core sink : Nat) (word time : UInt32)
   | hub (core node : Nat) (offset data : UInt32)
+  /-- A put frame off the lane into board `dst`'s hub. `release` frames carry a barrier release: the
+      arrivers on that board (global core indices) and the root's stamp in `data`. -/
+  | lane (dst origin core node : Nat) (offset data : UInt32) (release : List Nat)
   | board (core group : Nat) (word : UInt32)
   | releaseBox (core : Nat) (t0 : UInt32)
   | mailbox (core index : Nat) (word : UInt32)
   | effect (binding : Nat)
-  | hubServe
+  | hubServe (board : Nat)
 
 structure Item where
   cycle : Nat
@@ -362,6 +377,11 @@ structure Beat where
   arrived : Nat
   /-- A `wait` frame has reported this put. -/
   announced : Bool := false
+  /-- It came off the lane, from board `origin`. -/
+  fromLane : Bool := false
+  origin : Nat := 0
+  /-- A release frame: the arrivers on the receiving board. -/
+  release : Option (List Nat) := none
 
 /-- The board hub (RISC-Q `src/riscq/soc/link/PutHub.scala`), register by register: per source a
     `StreamFifo` (depth 8, latency 2) and its `m2sPipe`; the registered round-robin `grant` and `prio`;
@@ -386,6 +406,8 @@ structure HubState where
   wb : Option Nat := none
   /-- A hub cycle is on the agenda. -/
   serving : Bool := false
+  /-- Release frames still to leave (the root's `rel.busy` holds `arb`). -/
+  relBusy : Nat := 0
   served : Nat := 0
   maxWait : Nat := 0
   peakWaiting : Nat := 0
@@ -435,7 +457,10 @@ structure Frame where
 
 structure World where
   cores : Array CoreState
-  hub : HubState := {}
+  /-- One hub per board; board 0 is the barrier root. -/
+  hubs : Array HubState := #[{}]
+  /-- Per lane (`from * 16 + to`): the earliest cycle the next frame can arrive (one frame time apart). -/
+  laneFree : Array Nat := Array.replicate 256 0
   agenda : List Item := []
   seq : Nat := 0
   frames : Array Frame := #[]
@@ -592,20 +617,77 @@ private def applyPut (p : Program) (w : World) (t : Nat) (item : Item) (ci ch : 
     state := Json.mkObj ([("offset", toJson offset.toNat), ("data", toJson data.toNat),
       ("buffer", bufferJson state.buffer)] ++ detail) }
 
-/-- Dispatch one system put at the board hub. -/
-private def applyHub (p : Program) (w : World) (t : Nat) (item : Item) (ci node : Nat) (offset data : UInt32)
-    (cause : String) (waited waiting : Nat) : World :=
+/-- Boards of the build, and where a core sits on its board (its hub source and inbox unit). -/
+def Program.boards (p : Program) : Nat := p.cores.foldl (fun m c ↦ max m (c.board + 1)) 1
+def Program.boardCores (p : Program) (b : Nat) : Array Nat :=
+  (p.cores.zipIdx.filter fun (c, _) ↦ c.board == b).map (·.2)
+def Program.localIndex (p : Program) (ci : Nat) : Nat :=
+  ((p.boardCores (p.cores[ci]!.board)).findIdx? (· == ci)).getD 0
+
+private def getHub (w : World) (b : Nat) : HubState := w.hubs.getD b ({} : HubState)
+private def setHub (w : World) (b : Nat) (h : HubState) : World :=
+  let hubs := if w.hubs.size ≤ b then w.hubs ++ Array.replicate (b + 1 - w.hubs.size) ({} : HubState) else w.hubs
+  { w with hubs := hubs.set! b h }
+
+/-- The barrier a hub beat arrives at, if it is a barrier arrival. -/
+private def Beat.barrier (b : Beat) : Option Nat :=
+  if b.release.isNone && localNodes + groupNodes ≤ b.node && b.node < inboxNode0 then some (b.node - localNodes - groupNodes) else none
+
+/-- Put a frame on the lane from board `src` to board `dst` at cycle `t` (`PutLane`): it reaches the far
+    hub's lane input `laneCross` cycles later at the earliest, on the lane's word-clock phase, one frame
+    time after the lane's previous frame. -/
+private def sendLane (p : Program) (w : World) (t src dst : Nat) (beat : Beat) : World :=
+  let cross := p.model.laneCross?.getD 310
+  let frame := p.model.laneFrame?.getD 160
+  let word := max 1 (p.model.laneWord?.getD 8)
+  let phase := p.model.lanePhase?.getD 0
+  let k := src * 16 + dst
+  let earliest := max (t + cross) (w.laneFree.getD k 0)
+  let r := earliest + (phase + word - earliest % word) % word
+  let w := { w with laneFree := w.laneFree.set! k (r + frame) }
+  w.schedule r s!"e{beat.item.seq}" beat.item.pc beat.item.source
+    (.lane dst beat.origin beat.core beat.node beat.offset beat.data (beat.release.getD []))
+
+/-- Boards a dispatched frame is forwarded to. RISC-Q's put network joins two boards over one lane: a
+    board forwards its own publishes, arrivals and remote unicasts, never a frame off the lane. With more
+    boards (QuantumOS's extension, not RISC-Q's RTL) board 0 has a lane to every other board and forwards
+    what it receives to the boards that have not seen it. -/
+private def forwardTo (p : Program) (b : Nat) (beat : Beat) (dest : Option Nat) : List Nat :=
+  let n := p.boards
+  if n ≤ 1 then []
+  else if b == 0 then
+    match dest with
+    | some d => if d == 0 then [] else [d]
+    | none => (List.range n).filter fun k ↦ k != 0 && k != beat.origin
+  else if beat.fromLane then []
+  else [0]
+
+/-- Dispatch one system put at board `b`'s hub. -/
+private def applyHub (p : Program) (w : World) (t b : Nat) (beat : Beat) (cause : String) (waited waiting : Nat) : World :=
   Id.run do
-  let id := s!"e{item.seq}"
+  let item := beat.item
+  let ci := beat.core
+  let node := beat.node
+  let offset := beat.offset
+  let data := beat.data
+  let id := s!"e{item.seq}" ++ (if beat.fromLane then s!".b{b}" else "")
   let mut w := w
-  let mut hub := w.hub
+  let mut hub := getHub w b
   let mut op := "dispatch"
   let mut detail : List (String × Json) := [("from", toJson (partOf p ci)), ("node", toJson node),
-    ("waited", toJson waited), ("waiting", toJson waiting)]
+    ("waited", toJson waited), ("waiting", toJson waiting), ("board", toJson b)]
   -- The beat leaves the output stage, crosses the per-core replica pipe, the up-link queue and link
   -- (`hubUp`, from riscq/soc.mjs); a read sees it from then on.
   let up := t + p.model.hubUp
-  if node < localNodes + groupNodes then
+  let mine := p.boardCores b
+  let mut forward : List (Nat × Beat) := []
+  if let some arrivers := beat.release then
+    -- A release frame from the root: the arrivers on this board take the root's stamp.
+    for target in arrivers do
+      w := w.schedule up id item.pc item.source (.releaseBox target data)
+    op := "release"
+    detail := detail ++ [("t0", toJson data.toNat), ("fromRoot", toJson true)]
+  else if node < localNodes + groupNodes then
     let g := node - localNodes
     let slot := (data.toNat / 2) % 32
     let bit := data &&& 1
@@ -614,51 +696,70 @@ private def applyHub (p : Program) (w : World) (t : Nat) (item : Item) (ci node 
     hub := { hub with groups := hub.groups.set! g word }
     op := "publish"
     detail := detail ++ [("group", toJson g), ("slot", toJson slot), ("bit", toJson bit.toNat), ("word", toJson word.toNat)]
-    for target in [0:p.cores.size] do
+    for target in mine do
       w := w.schedule up id item.pc item.source (.board target g word)
+    forward := (forwardTo p b beat none).map (·, beat)
   else if node < inboxNode0 then
-    let b := node - localNodes - groupNodes
-    let arrived := hub.arrivers[b]!
-    let expected := if arrived.isEmpty then data.toNat else hub.expected[b]!
-    let mismatch := hub.countMismatch || data.toNat != expected
-    let arrived := if arrived.contains ci then arrived else arrived ++ [ci]
-    op := "arrive"
-    detail := detail ++ [("barrier", toJson b), ("arrived", toJson arrived.length), ("expected", toJson expected)]
-    if arrived.length ≥ expected then
-      -- The last arrival releases every arriver with the hub's own time.
-      -- `hub.time := RegNext(syncTime)`. This model's time base is the batch at which a pulse opens at
-      -- its channel output for its start time: two batches behind `RegNext(syncTime)` (measured on RISC-Q's
-      -- RTL, validation/riscq/rtl/firmware-rtl.mjs).
-      let t0 := (p.timeReg t + 2).toUInt32
-      for target in arrived do
-        w := w.schedule up id item.pc item.source (.releaseBox target t0)
-      hub := { hub with arrivers := hub.arrivers.set! b [], expected := hub.expected.set! b 0, countMismatch := mismatch }
-      op := "release"
-      detail := detail ++ [("t0", toJson t0.toNat)]
+    let bar := node - localNodes - groupNodes
+    if b != 0 then
+      -- A non-root forwards an arrival to the root, which counts every arrival (PutHub.scala).
+      op := "forward"
+      detail := detail ++ [("barrier", toJson bar)]
+      forward := (forwardTo p b beat (some 0)).map (·, beat)
     else
-      hub := { hub with
-        arrivers := hub.arrivers.set! b arrived, expected := hub.expected.set! b expected,
-        countMismatch := mismatch }
+      let arrived := hub.arrivers[bar]!
+      let expected := if arrived.isEmpty then data.toNat else hub.expected[bar]!
+      let mismatch := hub.countMismatch || data.toNat != expected
+      let arrived := if arrived.contains ci then arrived else arrived ++ [ci]
+      op := "arrive"
+      detail := detail ++ [("barrier", toJson bar), ("arrived", toJson arrived.length), ("expected", toJson expected)]
+      if arrived.length ≥ expected then
+        -- The last arrival releases every arriver with the root's time. `hub.time := RegNext(syncTime)`.
+        -- This model's time base is the batch at which a pulse opens at its channel output for its
+        -- start time: two batches behind `RegNext(syncTime)` (measured on RISC-Q's RTL,
+        -- validation/riscq/rtl/firmware-rtl.mjs).
+        let t0 := (p.timeReg t + 2).toUInt32
+        for target in arrived.filter (fun c ↦ p.cores[c]!.board == 0) do
+          w := w.schedule up id item.pc item.source (.releaseBox target t0)
+        -- One release frame per other board with arrivers, one per cycle while the arbiter is held.
+        let remote := ((List.range p.boards).filter (· != 0)).filter fun k ↦ arrived.any (fun c ↦ p.cores[c]!.board == k)
+        for (k, i) in remote.zipIdx do
+          let frameBeat : Beat := { beat with data := t0, release := some (arrived.filter (fun c ↦ p.cores[c]!.board == k)), origin := 0, fromLane := false }
+          w := sendLane p w (t + 1 + i) 0 k frameBeat
+        let cleared := { hub with arrivers := hub.arrivers.set! bar [], expected := hub.expected.set! bar 0 }
+        hub := { cleared with countMismatch := mismatch, relBusy := remote.length }
+        op := "release"
+        detail := detail ++ [("t0", toJson t0.toNat), ("remoteBoards", toJson remote.length)]
+      else
+        hub := { hub with
+          arrivers := hub.arrivers.set! bar arrived, expected := hub.expected.set! bar expected,
+          countMismatch := mismatch }
   else
-    let target := node % 256 - inboxNode0
+    let tb := node / 256
+    let unit := node % 256
     let address := sinkBase + offset.toNat
     let index := (address - 0x4340) / sinkStride
-    if node / 256 == 0 && node % 256 ≥ inboxNode0 && target < p.cores.size && address ≥ 0x4340 &&
+    let targets := p.boardCores tb
+    if unit ≥ inboxNode0 && unit - inboxNode0 < targets.size && address ≥ 0x4340 &&
         (address - 0x4340) % sinkStride == 0 && index < 2 then
-      op := "signal"
-      detail := detail ++ [("to", toJson (partOf p target)), ("mailbox", toJson index), ("word", toJson data.toNat)]
-      w := w.schedule up id item.pc item.source (.mailbox target index data)
+      let target := targets[unit - inboxNode0]!
+      if tb == b then
+        op := "signal"
+        detail := detail ++ [("to", toJson (partOf p target)), ("mailbox", toJson index), ("word", toJson data.toNat)]
+        w := w.schedule up id item.pc item.source (.mailbox target index data)
+      else
+        op := "forward"
+        detail := detail ++ [("to", toJson (partOf p target)), ("toBoard", toJson tb)]
+        forward := (forwardTo p b beat (some tb)).map (·, beat)
     else
       op := "ignored"
       w := w.fault t "hub" s!"system put to unknown node {node} offset {offset.toNat}"
-  w := { w with hub }
+  w := setHub w b hub
+  for (dst, fb) in forward do
+    w := sendLane p w t b dst { fb with origin := if fb.fromLane then fb.origin else b }
   return w.emit p {
     id, atBatch := t, atPs := 0, op, part := "hub", targets := [], parents := [cause],
     pc? := item.pc, source? := item.source, state := Json.mkObj detail }
-
-/-- The barrier a hub beat arrives at, if it is a barrier arrival. -/
-private def Beat.barrier (b : Beat) : Option Nat :=
-  if localNodes + groupNodes ≤ b.node && b.node < inboxNode0 then some (b.node - localNodes - groupNodes) else none
 
 /-- System puts the hub holds: in its FIFOs, its source registers and its pipe registers. -/
 private def hubHeld (h : HubState) : Nat :=
@@ -667,49 +768,60 @@ private def hubHeld (h : HubState) : Nat :=
   h.queues.foldl (fun k q ↦ k + q.length) 0 + heads +
     [h.s1, h.s2, h.arb].foldl (fun k b ↦ k + (if b.isSome then 1 else 0)) 0
 
-/-- A system put reaches the hub (`hub.in(i)`, the `xput` flow) at cycle `t` and is pushed into its
-    source's FIFO, whose pop side shows it two cycles later (`StreamFifo`, latency 2). A put into a
-    full FIFO (depth `hubQueue`) is dropped: the input is a `Flow`, posted. -/
-private def hubArrive (p : Program) (w : World) (t : Nat) (item : Item) (ci node : Nat) (offset data : UInt32) : World :=
+/-- A put reaches board `b`'s hub at cycle `t` from source `src` (a core's `xput`, or the lane, the
+    last source) and is pushed into that source's FIFO, whose pop side shows it two cycles later
+    (`StreamFifo`, latency 2). A put into a full FIFO (depth `hubQueue`) is dropped: the input is a
+    `Flow`, posted. -/
+private def hubPush (p : Program) (w : World) (t b src : Nat) (beat : Beat) : World :=
   Id.run do
-  let n := p.cores.size
-  let hub := if w.hub.queues.size < n then
-      { w.hub with queues := Array.replicate n [], heads := Array.replicate n none } else w.hub
-  let queue := hub.queues.getD ci []
+  let n := (p.boardCores b).size + 1
+  let hub0 := getHub w b
+  let hub := if hub0.queues.size < n then
+      { hub0 with queues := Array.replicate n [], heads := Array.replicate n none } else hub0
+  let queue := hub.queues.getD src []
+  let item := beat.item
   if queue.length ≥ p.model.hubQueue then
-    let w := w.fault t "hub" s!"the hub queue of {partOf p ci} is full: its system put to node {node} is dropped"
+    let w := w.fault t "hub" s!"the hub queue of {if src + 1 == n then "the lane" else partOf p beat.core} on board {b} is full: a system put to node {beat.node} is dropped"
     return w.emit p {
-      id := s!"e{item.seq}", atBatch := t, atPs := 0, op := "drop", part := "hub", targets := [],
+      id := s!"e{item.seq}.drop{b}", atBatch := t, atPs := 0, op := "drop", part := "hub", targets := [],
       parents := [item.cause], pc? := item.pc, source? := item.source,
-      state := Json.mkObj [("from", toJson (partOf p ci)), ("node", toJson node), ("queued", toJson queue.length)] }
-  let beat : Beat := { item, core := ci, node, offset, data, arrived := t, announced := true }
-  let queues := hub.queues.set! ci (queue ++ [((beat, t + 2) : Beat × Nat)])
+      state := Json.mkObj [("from", toJson (partOf p beat.core)), ("node", toJson beat.node), ("queued", toJson queue.length), ("board", toJson b)] }
+  let beat := { beat with arrived := t, announced := true }
+  let queues := hub.queues.set! src (queue ++ [((beat, t + 2) : Beat × Nat)])
   let hub := { hub with queues := queues }
   let waiting := hubHeld hub
-  let mut w := { w with hub := { hub with peakWaiting := max hub.peakWaiting waiting } }
+  let waitId := s!"e{item.seq}.wait" ++ (if beat.fromLane then s!".b{b}" else "")
+  let mut w := setHub w b { hub with peakWaiting := max hub.peakWaiting waiting }
   -- Every put is held in the hub's pipeline from its arrival to its dispatch; its dispatch names
   -- this frame as its cause, and the dispatch frame states how many puts the hub still holds.
   w := w.emit p {
-    id := s!"e{item.seq}.wait", atBatch := t, atPs := 0, op := "wait", part := "hub", targets := [],
+    id := waitId, atBatch := t, atPs := 0, op := "wait", part := "hub", targets := [],
     parents := [item.cause], pc? := item.pc, source? := item.source,
-    state := Json.mkObj [("from", toJson (partOf p ci)), ("node", toJson node), ("waiting", toJson waiting)] }
-  unless w.hub.serving do
-    w := { w with hub := { w.hub with serving := true } }
-    w := w.schedule (t + 2) "hub" none none .hubServe
+    state := Json.mkObj [("from", toJson (partOf p beat.core)), ("node", toJson beat.node), ("waiting", toJson waiting), ("board", toJson b)] }
+  unless (getHub w b).serving do
+    w := setHub w b { getHub w b with serving := true }
+    w := w.schedule (t + 2) "hub" none none (.hubServe b)
   return w
 
-/-- One cycle of the hub, as the registers of `PutHub.scala` update at its end. The arbiter output
-    (`arb`) is always accepted on a one-board build, so a beat at `arb` dispatches this cycle. -/
-private def hubServe (p : Program) (w : World) (t : Nat) : World := Id.run do
+/-- A core's system put reaches its board's hub (`hub.in(i)`, the `xput` flow). -/
+private def hubArrive (p : Program) (w : World) (t : Nat) (item : Item) (ci node : Nat) (offset data : UInt32) : World :=
+  let b := p.cores[ci]!.board
+  hubPush p w t b (p.localIndex ci) { item, core := ci, node, offset, data, arrived := t, origin := b }
+
+/-- One cycle of board `b`'s hub, as the registers of `PutHub.scala` update at its end. While the root
+    has release frames to send (`rel.busy`), `arb` is held. -/
+private def hubServe (p : Program) (w : World) (t b : Nat) : World := Id.run do
   let mut w := w
-  let h := w.hub
+  let h := getHub w b
   let n := h.heads.size
   let valids := h.heads.map (·.isSome)
   -- Combinational signals of this cycle.
   let hazard := match h.s2.bind Beat.barrier with
-    | some b => (h.arb.bind Beat.barrier) == some b || h.wb == some b
+    | some bar => (h.arb.bind Beat.barrier) == some bar || h.wb == some bar
     | none => false
-  let s2Fire := h.s2.isSome && !hazard
+  let arbFire := h.arb.isSome && h.relBusy == 0
+  let arbIn := h.arb.isNone || arbFire
+  let s2Fire := h.s2.isSome && !hazard && arbIn
   let s2In := h.s2.isNone || s2Fire
   let s1Fire := h.s1.isSome && s2In
   let s1In := h.s1.isNone || s1Fire
@@ -719,15 +831,16 @@ private def hubServe (p : Program) (w : World) (t : Nat) : World := Id.run do
   let pickedFire := picked.isSome && s1In
   let advance := picked.isNone || s1In
   -- Dispatch at `arb`.
-  if let some beat := h.arb then
-    let waiting := hubHeld h - 1
-    w := applyHub p w t beat.item beat.core beat.node beat.offset beat.data s!"e{beat.item.seq}.wait" (t - beat.arrived) waiting
-    w := { w with hub := { w.hub with served := w.hub.served + 1, maxWait := max w.hub.maxWait (t - beat.arrived) } }
-  -- Next state. (`applyHub` changed only the group words and barrier counts.)
-  let wb := match h.arb with
-    | some beat => beat.barrier
-    | none => none
-  let arb := if s2Fire then h.s2 else none
+  if arbFire then
+    if let some beat := h.arb then
+      let waiting := hubHeld h - 1
+      let cause := s!"e{beat.item.seq}.wait" ++ (if beat.fromLane then s!".b{b}" else "")
+      w := applyHub p w t b beat cause (t - beat.arrived) waiting
+      let h2 := getHub w b
+      w := setHub w b { h2 with served := h2.served + 1, maxWait := max h2.maxWait (t - beat.arrived) }
+  -- Next state. (`applyHub` changed only the group words, the barrier counts and `relBusy`.)
+  let wb := if arbFire then (h.arb.bind Beat.barrier) else none
+  let arb := if s2Fire then h.s2 else if arbFire then none else h.arb
   let s2 := if s2In then (if s1Fire then h.s1 else none) else h.s2
   let s1 := if s1In then (if pickedFire then picked else none) else h.s1
   let popReg := if pickedFire then h.grant else none
@@ -751,11 +864,13 @@ private def hubServe (p : Program) (w : World) (t : Nat) : World := Id.run do
           queues := queues.set! i rest
         else heads := heads.set! i none
       | [] => heads := heads.set! i none
-  let hub := { w.hub with heads, queues, grant, prio, popReg, s1, s2, arb, wb }
+  let cur := getHub w b
+  let relBusy := if h.relBusy > 0 then h.relBusy - 1 else cur.relBusy
+  let hub := { cur with heads, queues, grant, prio, popReg, s1, s2, arb, wb, relBusy }
   let busy := hub.heads.any (·.isSome) || hub.queues.any (!·.isEmpty) || hub.s1.isSome || hub.s2.isSome ||
-    hub.arb.isSome || hub.wb.isSome || hub.grant.isSome || hub.popReg.isSome
-  w := { w with hub := { hub with serving := busy } }
-  if busy then return w.schedule (t + 1) "hub" none none .hubServe
+    hub.arb.isSome || hub.wb.isSome || hub.grant.isSome || hub.popReg.isSome || hub.relBusy > 0
+  w := setHub w b { hub with serving := busy }
+  if busy then return w.schedule (t + 1) "hub" none none (.hubServe b)
   return w
 
 /-- Apply one scheduled converter-edge, link or hub event. -/
@@ -768,7 +883,12 @@ def applyItem (p : Program) (w : World) (item : Item) : World := Id.run do
   match item.action with
   | .put ci ch offset data => return applyPut p w t item ci ch offset data
   | .hub ci node offset data => return hubArrive p w t item ci node offset data
-  | .hubServe => return hubServe p w t
+  | .hubServe b => return hubServe p w t b
+  | .lane dst origin ci node offset data release =>
+    let src := (p.boardCores dst).size
+    let rel : Option (List Nat) := if node < inboxNode0 && localNodes + groupNodes ≤ node && !release.isEmpty then some release else none
+    let beat : Beat := { item, core := ci, node, offset, data, arrived := t, fromLane := true, origin, release := rel }
+    return hubPush p w t dst src beat
   | .pulse ci ch f phaseCode land =>
     let some spec := (p.cores[ci]?).bind (·.channels[ch]?) | return w
     let core := w.cores[ci]!
@@ -1303,8 +1423,13 @@ def run (p : Program) : Json := Id.run do
     ("status", status), ("elapsedBatches", now), ("elapsedPs", now * p.dspPeriodPs), ("steps", steps),
     ("cores", toJson cores), ("pulses", toJson w.pulses), ("tones", toJson w.tones),
     ("faults", toJson w.faults), ("host", toJson w.host),
-    ("hub", Json.mkObj [("groups", toJson (w.hub.groups.map UInt32.toNat)), ("countMismatch", w.hub.countMismatch),
-      ("served", w.hub.served), ("maxWait", w.hub.maxWait), ("peakWaiting", w.hub.peakWaiting)])]
+    ("hub", Json.mkObj [("groups", toJson ((w.hubs.getD 0 ({} : HubState)).groups.map UInt32.toNat)),
+      ("countMismatch", toJson (w.hubs.any (·.countMismatch))), ("served", toJson (w.hubs.foldl (fun (m : Nat) h ↦ m + h.served) 0)),
+      ("maxWait", toJson (w.hubs.foldl (fun (m : Nat) h ↦ max m h.maxWait) 0)),
+      ("peakWaiting", toJson (w.hubs.foldl (fun (m : Nat) h ↦ max m h.peakWaiting) 0)),
+      ("boards", toJson p.boards),
+      ("perBoard", toJson (w.hubs.map fun h ↦ Json.mkObj [("groups", toJson (h.groups.map UInt32.toNat)), ("served", h.served),
+        ("maxWait", h.maxWait), ("peakWaiting", h.peakWaiting)]))])]
   let start := Json.mkObj [("pc", ramBase.toNat), ("timeRegister", p.timeOffset),
     ("coreTime", (p.coreTime 0).toNat)]
   return Json.mkObj [("program", toJson p), ("system", system p), ("initial", start),

@@ -50,7 +50,8 @@ export function socSpec(raw) {
       };
     });
     if (new Set(channels.map((ch) => ch.name)).size !== channels.length) fail("duplicate channel name in " + merged.name + ".");
-    return { name: merged.name, memWords: merged.mem_depth, withMul: merged.with_mul, queueDepth: merged.queue_depth, channels };
+    // `board`: the board the core sits on (RISC-Q SocSpec board/boards; 0 on a one-board build).
+    return { name: merged.name, memWords: merged.mem_depth, withMul: merged.with_mul, queueDepth: merged.queue_depth, channels, board: merged.board ?? 0 };
   });
   if (new Set(cores.map((c) => c.name)).size !== cores.length) fail("duplicate core name.");
   if (!(raw.dsp_freq_hz > 0)) fail("state dsp_freq_hz.");
@@ -122,6 +123,16 @@ export function model(spec, overrides = {}) {
     decoder: 9, // ReadoutDecoder.md: ComplexMul 6 + 1 + log2Up(4)
     sinkDepth: 8, // EventLink.md: consume-on-read queue of depth 8
     hubQueue: 8, // PutHub.md: one queue of depth 8 per source in front of the round-robin arbiter
+    // Board to board over RISC-Q's PutLane (the White Rabbit GTY lane), measured on its RTL at a 500 MHz
+    // dspClk and the lane's 62.5 MHz word clock (validation/riscq/rtl/QosLaneTiming.scala): a frame
+    // reaches the far hub's lane input at least 310 + 8·(L − 3) cycles after its dispatch, on the lane's
+    // word-clock phase (one edge per 8 cycles; the phase is fixed at power-up and arbitrary), and a lane
+    // carries one frame per 160 cycles. L, the GTY TX + RX latency and cable in 16 ns word clocks, is not
+    // in the RTL: 3 is the stand-in of RISC-Q's own simulation, `laneWords` overrides it.
+    laneCross: 310 + 8 * ((overrides.laneWords ?? 3) - 3),
+    laneFrame: 160,
+    laneWord: 8,
+    lanePhase: overrides.lanePhase ?? 0,
     ...overrides,
   };
 }
@@ -164,6 +175,14 @@ export function ampCode(a) {
 /** Assemble the document the Lean executable runs. `images[i]` is `{words, sourceMap}`. */
 export function program(spec, images, options = {}) {
   if (images.length !== spec.cores.length) fail("supply one image per core.");
+  const boards = new Set(spec.cores.map((c) => c.board ?? 0));
+  if (boards.size > 1 && spec.dspPeriodPs !== 2000)
+    fail("the board-to-board lane is measured on RISC-Q's RTL at a 500 MHz dspClk only; a multi-board build at another clock needs its own measurement.");
+  for (let b = 0; b < boards.size; b++) {
+    const here = spec.cores.filter((c) => (c.board ?? 0) === b).length;
+    if (!here) fail("boards are numbered from 0 without gaps; board " + b + " has no core.");
+    if (here > 16) fail("a board's hub serves at most 16 cores (RISC-Q PutHub); board " + b + " has " + here + ".");
+  }
   return {
     kind: "riscq-soc",
     version: 1,
@@ -179,6 +198,7 @@ export function program(spec, images, options = {}) {
       channels: core.channels,
       image: images[i].words,
       sourceMap: images[i].sourceMap ?? [],
+      ...(core.board ? { board: core.board } : {}),
     })),
     readouts: options.readouts ?? [],
     dioInputs: options.dioInputs ?? [],

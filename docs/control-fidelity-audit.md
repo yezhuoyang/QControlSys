@@ -80,7 +80,7 @@ a document, the document is cited and the item says so.
 | S2 | **closed** | `QControl/RiscQ/Pipe.lean` replaces the cost model. Instruction by instruction, every commit equals RISC-Q's RTL in Verilator: 16 micro-benchmarks, the Helios decoder (274,388 instructions), `pulse_sched.elf`, `xcore.elf`, the feed-forward and repetition examples. |
 | S3–S7 | in progress | Parallel session (decode service). It reads every time from the Lean run, so it inherits S2 and S8. |
 | S8 | **closed** | The hub is modeled register by register from `PutHub.scala`, checked under contention (`validation/riscq/rtl/hub-rtl.mjs`). These latencies are measured on the RTL: the time register, the system-put path, hub delivery, the readout result path, halting reads. Each is stated in `riscq/soc.mjs` `model()`. |
-| S9 | **measured on RTL; not yet in the Lean model** | Cross-board latency of RISC-Q's PutHub + PutLane (below). |
+| S9 | **modeled: two boards as RISC-Q's RTL, more as a stated extension** | Lean: one register-level hub per board; the lane is each hub's extra source, with the measured crossing, word-clock phase and frame time (`tests/riscq-multiboard.test.mjs` reproduces the RTL's 325–332, 160 and the barrier release). Still to do: a full two-SoC run on the RTL (two PulseTableSoc with the GTY simulation phy), and the designs placed on boards (S1). |
 | S10 | open | |
 | S11 | evidence gathered | See "Sizing a board" below. The board model built on it is next. |
 | S12 | open | |
@@ -158,4 +158,15 @@ The runs on the /reproduce pages still put these cores on one board. Their timin
 
 One crossing costs 308 + 8·L cycles. The 308 is RISC-Q's RTL: packing the 72-bit frame into 11 bytes, 8b/10b and the PCS, a receive that delivers only CRC-good whole frames, and a clock-crossing FIFO at each end. L is the GTY transceivers' TX and RX latency plus the cable or fiber. These are not in RISC-Q's RTL, so they must come from the transceiver user guide (UG578) and the cable length (about 5 ns/m). L = 3 is the stand-in of RISC-Q's own simulation, not a hardware value.
 
+**Throughput.** Twelve publishes from board 1, offered one per cycle, arrive on board 0 exactly 160 dspClk cycles (20 word clocks, 320 ns) apart. The lane carries 3.1 M put frames per second per direction. RISC-Q's PutLane.md states about 10 M frames/s; its RTL carries a third of that. A burst of syndrome bits crossing boards is therefore bound by the lane, not by the hub, which takes one per cycle.
+
+**Topology.** RISC-Q's put network joins exactly two boards. Each hub has one lane (`laneIn`/`laneOut`), and a frame that arrives from the lane is never forwarded on (`fwd.valid := !fromLane`). A release frame is applied by its receiver without checking its destination board. `PutHub` accepts `boards ≤ 16`, but with one point-to-point lane only two boards are consistent. A machine that needs more boards, as every reproduction twin does (5 to 18), needs a network RISC-Q does not have: a root that forwards between several lanes, or a switch, and a board check on release frames. That is a design QuantumOS must state as its own extension, with its latency derived from the measured crossing (each extra hop is another crossing). It is not RISC-Q's.
+
 What this means: a syndrome bit that crosses a board takes at least 616 ns more than one that does not. A barrier that spans boards takes at least 1.3 µs. The board-local hub takes 8 cycles (16 ns). How the cores of a twin are spread over boards therefore enters every decode and feedback latency. Next, the Lean model gets one hub per board and the lane between them.
+
+**In the Lean model** (`QControl/RiscQ/Soc.lean`; `riscq/soc.mjs` `model()`):
+
+- A core's `board` places it. Each board has its own register-level hub. Board 0 counts barriers and sends one release frame per remote board while its arbiter is held, as `rel.busy` does in the RTL.
+- A frame dispatched at cycle `d` reaches the far hub's lane input at the first cycle ≥ `d + 310 + 8·(L − 3)` on the lane's word-clock phase. That phase is fixed at power-up and arbitrary; `lanePhase` chooses it. The frame also arrives at least 160 cycles after the lane's previous frame, and enters the far hub as one more round-robin source with an 8-deep FIFO.
+- Measured at a 500 MHz dspClk only. A multi-board build at another clock is refused until it is measured there.
+- More than two boards is QuantumOS's extension: board 0 has a lane to every other board and forwards between them, and every frame between two non-root boards crosses twice.

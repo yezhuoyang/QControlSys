@@ -87,11 +87,36 @@ object QosLaneTiming extends App {
     put(0, 0, SocSpecMap.barrierNode(3), 0, 2); cd.waitSampling(200)
     val b = put(1, 2, SocSpecMap.barrierNode(3), 0, 2); settle()
     val barRoot = first(0, b, EventLink.releaseOffset); val barRemote = first(1, b, EventLink.releaseOffset)
+    // 4. lane throughput: twelve publishes from board 1 (four per core, one core per cycle), all for
+    //    board 0. Their arrivals at board 0's broadcast are spaced by the lane's frame time.
+    beats.foreach(_.clear())
+    val burstStart = cycle
+    for (k <- 0 until 12) {
+      val c = k % cores
+      dut.puts(1)(c).valid #= true
+      dut.puts(1)(c).payload.address #= (BigInt(SocSpecMap.groupNode(1)) << 16)
+      dut.puts(1)(c).payload.data #= ((k % 32) << 1) | 1
+      cd.waitSampling()
+      dut.puts(1)(c).valid #= false
+    }
+    settle(); settle()
+    val arrivals = beats(0).filter(b => b._1 >= burstStart && b._3 == EventLink.boardOffset + 4).map(_._1 - burstStart)
+    // 5. phase: a publish from board 1 offered at each of the 8 dspClk phases of the lane's word clock.
+    val phases = ArrayBuffer[Long]()
+    val sentAt = ArrayBuffer[Long]()
+    for (k <- 0 until 16) {
+      beats.foreach(_.clear())
+      cd.waitSampling(1000 + k)
+      val at = put(1, 1, SocSpecMap.groupNode(2), 0, ((k % 32) << 1) | 1)
+      settle()
+      phases += first(0, at, EventLink.boardOffset + 8)
+      sentAt += at
+    }
     val pw = new PrintWriter(new File(out))
     pw.print(s"""{"lineWords":$lineWords,"dspPs":2000,"wordPs":16000,"publish":{"local":$pubLocal,"remote":$pubRemote},""" +
-      s""""unicast":{"remote":$uniRemote},"barrier":{"root":$barRoot,"remote":$barRemote}}""")
+      s""""unicast":{"remote":$uniRemote},"barrier":{"root":$barRoot,"remote":$barRemote},"burst":[${arrivals.mkString(",")}],"phases":[${phases.mkString(",")}],"sentAt":[${sentAt.mkString(",")}]}""")
     pw.close()
-    println(s"[QosLaneTiming] publish local $pubLocal remote $pubRemote; unicast remote $uniRemote; barrier root $barRoot remote $barRemote (dspClk cycles)")
+    println(s"[QosLaneTiming] publish local $pubLocal remote $pubRemote; unicast remote $uniRemote; barrier root $barRoot remote $barRemote (dspClk cycles); burst arrivals ${arrivals.mkString(",")}; phases ${phases.mkString(",")}")
     simSuccess()
   }
 }
