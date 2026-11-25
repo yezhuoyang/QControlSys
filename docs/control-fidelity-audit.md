@@ -80,7 +80,7 @@ a document, the document is cited and the item says so.
 | S2 | **closed** | `QControl/RiscQ/Pipe.lean` replaces the cost model. Instruction by instruction, every commit equals RISC-Q's RTL in Verilator: 16 micro-benchmarks, the Helios decoder (274,388 instructions), `pulse_sched.elf`, `xcore.elf`, the feed-forward and repetition examples. |
 | S3–S7 | in progress | Parallel session (decode service). It reads every time from the Lean run, so it inherits S2 and S8. |
 | S8 | **closed** | The hub is modeled register by register from `PutHub.scala`, checked under contention (`validation/riscq/rtl/hub-rtl.mjs`). These latencies are measured on the RTL: the time register, the system-put path, hub delivery, the readout result path, halting reads. Each is stated in `riscq/soc.mjs` `model()`. |
-| S9 | open | Depends on S1. |
+| S9 | **measured on RTL; not yet in the Lean model** | Cross-board latency of RISC-Q's PutHub + PutLane (below). |
 | S10 | open | |
 | S11 | evidence gathered | See "Sizing a board" below. The board model built on it is next. |
 | S12 | open | |
@@ -144,3 +144,18 @@ A design that needs more than this does not fit one board. It must be split over
 | Bluvstein et al. 2024 | 23 | 2 | cores |
 
 The runs on the /reproduce pages still put these cores on one board. Their timing inside a core and through the hub is RTL-exact. What is missing is the latency of the boards between them: a publish or barrier that crosses boards goes over PutLane on the White Rabbit GTY lane (S9). Until S9 is modeled, every reproduction states that it needs these boards and does not yet model them.
+
+## Between boards (S9): measured on RISC-Q's RTL
+
+`validation/riscq/rtl/QosLaneTiming.scala` builds two PutHubs joined by two PutLanes (the White Rabbit TX/RX PCS pairs), as RISC-Q's own `PutLaneSim` does. It clocks them as on the board: dspClk 500 MHz, and the lane's word clock 62.5 MHz (20-bit words at 1.25 Gb/s). Latencies are in dspClk cycles, counted from the put entering its source hub. L is the serial line's delay in word clocks (16 ns each).
+
+| Message | Same board | Other board (L = 3) | Other board (L = 13) |
+|---|---|---|---|
+| Publish of a shared bit | 8 | 332 | 412 |
+| Unicast to a mailbox | — | 331 | 411 |
+| Barrier, last arrival on the far board: release at the root | — | 329 | 409 |
+| Same barrier: release back on the far board | — | 649 | 809 |
+
+One crossing costs 308 + 8·L cycles. The 308 is RISC-Q's RTL: packing the 72-bit frame into 11 bytes, 8b/10b and the PCS, a receive that delivers only CRC-good whole frames, and a clock-crossing FIFO at each end. L is the GTY transceivers' TX and RX latency plus the cable or fiber. These are not in RISC-Q's RTL, so they must come from the transceiver user guide (UG578) and the cable length (about 5 ns/m). L = 3 is the stand-in of RISC-Q's own simulation, not a hardware value.
+
+What this means: a syndrome bit that crosses a board takes at least 616 ns more than one that does not. A barrier that spans boards takes at least 1.3 µs. The board-local hub takes 8 cycles (16 ns). How the cores of a twin are spread over boards therefore enters every decode and feedback latency. Next, the Lean model gets one hub per board and the lane between them.
