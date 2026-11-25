@@ -103,6 +103,11 @@ export const examples = [
  *   trace     "io" (default) or "full" for every instruction
  */
 export async function run(request) {
+  // A reproduced paper's run on its digital twin (riscq/ftqvm/studio-runs.mjs).
+  if (typeof request.example === "string" && request.example.startsWith("reproduction:")) {
+    const { studioRun } = await import("./ftqvm/studio-runs.mjs");
+    return studioRun(request.example, { trace: request.trace ?? "io" });
+  }
   const example = examples.find((e) => e.id === request.example);
   if (request.example !== undefined && !example) throw Error("Unknown example " + request.example + ".");
   const platform = example?.platform ?? request.platform;

@@ -59,7 +59,7 @@ function failuresTable(failures) {
 }
 
 export async function renderDesign(el, id) {
-  let meta, stored, params, intro;
+  let meta, stored, params, intro, studioRows = [];
   try {
     const list = await json("/reproduce/data/index.json");
     meta = list.find((r) => r.id === id);
@@ -69,6 +69,8 @@ export async function renderDesign(el, id) {
     if (p.error) throw Error(p.error);
     params = p.params;
     intro = p.intro;
+    // Rows the studio can open (riscq/ftqvm/studio-runs.mjs): reproduction:<id>:<row>.
+    studioRows = (await json("/api/riscq/examples").catch(() => [])).filter((e) => e.id.startsWith("reproduction:" + id + ":")).map((e) => e.id.split(":")[2]);
   } catch (error) {
     el.innerHTML = `<p class="kicker"><a href="/reproduce">Reproduce</a></p><p class="no">This design could not be loaded: ${esc(error.message)}</p>`;
     return;
@@ -112,6 +114,8 @@ export async function renderDesign(el, id) {
     return edits;
   };
   form.addEventListener("input", mark);
+  // The studio's name for the chosen run: a stored twin row, or one of the paper's circuits.
+  const studioKey = () => { const c = current(); return c.row ?? (c.circuit ? "circuit=" + c.circuit : c.d ? "d=" + c.d : undefined); };
 
   async function show(row, { design, label }) {
     viewer?.dispose();
@@ -128,7 +132,8 @@ export async function renderDesign(el, id) {
       <h2>Every operation against its window</h2>${byKindTable(row.byKind)}
       ${failuresTable(row.failures)}
       <h2>The control system</h2>${controllerTable(row.track?.controller)}
-      ${design ? `<p><button type="button" class="btn" data-act="editor">Open the chip in the hardware editor</button> <span class="cite">The edited chip, its control board and every cable, in the RISC-Q design editor.</span></p>` : ""}`;
+      ${design ? `<p><button type="button" class="btn" data-act="editor">Open the chip in the hardware editor</button> <span class="cite">The edited chip, its control board and every cable, in the RISC-Q design editor.</span></p>` : ""}
+      ${studioRows.includes(studioKey()) ? `<p><a class="btn" href="/riscq-studio?${new URLSearchParams({ example: "reproduction:" + id + ":" + studioKey() })}">Open this run in the RISC-Q studio</a> <span class="cite">The paper's twin, without your edits, in the studio: the FormalRV listing, the hardware instructions, every core's firmware and the Lean trace, step by step.</span></p>` : ""}`;
     result.querySelector('[data-act="editor"]')?.addEventListener("click", () => {
       try {
         localStorage.setItem("riscq-design:reproduce", JSON.stringify({ design }));

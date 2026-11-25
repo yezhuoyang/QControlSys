@@ -33,6 +33,7 @@ import * as formalrv from "./formalrv.mjs";
 import * as specText from "./spec.mjs";
 import * as mc from "./magic-circuits.mjs";
 import { controllerTrack } from "./track.mjs";
+import { captured, nativeOp } from "./studio-capture.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..");
@@ -275,6 +276,8 @@ export async function runWillow(circuit, { theta = Math.PI / 4, outcomes = [], q
   const built = assemble(m.spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, bindings: m.bindings,
     readouts: superconducting.readoutOracle(lowered, m, bits) });
   const result = await execute(built.document);
+  // For the RISC-Q studio (riscq/ftqvm/studio-capture.mjs); nothing happens outside a studio run.
+  captured({ spec: m.spec, period: m.period, built, result, design, listing: s.listing, segments: [{ span: s.makespanNs * 1000, ops: s.natives.map((n) => nativeOp(n)) }] });
   const hardware = { segments: [{ ops: s.natives.map((n) => ({ id: n.id, t: n.t })), span: s.makespanNs * 1000 }] };
   const report = conformance(s.listing, { hardware, lowered, origin: s.origin, unrealized: [], classical: [], quantization: { maxSlipPs: 0, gridPs: m.period } }, result, built, m);
   bitLatency(report);
@@ -494,6 +497,9 @@ export async function runGemini(circuit, { outcomes = [], twin = geminiTwin() } 
   const lowered = { tables: [...tables.values()].map(({ keys: _k, lines: _l, ...t }) => t), segments: [{ span: b(s.makespanNs) }], actions, bindings };
   const built = assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, bindings, responses });
   const result = await execute(built.document);
+  // For the RISC-Q studio (riscq/ftqvm/studio-capture.mjs); nothing happens outside a studio run.
+  captured({ spec, period, built, result, listing: s.listing, segments: [{ span: s.makespanNs * 1000,
+    ops: [...natives.map((n) => nativeOp(n)), ...hardwareOps.filter((o) => o.id.startsWith("cam")).map((o) => ({ id: o.id, op: "image", qubits: [], t: o.t, dur: 0, source: "camera exposure " + o.id }))] }] });
   const m = { period, decoderCore: coreOf("frame") };
   const report = conformance(s.listing, { hardware: { segments: [{ ops: hardwareOps, span: s.makespanNs * 1000 }] }, lowered, origin: s.origin, unrealized: [], classical: [], quantization: { gridPs: period } }, result, built, m);
   bitLatency(report);

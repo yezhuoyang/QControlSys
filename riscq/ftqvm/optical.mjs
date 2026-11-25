@@ -660,5 +660,10 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   report.globalEarlyNs = Math.max(0, ...shared.map((sh) => sh.earlyNs ?? 0));
   report.boards = { count: onBoards.boards, summedDacs: onBoards.summed, cores: spec.cores.map((c) => c.board ?? 0) };
   void gatedPairs; void checks;
-  return { report, result, built };
+  // The native instructions as a hardware program (riscq/examples.mjs's shape), for the debugger.
+  const qubitsOf = (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) ?? [];
+  const hardwareProgram = { kind: "hardware-program", version: 1, platform: prof.platform, machine: design.id, timeUnit: "ps",
+    segments: [{ span: span * period, ops: natives.map((n) => ({ id: n.id, op: n.op, qubits: qubitsOf(n.id), t: n.at * period, dur: n.dur * period,
+      channel: n.pool + " " + n.channel, source: n.source })) }] };
+  return { report, result, built, spec, hardware: hardwareProgram };
 }

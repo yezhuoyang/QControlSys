@@ -17,6 +17,7 @@ import * as superconducting from "../platforms/superconducting.mjs";
 import { conformance } from "./sc-run.mjs";
 import { willowTwin, willowDesign, willowMachine, transmonSchedule, lowerTransmon, willowTrack, bitLatency } from "./magic.mjs";
 import { controllerTrack } from "./track.mjs";
+import { captured, nativeOp } from "./studio-capture.mjs";
 import { assembleWithDecoder, decodeRecord } from "../decoders/inrun.mjs";
 
 /** A flattened Stim circuit in the circuit form of riscq/ftqvm/magic-circuits.mjs. */
@@ -147,6 +148,9 @@ export async function runWithDecoder(circuit, graph, { shot, feedback = [{ qubit
     options: { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, bindings: m.bindings, readouts: superconducting.readoutOracle(lowered, m, bits) },
   });
   const result = await execute(document);
+  // For the RISC-Q studio (riscq/ftqvm/studio-capture.mjs): the natives, the decode, the conditioned pulses.
+  captured({ spec: m.spec, period, built, result, design, listing: s.listing, segments: [{ span: s.makespanNs * 1000, ops: s.natives.map((n) => nativeOp(n)) },
+    { classical: true, ops: [] }, { ops: fbIds.map((id, k) => ({ id, op: "x", qubits: [feedback[k].qubit], t: 0, dur: 0, source: "X on qubit " + feedback[k].qubit + ", conditioned on the decoded bit uf.obs0" })) }] });
   const hardware = { segments: [{ ops: s.natives.map((n) => ({ id: n.id, t: n.t })), span: s.makespanNs * 1000 }] };
   const report = conformance(s.listing, { hardware, lowered, origin: s.origin, unrealized: [], classical: [], quantization: { maxSlipPs: 0, gridPs: period } }, result, built, m);
   // A measured bit is needed only by the decode, which reads it after the next barrier: its

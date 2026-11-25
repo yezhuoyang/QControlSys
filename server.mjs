@@ -1,3 +1,4 @@
+import { gzipSync } from "node:zlib";
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
@@ -415,6 +416,13 @@ function reply(res, status, type, body) {
   res.end(body);
 }
 
+/** A large JSON answer (a run's trace), gzipped when the client accepts it: traces shrink about tenfold. */
+function replyLarge(req, res, body) {
+  if (body.length < 262144 || !/\bgzip\b/.test(req.headers["accept-encoding"] ?? "")) return reply(res, 200, "application/json", body);
+  res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Content-Encoding": "gzip", "Vary": "Accept-Encoding", "Cache-Control": "no-store", ...SECURITY });
+  res.end(gzipSync(body, { level: 6 }));
+}
+
 /** A page, script, style or image: cacheable for a few minutes, revalidated after a deploy. */
 function replyStatic(res, status, type, body) {
   res.writeHead(status, {
@@ -496,7 +504,8 @@ if (
       if (url.pathname === "/api/riscq/examples" && req.method === "GET") {
         const { examples } = await import("./riscq/examples.mjs");
         return reply(res, 200, "application/json", JSON.stringify(
-          examples.map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
+          [...examples, ...await import("./riscq/ftqvm/studio-runs.mjs").then((m) => m.studioExamples())]
+            .map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
       }
       if (url.pathname.startsWith("/api/riscq/design")) {
         // Hardware designs (riscq/design.mjs). GET /api/riscq/design?template=ring|ring-decoder
@@ -516,7 +525,7 @@ if (
         const request = req.method === "POST" ? JSON.parse(await readInput(req, 4 * 1024 * 1024))
           : { example: url.searchParams.get("example"), trace: url.searchParams.get("trace") ?? undefined,
               outcomes: Object.fromEntries(url.searchParams.getAll("outcome").map((o) => [o.split("=")[0], Number(o.split("=")[1])])) };
-        return reply(res, 200, "application/json", JSON.stringify(await run(request)));
+        return replyLarge(req, res, JSON.stringify(await run(request)));
       }
       if (req.method === "POST" && url.pathname === "/api/run") {
         const result = await simulate(await readInput(req, 1024 * 1024));

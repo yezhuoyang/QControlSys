@@ -3,6 +3,10 @@
 // numbers come from its run, /reproduce/data/<id>.json (riscq/ftqvm/papers.mjs).
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+// The studio (/riscq-studio) reruns a stored row of a reproduction on its twin: riscq/ftqvm/studio-runs.mjs.
+// A row is a stored twin (its twinKey) or one of the paper's own circuits (its circuit, or its distance).
+const studioKey = (row) => row.twinKey ?? (row.circuit ? "circuit=" + row.circuit : Number.isFinite(row.distance) ? "d=" + row.distance : undefined);
+const studioHref = (id, row) => "/riscq-studio?" + new URLSearchParams({ example: "reproduction:" + id + ":" + studioKey(row) });
 const code = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
 const µs = (ns, digits = 1) => (ns === undefined || ns === null ? "–" : (ns / 1000).toFixed(digits));
 const badge = (status) => `<span class="badge ${/^reproduced$/.test(status) ? "done" : /reproduced/.test(status) ? "partial" : "todo"}">${esc(status)}</span>`;
@@ -106,7 +110,8 @@ export async function renderPaper(el, id) {
     <p>${badge(m.status)}</p>
     <p class="lead">${esc(m.summary)}</p>
     <p class="cite">${cite(m.paper)}</p>
-    <p><a class="btn design" href="/reproduce/${esc(id)}/design">Open the design: the whole machine, editable</a></p>
+    <p><a class="btn design" href="/reproduce/${esc(id)}/design">Open the design: the whole machine, editable</a>
+    ${rows.some(studioKey) ? `<a class="btn design studio" href="${studioHref(id, rows.find(studioKey))}">Open this run in the RISC-Q studio: step through every instruction</a>` : ""}</p>
     ${rows.some((r) => r.track) ? `<h2>The twin, running the program</h2>
     <p>The machine below is the twin this page describes, running the compiled program. Every pulse, move, readout and decode appears at the time the Lean model of the control system executed it; drag to turn the view, scroll to zoom.</p>
     <div class="runpick" role="group" aria-label="Run">${runButtons}</div>
@@ -128,6 +133,7 @@ export async function renderPaper(el, id) {
   const show = async (i) => {
     run.innerHTML = rows[i].view === "circuit" && extra ? extra.runDetail(rows[i]) : runDetail(rows[i]);
     el.querySelectorAll(".runpick button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.run) === i)));
+    if (studioKey(rows[i])) el.querySelectorAll("a.studio").forEach((a) => (a.href = studioHref(id, rows[i])));
     if (!twin) return;
     viewer?.dispose();
     viewer = undefined;

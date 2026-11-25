@@ -18,6 +18,7 @@ import { measuredBits } from "../compile.mjs";
 import { conformance } from "./sc-run.mjs";
 import { bitLatency } from "./magic.mjs";
 import { controllerTrack } from "./track.mjs";
+import { captured, nativeOp } from "./studio-capture.mjs";
 import { assembleWithDecoder, decodeRecord } from "../decoders/inrun.mjs";
 
 const PER_CORE = 4;
@@ -130,6 +131,13 @@ export async function runOpticalTwin({ name, channels, natives, listing, measure
     options: { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, maxBatches: Math.min(2_000_000_000, 2 * b(makespan) + 10_000_000), bindings, responses },
   });
   const result = await execute(document);
+  // For the RISC-Q studio (riscq/ftqvm/studio-capture.mjs): the natives and exposures, the decode, the feedback.
+  const opText = new Map(listing.ops.map((o) => [o.uid, o.text ?? o.kind]));
+  captured({ spec, period, built, result, listing, segments: [
+    { span: makespan * 1000, ops: [...natives.map((n, k) => nativeOp({ id: "n" + k, op: n.channel, qubits: n.sites ?? [], at: n.at, dur: n.dur, source: opText.get(n.uid) ?? n.channel })),
+      ...hardwareOps.filter((o) => o.id.startsWith("cam")).map((o) => ({ id: o.id, op: "image", qubits: [], t: o.t, dur: 0, source: "camera exposure " + o.id }))] },
+    { classical: true, ops: [] },
+    { ops: feedback.map((f, k) => ({ id: "fb" + k, op: f.channel, qubits: f.qubit !== undefined ? [f.qubit] : [], t: 0, dur: Math.round(f.dur * 1000), source: "pulse on " + f.channel + ", conditioned on the decoded bit uf.obs0" })) }] });
   const m = { period, decoderCore: coreOf("frame") };
   const report = conformance(listing, { hardware: { segments: [{ ops: hardwareOps, span: makespan * 1000 }] }, lowered, origin, unrealized: [], classical: [], quantization: { gridPs: period } }, result, built, m);
   bitLatency(report);
