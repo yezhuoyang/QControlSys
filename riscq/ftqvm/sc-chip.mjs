@@ -54,8 +54,38 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
   if (qubitsPerCore !== 1)
     throw Error("RISC-Q builds exactly one demod channel (decoder + ADC) into every core, so a core reads out one transmon: qubitsPerCore must be 1.");
   const partnersOf = (s) => pairs.filter((p) => p.sites.includes(s));
+  // CZ channels of a transmon: one per coupler while the core has put-window nodes for them (16 per
+  // core, less gate, readout and demod). Past that, couplers whose CZ shares a carrier share a channel,
+  // one pulse-table entry each (a channel has one carrier; its pulses play one after another, as a
+  // transmon's CZs do).
+  const CZ_NODES = 16 - 3;
+  const czFreq = (p) => czPairs[pairs.indexOf(p) % czPairs.length].freq;
+  const czChannelsOf = (s) => {
+    const mine = partnersOf(s);
+    if (mine.length <= CZ_NODES) return mine.map((p) => [p]);
+    const byFreq = new Map();
+    for (const p of mine) (byFreq.get(czFreq(p)) ?? byFreq.set(czFreq(p), []).get(czFreq(p))).push(p);
+    if (byFreq.size > CZ_NODES)
+      throw Error("Site " + s + " has couplers at " + byFreq.size + " CZ carriers; a RISC-Q core has room for " + CZ_NODES + " CZ channels.");
+    // Each carrier's couplers over its share of the channels, largest groups split first.
+    const groups = [...byFreq.values()];
+    let spare = CZ_NODES - groups.length;
+    const split = groups.map((g) => [g]);
+    for (let moved = true; moved && spare > 0; ) {
+      moved = false;
+      const widest = split.map((parts, i) => [Math.max(...parts.map((x) => x.length)), i]).sort((x, y) => y[0] - x[0])[0];
+      if (widest[0] > 1) {
+        const parts = split[widest[1]], big = parts.findIndex((x) => x.length === widest[0]);
+        const half = Math.ceil(parts[big].length / 2);
+        parts.splice(big, 1, parts[big].slice(0, half), parts[big].slice(half));
+        spare--;
+        moved = true;
+      }
+    }
+    return split.flat();
+  };
   // Boards: transmons in site order while a board holds ≤ 14 cores and stays under the DSP ceiling.
-  const coreDsp = (k) => DSP_PER.core + (2 + partnersOf(k).length) * DSP_PER.pulse + DSP_PER.demod;
+  const coreDsp = (k) => DSP_PER.core + (2 + czChannelsOf(k).length) * DSP_PER.pulse + DSP_PER.demod;
   const classicalDsp = DSP_PER.core + DSP_PER.demod; // a status line and the demod channel RISC-Q requires
   const boardSites = [[]];
   let dsp = SHARED_DSP;
@@ -116,7 +146,7 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
       const drive = conv("dac", Math.floor(i / perDac)), ro = conv("dac", ZCU216.dacs.value - 1 - Math.floor(i / 8)), back = conv("adc", Math.floor(i / 8));
       const id = (role) => core.id + "." + role;
       channels.push({ id: id("gate"), core: core.id, name: "gate", kind: "pulse", converter: drive.id, slots: 3, interp: build.gate_interp, site: k });
-      partnersOf(k).forEach((p, j) => channels.push({ id: id("cz" + j), core: core.id, name: "cz" + j, kind: "pulse", converter: drive.id, slots: 1, interp: build.gate_interp, pairKey: p.sites.join("-"), site: k }));
+      czChannelsOf(k).forEach((list, j) => channels.push({ id: id("cz" + j), core: core.id, name: "cz" + j, kind: "pulse", converter: drive.id, slots: list.length, interp: build.gate_interp, pairKeys: list.map((p) => p.sites.join("-")), site: k }));
       channels.push({ id: id("ro"), core: core.id, name: "ro", kind: "pulse", converter: ro.id, slots: 1, interp: build.readout_interp, site: k },
         { id: id("demod"), core: core.id, name: "demod", kind: "demod", converter: back.id, slots: 1, interp: build.demod_interp ?? 4, site: k });
       coax("drive-" + site.id, drive, qubit);
@@ -148,7 +178,7 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
     couplings.push({
       qubits: p.sites, freqHz: ref.freq, durNs: dur ? dur.czNs.value : ref.pulses[0].time * 1e9, lengthLattice: p.length,
       pulses: ref.pulses.map((pulse, j) => ({ qubit: p.sites[j], amp: pulse.amp, phaseRad: pulse.phase, envelope: pulse.env,
-        channel: channels.find((c) => c.site === p.sites[j] && c.pairKey === key).id })),
+        channel: channels.find((c) => c.site === p.sites[j] && c.pairKeys?.includes(key)).id })),
       // The reference pair's frame corrections on its own two qubits; spectator corrections are dropped.
       virtualZ: ref.virtualZ.filter((z) => ref.pair.includes(z.qubit)).map((z) => ({ qubit: p.sites[ref.pair.indexOf(z.qubit)], phaseRad: z.phase })),
     });
@@ -157,7 +187,7 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
   const design = JSON.parse(JSON.stringify({
     kind: "riscq-design", version: 1, name,
     board: { dspHz: build.dsp_freq_hz, linkStages: build.link_pipe, memWords: build.mem_depth, queueDepth: build.queue_depth, envDepth: build.env_depth },
-    parts, channels: channels.map(({ pairKey: _k, site: _s, ...c }) => c), wires, qubits, couplings: couplings.map(({ lengthLattice: _l, ...c }) => c), decoder: "decoder",
+    parts, channels: channels.map(({ pairKeys: _k, site: _s, ...c }) => c), wires, qubits, couplings: couplings.map(({ lengthLattice: _l, ...c }) => c), decoder: "decoder",
     control: { qubitsPerCore, decoders, coresPerDecoder, drivesPerDac: perDac, boards: boardSites.length,
       boardsOf: "riscq/board.mjs ZCU216: ≤ " + ZCU216.cores.value + " cores and ≤ " + ZCU216.dspCeiling.value + " DSP48E2 per board" },
     provenance: {

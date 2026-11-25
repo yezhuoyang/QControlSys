@@ -266,7 +266,7 @@ function planRoute(op, laterGates, design, state, placement) {
             zone[k] = design.zoneOfSite[k];
           }
         });
-      if (members(zone[hub]) >= design.point.zoneCapacity) throw Error("listing line " + op.line + ": zone of the route's hub is full");
+      if (members(zone[hub]) >= design.point.zoneCapacity) throw Error("listing line " + op.line + ": zone of the route's hub is full (" + members(zone[hub]) + " ions, capacity " + design.point.zoneCapacity + "; the route gathers " + sites.length + "; others there: " + zone.map((z, k) => [z, k]).filter(([z, k]) => z === zone[hub] && !sites.includes(k)).map(([, k]) => k + (design.zoneOfSite[k] === z ? " (home)" : "")).join(", ") + ")");
       const [a, b] = [state.zonePos(zone[s]), state.zonePos(zone[hub])];
       const segments = Math.max(1, Math.ceil((Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1])) / design.prof.segmentUm.value));
       const junctions = a[0] !== b[0] && a[1] !== b[1] ? 1 : 0;
@@ -606,7 +606,8 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     const channels = spec.cores[core].channels;
     return { core, channel: channels.findIndex((c) => c.name === "detect"), occurrence, toCore: core, toChannel: channels.findIndex((c) => c.name === "pmt"), edges };
   });
-  const built = assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, bindings, responses });
+  // The run's budget: its own span twice over, plus 20 ms for the decodes after it (the model's cap is 2·10⁹ cycles).
+  const built = assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, maxBatches: Math.min(2_000_000_000, 2 * span + 10_000_000), bindings, responses });
   const result = await execute(built.document);
   const m = { period, decoderCore: frameCore };
   const hardware = { segments: [{ ops: natives.map((n) => ({ id: n.id, t: n.at * period })), span }] };

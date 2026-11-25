@@ -126,7 +126,8 @@ export async function runOpticalTwin({ name, channels, natives, listing, measure
   const inputs = measures.map((m) => m.bit);
   const { document, built, map, decoder } = assembleWithDecoder(spec, lowered, {
     decoderCore, segment: 1, graph, inputs, outputs: ["uf.obs0"], flag: "uf.flag", publishMask,
-    options: { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, bindings, responses },
+    // The run's budget: its span twice over, plus 20 ms for the decode and feedback (the model's cap is 2·10⁹ cycles).
+    options: { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, maxBatches: Math.min(2_000_000_000, 2 * b(makespan) + 10_000_000), bindings, responses },
   });
   const result = await execute(document);
   const m = { period, decoderCore: coreOf("frame") };

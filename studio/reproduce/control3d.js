@@ -71,57 +71,95 @@ export function buildControl(scene, controller, device) {
   const cores = controller.cores, n = cores.length;
   const optical = kind !== "transmon";
 
-  // ---- board and FPGA ----
-  const cols = Math.max(4, Math.ceil(Math.sqrt(n * 2.2))), rows = Math.ceil(n / cols), tile = 0.42, pitch = 0.56;
-  const fw = cols * pitch + 0.6, fd = rows * pitch + 1.0;
-  const bw = Math.max(fw + 4.5, Math.min(size.x + 3, fw + 9)), bd = fd + 3.4;
-  const zFront = center.z - size.z / 2 - (optical ? 7.5 : 4.5); // the board's edge nearest the device
-  const B = new THREE.Vector3(center.x, 0, zFront - bd / 2);
-  const pcb = new THREE.Mesh(new THREE.BoxGeometry(bw, 0.12, bd), new THREE.MeshStandardMaterial({ color: 0x0d4d2f, roughness: 0.75, metalness: 0.1 }));
-  pcb.position.copy(B).setY(0.06);
-  group.add(pcb);
-  // The board's edge connectors and traces, for legibility.
+  // ---- boards and FPGAs: one AMD ZCU216 per board of the build, its cores on its FPGA ----
+  const boardOf = (c) => c.board ?? 0;
+  const nb = Math.max(1, ...cores.map((c) => boardOf(c) + 1));
+  const members = Array.from({ length: nb }, (_, b) => cores.map((c, i) => (boardOf(c) === b ? i : -1)).filter((i) => i >= 0));
+  const most = Math.max(1, ...members.map((m) => m.length));
+  const cols = Math.max(4, Math.ceil(Math.sqrt(most * 2.2))), rowsOf = (m) => Math.max(1, Math.ceil(m / cols)), tile = 0.42, pitch = 0.56;
+  const fw = cols * pitch + 0.6, fd = rowsOf(most) * pitch + 1.0;
+  const bw = nb === 1 ? Math.max(fw + 4.5, Math.min(size.x + 3, fw + 9)) : fw + 1.6, bd = fd + 3.4;
+  const zFront = center.z - size.z / 2 - (optical ? 7.5 : 4.5); // the first row of boards' edge nearest the device
+  const perRow = Math.min(nb, Math.max(1, Math.floor((size.x + 12) / (bw + 0.8)))), gap = 0.8;
+  const boardCenter = (b) => {
+    const row = Math.floor(b / perRow), col = b % perRow, inRow = Math.min(perRow, nb - row * perRow);
+    return new THREE.Vector3(center.x + (col - (inRow - 1) / 2) * (bw + gap), 0, zFront - bd / 2 - row * (bd + gap));
+  };
+  const B = boardCenter(0);
   const traceMat = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.8, roughness: 0.35 });
-  for (let i = 0; i < 14; i++) {
-    const tr = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.01, bd * 0.36), traceMat);
-    tr.position.set(B.x - fw / 2 + (i + 0.5) * (fw / 14), 0.125, B.z + fd / 2 + bd * 0.14);
-    group.add(tr);
+  const boardMeshes = [], boardLabels = [];
+  const fpgas = members.map((mine, b) => {
+    const at = boardCenter(b);
+    const pcb = new THREE.Mesh(new THREE.BoxGeometry(bw, 0.12, bd), new THREE.MeshStandardMaterial({ color: 0x0d4d2f, roughness: 0.75, metalness: 0.1 }));
+    pcb.position.copy(at).setY(0.06);
+    pcb.userData = { pick: "board", board: b, cores: mine.map((i) => cores[i].name) };
+    group.add(pcb);
+    boardMeshes.push(pcb);
+    // The board's edge connectors and traces, for legibility.
+    for (let i = 0; i < 14; i++) {
+      const tr = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.01, bd * 0.36), traceMat);
+      tr.position.set(at.x - fw / 2 + (i + 0.5) * (fw / 14), 0.125, at.z + fd / 2 + bd * 0.14);
+      group.add(tr);
+    }
+    const chip = new THREE.Mesh(new THREE.BoxGeometry(fw, 0.22, fd), new THREE.MeshStandardMaterial({ color: 0x1e2433, roughness: 0.5, metalness: 0.4 }));
+    chip.position.copy(at).setY(0.23);
+    group.add(chip);
+    const label = textSprite(nb === 1 ? `RISC-Q FPGA · ${controller.board.dspMHz} MHz batch clock · ${n} cores`
+      : `board ${b}${b === 0 ? " (barrier root)" : ""} · ${mine.length} cores`, { size: nb === 1 ? 0.62 : 0.42, bold: true });
+    label.position.set(at.x, nb === 1 ? 1.3 : 0.95, at.z - fd / 2 - 0.3);
+    group.add(label);
+    boardLabels.push(label);
+    return { at, chip, mine };
+  });
+  const fpga = fpgas[0].chip;
+  if (nb > 1) {
+    const l = textSprite(`${nb} RISC-Q boards (AMD ZCU216) · ${controller.board.dspMHz} MHz batch clock · ${n} cores · joined by PutLane`, { size: 0.62, bold: true });
+    l.position.set(center.x, 2.2, boardCenter(nb - 1).z - bd / 2 - 0.6);
+    group.add(l);
+    // The board-to-board lanes (GTY transceivers and fibre): two boards as RISC-Q's RTL; more as
+    // QuantumOS's star, board 0 joined to every other board.
+    const fibre = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.25, roughness: 0.5 });
+    for (let b = 1; b < nb; b++) {
+      const a = fpgas[0].at.clone().setY(0.35), z = fpgas[b].at.clone().setY(0.35);
+      const curve = new THREE.CatmullRomCurve3([a, a.clone().lerp(z, 0.5).setY(0.9 + 0.05 * b), z]);
+      group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.025, 5), fibre));
+    }
   }
-  const fpga = new THREE.Mesh(new THREE.BoxGeometry(fw, 0.22, fd), new THREE.MeshStandardMaterial({ color: 0x1e2433, roughness: 0.5, metalness: 0.4 }));
-  fpga.position.copy(B).setY(0.23);
-  group.add(fpga);
-  const fpgaLabel = textSprite(`RISC-Q FPGA · ${controller.board.dspMHz} MHz batch clock · ${n} cores`, { size: 0.62, bold: true });
-  fpgaLabel.position.set(B.x, 1.3, B.z - fd / 2 - 0.3);
-  group.add(fpgaLabel);
 
   const tiles = cores.map((c, i) => {
     const color = ROLE_COLORS[c.role] ?? 0x94a3b8;
     const m = new THREE.Mesh(new THREE.BoxGeometry(tile, 0.12, tile), new THREE.MeshStandardMaterial({ color: 0x334155, emissive: color, emissiveIntensity: 0.12, roughness: 0.4 }));
-    const r = Math.floor(i / cols), col = i % cols;
-    m.position.set(B.x - fw / 2 + 0.3 + pitch / 2 + col * pitch, 0.4, B.z - fd / 2 + 0.7 + pitch / 2 + r * pitch);
+    const { at, mine } = fpgas[boardOf(c)], k = mine.indexOf(i);
+    const r = Math.floor(k / cols), col = k % cols;
+    m.position.set(at.x - fw / 2 + 0.3 + pitch / 2 + col * pitch, 0.4, at.z - fd / 2 + 0.7 + pitch / 2 + r * pitch);
     m.userData = { pick: "core", core: c, index: i };
     group.add(m);
     return { mesh: m, color, core: c, until: -1 };
   });
 
-  // ---- converters on the front edge: one DAC block per core that plays pulses, an ADC for readout ----
-  const pulsing = cores.map((c, i) => (c.channels.some(([k]) => k === "pulse") ? i : -1)).filter((i) => i >= 0);
+  // ---- converters on each board's front edge: one DAC block per core that plays pulses ----
   const dacAt = new Map();
-  const convW = Math.min(0.5, (bw - 1) / Math.max(1, pulsing.length)), convMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.5 });
-  pulsing.forEach((ci, j) => {
-    const x = B.x - ((pulsing.length - 1) * convW) / 2 + j * convW, z = B.z + bd / 2 - 0.35;
-    const chip = new THREE.Mesh(new THREE.BoxGeometry(convW * 0.8, 0.16, 0.4), convMat);
-    chip.position.set(x, 0.2, z);
-    chip.userData = { pick: "converter", core: cores[ci] };
-    group.add(chip);
-    dacAt.set(ci, new THREE.Vector3(x, 0.28, z + 0.2));
-    // The board trace from the core to its converter.
-    const from = tiles[ci].mesh.position.clone().setY(0.36), to = new THREE.Vector3(x, 0.14, z - 0.2);
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([from, new THREE.Vector3(from.x, 0.14, from.z), new THREE.Vector3(from.x, 0.14, (from.z + to.z) / 2), new THREE.Vector3(to.x, 0.14, (from.z + to.z) / 2), to]),
-      new THREE.LineBasicMaterial({ color: 0xc9a227, transparent: true, opacity: 0.55 }));
-    group.add(line);
+  const convMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.5 });
+  let anyPulsing = false;
+  fpgas.forEach(({ at, mine }) => {
+    const pulsing = mine.filter((i) => cores[i].channels.some(([k]) => k === "pulse"));
+    anyPulsing ||= pulsing.length > 0;
+    const convW = Math.min(0.5, (bw - 1) / Math.max(1, pulsing.length));
+    pulsing.forEach((ci, j) => {
+      const x = at.x - ((pulsing.length - 1) * convW) / 2 + j * convW, z = at.z + bd / 2 - 0.35;
+      const chip = new THREE.Mesh(new THREE.BoxGeometry(convW * 0.8, 0.16, 0.4), convMat);
+      chip.position.set(x, 0.2, z);
+      chip.userData = { pick: "converter", core: cores[ci] };
+      group.add(chip);
+      dacAt.set(ci, new THREE.Vector3(x, 0.28, z + 0.2));
+      // The board trace from the core to its converter.
+      const from = tiles[ci].mesh.position.clone().setY(0.36), to = new THREE.Vector3(x, 0.14, z - 0.2);
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([from, new THREE.Vector3(from.x, 0.14, from.z), new THREE.Vector3(from.x, 0.14, (from.z + to.z) / 2), new THREE.Vector3(to.x, 0.14, (from.z + to.z) / 2), to]),
+        new THREE.LineBasicMaterial({ color: 0xc9a227, transparent: true, opacity: 0.55 }));
+      group.add(line);
+    });
   });
-  if (pulsing.length) {
+  if (anyPulsing) {
     const l = textSprite(optical ? "DACs → AOM / AOD / electrode drivers" : "DACs (drive, flux, readout tone) and ADCs (demodulation)", { size: 0.46 });
     l.position.set(B.x, 1.5, B.z + bd / 2 - 0.2);
     group.add(l);
@@ -242,7 +280,9 @@ export function buildControl(scene, controller, device) {
   const bounds = new THREE.Box3().setFromObject(group);
   bounds.expandByPoint(center.clone().add(size.clone().multiplyScalar(0.5)));
   bounds.expandByPoint(center.clone().sub(size.clone().multiplyScalar(0.5)));
-  const controlBounds = new THREE.Box3().setFromObject(pcb).expandByObject(host).expandByObject(fpgaLabel);
+  const controlBounds = new THREE.Box3().expandByObject(host);
+  for (const board of boardMeshes) controlBounds.expandByObject(board);
+  for (const label of boardLabels) controlBounds.expandByObject(label);
 
   function update(t, { decoding = 0, framing = 0 } = {}) {
     for (const x of tiles) x.mesh.material.emissiveIntensity = 0.12;
@@ -309,6 +349,7 @@ export function describePick(data, controller) {
       (c.sites.length ? `<br>drives site${c.sites.length > 1 ? "s" : ""} ${c.sites.join(", ")}` : "");
   }
   if (data.pick === "optics") return `<b>${data.label}</b><br>driven by ${data.cores.join(", ")}`;
+  if (data.pick === "board") return `<b>board ${data.board}</b>${data.board === 0 ? " (barrier root)" : ""} · AMD ZCU216<br>${data.cores.length} cores: ${data.cores.slice(0, 14).join(", ")}<br>its own hub, 16 DACs and 16 ADCs; puts to other boards cross the PutLane (≈ 0.65 µs)`;
   if (data.pick === "host") return `<b>host</b><br>loads each core's program onto the board (${controller.board.name}) and reads the records back`;
   return "";
 }

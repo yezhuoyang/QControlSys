@@ -34,7 +34,7 @@ function roleOf(name) {
  * `sitesOfOp(id)`: the sites of the listing operation a native instruction belongs to.
  */
 export function controllerTrack({ spec, result, baseBatch, periodPs, sitesOfOp, coreSites = [], name, limit = 30000 }) {
-  const cores = spec.cores.map((c, i) => ({ name: c.name, role: roleOf(c.name), channels: c.channels.map((ch) => [ch.kind, ch.name]), sites: coreSites[i] ?? [] }));
+  const cores = spec.cores.map((c, i) => ({ name: c.name, role: roleOf(c.name), board: c.board ?? 0, channels: c.channels.map((ch) => [ch.kind, ch.name]), sites: coreSites[i] ?? [] }));
   const pulses = [];
   for (const p of result.summary.pulses) {
     if (pulses.length >= limit) break;
@@ -42,7 +42,7 @@ export function controllerTrack({ spec, result, baseBatch, periodPs, sitesOfOp, 
     const mine = cores[p.core]?.sites.length ? sites.filter((s) => cores[p.core].sites.includes(s)) : sites;
     pulses.push([p.core, p.channel, Math.round(((p.opens - baseBatch) * periodPs) / 1000), Math.round(((p.closes - baseBatch) * periodPs) / 1000), ...(mine.length ? mine : sites)]);
   }
-  return { board: { name, dspMHz: Math.round(1e6 / periodPs) }, cores, pulses, truncated: result.summary.pulses.length > limit };
+  return { board: { name, dspMHz: Math.round(1e6 / periodPs), count: new Set(spec.cores.map((c) => c.board ?? 0)).size }, cores, pulses, truncated: result.summary.pulses.length > limit };
 }
 
 /** Build a track from a listing, its placement, the conformance report and the device's geometry. */

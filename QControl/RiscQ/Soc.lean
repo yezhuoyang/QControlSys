@@ -623,6 +623,16 @@ def Program.boardCores (p : Program) (b : Nat) : Array Nat :=
   (p.cores.zipIdx.filter fun (c, _) ↦ c.board == b).map (·.2)
 def Program.localIndex (p : Program) (ci : Nat) : Nat :=
   ((p.boardCores (p.cores[ci]!.board)).findIdx? (· == ci)).getD 0
+/-- The hub sources of board `b`: its cores, then its lanes, each a `PutLane` with its own receive FIFO.
+    Two boards (RISC-Q's RTL) have one lane each; with more (QuantumOS's star) board 0 has one lane per
+    other board and every other board one lane to board 0. -/
+def Program.hubLanes (p : Program) (b : Nat) : Nat :=
+  if b == 0 && p.boards > 2 then p.boards - 1 else 1
+def Program.hubSources (p : Program) (b : Nat) : Nat := (p.boardCores b).size + p.hubLanes b
+/-- The source a frame off the lane enters at board `dst`: the lane from the board that sent it. Board 0
+    receives only frames that other boards originate; every other board receives from board 0. -/
+def Program.laneSource (p : Program) (dst origin : Nat) : Nat :=
+  (p.boardCores dst).size + (if dst == 0 && p.boards > 2 then origin - 1 else 0)
 
 private def getHub (w : World) (b : Nat) : HubState := w.hubs.getD b ({} : HubState)
 private def setHub (w : World) (b : Nat) (h : HubState) : World :=
@@ -774,14 +784,14 @@ private def hubHeld (h : HubState) : Nat :=
     `Flow`, posted. -/
 private def hubPush (p : Program) (w : World) (t b src : Nat) (beat : Beat) : World :=
   Id.run do
-  let n := (p.boardCores b).size + 1
+  let n := p.hubSources b
   let hub0 := getHub w b
   let hub := if hub0.queues.size < n then
       { hub0 with queues := Array.replicate n [], heads := Array.replicate n none } else hub0
   let queue := hub.queues.getD src []
   let item := beat.item
   if queue.length ≥ p.model.hubQueue then
-    let w := w.fault t "hub" s!"the hub queue of {if src + 1 == n then "the lane" else partOf p beat.core} on board {b} is full: a system put to node {beat.node} is dropped"
+    let w := w.fault t "hub" s!"the hub queue of {if src ≥ (p.boardCores b).size then s!"the lane from board {beat.origin}" else partOf p beat.core} on board {b} is full: a system put to node {beat.node} is dropped"
     return w.emit p {
       id := s!"e{item.seq}.drop{b}", atBatch := t, atPs := 0, op := "drop", part := "hub", targets := [],
       parents := [item.cause], pc? := item.pc, source? := item.source,
@@ -885,7 +895,7 @@ def applyItem (p : Program) (w : World) (item : Item) : World := Id.run do
   | .hub ci node offset data => return hubArrive p w t item ci node offset data
   | .hubServe b => return hubServe p w t b
   | .lane dst origin ci node offset data release =>
-    let src := (p.boardCores dst).size
+    let src := p.laneSource dst origin
     let rel : Option (List Nat) := if node < inboxNode0 && localNodes + groupNodes ≤ node && !release.isEmpty then some release else none
     let beat : Beat := { item, core := ci, node, offset, data, arrived := t, fromLane := true, origin, release := rel }
     return hubPush p w t dst src beat

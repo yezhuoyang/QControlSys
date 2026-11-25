@@ -79,3 +79,24 @@ test("a barrier across two boards: the root releases, and the far board one cros
   assert.equal(new Set(r.summary.host.map((h) => h.value)).size, 1);
   assert.equal(r.summary.host.length, 4);
 });
+
+test("a barrier across eighteen boards: each lane into the root has its own receive FIFO, so no arrival is dropped", async () => {
+  // QuantumOS's star (more than RISC-Q's two boards): board 0 has one PutLane per other board.
+  const spec = build(Array.from({ length: 18 }, () => 5));
+  const r = await run(spec, (fw) => {
+    fw.barrier(0, spec.cores.length, "a0");
+    fw.asm.lui("t0", 0x40000);
+    fw.asm.sw("a0", "t0", 0);
+  });
+  assert.deepEqual(r.summary.faults, []);
+  assert.equal(r.summary.host.length, spec.cores.length);
+  assert.equal(new Set(r.summary.host.map((h) => h.value)).size, 1);
+  // Every remote board's release follows the root's by one crossing, the i-th one cycle after the last.
+  const releases = hubFrames(r, "release");
+  const root = releases.find((f) => f.state.board === 0);
+  for (let b = 1; b < 18; b++) {
+    const far = releases.find((f) => f.state.board === b);
+    const gap = far.atBatch - root.atBatch;
+    assert.ok(gap >= 317 && gap <= 325 + b + 8, "board " + b + ": " + gap);
+  }
+});
