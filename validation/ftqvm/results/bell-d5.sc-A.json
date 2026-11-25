@@ -256,42 +256,42 @@
     "qubits": {
      "value": 49,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "runtime": {
      "value": 13922,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "gates": {
      "value": 12,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "factories": {
      "value": 0,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "decoders": {
      "value": 0,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "classical_data_bandwidth": {
      "value": 7,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "qubit_routing_bandwidth": {
      "value": 11500,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     },
     "ancilla_bandwidth": {
      "value": 168,
      "source": "measured",
-     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+     "note": "peak over the gadget's calls in the conforming run, the interface's charging rule"
     }
    },
    "surfaceRoundLogicalAncilla": {

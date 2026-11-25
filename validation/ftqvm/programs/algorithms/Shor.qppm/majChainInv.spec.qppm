@@ -1,0 +1,10 @@
+spec majChainInv:
+  ∀ u < 2^n . ∀ v < 2^n .
+  requires   0 < n  ∧  base + (2 * n) + 1 ≤ dim
+  assumes    {{ |majWord(n, u, v, 0)⟩_q[base, base + (2 * n) : 2)
+  ⊗ |xorN(n, u, v)⟩_q[base+1, base + (2 * n) : 2)
+  ⊗ |carryAt(n, u, v, 0)⟩_q[base + (2 * n)] }}
+  ensures {{ |0⟩_q[base] ⊗ |v⟩_q[base+1, base + (2 * n) : 2) ⊗ |u⟩_q[base+2, base + (2 * n) + 1 : 2) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_majChainInv(n, base) + pT * NT_majChainInv(n, base) + pI * N_I)
+  outcomes   none
+  resource   { meas: 50·n, frame: 50·n, magicT: 7·n, synthEps: 0 }
+

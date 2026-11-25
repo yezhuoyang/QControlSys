@@ -1,0 +1,4 @@
+gadget !ctl!majChainInv(n, base, __cw, __anc):
+  for n > k >= 0:
+    !ctl!MAJinv(base+2·k, base+2·k+1, base+2·k+2, __cw, __anc) @ id()
+

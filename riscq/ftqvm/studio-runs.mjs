@@ -2,7 +2,7 @@
 // stored twin (validation/ftqvm/twins/<id>/<row>.json, written by riscq/ftqvm/papers.mjs) is placed,
 // built and run in the Lean SoC model exactly as the reproduction ran it, and returned as the same
 // run bundle the studio's examples are (riscq/examples.mjs `run`): the machine with its cores, the
-// FormalRV listing as the source, the native instructions as the hardware program, every core's
+// QSysASM listing as the source, the native instructions as the hardware program, every core's
 // firmware, and the trace. Nothing in it is replayed from a file: the trace is a fresh run.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { geometry } from "../geometry.mjs";
@@ -39,7 +39,7 @@ export async function studioExamples() {
     const rows = rowsOf(r.id);
     for (const row of rows)
       out.push({ id: PREFIX + r.id + ":" + row.key, platform: platformOf(row), title: "Reproduction · " + r.title + " · " + row.label,
-        description: r.summary, source: { language: "FormalRV listing" } });
+        description: r.summary, source: { language: "QSysASM listing" } });
     if (rows.length) continue;
     const registry = await registryOf(r.id);
     const choice = registry && (await registry.params())[0];
@@ -51,17 +51,17 @@ export async function studioExamples() {
 }
 
 /** A circuit reproduction: its design page's run with the paper's values, captured for the studio. */
-async function circuitRun(exampleId, paper, choice, value) {
+async function circuitRun(exampleId, paper, choice, value, edited) {
   const { captureRuns } = await import("./studio-capture.mjs");
   const registry = await registryOf(paper.id);
   if (!registry) throw Error("no design registry for " + paper.id);
-  const { value: ran, pieces } = await captureRuns(() => registry.run({ [choice]: value }));
+  const { value: ran, pieces } = await captureRuns(() => registry.run({ [choice]: value }), { design: edited });
   const piece = pieces.at(-1);
   if (!piece) throw Error(exampleId + ": the run captured nothing for the studio");
   const label = (await registry.params())[0].options?.find((o) => String(o.value) === String(value))?.label ?? value;
   const lines = (piece.listing?.ops ?? []).map((o) => o.text ?? o.kind ?? "");
   return bundle({
-    exampleId, paper, label, platform: PLATFORM[paper.platform] ?? "superconducting", spec: piece.spec, period: piece.period,
+    exampleId, paper, label: label + (edited ? " · on the edited chip" : ""), platform: PLATFORM[paper.platform] ?? "superconducting", spec: piece.spec, period: piece.period,
     hardware: { kind: "hardware-program", version: 1, platform: PLATFORM[paper.platform], machine: paper.id, timeUnit: "ps", segments: piece.segments },
     built: piece.built, result: piece.result, design: piece.design, track: ran?.rows?.[0]?.track,
     source: { language: "Circuit schedule", text: ["# " + paper.title + " · " + label + ": the paper's circuit as this twin schedules it, one operation per line.", ...lines].join("\n") },
@@ -76,20 +76,28 @@ function platformOf(row) {
   return /h2|ion|qccd/i.test(row.platform.id) ? "qccd" : "neutral";
 }
 
-/** The listing as text, each operation on the line FormalRV's sysprog gave it. */
+/** The listing as text, each operation on the line the compiler's sysprog gave it. */
 function listingText(listing, title) {
-  const lines = ["# " + title + ": the listing FormalRV compiled for this twin. Each operation is on its line of the",
+  const lines = ["# " + title + ": the QSysASM listing compiled for this twin. Each operation is on its line of the",
     "# compiled sysprog, which the hardware instructions name; the program's declarations are not stored with the twin."];
   for (const op of listing.ops) lines[op.line - 1] = op.text;
   return Array.from(lines, (l) => l ?? "").join("\n");
 }
 
 /** Run one stored row and return a studio run bundle. */
-export async function studioRun(exampleId, { trace = "io" } = {}) {
+/**
+ * `design`: a chip edited in /riscq-design ("Edit this hardware"). The paper's own program then runs on
+ * it instead of on the twin's generated chip, after the design rules of riscq/design.mjs.
+ */
+export async function studioRun(exampleId, { trace = "io", design: edited } = {}) {
+  if (edited) {
+    const errors = hardwareDesign.check(edited).errors;
+    if (errors.length) throw Error("The edited chip breaks " + errors.length + " design rule" + (errors.length > 1 ? "s" : "") + ": " + errors.slice(0, 3).join(" "));
+  }
   const [, id, key] = exampleId.split(":");
   const { REPRODUCTIONS } = await import("./reproductions.mjs");
   const paper = REPRODUCTIONS.find((r) => r.id === id);
-  if (paper && key?.includes("=")) return circuitRun(exampleId, paper, key.slice(0, key.indexOf("=")), key.slice(key.indexOf("=") + 1));
+  if (paper && key?.includes("=")) return circuitRun(exampleId, paper, key.slice(0, key.indexOf("=")), key.slice(key.indexOf("=") + 1), edited);
   const src = rowsOf(id).find((r) => r.key === key);
   if (!paper || !src) throw Error("Unknown reproduction run " + exampleId + ".");
   const platform = platformOf(src);
@@ -101,7 +109,7 @@ export async function studioRun(exampleId, { trace = "io" } = {}) {
     if (src.platform.device !== "willow") throw Error("no twin device " + src.platform.device);
     const twin = transmonTwin(willow(), src.platform.options);
     const placement = twin.place(src.listing, { distance: src.distance });
-    design = twin.design(src.listing, placement);
+    design = edited ?? twin.design(src.listing, placement);
     ({ m, hardware, built, result, report } = await runListing(src.listing, placement, design, { distance: src.distance, trace }));
     spec = m.spec;
     period = m.period;
@@ -113,9 +121,10 @@ export async function studioRun(exampleId, { trace = "io" } = {}) {
     ({ report, result, built, spec, hardware } = await twin.run(src.listing, placement, d, { outcomes: {}, distance: src.distance }));
     period = spec.dspPeriodPs;
   }
-  return bundle({ exampleId, paper, label: src.label, platform, spec, period, hardware, built, result, design, m, track: report?.track, baseBatch: report?.baseBatch,
-    source: { language: "FormalRV listing", text: listingText(src.listing, paper.title + " · " + src.label) },
-    program: "the listing FormalRV compiled for this twin (validation/ftqvm/twins/" + id + "/" + key + ".json)", conforms: report?.conforms });
+  if (edited && src.platform.kind !== "transmonTwin") throw Error("Only a transmon chip can be edited in /riscq-design; this twin's controller is built in riscq/ftqvm/optical.mjs.");
+  return bundle({ exampleId, paper, label: src.label + (edited ? " · on the edited chip" : ""), platform, spec, period, hardware, built, result, design, m, track: report?.track, baseBatch: report?.baseBatch,
+    source: { language: "QSysASM listing", text: listingText(src.listing, paper.title + " · " + src.label) },
+    program: "the QSysASM listing compiled for this twin (validation/ftqvm/twins/" + id + "/" + key + ".json)", conforms: report?.conforms });
 }
 
 /** The studio's run bundle (riscq/examples.mjs `run`'s shape). */
@@ -132,7 +141,7 @@ function bundle({ exampleId, paper, label, platform, spec, period, hardware, bui
       name: paper.title + " · digital twin", dspPeriodPs: period,
       provenance: { twin: paper.twin, program, run: "a fresh run of the Lean model of the RISC-Q board(s), not a replay: times can differ from the page's stored tables",
         boards: new Set(spec.cores.map((c) => c.board ?? 0)).size + " RISC-Q board(s), AMD ZCU216 (riscq/board.mjs)",
-        ...(conforms === undefined ? {} : { conforms: conforms ? "every operation ran inside its FormalRV window" : "not every operation ran inside its window: see the reproduction page" }) },
+        ...(conforms === undefined ? {} : { conforms: conforms ? "every operation ran inside its the compiler window" : "not every operation ran inside its window: see the reproduction page" }) },
       cores: spec.cores.map((c) => ({ name: c.name, board: c.board ?? 0, channels: c.channels.map((ch) => ({ name: ch.name, kind: ch.kind, dac: ch.dac, adc: ch.adc })) })),
       ...(m ? { geometry: geometry(platform, m, hardware) } : {}),
       ...(design ? { design, layout: hardwareDesign.layout(design) } : {}),

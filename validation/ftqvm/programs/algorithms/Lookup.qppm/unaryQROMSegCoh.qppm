@@ -1,0 +1,310 @@
+gadget unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ctlW, base, tOff, cb):
+  if d != 0:
+    prepare |Y+> -> anc[0]
+    measure Z q[ancBase+(d-1)] Z anc[0] -> m[0]
+    measure X anc[0] -> m[1]
+    when m[0]:
+      frame Z q[ancBase+(d-1)]
+    when m[1]:
+      frame Z q[ancBase+(d-1)]
+    prepare |Y+> -> anc[1]
+    measure X q[ancBase+(d-1)] Z anc[1] -> m[2]
+    measure X anc[1] -> m[3]
+    when m[2]:
+      frame X q[ancBase+(d-1)]
+    when m[3]:
+      frame X q[ancBase+(d-1)]
+    frame Z q[ancBase+(d-1)]
+    prepare |T> -> anc[2]
+    measure Z q[ctlW] Z anc[2] -> m[4]
+    measure X anc[2] -> m[5]
+    when m[5]:
+      frame Z q[ctlW]
+    when m[4]:
+      prepare |Y+> -> anc[3]
+      measure Z q[ctlW] Z anc[3] -> m[6]
+      measure X anc[3] -> m[7]
+      when m[6]:
+        frame Z q[ctlW]
+      when m[7]:
+        frame Z q[ctlW]
+    prepare |T> -> anc[5]
+    measure Z q[addrBase+(d-1)] Z anc[5] -> m[8]
+    measure X anc[5] -> m[9]
+    when m[9]:
+      frame Z q[addrBase+(d-1)]
+    when m[8]:
+      prepare |Y+> -> anc[6]
+      measure Z q[addrBase+(d-1)] Z anc[6] -> m[10]
+      measure X anc[6] -> m[11]
+      when m[10]:
+        frame Z q[addrBase+(d-1)]
+      when m[11]:
+        frame Z q[addrBase+(d-1)]
+    prepare |T> -> anc[8]
+    measure Z q[ancBase+(d-1)] Z anc[8] -> m[12]
+    measure X anc[8] -> m[13]
+    when m[13]:
+      frame Z q[ancBase+(d-1)]
+    when m[12]:
+      prepare |Y+> -> anc[9]
+      measure Z q[ancBase+(d-1)] Z anc[9] -> m[14]
+      measure X anc[9] -> m[15]
+      when m[14]:
+        frame Z q[ancBase+(d-1)]
+      when m[15]:
+        frame Z q[ancBase+(d-1)]
+    prepare |T> -> anc[11]
+    measure Z q[ctlW] Z q[addrBase+(d-1)] Z anc[11] -> m[16]
+    measure X anc[11] -> m[17]
+    when m[17]:
+      frame Z q[ctlW] Z q[addrBase+(d-1)]
+    when m[16]:
+      prepare |Y+> -> anc[12]
+      measure Z q[ctlW] Z q[addrBase+(d-1)] Z anc[12] -> m[18]
+      measure X anc[12] -> m[19]
+      when m[18]:
+        frame Z q[ctlW] Z q[addrBase+(d-1)]
+      when m[19]:
+        frame Z q[ctlW] Z q[addrBase+(d-1)]
+    prepare |Y+> -> anc[13]
+    measure Z q[ctlW] Z q[addrBase+(d-1)] Z anc[13] -> m[20]
+    measure X anc[13] -> m[21]
+    when m[20]:
+      frame Z q[ctlW] Z q[addrBase+(d-1)]
+    when m[21]:
+      frame Z q[ctlW] Z q[addrBase+(d-1)]
+    frame Z q[ctlW] Z q[addrBase+(d-1)]
+    prepare |T> -> anc[14]
+    measure Z q[ctlW] Z q[ancBase+(d-1)] Z anc[14] -> m[22]
+    measure X anc[14] -> m[23]
+    when m[23]:
+      frame Z q[ctlW] Z q[ancBase+(d-1)]
+    when m[22]:
+      prepare |Y+> -> anc[15]
+      measure Z q[ctlW] Z q[ancBase+(d-1)] Z anc[15] -> m[24]
+      measure X anc[15] -> m[25]
+      when m[24]:
+        frame Z q[ctlW] Z q[ancBase+(d-1)]
+      when m[25]:
+        frame Z q[ctlW] Z q[ancBase+(d-1)]
+    prepare |Y+> -> anc[16]
+    measure Z q[ctlW] Z q[ancBase+(d-1)] Z anc[16] -> m[26]
+    measure X anc[16] -> m[27]
+    when m[26]:
+      frame Z q[ctlW] Z q[ancBase+(d-1)]
+    when m[27]:
+      frame Z q[ctlW] Z q[ancBase+(d-1)]
+    frame Z q[ctlW] Z q[ancBase+(d-1)]
+    prepare |T> -> anc[17]
+    measure Z q[addrBase+(d-1)] Z q[ancBase+(d-1)] Z anc[17] -> m[28]
+    measure X anc[17] -> m[29]
+    when m[29]:
+      frame Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    when m[28]:
+      prepare |Y+> -> anc[18]
+      measure Z q[addrBase+(d-1)] Z q[ancBase+(d-1)] Z anc[18] -> m[30]
+      measure X anc[18] -> m[31]
+      when m[30]:
+        frame Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+      when m[31]:
+        frame Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    prepare |Y+> -> anc[19]
+    measure Z q[addrBase+(d-1)] Z q[ancBase+(d-1)] Z anc[19] -> m[32]
+    measure X anc[19] -> m[33]
+    when m[32]:
+      frame Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    when m[33]:
+      frame Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    frame Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    prepare |T> -> anc[20]
+    measure Z q[ctlW] Z q[addrBase+(d-1)] Z q[ancBase+(d-1)] Z anc[20] -> m[34]
+    measure X anc[20] -> m[35]
+    when m[35]:
+      frame Z q[ctlW] Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    when m[34]:
+      prepare |Y+> -> anc[21]
+      measure Z q[ctlW] Z q[addrBase+(d-1)] Z q[ancBase+(d-1)] Z anc[21] -> m[36]
+      measure X anc[21] -> m[37]
+      when m[36]:
+        frame Z q[ctlW] Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+      when m[37]:
+        frame Z q[ctlW] Z q[addrBase+(d-1)] Z q[ancBase+(d-1)]
+    prepare |Y+> -> anc[23]
+    measure X q[ancBase+(d-1)] Z anc[23] -> m[38]
+    measure X anc[23] -> m[39]
+    when m[38]:
+      frame X q[ancBase+(d-1)]
+    when m[39]:
+      frame X q[ancBase+(d-1)]
+    prepare |Y+> -> anc[24]
+    measure Z q[ancBase+(d-1)] Z anc[24] -> m[40]
+    measure X anc[24] -> m[41]
+    when m[40]:
+      frame Z q[ancBase+(d-1)]
+    when m[41]:
+      frame Z q[ancBase+(d-1)]
+    unaryQROMSegCoh(d-1, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ancBase+(d-1), base+2^(d-1), tOff, cb) @ id()
+    prepare |Y+> -> anc[25]
+    measure Z q[ctlW] X q[ancBase+(d-1)] Z anc[25] -> m[42]
+    measure X anc[25] -> m[43]
+    when m[42]:
+      frame Z q[ctlW] X q[ancBase+(d-1)]
+    when m[43]:
+      frame Z q[ctlW] X q[ancBase+(d-1)]
+    prepare |Y+> -> anc[26]
+    measure Z q[ctlW] Z anc[26] -> m[44]
+    measure X anc[26] -> m[45]
+    when m[44]:
+      frame Z q[ctlW]
+    when m[45]:
+      frame Z q[ctlW]
+    frame Z q[ctlW]
+    prepare |Y+> -> anc[27]
+    measure X q[ancBase+(d-1)] Z anc[27] -> m[46]
+    measure X anc[27] -> m[47]
+    when m[46]:
+      frame X q[ancBase+(d-1)]
+    when m[47]:
+      frame X q[ancBase+(d-1)]
+    frame X q[ancBase+(d-1)]
+    unaryQROMSegCoh(d-1, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ancBase+(d-1), base, tOff, cb+2^(d-1)-1) @ id()
+    prepare |Y+> -> anc[28]
+    measure Z q[ctlW] X q[ancBase+(d-1)] Z anc[28] -> m[48]
+    measure X anc[28] -> m[49]
+    when m[48]:
+      frame Z q[ctlW] X q[ancBase+(d-1)]
+    when m[49]:
+      frame Z q[ctlW] X q[ancBase+(d-1)]
+    prepare |Y+> -> anc[29]
+    measure Z q[ctlW] Z anc[29] -> m[50]
+    measure X anc[29] -> m[51]
+    when m[50]:
+      frame Z q[ctlW]
+    when m[51]:
+      frame Z q[ctlW]
+    frame Z q[ctlW]
+    prepare |Y+> -> anc[30]
+    measure X q[ancBase+(d-1)] Z anc[30] -> m[52]
+    measure X anc[30] -> m[53]
+    when m[52]:
+      frame X q[ancBase+(d-1)]
+    when m[53]:
+      frame X q[ancBase+(d-1)]
+    frame X q[ancBase+(d-1)]
+    prepare |Y+> -> anc[31]
+    measure Z q[ancBase+(d-1)] Z anc[31] -> m[54]
+    measure X anc[31] -> m[55]
+    when m[54]:
+      frame Z q[ancBase+(d-1)]
+    when m[55]:
+      frame Z q[ancBase+(d-1)]
+    prepare |Y+> -> anc[32]
+    measure X q[ancBase+(d-1)] Z anc[32] -> m[56]
+    measure X anc[32] -> m[57]
+    when m[56]:
+      frame X q[ancBase+(d-1)]
+    when m[57]:
+      frame X q[ancBase+(d-1)]
+    prepare |Y+> -> anc[33]
+    measure Z q[ancBase+(d-1)] Z anc[33] -> m[58]
+    measure X anc[33] -> m[59]
+    when m[58]:
+      frame Z q[ancBase+(d-1)]
+    when m[59]:
+      frame Z q[ancBase+(d-1)]
+    measure Z q[ancBase+(d-1)] -> c[cb+2^(d)-2]
+    when c[cb+2^(d)-2]:
+      prepare |Y+> -> anc[34]
+      measure Z q[addrBase+(d-1)] Z anc[34] -> m[60]
+      measure X anc[34] -> m[61]
+      when m[60]:
+        frame Z q[addrBase+(d-1)]
+      when m[61]:
+        frame Z q[addrBase+(d-1)]
+      prepare |Y+> -> anc[35]
+      measure X q[addrBase+(d-1)] Z anc[35] -> m[62]
+      measure X anc[35] -> m[63]
+      when m[62]:
+        frame X q[addrBase+(d-1)]
+      when m[63]:
+        frame X q[addrBase+(d-1)]
+      prepare |Y+> -> anc[36]
+      measure Z q[addrBase+(d-1)] Z anc[36] -> m[64]
+      measure X anc[36] -> m[65]
+      when m[64]:
+        frame Z q[addrBase+(d-1)]
+      when m[65]:
+        frame Z q[addrBase+(d-1)]
+      prepare |Y+> -> anc[37]
+      measure Z q[ctlW] X q[addrBase+(d-1)] Z anc[37] -> m[66]
+      measure X anc[37] -> m[67]
+      when m[66]:
+        frame Z q[ctlW] X q[addrBase+(d-1)]
+      when m[67]:
+        frame Z q[ctlW] X q[addrBase+(d-1)]
+      prepare |Y+> -> anc[38]
+      measure Z q[ctlW] Z anc[38] -> m[68]
+      measure X anc[38] -> m[69]
+      when m[68]:
+        frame Z q[ctlW]
+      when m[69]:
+        frame Z q[ctlW]
+      frame Z q[ctlW]
+      prepare |Y+> -> anc[39]
+      measure X q[addrBase+(d-1)] Z anc[39] -> m[70]
+      measure X anc[39] -> m[71]
+      when m[70]:
+        frame X q[addrBase+(d-1)]
+      when m[71]:
+        frame X q[addrBase+(d-1)]
+      frame X q[addrBase+(d-1)]
+      prepare |Y+> -> anc[40]
+      measure Z q[addrBase+(d-1)] Z anc[40] -> m[72]
+      measure X anc[40] -> m[73]
+      when m[72]:
+        frame Z q[addrBase+(d-1)]
+      when m[73]:
+        frame Z q[addrBase+(d-1)]
+      prepare |Y+> -> anc[41]
+      measure X q[addrBase+(d-1)] Z anc[41] -> m[74]
+      measure X anc[41] -> m[75]
+      when m[74]:
+        frame X q[addrBase+(d-1)]
+      when m[75]:
+        frame X q[addrBase+(d-1)]
+      prepare |Y+> -> anc[42]
+      measure Z q[addrBase+(d-1)] Z anc[42] -> m[76]
+      measure X anc[42] -> m[77]
+      when m[76]:
+        frame Z q[addrBase+(d-1)]
+      when m[77]:
+        frame Z q[addrBase+(d-1)]
+      frame X q[ancBase+(d-1)]
+  else:
+    for 0 <= j < W:
+      if (T[base+tOff] >> W-(j+1)) % 2 = 1:
+        prepare |Y+> -> anc[3·j]
+        measure Z q[ctlW] X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)] Z anc[3·j] -> m[6·j]
+        measure X anc[3·j] -> m[6·j+1]
+        when m[6·j]:
+          frame Z q[ctlW] X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)]
+        when m[6·j+1]:
+          frame Z q[ctlW] X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)]
+        prepare |Y+> -> anc[3·j+1]
+        measure Z q[ctlW] Z anc[3·j+1] -> m[6·j+2]
+        measure X anc[3·j+1] -> m[6·j+3]
+        when m[6·j+2]:
+          frame Z q[ctlW]
+        when m[6·j+3]:
+          frame Z q[ctlW]
+        frame Z q[ctlW]
+        prepare |Y+> -> anc[3·j+2]
+        measure X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)] Z anc[3·j+2] -> m[6·j+4]
+        measure X anc[3·j+2] -> m[6·j+5]
+        when m[6·j+4]:
+          frame X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)]
+        when m[6·j+5]:
+          frame X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)]
+        frame X q[posBase+posStride·((W-(j+1)) mod segLen)+segStride·((W-(j+1))/segLen)]
+

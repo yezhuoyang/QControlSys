@@ -1,0 +1,4 @@
+gadget !ctl!majChain(n, base, __cw, __anc):
+  for 0 <= k < n headfirst:
+    !ctl!MAJ(base+2·k, base+2·k+1, base+2·k+2, __cw, __anc) @ id()
+

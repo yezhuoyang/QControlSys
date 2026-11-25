@@ -1,5 +1,5 @@
 // Digital twins of published machines: the device each experiment ran on, as a fixed set of
-// qubits, couplers and calibrated durations, with the source of every number. A FormalRV listing
+// qubits, couplers and calibrated durations, with the source of every number. A QSysASM listing
 // is compiled onto a twin by placing it (riscq/ftqvm/place.mjs) and checking that every placed
 // qubit is a qubit of the device and every gated pair one of its couplers (`onDevice`).
 //

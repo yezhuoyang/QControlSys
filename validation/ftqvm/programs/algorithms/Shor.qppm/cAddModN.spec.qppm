@@ -1,0 +1,15 @@
+spec cAddModN:
+  ∀ u < N . ∀ d < 2 .
+  requires   1 ≤ bits  ∧  0 < N  ∧  2 * N ≤ 2^bits
+  ∧  0 < cst  ∧  cst < N
+  ∧  (ctrl < base  ∨  base + (2 * bits) + 1 ≤ ctrl)
+  ∧  (flag < base  ∨  base + (2 * bits) + 1 ≤ flag)
+  ∧  ctrl ≠ flag
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  ctrl < dim  ∧  flag < dim
+  assumes    {{ |0⟩_q[base] ⊗ |u⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2)
+  ⊗ |0⟩_q[flag] ⊗ |d⟩_q[ctrl] }}
+  ensures {{ |0⟩_q[base] ⊗ |(u + (d * cst)) % N⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |0⟩_q[flag] ⊗ |d⟩_q[ctrl] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_cAddModN(bits, base, N, cst, ctrl, flag) + pT * NT_cAddModN(bits, base, N, cst, ctrl, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 436·bits+18, frame: 450·bits+24, magicT: 56·bits, synthEps: 0 }
+

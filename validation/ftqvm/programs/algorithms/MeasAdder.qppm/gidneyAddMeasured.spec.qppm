@@ -1,0 +1,8 @@
+spec gidneyAddMeasured:
+  ∀ x < 2^(3*n) .
+  requires   2 ≤ n  ∧  3*n ≤ dim  ∧  cb + n ≤ dim  ∧  3*n ≤ cb
+  assumes    {{ |x⟩_q[0, 3*n) }}
+  ensures {{ |vAll(n-2, x)⟩_q[0, 3*n) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyAddMeasured(n, cb) + pT * NT_gidneyAddMeasured(n, cb) + pI * N_I)
+  outcomes   none
+  resource   { meas: 6·n+106·(n-1)+27·(n-2)+88, frame: 8·n+108·(n-1)+36·(n-2)+100, magicT: 14·(n-1)+7, synthEps: 0 }
+

@@ -1,6 +1,6 @@
-// Spec derivation: the system specification FormalRV compiles against, taken from the machine.
+// Spec derivation: the system specification the compiler lowers against, taken from the machine.
 //
-// The loop: write a spec → FormalRV compiles the program and its VM admits the listing → place
+// The loop: write a spec → the compiler lowers the program and its VM admits the listing → place
 // the listing and build the platform's design for it → run it time-triggered → read, from the
 // trace, how long each kind of operation took on the hardware → raise every duration of the
 // spec that the hardware exceeded → repeat until the listing conforms. Durations only grow, so
@@ -17,10 +17,10 @@
 import { readFileSync, copyFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import * as formalrv from "./formalrv.mjs";
+import * as ftc from "./ftcompiler.mjs";
 import * as specText from "./spec.mjs";
 
-/** Which machine duration each listing operation is charged (FormalRV's TIMINGS). */
+/** Which machine duration each listing operation is charged (the compiler's TIMINGS). */
 export const FIELD_OF = Object.freeze({
   H: "gate1q_ns", S: "gate1q_ns", Sdg: "gate1q_ns", X: "gate1q_ns", Z: "gate1q_ns",
   CNOT: "gate2q_ns", CZ: "gate2q_ns", CY: "gate2q_ns",
@@ -85,7 +85,7 @@ export function specFor(durations, capacities, base, { gadgets = [], factories =
 }
 
 const GATES = new Set(["H", "S", "Sdg", "X", "Z", "CNOT", "CZ", "CY"]);
-const rate = (n, d) => (d > 0 ? Math.ceil((1000 * n) / d) : 0); // FormalRV's r(N, D), items/µs
+const rate = (n, d) => (d > 0 ? Math.ceil((1000 * n) / d) : 0); // The interface's r(N, D), items/µs
 
 /** Peak of summed loads over half-open intervals [from, to): ends are processed before starts. */
 function peak(intervals) {
@@ -99,7 +99,7 @@ function peak(intervals) {
 
 /**
  * Resource contracts of the round gadgets, from a conforming run. For each gadget, over all its
- * calls: the sites its operations touch, its span, and the peak of every service with FormalRV's
+ * calls: the sites its operations touch, its span, and the peak of every service with the compiler's
  * charging rule (each operation holds its demand over its listing interval, r(N, D) for rates).
  * `hardware` gives the same peaks over the intervals the trace shows the hardware busy, and the
  * span to the last pulse or bit: what the contract leaves unused.
@@ -136,8 +136,8 @@ export function roundContracts(listing, placement, report) {
 }
 
 /**
- * Derive a spec for a FormalRV program on a platform design, by the loop above.
- * options: { platform, qppm, specialize, code, distance, baseMachine (a FormalRV machine file:
+ * Derive a spec for a logical program on a platform design, by the loop above.
+ * options: { platform, qppm, specialize, code, distance, baseMachine (a compiler machine file:
  *            provisional values and factory contracts), maxIterations, dir, outcomes, contracts }.
  * Returns { iterations: [{ spec, verdict, report, sites, listing, placement, design, ... }], final }.
  */
@@ -155,20 +155,20 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
   const qec = join(dir, "program.qec");
   // A program given at the encoded level (.qec) is compiled as it is; a .qppm is prepared first.
   if (qecSource) { mkdirSync(dir, { recursive: true }); copyFileSync(qecSource, qec); }
-  else await formalrv.prepareQec(qppm, qec, { code, distance, specialize });
-  // A parameter the program declares and the caller did not fix takes 1, as FormalRV's README does.
+  else await ftc.prepareQec(qppm, qec, { code, distance, specialize });
+  // A parameter the program declares and the caller did not fix takes 1, as the compiler's README does.
   const declared = /^params\s+(.+)$/m.exec(readFileSync(qec, "utf8"));
   const missing = declared ? declared[1].split(",").map((x) => x.trim()).filter((k) => !(k in specialize)) : [];
   // The program's own witness first, else 1.
   const witness = Object.fromEntries((/^witness\s+(.+)$/m.exec(readFileSync(qec, "utf8"))?.[1] ?? "").split(",").map((x) => x.trim().split("=")).filter((x) => x.length === 2).map(([k, v]) => [k, Number(v)]));
-  if (missing.length) await formalrv.prepareQec(qppm, qec, { code, distance, specialize: { ...specialize, ...Object.fromEntries(missing.map((k) => [k, witness[k] ?? 1])) } });
-  const gadgets = await formalrv.discoverGadgets(qec, { dir, name: "discover", staged, options: compileOptions,
+  if (missing.length) await ftc.prepareQec(qppm, qec, { code, distance, specialize: { ...specialize, ...Object.fromEntries(missing.map((k) => [k, witness[k] ?? 1])) } });
+  const gadgets = await ftc.discoverGadgets(qec, { dir, name: "discover", staged, options: compileOptions,
     machine: specText.machineText({ machine: specFor({}, capacities, base, { gridNs, runtimeNs }).machine, factories }),
     sysspecFor: (names) => specText.sysspecText(specFor({}, capacities, base, { gadgets: names, gridNs, runtimeNs })) });
   const iterations = [];
   let factoryMeasured = false;
   const attempt = async (spec, name) => {
-    const built = await formalrv.build({ qec, spec: specText.files(spec), name, dir, staged, options: compileOptions });
+    const built = await ftc.build({ qec, spec: specText.files(spec), name, dir, staged, options: compileOptions });
     if (built.verdict.status !== "RESOURCE_VALIDATED") return { spec, verdict: built.verdict.status, verdictDetail: built.verdict, report: { conforms: false, rows: [], byKind: {} }, files: built.files, listing: built.listing };
     const placement = platform.place(built.listing, { distance });
     const design = platform.design(built.listing, placement);
@@ -179,7 +179,7 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
   for (let i = 0; i < maxIterations; i++) {
     const it = await attempt(specFor(durations, capacities, base, { gadgets, factories, gridNs, runtimeNs }), "iter" + i);
     iterations.push(it);
-    if (it.verdict !== "RESOURCE_VALIDATED") throw Error("FormalRV's VM did not admit iteration " + i + ": " + JSON.stringify(it.verdictDetail).slice(0, 400));
+    if (it.verdict !== "RESOURCE_VALIDATED") throw Error("The resource VM did not admit iteration " + i + ": " + JSON.stringify(it.verdictDetail).slice(0, 400));
     const measured = measuredDurations(it.report);
     let changed = i === 0;
     const next = { ...durations };
@@ -215,14 +215,14 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
     if (it.report.conforms && !changed) break;
   }
   // Contract pass: every called round gadget gets the footprint its calls showed, instead of
-  // the whole machine. FormalRV compiles once more against it; the run must still conform.
+  // the whole machine. The compiler lowers once more against it; the run must still conform.
   const last = iterations.at(-1);
   if (contracts && last.report.conforms && last.listing.calls.length) {
     const measured = roundContracts(last.listing, last.placement, last.report);
     const spec = structuredClone(last.spec);
     for (const [name, c] of Object.entries(measured)) {
       if (!spec.contracts[name]) continue;
-      const note = "peak over the gadget's calls in the conforming run, FormalRV's charging rule";
+      const note = "peak over the gadget's calls in the conforming run, the interface's charging rule";
       spec.contracts[name] = Object.fromEntries(Object.keys(specText.CONTRACT_FIELDS).map((k) => [k, { value: c[k], source: "measured", note }]));
     }
     const it = await attempt(spec, "contracts");

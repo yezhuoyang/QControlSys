@@ -1,0 +1,30 @@
+gadget qftInv(n, base):
+  for 0 <= i < n:
+    for 0 <= s < i:
+      ppmrot(-pi/2^(i-s+2)) Z q[base+s] with tSynth[i-s+2] magic states anc[0,synthAnc[i-s+2]) c[0,synthBits[i-s+2])
+      ppmrot(-pi/2^(i-s+2)) Z q[base+i] with tSynth[i-s+2] magic states anc[0,synthAnc[i-s+2]) c[0,synthBits[i-s+2])
+      ppmrot(pi/2^(i-s+2)) Z q[base+s] Z q[base+i] with tSynth[i-s+2] magic states anc[0,synthAnc[i-s+2]) c[0,synthBits[i-s+2])
+    prepare |Y+> -> anc[3·i]
+    measure Z q[base+i] Z anc[3·i] -> m[6·i]
+    measure X anc[3·i] -> m[6·i+1]
+    when m[6·i]:
+      frame Z q[base+i]
+    when m[6·i+1]:
+      frame Z q[base+i]
+    prepare |Y+> -> anc[3·i+1]
+    measure X q[base+i] Z anc[3·i+1] -> m[6·i+2]
+    measure X anc[3·i+1] -> m[6·i+3]
+    when m[6·i+2]:
+      frame X q[base+i]
+    when m[6·i+3]:
+      frame X q[base+i]
+    prepare |Y+> -> anc[3·i+2]
+    measure Z q[base+i] Z anc[3·i+2] -> m[6·i+4]
+    measure X anc[3·i+2] -> m[6·i+5]
+    when m[6·i+4]:
+      frame Z q[base+i]
+    when m[6·i+5]:
+      frame Z q[base+i]
+  for 0 <= i < n/2:
+    swapW(base+i, base+n-(i+1)) @ id()
+

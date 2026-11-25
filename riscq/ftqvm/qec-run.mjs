@@ -17,7 +17,7 @@ import * as superconducting from "../platforms/superconducting.mjs";
 import { conformance } from "./sc-run.mjs";
 import { willowTwin, willowDesign, willowMachine, transmonSchedule, lowerTransmon, willowTrack, bitLatency } from "./magic.mjs";
 import { controllerTrack } from "./track.mjs";
-import { captured, nativeOp } from "./studio-capture.mjs";
+import { captured, nativeOp, designOverride } from "./studio-capture.mjs";
 import { assembleWithDecoder, decodeRecord } from "../decoders/inrun.mjs";
 
 /** A flattened Stim circuit in the circuit form of riscq/ftqvm/magic-circuits.mjs. */
@@ -126,7 +126,8 @@ export function qecTwin(circuit, edits = {}, { durations, title, published, basi
  */
 export async function runWithDecoder(circuit, graph, { shot, feedback = [{ qubit: 0 }], edits = {}, qubitsPerCore = 1, twin = {}, momentNs, publishMask = false } = {}) {
   const device = qecTwin(circuit, edits, twin);
-  const design = willowDesign(device, { qubitsPerCore });
+  // In the RISC-Q studio, a chip edited in /riscq-design runs the same program (riscq/ftqvm/studio-capture.mjs).
+  const design = designOverride() ?? willowDesign(device, { qubitsPerCore });
   const m = willowMachine(design);
   const s = transmonSchedule(circuit, m, { momentNs });
   const lowered = lowerTransmon(s.natives, m, s.makespanNs);

@@ -66,7 +66,7 @@ const besedin = {
   noiseNote: "The paper's simulation model (its appendix): depolarizing 0.09% after one-qubit gates, 2.2% after CZ, 1.5% readout flips, and the idle Pauli channel 1 − exp(−t/T) with T_X = T_Y = 4·T1 and T_Z = T_φ over each layer's time, T1 = 51 µs (midpoint of 24–78 µs) and T2E = 50 µs (representative; per-qubit values are not published).",
   // Feed-forward the paper does in software: the decoded Z_L1·Z_L2 conditions X on L2's data (D3, D6, D9).
   feedback: [{ qubit: 6 }, { qubit: 9 }, { qubit: 12 }],
-  // FormalRV's counterpart: a Bell pair of two d = 3 surface-code blocks by an X⊗X merge (the
+  // The compiler's counterpart: a Bell pair of two d = 3 surface-code blocks by an X⊗X merge (the
   // operation the paper's split runs backwards), on the twin's durations.
   call: (twin, meta) => {
     const d = twin.durations;
@@ -420,10 +420,10 @@ async function opticalRow(paper, c, meta, circuit, g, bench, stats, refName, dec
 /* ================================================================== the system call */
 
 /**
- * The paper's logical operation as a FormalRV program, compiled against the twin: its durations,
+ * The paper's logical operation as a logical program, compiled against the twin: its durations,
  * the decoder as calibrated (riscq/decoders/calibrate.mjs; the worst decode measured at the
  * program's distance, plus the measured time for the bits to reach the decoder), the frame update
- * as measured in the run. First on the paper's device; if FormalRV's VM refuses it, again on the
+ * as measured in the run. First on the paper's device; if the resource VM refuses it, again on the
  * smallest machine the refusal names, so the page shows both.
  */
 export async function paperCall({ program, code = "surface", distance = 3, qubits, durations, gridNs = 2, dir, inRun }) {
@@ -437,7 +437,7 @@ export async function paperCall({ program, code = "surface", distance = 3, qubit
     pauli_frame_update_ns: v(inRun.afterDecodeNs, "measured", "from the decoder's result to a conditioned pulse on another core, in this paper's run"),
   };
   const caps = (n) => ({
-    qubits: v(n, n === qubits ? "published" : "derived", n === qubits ? "the device's qubits" : "the least FormalRV's VM admits"),
+    qubits: v(n, n === qubits ? "published" : "derived", n === qubits ? "the device's qubits" : "the least the resource VM admits"),
     factories: v(1, "provisional"), max_parallel_gates: v(n, "derived", "one RISC-Q core per qubit"), decoders: v(1, "derived", "one decoder core"),
     classical_data_bandwidth: v(500, "derived", "the board hub: one bit per batch at 500 MHz"),
     qubit_routing_bandwidth: v(1000 * n, "derived", "a coupler for every gated pair"), ancilla_bandwidth: v(1000 * n, "derived", "every qubit at once"),
@@ -452,7 +452,7 @@ export async function paperCall({ program, code = "surface", distance = 3, qubit
   const brief = (r) => r && { verdict: r.verdict, message: r.verdictDetail?.message, code: r.verdictDetail?.code, ops: r.ops, kinds: r.kinds, makespanNs: r.makespanNs, listingHead: r.listingHead, listingLines: r.listingLines, machineText: r.machineText, sysspecText: r.sysspecText, spec: r.spec };
   return { programText: onDevice.programText, onDevice: { qubits, ...brief(onDevice) }, admitted: admitted && { qubits: admitted.qubits, ...brief(admitted) },
     decoder: { latencyModel: cal.fields.decoder_latency_model, bandwidth: cal.fields.decoder_bandwidth, windowRounds: cal.fields.decoder_window_rounds, memory: cal.fields.classical_memory,
-      note: "The installed FormalRV compiler predates decoder_latency_model, and its VM refuses decoder_bandwidth: the decoder is declared to it as decoder_latency_ns (the measured worst case). The model and bandwidth are the calibration's, for a FormalRV built from its current source (it needs OCaml 5)." } };
+      note: "The installed compiler predates decoder_latency_model, and its VM refuses decoder_bandwidth: the decoder is declared to it as decoder_latency_ns (the measured worst case). The model and bandwidth are the calibration's, for a compiler built from its current source (it needs OCaml 5)." } };
 }
 
 /** The decoder's calibration (riscq/decoders/calibrate.mjs), without the per-shot lists. */

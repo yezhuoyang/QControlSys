@@ -1,0 +1,4 @@
+spec !ctl!modMulMCP:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_modMulMCP(bits, N, a, ainv, __cw, __anc) + pT * NT_ctl_modMulMCP(bits, N, a, ainv, __cw, __anc) + pI * N_I)
+  resource   { meas: 618·bits+3824·bits^(2)+12, frame: 576·bits+3572·bits^(2)+16, magicT: 105·bits+644·bits^(2), synthEps: 0 }
+

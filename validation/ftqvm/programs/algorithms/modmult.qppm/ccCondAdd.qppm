@@ -1,0 +1,5 @@
+gadget ccCondAdd(bits, base, cst, ctl):
+  ccPrepareMaskedConstRead(bits, base, cst, ctl) @ id()
+  ccAdder(bits, base) @ id()
+  ccPrepareMaskedConstRead(bits, base, cst, ctl) @ id()
+

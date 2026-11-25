@@ -1,0 +1,4 @@
+gadget !ctl!swapAccMult(bits, __cw, __anc):
+  for 0 <= s < bits:
+    !ctl!qubitSwap(2·s+3, 2·bits+s+3, __cw, __anc) @ id()
+

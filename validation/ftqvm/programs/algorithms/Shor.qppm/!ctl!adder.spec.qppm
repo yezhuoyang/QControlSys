@@ -1,0 +1,4 @@
+spec !ctl!adder:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_adder(n, base, __cw, __anc) + pT * NT_ctl_adder(n, base, __cw, __anc) + pI * N_I)
+  resource   { meas: 412·n, frame: 384·n, magicT: 70·n, synthEps: 0 }
+

@@ -1,0 +1,17 @@
+Grover.qppm
+groverIterate.qppm
+groverDiffusion.qppm
+groverOracle.qppm
+mcz.qppm
+andChain.qppm
+andChainRev.qppm
+groverStep.qppm
+main.qppm
+groverIterate.spec.qppm
+groverDiffusion.spec.qppm
+groverOracle.spec.qppm
+mcz.spec.qppm
+andChain.spec.qppm
+andChainRev.spec.qppm
+groverStep.spec.qppm
+main.spec.qppm

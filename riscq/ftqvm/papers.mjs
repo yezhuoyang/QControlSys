@@ -1,12 +1,12 @@
-// Published experiments as FormalRV programs, compiled with system calls onto digital twins of
+// Published experiments as logical programs, compiled with system calls onto digital twins of
 // the machines they ran on (riscq/ftqvm/twins.mjs).
 //
-// A program is written at FormalRV's encoded level (.qec) when the experiment is defined by its
-// rounds, as a memory experiment is; the code declarations come from FormalRV itself
-// (prepare_qec on a one-line program of that code and distance), so the code is FormalRV's.
+// A program is written at the compiler's encoded level (.qec) when the experiment is defined by its
+// rounds, as a memory experiment is; the code declarations come from the compiler itself
+// (prepare_qec on a one-line program of that code and distance), so the code is the compiler's.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import * as formalrv from "./formalrv.mjs";
+import * as ftc from "./ftcompiler.mjs";
 import * as specText from "./spec.mjs";
 import { byId } from "./reproductions.mjs";
 
@@ -26,7 +26,7 @@ export function details(last, qec) {
 
 /**
  * What a design page needs to run a row again on an edited twin (riscq/ftqvm/designs.mjs): the
- * compiled listing (FormalRV's output, fixed), its distance and the twin it ran on. The CLI writes
+ * compiled listing (the compiler's output, fixed), its distance and the twin it ran on. The CLI writes
  * it to validation/ftqvm/twins/<id>/<key>.json, not into the page's data.
  */
 const twinSource = (key, label, platform, distance, listing) => ({ key, label, platform, distance, listing: { ops: listing.ops.map(({ stack, ...o }) => o) } });
@@ -45,12 +45,12 @@ async function writeTwins(id, rows) {
   saveDecoderTimes();
 }
 
-/** FormalRV's declaration of the distance-d surface code, as prepare_qec writes it. */
+/** The compiler's declaration of the distance-d surface code, as prepare_qec writes it. */
 export async function surfaceCodes(d, dir) {
   mkdirSync(dir, { recursive: true });
   const qppm = join(dir, "memory-d" + d + ".qppm"), qec = join(dir, "memory-d" + d + ".qec");
   writeFileSync(qppm, "\ncode surface d=" + d + "\n\nparams  n\n\nprogram[q: 1, c: 1]:\n  measure Z data[0] -> c[0]\n");
-  await formalrv.prepareQec(qppm, qec, { code: "surface", distance: d, specialize: { n: 1 } });
+  await ftc.prepareQec(qppm, qec, { code: "surface", distance: d, specialize: { n: 1 } });
   const text = readFileSync(qec, "utf8");
   return text.slice(0, text.indexOf("program["));
 }
@@ -59,7 +59,7 @@ export async function surfaceCodes(d, dir) {
  * Google Quantum AI, Nature 638, 920 (2025): a surface-code memory of distance d over R cycles.
  * One logical qubit; R rounds of every check; the syndrome decoded. (The paper reads the data
  * qubits out at the end and decodes with the final round; the readout here is not part of the
- * listing, because FormalRV's .qec has no transversal data readout in this form.)
+ * listing, because the compiler's .qec has no transversal data readout in this form.)
  */
 export async function googleMemory(d, rounds, dir) {
   const checks = d * d - 1;
@@ -73,7 +73,7 @@ export async function googleMemory(d, rounds, dir) {
 }
 
 /**
- * Run Google's memory on the Willow twin for each distance: FormalRV compiles it with system
+ * Run Google's memory on the Willow twin for each distance: the compiler lowers it with system
  * calls against the spec the twin's trace derives, and the run must conform. Returns rows that
  * put the twin's numbers beside the paper's.
  */
@@ -111,7 +111,7 @@ if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replac
     const result = await googleExperiment({ dir: join(tmpdir(), "quantumos-google-" + process.pid), baseMachine: join("validation", "ftqvm", "base.machine"), rounds: Number(process.argv[3] ?? 10) });
     await writeTwins("google-2025", result.rows);
     writeFileSync(join(out, "google-2025.json"), JSON.stringify({ meta: byId("google-2025"), generated: new Date().toISOString(), ...result }, null, 1));
-    const md = ["| d | Rounds | Qubits | Ops | Conforms | FormalRV round (µs) | Paper cycle (µs) | Gates per round | Decoder (µs) |", "|---|---|---|---|---|---|---|---|---|",
+    const md = ["| d | Rounds | Qubits | Ops | Conforms | Compiled round (µs) | Paper cycle (µs) | Gates per round | Decoder (µs) |", "|---|---|---|---|---|---|---|---|---|",
       ...result.rows.map((r) => `| ${r.distance} | ${r.rounds} | ${r.qubits} | ${r.ops} | ${r.conforms ? "yes" : "no"} | ${(r.roundNs / 1000).toFixed(2)} | ${(r.paper.cycleNs / 1000).toFixed(1)} | ${r.roundGates} | ${(r.decoderNs / 1000).toFixed(1)} |`)].join("\n") + "\n";
     writeFileSync(join(out, "google-2025.md"), md);
     console.log(md);
@@ -137,7 +137,7 @@ if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replac
 }
 
 /**
- * FormalRV's declaration of the distance-d surface code with its transversal gates (the H̄ row
+ * The compiler's declaration of the distance-d surface code with its transversal gates (the H̄ row
  * the transversal passes add), from prepare_qec with `fuse-cx`, `fuse-h` and `transversal-gates`
  * on a two-qubit CX program.
  */
@@ -145,9 +145,9 @@ export async function transversalSurfaceCodes(d, dir, code = "surface") {
   mkdirSync(dir, { recursive: true });
   const prog = join(dir, "cx-" + code + d + ".prog"), qppm = join(dir, "cx-" + code + d + ".qppm"), qec = join(dir, "cx-" + code + d + ".qec");
   writeFileSync(prog, "code " + code + " d=" + d + "\n\nprogram cx[q: 2, c: 2]:\n  H(0)\n  CX(0, 1)\n  measure 0 ↦ c[0]\n  measure 1 ↦ c[1]\n");
-  await formalrv.prepareQppm(prog, qppm);
+  await ftc.prepareQppm(prog, qppm);
   const args = { code, distance: d, specialize: {} };
-  await formalrv.prepareQecWith(qppm, qec, args, ["--opt", "fuse-cx", "--opt", "fuse-h", "--opt", "transversal-gates"]);
+  await ftc.prepareQecWith(qppm, qec, args, ["--opt", "fuse-cx", "--opt", "fuse-h", "--opt", "transversal-gates"]);
   const text = readFileSync(qec, "utf8");
   return text.slice(0, text.indexOf("program["));
 }
@@ -156,8 +156,8 @@ export async function transversalSurfaceCodes(d, dir, code = "surface") {
  * Bluvstein et al., Nature 626, 58 (2024), Fig. 2: two distance-d surface codes, one in |+⟩_L
  * and one in |0⟩_L, a transversal CNOT, and the logical Bell stabilizer read in `basis` (Z: Z⊗Z,
  * X: X⊗X), with one round of stabilizers on each block before the readout. |+⟩_L is prepared in
- * a logical ancilla block (FormalRV's staged back end does not expand a transversal H on one
- * block). Compiled by FormalRV's staged back end, whose `pipeline-loops` option runs the
+ * a logical ancilla block (the compiler's staged back end does not expand a transversal H on one
+ * block). Compiled by the compiler's staged back end, whose `pipeline-loops` option runs the
  * transversal CNOT's trips together.
  */
 export async function bluvsteinBell(d, basis, dir) {
@@ -220,7 +220,7 @@ export async function bluvsteinExperiment({ distances = [3, 5, 7], bases = ["Z",
  * transversal gates. Three [[7,1,3]] blocks: a Bell pair between two logical ancilla blocks
  * (|+⟩_L, |0⟩_L and a transversal CX), one stabilizer round on each, a transversal CX from the
  * source block, the source read in X and the first ancilla in Z, then the Pauli-frame
- * corrections on the target. FormalRV's own Steane declaration; its staged back end.
+ * corrections on the target. The compiler's own Steane declaration; its staged back end.
  */
 export async function quantinuumTeleport(dir) {
   const codes = await transversalSurfaceCodes(3, dir, "steane");
@@ -273,7 +273,7 @@ export async function quantinuumExperiment({ dir, baseMachine } = {}) {
       _twin: twinSource(size.qubits ? "q" + size.qubits.value : "q32", size.label, { kind: "optical", id: "quantinuum-h2", overrides }, 3, last.listing),
     });
   } catch (error) {
-    // The line that says why (FormalRV's refusal or the VM's verdict), not the compiler's progress lines.
+    // The line that says why (the compiler's refusal or the VM's verdict), not the compiler's progress lines.
     const lines = error.message.split("\n");
     rows.push({ distance: 3, basis: size.label, error: (lines.find((l) => /refused|did not admit|exceeds/.test(l)) ?? lines[0]).trim().slice(0, 400) });
   }

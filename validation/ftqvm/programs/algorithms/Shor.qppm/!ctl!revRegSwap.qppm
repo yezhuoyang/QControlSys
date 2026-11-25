@@ -1,0 +1,4 @@
+gadget !ctl!revRegSwap(n, oA, oB, __cw, __anc):
+  for 0 <= r < n:
+    !ctl!qubitSwap(oA+r, oB+(n-(r+1)), __cw, __anc) @ id()
+

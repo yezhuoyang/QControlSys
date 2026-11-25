@@ -1,6 +1,6 @@
 // Calibration of the decode_syndrome system call: the compiled union-find decoder
 // (riscq/decoders/uf_decoder.c) measured in the Lean model of a RISC-Q decoder core, and the
-// FormalRV machine fields that QuantumOS declares for it, each read off those runs.
+// The compiler machine fields that QuantumOS declares for it, each read off those runs.
 //
 // Workload: rotated surface-code memory circuits (Stim's generated circuits) at distances d and
 // round counts r, with SI1000 noise at strength p (Google Quantum AI's circuit noise model), so
@@ -14,7 +14,7 @@
 //   result out   from the decoder's last instruction to a conditioned pulse opening on another
 //                core (publish, the next segment's barrier, fetch, pulse issue)
 //
-// FormalRV fields (FormalRV/ftq_vm/ocaml/resource_vm.ml), all in its units:
+// Compiler fields (ftq_vm/ocaml/resource_vm.ml), all in its units:
 //   decoder_latency_ns       the longest decode seen, bits in + compute
 //   decoder_latency_model    F(n) ≥ every decode seen, as a + b·n in the decode's input bits n
 //   decoder_bandwidth        input bits per µs at the slowest decode seen (bits/us)
@@ -65,7 +65,7 @@ export function envelope(points) {
 }
 
 /**
- * Calibrate: measure every workload, then the FormalRV fields. `inRun` are the overheads
+ * Calibrate: measure every workload, then the compiler fields. `inRun` are the overheads
  * measured in a control program run (riscq/ftqvm/qec-run.mjs): { bitsInNs, resultOutNs }.
  */
 export async function calibrate({ distances = [3, 5], ps = [1e-3, 2.3e-3, 3e-3], shots = 100, inRun }) {

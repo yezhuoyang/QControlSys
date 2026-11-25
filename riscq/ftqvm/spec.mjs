@@ -1,14 +1,14 @@
-// The system specification QuantumOS hands to FormalRV: the `.machine` and `.sysspec` files its
-// back end (`qec_sys`) and VM read, in FormalRV's own format (FormalRV/ftq_vm/TEXT_SYSPROG.md).
+// The system specification QuantumOS hands to the compiler: the `.machine` and `.sysspec` files its
+// back end (`qec_sys`) and VM read, in the compiler's own format (ftq_vm/TEXT_SYSPROG.md).
 //
 // A spec here is data with provenance. Every value says where it comes from:
 //   { value, source: "measured", trace } from a QuantumOS run,
 //   { value, source: "cited", ref } from the literature (riscq/standards.mjs),
 //   { value, source: "derived", from } as arithmetic on other values, or
 //   { value, source: "provisional", ref } as a placeholder still to be derived.
-// Units are FormalRV's: integers in ns, bits/us and qubits/us.
+// Units are the compiler's: integers in ns, bits/us and qubits/us.
 
-/** Machine fields FormalRV requires, with their units (FormalRV/ftq_vm/ocaml/resource_vm.ml). */
+/** Machine fields the compiler requires, with their units (ftq_vm/ocaml/resource_vm.ml). */
 export const MACHINE_FIELDS = Object.freeze({
   qubits: "total", factories: "total", max_parallel_gates: "total", decoders: "total",
   classical_data_bandwidth: "bits/us", qubit_routing_bandwidth: "qubits/us", ancilla_bandwidth: "qubits/us",
@@ -65,14 +65,14 @@ export function machineText(spec) {
     if (name.endsWith("_ns") && valueOf(v) <= 0) throw new Error(`${name} must be positive`);
   }
   const lines = [`machine { ${fields(spec.machine, MACHINE_FIELDS, MACHINE_OPTIONAL)} }`];
-  // Factory contracts follow the machine line, as in FormalRV's own machine files.
+  // Factory contracts follow the machine line, as in the compiler's own machine files.
   for (const [name, c] of Object.entries(spec.factories ?? {})) lines.push("", `spec ${name}:`, `  resource { ${fields(c, FACTORY_FIELDS)} }`);
   return lines.join("\n") + "\n";
 }
 
 /**
  * The `.sysspec` text: `spec program`, then one contract per round gadget, then factory and
- * maintenance contracts when the spec has them (in the order FormalRV's examples use).
+ * maintenance contracts when the spec has them (in the order the compiler's examples use).
  */
 export function sysspecText(spec) {
   const lines = ["spec program:", `  resource { ${fields(spec.program, PROGRAM_FIELDS)} }`];
@@ -84,12 +84,12 @@ export function sysspecText(spec) {
   return lines.join("\n") + "\n";
 }
 
-/** Both files' text, as formalrv.build() takes them. */
+/** Both files' text, as ftc.build() takes them. */
 export function files(spec) {
   return { machine: machineText(spec), sysspec: sysspecText(spec) };
 }
 
-/** Factory contracts of a FormalRV machine file: { factory: { output_qubits: 9, … }, factory_ccz: … }. */
+/** Factory contracts of a compiler machine file: { factory: { output_qubits: 9, … }, factory_ccz: … }. */
 export function parseFactories(text) {
   const out = {};
   for (const m of text.matchAll(/^spec (factory\w*):\s*\n\s*resource\s*\{([^}]*)\}/gm)) {
@@ -102,7 +102,7 @@ export function parseFactories(text) {
   return out;
 }
 
-/** Parse a FormalRV `machine { ... }` line into { field: number | string }. */
+/** Parse a compiler `machine { ... }` line into { field: number | string }. */
 export function parseMachine(text) {
   const m = /machine\s*\{([\s\S]*?)\}/.exec(text.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n"));
   if (!m) throw new Error("no machine { ... } declaration");
@@ -119,9 +119,9 @@ export function parseMachine(text) {
 }
 
 /**
- * A provisional spec from an existing FormalRV machine file: every value is marked provisional,
+ * A provisional spec from an existing compiler machine file: every value is marked provisional,
  * with the file as its reference. Contracts for the given round gadgets get the machine's whole
- * capacity, which FormalRV checks but which says nothing about the hardware yet; spec
+ * capacity, which the compiler checks but which says nothing about the hardware yet; spec
  * derivation (derive.mjs) replaces them with measured values.
  */
 export function provisional(machineFileText, ref, { gadgets = [], runtimeNs = 1_000_000_000 } = {}) {

@@ -17,7 +17,7 @@
 // Timing. A job is ready when its last syndrome bit has reached the decoder core: the bit's
 // store at its measuring core (from the listing run) plus the hub's publish latency. A design
 // gives `decoders` decoder units; the jobs of one decode run on one unit, one after another
-// (FormalRV charges a decode one decoder), or, with `coresPerDecoder > 1`, spread over that
+// (the compiler charges a decode one decoder), or, with `coresPerDecoder > 1`, spread over that
 // many cores of the unit. A unit is busy from a job's start to its end. The decode is done when
 // its last job is. Decode times are properties of RISC-Q's core as QControl/RiscQ/Pipe.lean models it
 // (cycle for cycle as its RTL, validation/riscq/rtl/), not of a board.
@@ -159,7 +159,7 @@ export async function jobNs(job, outcomes = {}, periodNs = 2) {
 }
 
 /**
- * Decode the injection rounds of every factory on the factory's own decoder core (FormalRV's
+ * Decode the injection rounds of every factory on the factory's own decoder core (the compiler's
  * factory contract declares the decoders a factory holds): one Helios job per check type, in
  * series, each ready when its last round's bits have reached the decoder.
  * `factories`: [{ uid, records: [{ name, round, check, type, support }] }] from sc-run.
@@ -196,7 +196,7 @@ export async function runDecodes(listing, placement, d, bitStoredNs, { decoders 
   const rows = [];
   for (const op of listing.ops.filter((o) => o.kind === "decode_syndrome").sort((x, y) => x.start - y.start)) {
     const jobs = jobsOf(listing, op, placement, d);
-    // FormalRV holds one decoder for the decode: take the unit that frees first.
+    // The compiler holds one decoder for the decode: take the unit that frees first.
     const u = units.map((cores, i) => [Math.min(...cores), i]).sort((x, y) => x[0] - y[0])[0][1];
     const cores = units[u];
     const out = [];

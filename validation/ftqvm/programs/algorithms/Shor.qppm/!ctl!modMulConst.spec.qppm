@@ -1,0 +1,4 @@
+spec !ctl!modMulConst:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_modMulConst(bits, N, a, __cw, __anc) + pT * NT_ctl_modMulConst(bits, N, a, __cw, __anc) + pI * N_I)
+  resource   { meas: 126·bits+1912·bits^(2), frame: 117·bits+1786·bits^(2), magicT: 21·bits+322·bits^(2), synthEps: 0 }
+

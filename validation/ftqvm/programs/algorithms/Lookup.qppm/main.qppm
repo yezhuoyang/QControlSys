@@ -1,0 +1,4 @@
+program[q: ctlW+1, c: ctlW+(2^(d)-1)+1]:
+  frame X q[ctlW]
+  unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, 0, 0, ctlW+1) @ id()
+

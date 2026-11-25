@@ -10,17 +10,24 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 const store = new AsyncLocalStorage();
 
-/** Run `fn` and collect every piece its runners capture. Returns { value, pieces }. */
-export async function captureRuns(fn) {
+/**
+ * Run `fn` and collect every piece its runners capture. Returns { value, pieces }. `design`: a hardware
+ * design (riscq/design.mjs) edited in /riscq-design, which a transmon runner uses in place of the chip it
+ * would build (`designOverride`), so the paper's own program runs on the edited chip.
+ */
+export async function captureRuns(fn, { design } = {}) {
   const pieces = [];
-  const value = await store.run(pieces, fn);
+  const value = await store.run({ pieces, design }, fn);
   return { value, pieces };
 }
 
 /** Called by a runner after its Lean run. */
 export function captured(piece) {
-  store.getStore()?.push(piece);
+  store.getStore()?.pieces.push(piece);
 }
+
+/** The edited chip a studio run was given, if any. */
+export const designOverride = () => store.getStore()?.design;
 
 /** A native op in the studio's shape, from the fields the runners use. */
 export const nativeOp = (n, extra = {}) => ({

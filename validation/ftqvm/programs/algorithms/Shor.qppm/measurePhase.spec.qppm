@@ -1,0 +1,9 @@
+spec measurePhase:
+  ∀ x < 2^n .
+  requires   0 < n  ∧  base + n ≤ rec  ∧  rec + n ≤ dim
+  ∧  rec + n ≤ cb  ∧  cb + n ≤ dim
+  assumes    {{ |x⟩_q[base, base+n) }}
+  ensures {{ |0⟩_q[base, base+n) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_measurePhase(n, base, rec, cb) + pT * NT_measurePhase(n, base, rec, cb) + pI * N_I)
+  outcomes Pr[ c[cb, cb+n) = x ]  ≥  1 - (pL * NL_measurePhase(n, base, rec, cb) + pT * NT_measurePhase(n, base, rec, cb) + pI * N_I) ∧ Pr[ c[cb, cb+n) = x ]  ≤  1 + (pL * NL_measurePhase(n, base, rec, cb) + pT * NT_measurePhase(n, base, rec, cb) + pI * N_I)
+  resource   { meas: n, frame: n, magicT: 0, synthEps: 0 }
+

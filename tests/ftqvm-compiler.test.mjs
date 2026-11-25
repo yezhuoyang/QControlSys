@@ -1,19 +1,20 @@
-// FormalRV, unchanged, compiles a program against a system specification QuantumOS writes; its
+// The compiler, unchanged, compiles a program against a system specification QuantumOS writes; its
 // VM admits the listing and its expander gives the timed operations QuantumOS will execute.
-// Skipped when no built FormalRV checkout is next to this one (or at FORMALRV_ROOT).
+// Skipped when no built compiler checkout is next to this one (or at FT_COMPILER_ROOT).
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import * as formalrv from "../riscq/ftqvm/formalrv.mjs";
+import { fileURLToPath } from "node:url";
+import * as ftc from "../riscq/ftqvm/ftcompiler.mjs";
 import * as spec from "../riscq/ftqvm/spec.mjs";
 
-const skip = !formalrv.available() && "no built FormalRV checkout";
+const skip = !ftc.available() && "no built compiler checkout";
 
-test("spec text round-trips through FormalRV's machine syntax", () => {
+test("spec text round-trips through the compiler's machine syntax", () => {
   const text = "machine { qubits: 8 total, factories: 2 total, max_parallel_gates: 2 total, decoders: 2 total, classical_data_bandwidth: 32 bits/us, qubit_routing_bandwidth: 4 qubits/us, ancilla_bandwidth: 10 qubits/us, gate1q_ns: 100 ns, gate2q_ns: 200 ns, measure_ns: 300 ns, reset_ns: 1000 ns, route_latency_ns: 1000 ns, decoder_latency_ns: 2000 ns, magic_state_latency_ns: 5000 ns, pauli_frame_update_ns: 50 ns }";
-  const s = spec.provisional(text, "FormalRV factory.sysprog", { gadgets: ["surfaceRound"] });
+  const s = spec.provisional(text, "The compiler factory.sysprog", { gadgets: ["surfaceRound"] });
   assert.deepEqual(spec.parseMachine(spec.machineText(s)), spec.parseMachine(text));
   assert.match(spec.sysspecText(s), /^spec program:\n {2}resource \{ qubits_min: 0 total, qubits: 8 total/);
   assert.match(spec.sysspecText(s), /spec surfaceRound:\n {2}resource \{ qubits: 8 total, runtime: 1000000000 ns, gates: 2 total/);
@@ -21,13 +22,13 @@ test("spec text round-trips through FormalRV's machine syntax", () => {
   assert.throws(() => spec.machineText({ machine: { ...s.machine, cycle_ns: 5 } }), /unknown field cycle_ns/);
 });
 
-test("the Z⊗Z merge compiles, is admitted and expands to FormalRV's 411 operations", { skip, timeout: 300_000 }, async () => {
-  const root = formalrv.formalrvRoot();
-  const examples = join(root, "FormalRV", "Examples", "QParamPPM");
-  const s = spec.provisional(readFileSync(join(examples, "ZZmerge.machine"), "utf8"), "FormalRV ZZmerge.machine (test profile)", {
+test("the Z⊗Z merge compiles, is admitted and expands to the compiler's 411 operations", { skip, timeout: 300_000 }, async () => {
+  const root = ftc.compilerRoot();
+  const examples = fileURLToPath(new URL("../validation/ftqvm/programs/", import.meta.url));
+  const s = spec.provisional(readFileSync(join(examples, "ZZmerge.machine"), "utf8"), "The compiler ZZmerge.machine (test profile)", {
     gadgets: ["surfaceRound", "surfaceRoundLogicalAncilla"],
   });
-  const built = await formalrv.build({
+  const built = await ftc.build({
     qppm: join(examples, "ZZmerge.qppm"), spec: spec.files(s), name: "ZZmerge",
     dir: join(tmpdir(), "quantumos-ftqvm-" + process.pid), code: "surface", distance: 3, specialize: { a: 0, b: 1 },
   });

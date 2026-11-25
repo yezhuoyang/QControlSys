@@ -28,13 +28,14 @@ function roleOf(name) {
 }
 
 /**
- * The control system of a run, for the 3D view: the board, its cores (role, channels, the sites a
+ * The control system of a run, for the 3D view: the board, its cores (role, board, channels as [kind, name,
+ * RF-DAC or RF-ADC index on the core's board], the sites a
  * qubit core drives) and every pulse the trace shows ([core, channel, t0 ns, t1 ns, ...sites driven]),
  * timed from the same time base as the conformance check.
  * `sitesOfOp(id)`: the sites of the listing operation a native instruction belongs to.
  */
 export function controllerTrack({ spec, result, baseBatch, periodPs, sitesOfOp, coreSites = [], name, limit = 30000 }) {
-  const cores = spec.cores.map((c, i) => ({ name: c.name, role: roleOf(c.name), board: c.board ?? 0, channels: c.channels.map((ch) => [ch.kind, ch.name]), sites: coreSites[i] ?? [] }));
+  const cores = spec.cores.map((c, i) => ({ name: c.name, role: roleOf(c.name), board: c.board ?? 0, channels: c.channels.map((ch) => (ch.kind === "pulse" || ch.kind === "demod" ? [ch.kind, ch.name, ch.kind === "demod" ? ch.adc : ch.dac] : [ch.kind, ch.name])), sites: coreSites[i] ?? [] }));
   const pulses = [];
   for (const p of result.summary.pulses) {
     if (pulses.length >= limit) break;

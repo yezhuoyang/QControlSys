@@ -1,0 +1,8 @@
+spec encodeAdapter:
+  ∀ u < 2^bits . ∀ v < 2^bits .
+  requires   0 < bits  ∧  (4 * bits) + 3 ≤ dim
+  assumes    {{ |u⟩_q[0, bits) ⊗ |v⟩_q[(3 * bits) + 3, (4 * bits) + 3) }}
+  ensures {{ |rev(bits, v)⟩_q[0, bits) ⊗ |rev(bits, u)⟩_q[(3 * bits) + 3, (4 * bits) + 3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_encodeAdapter(bits) + pT * NT_encodeAdapter(bits) + pI * N_I)
+  outcomes   none
+  resource   { meas: 18·bits, frame: 24·bits, magicT: 0, synthEps: 0 }
+

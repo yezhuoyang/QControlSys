@@ -1,0 +1,4 @@
+spec !ctl!prepConst:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_prepConst(bits, base, cst, __cw, __anc) + pT * NT_ctl_prepConst(bits, base, cst, __cw, __anc) + pI * N_I)
+  resource   { meas: 6·bits, frame: 8·bits, magicT: 0, synthEps: 0 }
+

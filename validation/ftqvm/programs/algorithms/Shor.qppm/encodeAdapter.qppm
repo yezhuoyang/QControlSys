@@ -1,0 +1,3 @@
+gadget encodeAdapter(bits):
+  revRegSwap(bits, 0, 3·bits+3) @ id()
+

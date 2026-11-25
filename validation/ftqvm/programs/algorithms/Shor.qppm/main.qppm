@@ -1,0 +1,53 @@
+program[q: m+rec, c: 2·m+rec]:
+  nparH(m, 0) @ id()
+  for 0 <= j < m:
+    prepare |Y+> -> anc[6·j]
+    measure Z q[j] X q[4·bits+m+5] Z anc[6·j] -> m[12·j]
+    measure X anc[6·j] -> m[12·j+1]
+    when m[12·j]:
+      frame Z q[j] X q[4·bits+m+5]
+    when m[12·j+1]:
+      frame Z q[j] X q[4·bits+m+5]
+    prepare |Y+> -> anc[6·j+1]
+    measure Z q[j] Z anc[6·j+1] -> m[12·j+2]
+    measure X anc[6·j+1] -> m[12·j+3]
+    when m[12·j+2]:
+      frame Z q[j]
+    when m[12·j+3]:
+      frame Z q[j]
+    frame Z q[j]
+    prepare |Y+> -> anc[6·j+2]
+    measure X q[4·bits+m+5] Z anc[6·j+2] -> m[12·j+4]
+    measure X anc[6·j+2] -> m[12·j+5]
+    when m[12·j+4]:
+      frame X q[4·bits+m+5]
+    when m[12·j+5]:
+      frame X q[4·bits+m+5]
+    frame X q[4·bits+m+5]
+    !ctl!modMulMCP(bits, N, a^(2^(m-(j+1))) mod N, ainv^(2^(m-(j+1))) mod N, 4·bits+5, 4·bits+6) @ shift(m)
+    prepare |Y+> -> anc[6·j+3]
+    measure Z q[j] X q[4·bits+m+5] Z anc[6·j+3] -> m[12·j+6]
+    measure X anc[6·j+3] -> m[12·j+7]
+    when m[12·j+6]:
+      frame Z q[j] X q[4·bits+m+5]
+    when m[12·j+7]:
+      frame Z q[j] X q[4·bits+m+5]
+    prepare |Y+> -> anc[6·j+4]
+    measure Z q[j] Z anc[6·j+4] -> m[12·j+8]
+    measure X anc[6·j+4] -> m[12·j+9]
+    when m[12·j+8]:
+      frame Z q[j]
+    when m[12·j+9]:
+      frame Z q[j]
+    frame Z q[j]
+    prepare |Y+> -> anc[6·j+5]
+    measure X q[4·bits+m+5] Z anc[6·j+5] -> m[12·j+10]
+    measure X anc[6·j+5] -> m[12·j+11]
+    when m[12·j+10]:
+      frame X q[4·bits+m+5]
+    when m[12·j+11]:
+      frame X q[4·bits+m+5]
+    frame X q[4·bits+m+5]
+  qftInv(m, 0) @ id()
+  measurePhase(m, 0, rec, m+rec) @ id()
+

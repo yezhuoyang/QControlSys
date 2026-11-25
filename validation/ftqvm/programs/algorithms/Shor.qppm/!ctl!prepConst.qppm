@@ -1,0 +1,27 @@
+gadget !ctl!prepConst(bits, base, cst, __cw, __anc):
+  for 0 <= b < bits:
+    if (cst >> b) % 2 = 1:
+      prepare |Y+> -> anc[3·b]
+      measure Z q[__cw] X q[2·b+base+2] Z anc[3·b] -> m[6·b]
+      measure X anc[3·b] -> m[6·b+1]
+      when m[6·b]:
+        frame Z q[__cw] X q[2·b+base+2]
+      when m[6·b+1]:
+        frame Z q[__cw] X q[2·b+base+2]
+      prepare |Y+> -> anc[3·b+1]
+      measure Z q[__cw] Z anc[3·b+1] -> m[6·b+2]
+      measure X anc[3·b+1] -> m[6·b+3]
+      when m[6·b+2]:
+        frame Z q[__cw]
+      when m[6·b+3]:
+        frame Z q[__cw]
+      frame Z q[__cw]
+      prepare |Y+> -> anc[3·b+2]
+      measure X q[2·b+base+2] Z anc[3·b+2] -> m[6·b+4]
+      measure X anc[3·b+2] -> m[6·b+5]
+      when m[6·b+4]:
+        frame X q[2·b+base+2]
+      when m[6·b+5]:
+        frame X q[2·b+base+2]
+      frame X q[2·b+base+2]
+

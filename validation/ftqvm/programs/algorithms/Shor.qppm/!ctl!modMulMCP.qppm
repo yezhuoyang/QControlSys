@@ -1,0 +1,51 @@
+gadget !ctl!modMulMCP(bits, N, a, ainv, __cw, __anc):
+  !ctl!encodeAdapter(bits, __cw, __anc) @ id()
+  prepare |Y+> -> anc[0]
+  measure Z q[__cw] X q[4·bits+3] Z anc[0] -> m[0]
+  measure X anc[0] -> m[1]
+  when m[0]:
+    frame Z q[__cw] X q[4·bits+3]
+  when m[1]:
+    frame Z q[__cw] X q[4·bits+3]
+  prepare |Y+> -> anc[1]
+  measure Z q[__cw] Z anc[1] -> m[2]
+  measure X anc[1] -> m[3]
+  when m[2]:
+    frame Z q[__cw]
+  when m[3]:
+    frame Z q[__cw]
+  frame Z q[__cw]
+  prepare |Y+> -> anc[2]
+  measure X q[4·bits+3] Z anc[2] -> m[4]
+  measure X anc[2] -> m[5]
+  when m[4]:
+    frame X q[4·bits+3]
+  when m[5]:
+    frame X q[4·bits+3]
+  frame X q[4·bits+3]
+  !ctl!modMulInPlace(bits, N, a, ainv, 3·bits+3, 3·bits+4) @ shift(bits)
+  prepare |Y+> -> anc[3]
+  measure Z q[__cw] X q[4·bits+3] Z anc[3] -> m[6]
+  measure X anc[3] -> m[7]
+  when m[6]:
+    frame Z q[__cw] X q[4·bits+3]
+  when m[7]:
+    frame Z q[__cw] X q[4·bits+3]
+  prepare |Y+> -> anc[4]
+  measure Z q[__cw] Z anc[4] -> m[8]
+  measure X anc[4] -> m[9]
+  when m[8]:
+    frame Z q[__cw]
+  when m[9]:
+    frame Z q[__cw]
+  frame Z q[__cw]
+  prepare |Y+> -> anc[5]
+  measure X q[4·bits+3] Z anc[5] -> m[10]
+  measure X anc[5] -> m[11]
+  when m[10]:
+    frame X q[4·bits+3]
+  when m[11]:
+    frame X q[4·bits+3]
+  frame X q[4·bits+3]
+  !ctl!encodeAdapter(bits, __cw, __anc) @ id()
+

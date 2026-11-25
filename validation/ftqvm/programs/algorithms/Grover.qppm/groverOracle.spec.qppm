@@ -1,0 +1,8 @@
+spec groverOracle:
+  ∀α .
+  requires   2 ≤ n  ∧  s < 2^n  ∧  n ≤ anc  ∧  anc + n ≤ dim
+  assumes    {{ Σ x < 2^n . α(x) * (|x⟩_q[0, n) ⊗ |0⟩_q[anc, anc + n - 2)) }}
+  ensures {{ Σ x < 2^n . grvMark(s, α)(x) * (|x⟩_q[0, n) ⊗ |0⟩_q[anc, anc + n - 2)) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_groverOracle(n, s, anc) + pT * NT_groverOracle(n, s, anc) + pI * N_I)
+  outcomes   none
+  resource   { meas: 84·(n-3)+96, frame: 2·n+78·(n-3)+94, magicT: 14·(n-3)+14, synthEps: 0 }
+

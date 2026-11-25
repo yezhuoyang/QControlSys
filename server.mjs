@@ -36,6 +36,8 @@ const routes = new Map([
   ["/riscq-design.js", "studio/riscq-design.js"],
   ["/riscq-design.css", "studio/riscq-design.css"],
   ["/riscq-design-doc.js", "studio/riscq-design-doc.js"],
+  // What one control board holds, shared by the design rules and the editor (riscq/board.mjs).
+  ["/riscq/board.mjs", "riscq/board.mjs"],
   // Home page, tutorial and the menu bar every page loads.
   ["/home.css", "studio/home.css"],
   ["/quantumos.svg", "studio/quantumos.svg"],
@@ -167,8 +169,10 @@ function examplesAsset(pathname) {
   if (rest === "") return path.join("studio", "examples", "index.html");
   if (rest.startsWith("data/")) return path.join("validation", "calib", "site", rest.slice(5));
   if (path.extname(rest)) return path.join("studio", "examples", rest);
-  if (rest.includes("/") || !existsSync(path.join(root, "validation", "calib", "site", rest + ".json"))) return undefined;
-  return path.join("studio", "examples", "study.html");
+  // /examples/<id> is the study, /examples/<id>/design its design page.
+  const [id, sub] = rest.split("/");
+  if (rest.split("/").length > 2 || !existsSync(path.join(root, "validation", "calib", "site", id + ".json"))) return undefined;
+  return sub === undefined ? path.join("studio", "examples", "study.html") : sub === "design" ? path.join("studio", "examples", "design.html") : undefined;
 }
 
 /**
@@ -202,6 +206,9 @@ async function designOf(id) {
   if (MAGIC_DESIGNS?.[id]) return MAGIC_DESIGNS[id];
   const logical = await import("./riscq/ftqvm/logical.mjs").catch(() => null);
   if (logical?.LOGICAL_DESIGNS?.[id]) return logical.LOGICAL_DESIGNS[id];
+  // The Examples studies (/examples/<id>/design): riscq/calib/example-runs.mjs.
+  const examples = await import("./riscq/calib/example-runs.mjs").catch(() => null);
+  if (examples?.EXAMPLE_DESIGNS?.[id]) return examples.EXAMPLE_DESIGNS[id];
   throw Error("no editable twin for " + id);
 }
 function runDesign(id, params) {

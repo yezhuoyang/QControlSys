@@ -1,15 +1,15 @@
-// Derive a system specification for a FormalRV program on a transmon chip, headless.
+// Derive a system specification for a logical program on a transmon chip, headless.
 //
-//   node riscq/ftqvm/cli.mjs --qppm ../FormalRV/FormalRV/Examples/QParamPPM/ZZmerge.qppm \
+//   node riscq/ftqvm/cli.mjs --qppm validation/ftqvm/programs/ZZmerge.qppm \
 //     --specialize a=0 --specialize b=1 \
-//     --base-machine ../FormalRV/FormalRV/Examples/QParamPPM/ZZmerge.machine \
+//     --base-machine validation/ftqvm/programs/ZZmerge.machine \
 //     --gadget surfaceRound --gadget surfaceRoundLogicalAncilla --out out/zzmerge
 //
-// FormalRV (unchanged, at FORMALRV_ROOT or ../FormalRV, compiler built) compiles the program
+// The compiler (unchanged, at FT_COMPILER_ROOT or the path in ft-compiler.local, built) compiles the program
 // against each spec, its VM admits the listing, and the chip runs it time-triggered
-// (riscq/ftqvm/derive.mjs). `--out` receives, for the last iteration: the spec as FormalRV
+// (riscq/ftqvm/derive.mjs). `--out` receives, for the last iteration: the spec as the compiler
 // files (`derived.machine`, `derived.sysspec`) and as JSON with every value's source
-// (`spec.json`), the listing FormalRV compiled against it (`listing.sysprog`), the chip
+// (`spec.json`), the QSysASM listing compiled against it (`listing.sysprog`), the chip
 // (`chip.json`, a design the editor opens), and the conformance report (`report.json`).
 import { mkdir, writeFile, copyFile } from "node:fs/promises";
 import { join } from "node:path";

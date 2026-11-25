@@ -1,0 +1,12 @@
+spec ccCompareConst:
+  ∀ x < 2^bits . ∀ f < 2 .
+  requires   0 < bits  ∧  0 < N  ∧  N ≤ 2^bits
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  flag < dim
+  ∧  flag ≠ base + (2 * bits)
+  ∧  (∀ i < bits . flag ≠ base + (2 * i) + 2)
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |f⟩_q[flag] }}
+  ensures {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |f ⊕ cmpGE(x, N)⟩_q[flag] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccCompareConst(bits, base, N, flag) + pT * NT_ccCompareConst(bits, base, N, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 100·bits+6, frame: 102·bits+8, magicT: 14·bits, synthEps: 0 }
+

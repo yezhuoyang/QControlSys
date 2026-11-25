@@ -1,0 +1,3 @@
+spec program:
+  requires  a < b
+  resource  { meas: 1, correct: 1, magicT: 0, magicCCZ: 0, stmts: 3 }

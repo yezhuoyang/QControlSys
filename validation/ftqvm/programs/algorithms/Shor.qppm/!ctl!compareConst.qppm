@@ -1,0 +1,150 @@
+gadget !ctl!compareConst(bits, base, N, flag, __cw, __anc):
+  !ctl!prepConst(bits, base, 2^(bits)-N, __cw, __anc) @ id()
+  !ctl!majChain(bits, base, __cw, __anc) @ id()
+  prepare |Y+> -> anc[0]
+  measure Z q[flag] Z anc[0] -> m[0]
+  measure X anc[0] -> m[1]
+  when m[0]:
+    frame Z q[flag]
+  when m[1]:
+    frame Z q[flag]
+  prepare |Y+> -> anc[1]
+  measure X q[flag] Z anc[1] -> m[2]
+  measure X anc[1] -> m[3]
+  when m[2]:
+    frame X q[flag]
+  when m[3]:
+    frame X q[flag]
+  frame Z q[flag]
+  prepare |T> -> anc[2]
+  measure Z q[__cw] Z anc[2] -> m[4]
+  measure X anc[2] -> m[5]
+  when m[5]:
+    frame Z q[__cw]
+  when m[4]:
+    prepare |Y+> -> anc[3]
+    measure Z q[__cw] Z anc[3] -> m[6]
+    measure X anc[3] -> m[7]
+    when m[6]:
+      frame Z q[__cw]
+    when m[7]:
+      frame Z q[__cw]
+  prepare |T> -> anc[5]
+  measure Z q[base+2·bits] Z anc[5] -> m[8]
+  measure X anc[5] -> m[9]
+  when m[9]:
+    frame Z q[base+2·bits]
+  when m[8]:
+    prepare |Y+> -> anc[6]
+    measure Z q[base+2·bits] Z anc[6] -> m[10]
+    measure X anc[6] -> m[11]
+    when m[10]:
+      frame Z q[base+2·bits]
+    when m[11]:
+      frame Z q[base+2·bits]
+  prepare |T> -> anc[8]
+  measure Z q[flag] Z anc[8] -> m[12]
+  measure X anc[8] -> m[13]
+  when m[13]:
+    frame Z q[flag]
+  when m[12]:
+    prepare |Y+> -> anc[9]
+    measure Z q[flag] Z anc[9] -> m[14]
+    measure X anc[9] -> m[15]
+    when m[14]:
+      frame Z q[flag]
+    when m[15]:
+      frame Z q[flag]
+  prepare |T> -> anc[11]
+  measure Z q[__cw] Z q[base+2·bits] Z anc[11] -> m[16]
+  measure X anc[11] -> m[17]
+  when m[17]:
+    frame Z q[__cw] Z q[base+2·bits]
+  when m[16]:
+    prepare |Y+> -> anc[12]
+    measure Z q[__cw] Z q[base+2·bits] Z anc[12] -> m[18]
+    measure X anc[12] -> m[19]
+    when m[18]:
+      frame Z q[__cw] Z q[base+2·bits]
+    when m[19]:
+      frame Z q[__cw] Z q[base+2·bits]
+  prepare |Y+> -> anc[13]
+  measure Z q[__cw] Z q[base+2·bits] Z anc[13] -> m[20]
+  measure X anc[13] -> m[21]
+  when m[20]:
+    frame Z q[__cw] Z q[base+2·bits]
+  when m[21]:
+    frame Z q[__cw] Z q[base+2·bits]
+  frame Z q[__cw] Z q[base+2·bits]
+  prepare |T> -> anc[14]
+  measure Z q[__cw] Z q[flag] Z anc[14] -> m[22]
+  measure X anc[14] -> m[23]
+  when m[23]:
+    frame Z q[__cw] Z q[flag]
+  when m[22]:
+    prepare |Y+> -> anc[15]
+    measure Z q[__cw] Z q[flag] Z anc[15] -> m[24]
+    measure X anc[15] -> m[25]
+    when m[24]:
+      frame Z q[__cw] Z q[flag]
+    when m[25]:
+      frame Z q[__cw] Z q[flag]
+  prepare |Y+> -> anc[16]
+  measure Z q[__cw] Z q[flag] Z anc[16] -> m[26]
+  measure X anc[16] -> m[27]
+  when m[26]:
+    frame Z q[__cw] Z q[flag]
+  when m[27]:
+    frame Z q[__cw] Z q[flag]
+  frame Z q[__cw] Z q[flag]
+  prepare |T> -> anc[17]
+  measure Z q[base+2·bits] Z q[flag] Z anc[17] -> m[28]
+  measure X anc[17] -> m[29]
+  when m[29]:
+    frame Z q[base+2·bits] Z q[flag]
+  when m[28]:
+    prepare |Y+> -> anc[18]
+    measure Z q[base+2·bits] Z q[flag] Z anc[18] -> m[30]
+    measure X anc[18] -> m[31]
+    when m[30]:
+      frame Z q[base+2·bits] Z q[flag]
+    when m[31]:
+      frame Z q[base+2·bits] Z q[flag]
+  prepare |Y+> -> anc[19]
+  measure Z q[base+2·bits] Z q[flag] Z anc[19] -> m[32]
+  measure X anc[19] -> m[33]
+  when m[32]:
+    frame Z q[base+2·bits] Z q[flag]
+  when m[33]:
+    frame Z q[base+2·bits] Z q[flag]
+  frame Z q[base+2·bits] Z q[flag]
+  prepare |T> -> anc[20]
+  measure Z q[__cw] Z q[base+2·bits] Z q[flag] Z anc[20] -> m[34]
+  measure X anc[20] -> m[35]
+  when m[35]:
+    frame Z q[__cw] Z q[base+2·bits] Z q[flag]
+  when m[34]:
+    prepare |Y+> -> anc[21]
+    measure Z q[__cw] Z q[base+2·bits] Z q[flag] Z anc[21] -> m[36]
+    measure X anc[21] -> m[37]
+    when m[36]:
+      frame Z q[__cw] Z q[base+2·bits] Z q[flag]
+    when m[37]:
+      frame Z q[__cw] Z q[base+2·bits] Z q[flag]
+  prepare |Y+> -> anc[23]
+  measure X q[flag] Z anc[23] -> m[38]
+  measure X anc[23] -> m[39]
+  when m[38]:
+    frame X q[flag]
+  when m[39]:
+    frame X q[flag]
+  prepare |Y+> -> anc[24]
+  measure Z q[flag] Z anc[24] -> m[40]
+  measure X anc[24] -> m[41]
+  when m[40]:
+    frame Z q[flag]
+  when m[41]:
+    frame Z q[flag]
+  !ctl!majChainInv(bits, base, __cw, __anc) @ id()
+  !ctl!prepConst(bits, base, 2^(bits)-N, __cw, __anc) @ id()
+

@@ -1,0 +1,8 @@
+spec prepConst:
+  ∀ u < 2^bits .
+  requires   base + (2 * bits) + 1 ≤ dim
+  assumes    {{ |u⟩_q[base+2, base + (2 * bits) + 1 : 2) }}
+  ensures {{ |xorN(bits, u, cst)⟩_q[base+2, base + (2 * bits) + 1 : 2) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_prepConst(bits, base, cst) + pT * NT_prepConst(bits, base, cst) + pI * N_I)
+  outcomes   none
+  resource   { meas: 0, frame: bits, magicT: 0, synthEps: 0 }
+

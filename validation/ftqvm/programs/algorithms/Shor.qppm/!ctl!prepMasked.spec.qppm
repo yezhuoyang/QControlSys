@@ -1,0 +1,4 @@
+spec !ctl!prepMasked:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_prepMasked(bits, base, cst, flag, __cw, __anc) + pT * NT_ctl_prepMasked(bits, base, cst, flag, __cw, __anc) + pI * N_I)
+  resource   { meas: 42·bits, frame: 39·bits, magicT: 7·bits, synthEps: 0 }
+

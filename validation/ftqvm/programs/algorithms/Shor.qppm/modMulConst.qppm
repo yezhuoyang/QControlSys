@@ -1,0 +1,4 @@
+gadget modMulConst(bits, N, a):
+  for 0 <= w < bits:
+    cAddModN(bits, 2, N, (a·2^(w)) mod N, 2·bits+w+3, 1) @ id()
+

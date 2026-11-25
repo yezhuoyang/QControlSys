@@ -1,0 +1,4 @@
+gadget ccSubConstReverseOnly(bits, base, N):
+  ccUmaChainRev(bits, base) @ id()
+  ccPrepareConstRead(bits, base, 2^(bits)-N) @ id()
+

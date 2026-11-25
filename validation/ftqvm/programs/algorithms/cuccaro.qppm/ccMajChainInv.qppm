@@ -1,0 +1,4 @@
+gadget ccMajChainInv(n, base):
+  for n > k >= 0:
+    ccMAJinv(base+2·k, base+2·k+1, base+2·k+2) @ id()
+

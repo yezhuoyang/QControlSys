@@ -1,0 +1,2 @@
+spec program:
+  resource   { meas: 0, frame: 0, magicT: 0, synthEps: 0, bound: library-no-entry-point }

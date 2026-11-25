@@ -1,0 +1,5 @@
+gadget modMulInPlace(bits, N, a, ainv):
+  modMulConst(bits, N, a) @ id()
+  swapAccMult(bits) @ id()
+  modMulConst(bits, N, (N-ainv) mod N) @ id()
+

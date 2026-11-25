@@ -1,0 +1,4 @@
+gadget ccCompareConstForward(bits, base, N):
+  ccPrepareConstRead(bits, base, 2^(bits)-N) @ id()
+  ccMajChain(bits, base) @ id()
+

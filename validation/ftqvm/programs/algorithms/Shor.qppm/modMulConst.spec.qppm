@@ -1,0 +1,12 @@
+spec modMulConst:
+  ∀ u < 2^bits . ∀ v < N .
+  requires   1 ≤ bits  ∧  0 < N  ∧  2 * N ≤ 2^bits
+  ∧  (∀ w < bits . 0 < (a * 2^w) % N)
+  ∧  (4 * bits) + 3 ≤ dim
+  assumes    {{ |0⟩_q[0] ⊗ |0⟩_q[1] ⊗ |0⟩_q[2]
+  ⊗ |v⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2)
+  ⊗ |u⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}
+  ensures {{ |0⟩_q[0] ⊗ |0⟩_q[1] ⊗ |0⟩_q[2] ⊗ |(v + (a * u)) % N⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2) ⊗ |u⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_modMulConst(bits, N, a) + pT * NT_modMulConst(bits, N, a) + pI * N_I)
+  outcomes   none
+  resource   { meas: 18·bits+436·bits^(2), frame: 24·bits+450·bits^(2), magicT: 56·bits^(2), synthEps: 0 }
+

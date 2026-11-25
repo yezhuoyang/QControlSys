@@ -1,0 +1,5 @@
+gadget !ctl!modMulInPlace(bits, N, a, ainv, __cw, __anc):
+  !ctl!modMulConst(bits, N, a, __cw, __anc) @ id()
+  !ctl!swapAccMult(bits, __cw, __anc) @ id()
+  !ctl!modMulConst(bits, N, (N-ainv) mod N, __cw, __anc) @ id()
+

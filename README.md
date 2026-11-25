@@ -8,7 +8,7 @@ A fault-tolerant program reaches the hardware only through system calls: allocat
 QuantumOS runs those calls on a real quantum computer, simulated down to its control system, and measures what each call costs.
 The machine can be superconducting, trapped-ion or neutral-atom.
 
-![QuantumOS architecture: fault-tolerant programs compile to system calls; the operating system schedules them against a machine's declared latencies and capacities; underneath, a quantum computer is simulated with its full control system, and measured costs flow back up](docs/media/quantumos-architecture.svg)
+![QuantumOS architecture: a logical quantum program is lowered by fault-tolerant compilation to the Fault-Tolerant Quantum Execution Interface (QSysASM), physical instructions interleaved with system calls; the Quantum OS manages resources and executes it on RISC-Q control hardware for superconducting, trapped-ion and neutral-atom qubits, and measured costs flow back up](docs/media/quantumos-architecture.svg)
 
 | System call | On the hardware | In QuantumOS today |
 | --- | --- | --- |

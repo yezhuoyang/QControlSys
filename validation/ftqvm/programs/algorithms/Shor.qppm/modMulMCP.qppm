@@ -1,0 +1,5 @@
+gadget modMulMCP(bits, N, a, ainv):
+  encodeAdapter(bits) @ id()
+  modMulInPlace(bits, N, a, ainv) @ shift(bits)
+  encodeAdapter(bits) @ id()
+

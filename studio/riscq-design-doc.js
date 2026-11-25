@@ -8,6 +8,8 @@
 export const SPEEDS = { coax: 200, planar: 125, fiber: 204, beam: 299.792458 };
 
 export const clone = (doc) => JSON.parse(JSON.stringify(doc));
+import { ZCU216, DSP_PER, SHARED_DSP } from "../riscq/board.mjs";
+
 export const part = (doc, id) => doc.parts.find((p) => p.id === id);
 export const channel = (doc, id) => doc.channels.find((c) => c.id === id);
 export const wire = (doc, id) => doc.wires.find((w) => w.id === id);
@@ -51,20 +53,72 @@ function tidy(route) {
   return out;
 }
 
-/** The smallest index 0–63 no converter of this type uses. */
-export function freeIndex(doc, type) {
-  const used = new Set(doc.parts.filter((p) => p.type === type).map((p) => p.index));
-  for (let i = 0; i < 64; i++) if (!used.has(i)) return i;
-  return 64;
+/**
+ * Control boards. A design has one or more (AMD ZCU216, riscq/board.mjs); a core, DAC or ADC sits on the
+ * board its `board` names, the first one when it names none. Each board has 16 RF-DACs and 16 RF-ADCs,
+ * numbered 0–15 on that board, and holds at most 14 cores (riscq/design.mjs checks both, and the DSP use).
+ */
+export const BOARD_LIMITS = { cores: ZCU216.cores.value, dac: ZCU216.dacs.value, adc: ZCU216.adcs.value, dsp: ZCU216.dspCeiling.value };
+export const boardIds = (doc) => doc.parts.filter((p) => p.type === "control-board").map((p) => p.id);
+export const boardOfPart = (doc, p) => p?.board ?? boardIds(doc)[0];
+const ON_BOARD = new Set(["core", "dac", "adc"]);
+
+/** What a board carries: its cores, DACs and ADCs, and its DSP48E2 estimate (riscq/board.mjs). */
+export function boardContents(doc, boardId) {
+  const on = (type) => doc.parts.filter((p) => p.type === type && boardOfPart(doc, p) === boardId);
+  const cores = on("core");
+  const dsp = SHARED_DSP + cores.reduce((n, c) => n + coreDsp(doc.channels.filter((ch) => ch.core === c.id)), 0);
+  return { cores, dac: on("dac"), adc: on("adc"), dsp: Math.round(dsp) };
+}
+const coreDsp = (channels) => DSP_PER.core + channels.reduce((n, ch) => n + (DSP_PER[ch.kind] ?? 0), 0);
+
+/** The smallest index 0–15 no converter of this type uses on that board (16 when the board is full). */
+export function freeIndex(doc, type, boardId = boardIds(doc)[0]) {
+  const used = new Set(doc.parts.filter((p) => p.type === type && boardOfPart(doc, p) === boardId).map((p) => p.index));
+  for (let i = 0; i < BOARD_LIMITS[type]; i++) if (!used.has(i)) return i;
+  return BOARD_LIMITS[type];
 }
 
-/** Adds a part of a type at a position. A DAC or ADC gets the smallest free index. Returns the part. */
-export function addPart(doc, type, centerMm, id) {
+/**
+ * Adds a part of a type at a position. A core, DAC or ADC goes on `boardId` (the first board when left
+ * out); a DAC or ADC gets the smallest index free on that board. Returns the part.
+ */
+export function addPart(doc, type, centerMm, id, boardId) {
   const prefix = { "control-board": "board", core: "core", dac: "dac", adc: "adc", stage: "stage", qubit: "qubit", resonator: "resonator" }[type] ?? type;
   const p = { id: id ?? freshId(doc, prefix), type, centerMm: centerMm.map(round) };
-  if (type === "dac" || type === "adc") p.index = freeIndex(doc, type);
+  const first = boardIds(doc)[0];
+  if (ON_BOARD.has(type) && boardId && boardId !== first) p.board = boardId;
+  if (type === "dac" || type === "adc") p.index = freeIndex(doc, type, boardId ?? first);
   doc.parts.push(p);
   return p;
+}
+
+/**
+ * Moves a core, DAC or ADC to another board. A converter takes the smallest index free there when its
+ * own is taken. The channels of a core keep their converters: a channel whose converter is on another
+ * board than its core breaks a rule until it is given one on the core's board.
+ */
+export function setBoard(doc, id, boardId) {
+  const p = part(doc, id);
+  if (!p || !ON_BOARD.has(p.type) || !boardIds(doc).includes(boardId)) return false;
+  if (boardOfPart(doc, p) === boardId) return true;
+  if (boardId === boardIds(doc)[0]) delete p.board;
+  else p.board = boardId;
+  if ((p.type === "dac" || p.type === "adc") && doc.parts.some((q) => q !== p && q.type === p.type && boardOfPart(doc, q) === boardId && q.index === p.index))
+    p.index = freeIndex(doc, p.type, boardId);
+  return true;
+}
+
+/**
+ * The board a new qubit's core goes on: the first with room for a core, two DACs, an ADC and their DSP
+ * slices (the core's drive and readout channels and its demod, plus CZ channels added later).
+ */
+export function boardWithRoom(doc) {
+  const ids = boardIds(doc), need = coreDsp([{ kind: "pulse" }, { kind: "pulse" }, { kind: "demod" }]);
+  return ids.find((b) => {
+    const c = boardContents(doc, b);
+    return c.cores.length < BOARD_LIMITS.cores && c.dac.length + 2 <= BOARD_LIMITS.dac && c.adc.length < BOARD_LIMITS.adc && c.dsp + need <= BOARD_LIMITS.dsp;
+  }) ?? ids.at(-1);
 }
 
 const round = (v) => Math.round(v * 1000) / 1000;
@@ -180,16 +234,18 @@ export function addChannel(doc, core, kind) {
   let n = 0;
   while (names.has(kind + n)) n++;
   const converter = { pulse: "dac", demod: "adc" }[kind];
+  // The channel names a converter of its kind on its core's board.
+  const onBoard = boardOfPart(doc, part(doc, core));
   const c = { id: freshId(doc, core + "." + kind), core, name: kind + n, kind, slots: 1, interp: 4,
-    ...(converter ? { converter: doc.parts.find((p) => p.type === converter)?.id } : {}) };
+    ...(converter ? { converter: doc.parts.find((p) => p.type === converter && boardOfPart(doc, p) === onBoard)?.id } : {}) };
   doc.channels.push(c);
   return c;
 }
 
 /**
  * Adds a qubit with everything it needs to run: the qubit and its readout resonator on the chip,
- * a core with drive, readout and acquisition channels, two DACs and an ADC beside that core, and
- * the three coax lines between them. Its calibration is a copy of `template` (a `qubits` entry):
+ * a core with drive, readout and acquisition channels, two DACs and an ADC beside that core (on the
+ * first board with room for them), and the three coax lines between them. Its calibration is a copy of `template` (a `qubits` entry):
  * a starting value to edit, not a measured one. Returns the new qubit's index.
  */
 export function addQubit(doc, template, at) {
@@ -201,10 +257,12 @@ export function addQubit(doc, template, at) {
   const qubit = addPart(doc, "qubit", place);
   const resonator = addPart(doc, "resonator", [place[0], place[1] + 1.5, place[2]], freshId(doc, "resonator"));
   const corePlace = cores.length ? cores.reduce((top, c) => (c.centerMm[1] > top.centerMm[1] ? c : top)).centerMm.map((v, k) => v + (k === 1 ? 12 : 0)) : [b[0], b[1], b[2]];
-  const core = addPart(doc, "core", corePlace, freshId(doc, "q"));
-  const gateDac = addPart(doc, "dac", [corePlace[0] + 60, corePlace[1], corePlace[2]]);
-  const roDac = addPart(doc, "dac", [corePlace[0] + 60, corePlace[1] + 4, corePlace[2]]);
-  const adc = addPart(doc, "adc", [corePlace[0] + 60, corePlace[1] + 2, corePlace[2] - 20]);
+  // On the first board with room for the core and its converters (a design adds boards as it grows).
+  const onBoard = boardWithRoom(doc);
+  const core = addPart(doc, "core", corePlace, freshId(doc, "q"), onBoard);
+  const gateDac = addPart(doc, "dac", [corePlace[0] + 60, corePlace[1], corePlace[2]], undefined, onBoard);
+  const roDac = addPart(doc, "dac", [corePlace[0] + 60, corePlace[1] + 4, corePlace[2]], undefined, onBoard);
+  const adc = addPart(doc, "adc", [corePlace[0] + 60, corePlace[1] + 2, corePlace[2] - 20], undefined, onBoard);
   const interp = (role, fallback) => channel(doc, template?.[role])?.interp ?? fallback;
   const ch = (name, kind, converter, slots, i) => {
     const c = { id: core.id + "." + name, core: core.id, name, kind, converter, slots, interp: i };

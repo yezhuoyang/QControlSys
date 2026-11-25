@@ -1,0 +1,6 @@
+gadget measurePhase(n, base, rec, cb):
+  for 0 <= i < n:
+    measure Z q[base+i] -> c[cb+i]
+    when c[cb+i]:
+      frame X q[base+i]
+

@@ -1,0 +1,4 @@
+gadget !ctl!modMulConst(bits, N, a, __cw, __anc):
+  for 0 <= w < bits:
+    !ctl!cAddModN(bits, 2, N, (a·2^(w)) mod N, 2·bits+w+3, 1, __cw, __anc) @ id()
+

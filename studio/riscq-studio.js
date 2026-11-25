@@ -913,7 +913,9 @@ function show(bundle, text, keepStep) {
   $("designLink").onclick = () => {
     if (!run.machine.design) return;
     try {
-      localStorage.setItem("riscq-design:edit", JSON.stringify({ design: run.machine.design, qasm: run.source.text }));
+      // A reproduction hands over its id: the editor then reruns the paper's own program on the edited chip.
+      const reproduction = /^reproduction:/.test(run.example?.id ?? "") ? run.example.id : undefined;
+      localStorage.setItem("riscq-design:edit", JSON.stringify(reproduction ? { design: run.machine.design, reproduction } : { design: run.machine.design, qasm: run.source.text }));
       $("designLink").href = "/riscq-design?from=run";
     } catch {
       /* Without storage the editor opens its own last design. */
@@ -927,7 +929,10 @@ async function load(next, keepStep = false, report = note) {
   try {
     let response;
     const query = new URLSearchParams(next.example ? { example: next.example } : {});
-    if (next.example) {
+    if (next.example && next.design)
+      // A reproduction on a chip edited in /riscq-design: the paper's program on that chip.
+      response = await fetch("/api/riscq/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ example: next.example, design: next.design }) });
+    else if (next.example) {
       for (const [bit, value] of Object.entries(outcomes)) if (value) query.append("outcome", bit + "=" + value);
       response = await fetch("/api/riscq/run?" + query);
     } else
@@ -1102,7 +1107,8 @@ try {
     handed = null;
   }
   const wanted = examples.find((e) => e.id === query.get("example")) ?? examples[0];
-  if (handed?.design) await load({ platform: "superconducting", qasm: handed.qasm, design: handed.design });
+  if (handed?.design && handed.reproduction) await load({ example: handed.reproduction, design: handed.design });
+  else if (handed?.design) await load({ platform: "superconducting", qasm: handed.qasm, design: handed.design });
   else if (wanted) await load({ example: wanted.id });
 } catch (error) {
   note(error.message);

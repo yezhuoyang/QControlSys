@@ -1,0 +1,4 @@
+gadget majChain(n, base):
+  for 0 <= k < n headfirst:
+    MAJ(base+2·k, base+2·k+1, base+2·k+2) @ id()
+

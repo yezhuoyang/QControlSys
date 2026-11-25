@@ -1,0 +1,11 @@
+spec condAdd:
+  ∀ u < 2^bits . ∀ f < 2 .
+  requires   1 ≤ bits  ∧  cst < 2^bits
+  ∧  (flag < base  ∨  base + (2 * bits) + 1 ≤ flag)
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  flag < dim
+  assumes    {{ |0⟩_q[base] ⊗ |u⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |f⟩_q[flag] }}
+  ensures {{ |0⟩_q[base] ⊗ |(u + (f * cst)) % 2^bits⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |f⟩_q[flag] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_condAdd(bits, base, cst, flag) + pT * NT_condAdd(bits, base, cst, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 112·bits, frame: 116·bits, magicT: 14·bits, synthEps: 0 }
+

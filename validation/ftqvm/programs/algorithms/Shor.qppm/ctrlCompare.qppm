@@ -1,0 +1,29 @@
+gadget ctrlCompare(bits, base, cst, ctrl, flag):
+  prepMasked(bits, base, 2^(bits)-cst, ctrl) @ id()
+  majChain(bits, base) @ id()
+  prepare |Y+> -> anc[0]
+  measure Z q[base+2·bits] X q[flag] Z anc[0] -> m[0]
+  measure X anc[0] -> m[1]
+  when m[0]:
+    frame Z q[base+2·bits] X q[flag]
+  when m[1]:
+    frame Z q[base+2·bits] X q[flag]
+  prepare |Y+> -> anc[1]
+  measure Z q[base+2·bits] Z anc[1] -> m[2]
+  measure X anc[1] -> m[3]
+  when m[2]:
+    frame Z q[base+2·bits]
+  when m[3]:
+    frame Z q[base+2·bits]
+  frame Z q[base+2·bits]
+  prepare |Y+> -> anc[2]
+  measure X q[flag] Z anc[2] -> m[4]
+  measure X anc[2] -> m[5]
+  when m[4]:
+    frame X q[flag]
+  when m[5]:
+    frame X q[flag]
+  frame X q[flag]
+  majChainInv(bits, base) @ id()
+  prepMasked(bits, base, 2^(bits)-cst, ctrl) @ id()
+

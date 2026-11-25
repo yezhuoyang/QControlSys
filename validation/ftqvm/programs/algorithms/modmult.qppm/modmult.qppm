@@ -1,0 +1,79 @@
+code surface d=3
+
+params  n, bits, base, cst, N, flag, a, ainv
+
+noise   measure, prepare |Y+>      : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pL·tr(ρ)
+        prepare |T>, prepare |CCZ> : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pT·tr(ρ)
+        idle                       : ||(N - id)(ρ)||_1 <= 2·pI·tr(ρ)
+        frame                      : Φ~ = Φ
+        N_L = 0
+        N_T = 0
+        N_I = V
+        NL_ccMAJ(a, b, cw) = 68
+        NT_ccMAJ(a, b, cw) = 7
+        NL_ccUMA(a, b, cw) = 68
+        NT_ccUMA(a, b, cw) = 7
+        NL_ccMAJinv(a, b, cw) = 68
+        NT_ccMAJinv(a, b, cw) = 7
+        NL_ccMajChain(n, base) = Σ k < n . NL_ccMAJ(base + 2 * k, base + 2 * k + 1, base + 2 * k + 2)
+        NT_ccMajChain(n, base) = Σ k < n . NT_ccMAJ(base + 2 * k, base + 2 * k + 1, base + 2 * k + 2)
+        NL_ccUmaChainRev(n, base) = Σ k < n . NL_ccUMA(base + 2 * k, base + 2 * k + 1, base + 2 * k + 2)
+        NT_ccUmaChainRev(n, base) = Σ k < n . NT_ccUMA(base + 2 * k, base + 2 * k + 1, base + 2 * k + 2)
+        NL_ccMajChainInv(n, base) = Σ k < n . NL_ccMAJinv(base + 2 * k, base + 2 * k + 1, base + 2 * k + 2)
+        NT_ccMajChainInv(n, base) = Σ k < n . NT_ccMAJinv(base + 2 * k, base + 2 * k + 1, base + 2 * k + 2)
+        NL_ccAdder(n, base) = NL_ccMajChain(n, base) + NL_ccUmaChainRev(n, base)
+        NT_ccAdder(n, base) = NT_ccMajChain(n, base) + NT_ccUmaChainRev(n, base)
+        NL_ccPrepareConstRead(bits, base, cst) = Σ b < bits . (if (cst // 2^b % 2) = 1 then 0 else 0)
+        NT_ccPrepareConstRead(bits, base, cst) = Σ b < bits . (if (cst // 2^b % 2) = 1 then 0 else 0)
+        NL_ccAddConst(bits, base, cst) = NL_ccPrepareConstRead(bits, base, cst) + NL_ccAdder(bits, base) + NL_ccPrepareConstRead(bits, base, cst)
+        NT_ccAddConst(bits, base, cst) = NT_ccPrepareConstRead(bits, base, cst) + NT_ccAdder(bits, base) + NT_ccPrepareConstRead(bits, base, cst)
+        NL_ccSubConst(bits, base, N) = NL_ccAddConst(bits, base, max(0, 2^bits - N))
+        NT_ccSubConst(bits, base, N) = NT_ccAddConst(bits, base, max(0, 2^bits - N))
+        NL_ccCompareConstForward(bits, base, N) = NL_ccPrepareConstRead(bits, base, max(0, 2^bits - N)) + NL_ccMajChain(bits, base)
+        NT_ccCompareConstForward(bits, base, N) = NT_ccPrepareConstRead(bits, base, max(0, 2^bits - N)) + NT_ccMajChain(bits, base)
+        NL_ccSubConstReverseOnly(bits, base, N) = NL_ccUmaChainRev(bits, base) + NL_ccPrepareConstRead(bits, base, max(0, 2^bits - N))
+        NT_ccSubConstReverseOnly(bits, base, N) = NT_ccUmaChainRev(bits, base) + NT_ccPrepareConstRead(bits, base, max(0, 2^bits - N))
+        NL_ccCompareConst(bits, base, N, flag) = 9 + NL_ccCompareConstForward(bits, base, N) + NL_ccMajChainInv(bits, base) + NL_ccPrepareConstRead(bits, base, max(0, 2^bits - N))
+        NT_ccCompareConst(bits, base, N, flag) = NT_ccCompareConstForward(bits, base, N) + NT_ccMajChainInv(bits, base) + NT_ccPrepareConstRead(bits, base, max(0, 2^bits - N))
+        NL_ccPrepareMaskedConstRead(bits, base, cst, ctl) = Σ b < bits . (if (cst // 2^b % 2) = 1 then 9 else 0)
+        NT_ccPrepareMaskedConstRead(bits, base, cst, ctl) = Σ b < bits . (if (cst // 2^b % 2) = 1 then 0 else 0)
+        NL_ccCondAdd(bits, base, cst, ctl) = NL_ccPrepareMaskedConstRead(bits, base, cst, ctl) + NL_ccAdder(bits, base) + NL_ccPrepareMaskedConstRead(bits, base, cst, ctl)
+        NT_ccCondAdd(bits, base, cst, ctl) = NT_ccPrepareMaskedConstRead(bits, base, cst, ctl) + NT_ccAdder(bits, base) + NT_ccPrepareMaskedConstRead(bits, base, cst, ctl)
+        NL_ccCondSub(bits, base, N, ctl) = NL_ccCondAdd(bits, base, max(0, 2^bits - N), ctl)
+        NT_ccCondSub(bits, base, N, ctl) = NT_ccCondAdd(bits, base, max(0, 2^bits - N), ctl)
+        NL_ccCtrlCompareConst(bits, base, cst, ctl, flag) = 9 + NL_ccPrepareMaskedConstRead(bits, base, max(0, 2^bits - cst), ctl) + NL_ccMajChain(bits, base) + NL_ccMajChainInv(bits, base) + NL_ccPrepareMaskedConstRead(bits, base, max(0, 2^bits - cst), ctl)
+        NT_ccCtrlCompareConst(bits, base, cst, ctl, flag) = NT_ccPrepareMaskedConstRead(bits, base, max(0, 2^bits - cst), ctl) + NT_ccMajChain(bits, base) + NT_ccMajChainInv(bits, base) + NT_ccPrepareMaskedConstRead(bits, base, max(0, 2^bits - cst), ctl)
+        NL_ccCtrlModAddConst(bits, base, N, cst, ctl, flag) = if cst = 0 then 0 else (9 + NL_ccCondAdd(bits, base, cst, ctl) + NL_ccCompareConst(bits, base, N, flag) + NL_ccCondSub(bits, base, N, flag) + NL_ccCtrlCompareConst(bits, base, cst, ctl, flag))
+        NT_ccCtrlModAddConst(bits, base, N, cst, ctl, flag) = if cst = 0 then 0 else (NT_ccCondAdd(bits, base, cst, ctl) + NT_ccCompareConst(bits, base, N, flag) + NT_ccCondSub(bits, base, N, flag) + NT_ccCtrlCompareConst(bits, base, cst, ctl, flag))
+        NL_ccBoundedReduce(bits, base, M, flag) = NL_ccCompareConst(bits, base, M, flag) + NL_ccCondSub(bits, base, M, flag) + NL_ccCompareConst(bits, base, M, flag)
+        NT_ccBoundedReduce(bits, base, M, flag) = NT_ccCompareConst(bits, base, M, flag) + NT_ccCondSub(bits, base, M, flag) + NT_ccCompareConst(bits, base, M, flag)
+        NL_ccModAddSkeleton(bits, base, N, cst, flag) = NL_ccAddConst(bits, base, cst) + NL_ccCompareConst(bits, base, N, flag)
+        NT_ccModAddSkeleton(bits, base, N, cst, flag) = NT_ccAddConst(bits, base, cst) + NT_ccCompareConst(bits, base, N, flag)
+        NL_ccModAddDirty(bits, base, N, cst, flag) = NL_ccAddConst(bits, base, cst) + NL_ccCompareConst(bits, base, N, flag) + NL_ccCondSub(bits, base, N, flag)
+        NT_ccModAddDirty(bits, base, N, cst, flag) = NT_ccAddConst(bits, base, cst) + NT_ccCompareConst(bits, base, N, flag) + NT_ccCondSub(bits, base, N, flag)
+        NL_ccModAddClean(bits, base, N, cst, flag) = NL_ccModAddDirty(bits, base, N, cst, flag) + NL_ccCompareConst(bits, base, cst, flag)
+        NT_ccModAddClean(bits, base, N, cst, flag) = NT_ccModAddDirty(bits, base, N, cst, flag) + NT_ccCompareConst(bits, base, cst, flag)
+        NL_ccModAddCleanGate(bits, N, cst) = if cst = 0 then 0 else NL_ccModAddClean(bits, 2, N, cst, 1)
+        NT_ccModAddCleanGate(bits, N, cst) = if cst = 0 then 0 else NT_ccModAddClean(bits, 2, N, cst, 1)
+        NL_mmQubitSwap(x, y) = 27
+        NT_mmQubitSwap(x, y) = 0
+        NL_mmSwapAccMult(bits) = Σ k < bits . NL_mmQubitSwap(2 * k + 3, 2 * bits + k + 3)
+        NT_mmSwapAccMult(bits) = Σ k < bits . NT_mmQubitSwap(2 * k + 3, 2 * bits + k + 3)
+        NL_mmStep(bits, N, a, j) = NL_ccCtrlModAddConst(bits, 2, N, if N = 0 then (a * 2^j) else (a * 2^j % N), 2 * bits + j + 3, 1)
+        NT_mmStep(bits, N, a, j) = NT_ccCtrlModAddConst(bits, 2, N, if N = 0 then (a * 2^j) else (a * 2^j % N), 2 * bits + j + 3, 1)
+        NL_mmConstGate(bits, N, a) = Σ j < bits . NL_mmStep(bits, N, a, j)
+        NT_mmConstGate(bits, N, a) = Σ j < bits . NT_mmStep(bits, N, a, j)
+        NL_mmInPlace(bits, N, a, ainv) = NL_mmConstGate(bits, N, a) + NL_mmSwapAccMult(bits) + NL_mmConstGate(bits, N, if N = 0 then max(0, N - ainv) else (max(0, N - ainv) % N))
+        NT_mmInPlace(bits, N, a, ainv) = NT_mmConstGate(bits, N, a) + NT_mmSwapAccMult(bits) + NT_mmConstGate(bits, N, if N = 0 then max(0, N - ainv) else (max(0, N - ainv) % N))
+
+define bit(e, k)               = (e >> k) % 2
+define popc(n, x)              = Σ b < n . bit(x, b)
+define maj3(u, v, w)           = w ⊕ ((u ⊕ w) * (v ⊕ w))
+define xorN(0, x, y)           = 0
+define xorN(k+1, x, y)         = xorN(k, x, y) + ((bit(x, k) ⊕ bit(y, k)) * 2^k)
+define carryAt(0, u, v, cin)   = cin
+define carryAt(k+1, u, v, cin) = maj3(carryAt(k, u, v, cin), bit(v, k), bit(u, k))
+define majWord(n, u, v, cin)   = Σ i < n . ((carryAt(i, u, v, cin) ⊕ bit(u, i)) * 2^i)
+define cmpGE(x, y)             = if y ≤ x then 1 else 0
+define nz(x) = if x = 0 then 0 else 1
+

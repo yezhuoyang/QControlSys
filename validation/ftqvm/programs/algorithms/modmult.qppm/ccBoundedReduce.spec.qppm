@@ -1,0 +1,11 @@
+spec ccBoundedReduce:
+  ∀ x < 2^bits .
+  requires   0 < bits  ∧  0 < M  ∧  M ≤ 2^bits  ∧  x < 2 * M
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  flag < dim
+  ∧  (flag < base  ∨  base + (2 * bits) + 1 ≤ flag)
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |0⟩_q[flag] }}
+  ensures {{ |0⟩_q[base] ⊗ |x % M⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |cmpGE(x, M)⟩_q[flag] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccBoundedReduce(bits, base, M, flag) + pT * NT_ccBoundedReduce(bits, base, M, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 312·bits+12, frame: 320·bits+16, magicT: 42·bits, synthEps: 0 }
+

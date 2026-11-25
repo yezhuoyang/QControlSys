@@ -1,0 +1,8 @@
+spec measANDNRelease:
+  ∀ x < 2^(anc+1) .
+  requires   r < anc  ∧  tgt < anc  ∧  r ≠ tgt  ∧  anc < dim  ∧  s < dim  ∧  anc < s
+  assumes    {{ |x⟩_q[0, anc+1) }}
+  ensures {{ |relV(anc, x)⟩_q[0, anc+1) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_measANDNRelease(r, tgt, anc, s) + pT * NT_measANDNRelease(r, tgt, anc, s) + pI * N_I)
+  outcomes   none
+  resource   { meas: 13, frame: 17, magicT: 0, synthEps: 0 }
+

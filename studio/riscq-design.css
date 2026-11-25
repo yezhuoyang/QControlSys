@@ -106,3 +106,7 @@ textarea#qasm { width: 100%; height: calc(100% - 40px); min-height: 90px; font: 
 @media (max-width: 1100px) {
   .palette { grid-template-columns: 1fr; }
 }
+
+/* What a control board carries, against a ZCU216 (riscq/board.mjs). */
+.usage { display: grid; gap: 2px; font-size: 12.5px; margin: 2px 0 6px; }
+.usage .bad { color: #b42318; font-weight: 600; }

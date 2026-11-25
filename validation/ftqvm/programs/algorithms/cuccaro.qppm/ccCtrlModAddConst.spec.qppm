@@ -1,0 +1,14 @@
+spec ccCtrlModAddConst:
+  ∀ x < N . ∀ d < 2 .
+  requires   0 < bits  ∧  0 < N  ∧  (2 * N) ≤ 2^bits  ∧  0 < cst  ∧  cst < N
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  ctl < dim  ∧  flag < dim
+  ∧  ctl ≠ flag
+  ∧  (ctl < base   ∨  base + (2 * bits) + 1 ≤ ctl)
+  ∧  (flag < base  ∨  base + (2 * bits) + 1 ≤ flag)
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2)
+  ⊗ |d⟩_q[ctl] ⊗ |0⟩_q[flag] }}
+  ensures {{ |0⟩_q[base] ⊗ |(x + (d * cst)) % N⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |d⟩_q[ctl] ⊗ |0⟩_q[flag] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccCtrlModAddConst(bits, base, N, cst, ctl, flag) + pT * NT_ccCtrlModAddConst(bits, base, N, cst, ctl, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 436·bits+18, frame: 450·bits+24, magicT: 56·bits, synthEps: 0 }
+

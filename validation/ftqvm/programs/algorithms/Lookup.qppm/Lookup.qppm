@@ -1,0 +1,27 @@
+code surface d=3
+
+params  d, W, addrBase, ancBase, posBase, posStride, ctlW
+amps    α
+
+noise   measure, prepare |Y+>      : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pL·tr(ρ)
+        prepare |T>, prepare |CCZ> : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pT·tr(ρ)
+        idle                       : ||(N - id)(ρ)||_1 <= 2·pI·tr(ρ)
+        frame                      : Φ~ = Φ
+        N_L = NL_unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, 0, 0, ctlW + 1)
+        N_T = NT_unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, 0, 0, ctlW + 1)
+        N_I = V
+        NL_unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, base, tOff, cb) = NL_unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, W, 0, ctlW, base, tOff, cb)
+        NT_unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, base, tOff, cb) = NT_unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, W, 0, ctlW, base, tOff, cb)
+        NL_unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ctlW, base, tOff, cb) = if d ≠ 0 then (111 + NL_unaryQROMSegCoh(max(0, d - 1), W, addrBase, ancBase, posBase, posStride, segLen, segStride, ancBase + max(0, d - 1), base + 2^max(0, d - 1), tOff, cb) + NL_unaryQROMSegCoh(max(0, d - 1), W, addrBase, ancBase, posBase, posStride, segLen, segStride, ancBase + max(0, d - 1), base, tOff, max(0, cb + 2^max(0, d - 1) - 1))) else (Σ j < W . (if (T[base + tOff] // 2^max(0, W - (j + 1)) % 2) = 1 then 9 else 0))
+        NT_unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ctlW, base, tOff, cb) = if d ≠ 0 then (7 + NT_unaryQROMSegCoh(max(0, d - 1), W, addrBase, ancBase, posBase, posStride, segLen, segStride, ancBase + max(0, d - 1), base + 2^max(0, d - 1), tOff, cb) + NT_unaryQROMSegCoh(max(0, d - 1), W, addrBase, ancBase, posBase, posStride, segLen, segStride, ancBase + max(0, d - 1), base, tOff, max(0, cb + 2^max(0, d - 1) - 1))) else (Σ j < W . (if (T[base + tOff] // 2^max(0, W - (j + 1)) % 2) = 1 then 0 else 0))
+
+define bit(e, k)           = (e >> k) % 2
+define wordPop(n, x) = Σ m < n . bit(x, m)
+define posAt(b, s, m) = b + s * m
+define posSeg(b, ss, ps, sl, m) = b + ss * (m // sl) + ps * (m % sl)
+define xorLow(0, x, y)   = 0
+define xorLow(k+1, x, y) = xorLow(k, x, y) + 2^k * (bit(x, k) ⊕ bit(y, k))
+define anyRowBit(0, off, j)   = 0
+define anyRowBit(k+1, off, j) = max(bit(T[off + k], j), anyRowBit(k, off, j))
+define posUsed(rows, off, wd) = Σ j < wd . anyRowBit(rows, off, j)
+

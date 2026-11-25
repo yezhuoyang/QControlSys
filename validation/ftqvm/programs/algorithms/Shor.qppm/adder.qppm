@@ -1,0 +1,4 @@
+gadget adder(n, base):
+  majChain(n, base) @ id()
+  umaChainRev(n, base) @ id()
+

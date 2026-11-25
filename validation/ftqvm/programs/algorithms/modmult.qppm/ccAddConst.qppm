@@ -1,0 +1,5 @@
+gadget ccAddConst(bits, base, cst):
+  ccPrepareConstRead(bits, base, cst) @ id()
+  ccAdder(bits, base) @ id()
+  ccPrepareConstRead(bits, base, cst) @ id()
+

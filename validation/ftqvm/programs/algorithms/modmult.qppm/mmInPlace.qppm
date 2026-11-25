@@ -1,0 +1,6 @@
+gadget mmInPlace(bits, N, a, ainv):
+  mmConstGate(bits, N, a) @ id()
+  mmSwapAccMult(bits) @ id()
+  mmConstGate(bits, N, (N-ainv) mod N) @ id()
+
+

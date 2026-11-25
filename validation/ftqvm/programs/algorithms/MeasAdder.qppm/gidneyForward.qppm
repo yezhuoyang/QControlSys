@@ -1,0 +1,4 @@
+gadget gidneyForward(n):
+  gidneyForwardProp(n-1) @ id()
+  gidneyLast(n-1) @ id()
+

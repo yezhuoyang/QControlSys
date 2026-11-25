@@ -1,0 +1,9 @@
+gadget groverOracle(n, s, anc):
+  for 0 <= i < n:
+    if not (s >> i) % 2 = 1:
+      frame X q[i]
+  mcz(n, anc) @ id()
+  for 0 <= i < n:
+    if not (s >> i) % 2 = 1:
+      frame X q[i]
+

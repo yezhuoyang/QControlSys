@@ -1,0 +1,4 @@
+gadget mmSwapAccMult(bits):
+  for 0 <= k < bits:
+    mmQubitSwap(2·k+3, 2·bits+k+3) @ id()
+

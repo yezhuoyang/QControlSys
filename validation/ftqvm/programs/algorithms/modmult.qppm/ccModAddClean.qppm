@@ -1,0 +1,5 @@
+gadget ccModAddClean(bits, base, N, cst, flag):
+  ccModAddDirty(bits, base, N, cst, flag) @ id()
+  ccCompareConst(bits, base, cst, flag) @ id()
+  frame X q[flag]
+

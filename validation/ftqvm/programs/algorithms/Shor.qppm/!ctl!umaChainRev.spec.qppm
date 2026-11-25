@@ -1,0 +1,4 @@
+spec !ctl!umaChainRev:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_umaChainRev(n, base, __cw, __anc) + pT * NT_ctl_umaChainRev(n, base, __cw, __anc) + pI * N_I)
+  resource   { meas: 206·n, frame: 192·n, magicT: 35·n, synthEps: 0 }
+

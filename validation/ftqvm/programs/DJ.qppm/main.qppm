@@ -1,0 +1,6 @@
+program[q: rec + n, c: n]:
+  for 0 <= i < n:
+    measure Z q[i] -> c[i]
+    when c[i]:
+      frame X q[i]
+

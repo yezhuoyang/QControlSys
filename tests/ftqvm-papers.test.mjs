@@ -1,14 +1,14 @@
-// Published experiments as FormalRV programs on digital twins of their machines.
-// Skipped without a built FormalRV checkout (riscq/ftqvm/formalrv.mjs).
+// Published experiments as logical programs on digital twins of their machines.
+// Skipped without a built compiler checkout (riscq/ftqvm/ftcompiler.mjs).
 import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import * as formalrv from "../riscq/ftqvm/formalrv.mjs";
+import * as ftc from "../riscq/ftqvm/ftcompiler.mjs";
 import { willow, onDevice } from "../riscq/ftqvm/twins.mjs";
 import { googleExperiment } from "../riscq/ftqvm/papers.mjs";
 
-const skip = !formalrv.available() && "no built FormalRV checkout";
+const skip = !ftc.available() && "no built compiler checkout";
 
 test("the Willow twin: a distance-7 patch on the square grid, the paper's durations", () => {
   const w = willow();
@@ -32,7 +32,7 @@ test("Google's d = 3 memory compiles onto the Willow twin and conforms", { skip,
   assert.equal(r.ops, 601);
   // The twin's durations on its 2 ns grid: XY 25 → 26 ns, CNOT = H·CZ·H = 26 + 42 + 26 ns.
   assert.deepEqual([r.gate1qNs, r.gate2qNs, r.resetNs], [26, 94, 160]);
-  // FormalRV's round is longer than the paper's 1.1 µs cycle: its schedule runs few checks at once.
+  // The compiler's round is longer than the paper's 1.1 µs cycle: its schedule runs few checks at once.
   assert.ok(r.roundNs > r.paper.cycleNs && r.roundGates <= 8, JSON.stringify(r));
 });
 
@@ -49,7 +49,7 @@ test("Bluvstein's Bell pair: a transversal CNOT, compiled onto the twin of their
   assert.ok(r.routeNs >= 200_000 && r.routeNs < 201_000, String(r.routeNs));
   assert.ok(r.gate2qNs >= 2_270, String(r.gate2qNs));
   assert.ok(r.measureNs >= 700_000 && r.measureNs < 702_000, String(r.measureNs));
-  // FormalRV runs the transversal gate's per-pair routes a few at a time on the twin's 2 AODs.
+  // The compiler runs the transversal gate's per-pair routes a few at a time on the twin's 2 AODs.
   assert.ok(r.transversalSpreadNs > 400_000, String(r.transversalSpreadNs));
 });
 

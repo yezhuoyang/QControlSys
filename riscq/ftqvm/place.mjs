@@ -1,4 +1,4 @@
-// Placement: every qubit a FormalRV listing names is given a physical site.
+// Placement: every qubit a QSysASM listing names is given a physical site.
 //
 // A listing names physical qubits by address. `data[b*n + j]` is qubit j of code block b, live for
 // the whole run. `ancilla[k]` is an SSA identity, live from its `request_ancilla` to its
@@ -46,7 +46,7 @@ export function analyze(listing) {
   return { live, partners, dataWidth: dataWidth.n };
 }
 
-/** FormalRV's surface order: a weight-4 check is a unit square of the row-major d×d grid. */
+/** The compiler's surface order: a weight-4 check is a unit square of the row-major d×d grid. */
 export function checkSurfaceOrder(stabilizers, d) {
   const at = (j) => [Math.floor(j / d), j % d];
   for (const support of stabilizers) {

@@ -1,0 +1,4 @@
+spec !ctl!condSub:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_condSub(bits, base, N, flag, __cw, __anc) + pT * NT_ctl_condSub(bits, base, N, flag, __cw, __anc) + pI * N_I)
+  resource   { meas: 496·bits, frame: 462·bits, magicT: 84·bits, synthEps: 0 }
+

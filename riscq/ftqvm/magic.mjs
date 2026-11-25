@@ -4,9 +4,9 @@
 //                 twin's calibrated durations, lowered to RISC-Q channel actions and run in the Lean
 //                 model of the controller; every operation is checked against its window. Its
 //                 noise is simulated with the paper's own error model (bridge/magic_sim.py).
-//   the call      a FormalRV program that consumes one magic state (`prepare |T>`), compiled by
-//                 FormalRV against a machine whose `request_magic` factory is that circuit: its
-//                 output and workspace qubits and its latency are the twin's, and FormalRV's VM
+//   the call      a logical program that consumes one magic state (`prepare |T>`), compiled by
+//                 the compiler against a machine whose `request_magic` factory is that circuit: its
+//                 output and workspace qubits and its latency are the twin's, and the resource VM
 //                 must admit the listing.
 //
 // Google Quantum AI, "Magic state cultivation on a superconducting quantum processor",
@@ -29,12 +29,12 @@ import { STANDARD } from "../standards.mjs";
 import { chipDesign } from "./sc-chip.mjs";
 import { conformance, addRows } from "./sc-run.mjs";
 import { slack, specFor } from "./derive.mjs";
-import * as formalrv from "./formalrv.mjs";
+import * as ftc from "./ftcompiler.mjs";
 import * as specText from "./spec.mjs";
 import * as mc from "./magic-circuits.mjs";
 import { placeOnBoards } from "../board.mjs";
 import { controllerTrack } from "./track.mjs";
-import { captured, nativeOp } from "./studio-capture.mjs";
+import { captured, nativeOp, designOverride } from "./studio-capture.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..");
@@ -159,7 +159,7 @@ const KIND = { pulse: "1Q pulse", frame: "virtual Z", cz: "CZ", measure: "measur
  * The paper's circuit as a time-triggered listing on the twin: each moment (Stim TICK) starts
  * when the previous one ends and lasts as long as its longest operation on the controller's
  * 2 ns grid (a 35 ns pulse takes 36 ns); virtual Z rotations take no time. Returns the listing
- * (one row per operation and qubit, FormalRV's listing shape) and its native instructions.
+ * (one row per operation and qubit, the compiler's listing shape) and its native instructions.
  */
 export function transmonSchedule(circuit, m, { theta = Math.PI / 4, momentNs } = {}) {
   // `momentNs`: a paper's own timeline, one duration per moment (ns). A moment then lasts that
@@ -269,7 +269,8 @@ export async function runWillow(circuit, { theta = Math.PI / 4, outcomes = [], q
   const device = willowTwin(circuit, edits);
   const bad = uncoupled(circuit, device);
   if (bad.length) throw Error(circuit.name + ": " + bad.length + " CZ pairs are not neighbours on the square grid");
-  const design = willowDesign(device, { qubitsPerCore });
+  // In the RISC-Q studio, a chip edited in /riscq-design runs the same program (riscq/ftqvm/studio-capture.mjs).
+  const design = designOverride() ?? willowDesign(device, { qubitsPerCore });
   const m = willowMachine(design);
   const s = transmonSchedule(circuit, m, { theta });
   const lowered = lowerTransmon(s.natives, m, s.makespanNs);
@@ -536,29 +537,29 @@ export function queraNoise(twin = geminiTwin()) {
 const baseMachine = join(REPO, "validation", "ftqvm", "base.machine");
 
 /**
- * One magic state consumed by a FormalRV program: `prepare |T>` (the request_magic system call),
- * a Z⊗Z merge with the data block and an X readout, and the frame update (FormalRV's tinject
+ * One magic state consumed by a logical program: `prepare |T>` (the request_magic system call),
+ * a Z⊗Z merge with the data block and an X readout, and the frame update (the compiler's tinject
  * example, one T gate). Compiled against `durations` and `capacities` of the twin and a factory
- * contract whose latency is the factory circuit's on the twin. Returns the files, FormalRV's VM
+ * contract whose latency is the factory circuit's on the twin. Returns the files, the resource VM
  * verdict, the listing and the request_magic window.
  */
 export async function systemCall({ code, distance, factory, durations, capacities, gridNs, dir, program, optional = {} }) {
   mkdirSync(dir, { recursive: true });
-  // `program`: the body of another FormalRV program (default: one T gate by magic-state
+  // `program`: the body of another logical program (default: one T gate by magic-state
   // injection); `optional`: optional machine fields (the decoder's measured fields).
   const programText = `code ${code} d=${distance}\n\nparams  n\n\n` + (program ?? `program[q: 1, c: 2]:\n  prepare |T> -> ancilla[0]\n  measure Z data[0] Z ancilla[0] -> c[0]\n  measure X ancilla[0] -> c[1]\n  when c[1]:\n    frame Z data[0]\n`);
   const qppm = join(dir, "t-gate.qppm"), qec = join(dir, "t-gate.qec");
   writeFileSync(qppm, programText);
-  await formalrv.prepareQec(qppm, qec, { code, distance, specialize: { n: 1 } });
+  await ftc.prepareQec(qppm, qec, { code, distance, specialize: { n: 1 } });
   const baseText = readFileSync(baseMachine, "utf8");
   const base = specText.parseMachine(baseText);
   const factories = factory ? { factory: factory.contract } : specText.parseFactories(baseText);
   capacities = { ...capacities, ...optional };
-  const gadgets = await formalrv.discoverGadgets(qec, { dir, name: "discover",
+  const gadgets = await ftc.discoverGadgets(qec, { dir, name: "discover",
     machine: specText.machineText({ machine: specFor(durations, capacities, base, { gridNs }).machine, factories }),
     sysspecFor: (names) => specText.sysspecText(specFor(durations, capacities, base, { gadgets: names, gridNs })) });
   const spec = specFor(durations, capacities, base, { gadgets, factories, gridNs });
-  const built = await formalrv.build({ qec, spec: specText.files(spec), name: "t-gate", dir });
+  const built = await ftc.build({ qec, spec: specText.files(spec), name: "t-gate", dir });
   const listing = readFileSync(built.files.sysprog, "utf8").split("\n");
   const magic = built.listing.ops.filter((o) => o.kind === "request_magic");
   const peak = Math.max(0, ...built.listing.ops.map((o) => o.end));
@@ -645,7 +646,7 @@ const rate = (k, n) => ({ k, n, value: n ? k / n : 0, sigma: n ? Math.sqrt(Math.
 
 /**
  * Google's cultivation on the Willow twin: the three circuits of Figs. 2–4 run on RISC-Q; the
- * noise simulation of Figs. 2–3 with the paper's SI1000 model; the FormalRV call whose factory is
+ * noise simulation of Figs. 2–3 with the paper's SI1000 model; the system call whose factory is
  * the Fig. 4 circuit (injection, cultivation, graft into the distance-5 code on 54 qubits).
  */
 const GOOGLE_PUBLISHED = {
@@ -724,7 +725,7 @@ export function debugSteps(run, extra = () => ({})) {
 
 /**
  * Google's cultivation on the Willow twin: the three circuits of Figs. 2–4 run on RISC-Q; the
- * noise simulation of Figs. 2–3 with the paper's SI1000 model; the FormalRV call whose factory is
+ * noise simulation of Figs. 2–3 with the paper's SI1000 model; the system call whose factory is
  * the Fig. 4 circuit (injection, cultivation, graft into the distance-5 code on 54 qubits).
  */
 export async function googleCultivation({ shots = 2_000_000, sweepShots = 0, dir = join(tmpdir(), "quantumos-cultivation-" + process.pid) } = {}) {
@@ -764,15 +765,15 @@ export async function googleCultivation({ shots = 2_000_000, sweepShots = 0, dir
   return {
     device: willowTwin(mc.googleCircuit("fig3-kickback")), rows, sweep, call,
     factory: { circuit: "fig4-graft-N2", latencyNs: latency, qubits: graft.qubits, acceptance: keep, expectedNs: Math.round(latency / keep),
-      note: "One attempt is the Fig. 4 circuit on the twin. The paper keeps an attempt when no detector before the graft fires; the kept fraction used here is that of the Fig. 2 circuit (injection and cultivation, every detector), simulated with SI1000. FormalRV's factory contract has a fixed latency and no acceptance probability." },
+      note: "One attempt is the Fig. 4 circuit on the twin. The paper keeps an attempt when no detector before the graft fires; the kept fraction used here is that of the Fig. 2 circuit (injection and cultivation, every detector), simulated with SI1000. The interface's factory contract has a fixed latency and no acceptance probability." },
   };
 }
 
 /**
  * QuEra's distillation on the Gemini twin: the d = 3 and d = 5 factories run on RISC-Q; the
  * injected and distilled fidelities and the acceptance from the noise learned with Stim on the
- * paper's error model, applied to the exact 5-qubit logical channel; the FormalRV call whose
- * factory is the d = 3 circuit (the Steane code is FormalRV's d = 3 color code).
+ * paper's error model, applied to the exact 5-qubit logical channel; the system call whose
+ * factory is the d = 3 circuit (the Steane code is the compiler's d = 3 color code).
  */
 /**
  * One of QuEra's factories on the Gemini twin, as a row of the reproduction page and of the design
@@ -842,8 +843,8 @@ export async function queraRow(d, { shots = 0, edits = {}, outcomes: given } = {
 /**
  * QuEra's distillation on the Gemini twin: the d = 3 and d = 5 factories run on RISC-Q; the
  * injected and distilled fidelities and the acceptance from the noise learned with Stim on the
- * paper's error model, applied to the exact 5-qubit logical channel; the FormalRV call whose
- * factory is the d = 3 circuit (the Steane code is FormalRV's d = 3 color code).
+ * paper's error model, applied to the exact 5-qubit logical channel; the system call whose
+ * factory is the d = 3 circuit (the Steane code is the compiler's d = 3 color code).
  */
 export async function queraDistillation({ shots = 200_000, dir = join(tmpdir(), "quantumos-distillation-" + process.pid), distances = [3, 5] } = {}) {
   const twin = geminiTwin(), noise = queraNoise(twin);
@@ -881,7 +882,7 @@ export async function queraDistillation({ shots = 200_000, dir = join(tmpdir(), 
     device: { id: twin.id, title: twin.title, basis: twin.basis, durations: twin.durations, published: twin.published, rabi: twin.rabi, errors: twin.errors, pitchUm: twin.pitchUm, grid: twin.grid, noise },
     rows, call,
     factory: { distance: 3, latencyNs: latency, qubits: 35, acceptance: acc, expectedNs: Math.round(latency / acc),
-      note: "One attempt of the factory takes the d = 3 circuit's time; it is kept for the accepted distillation syndrome and perfect stabilizers on the four syndrome qubits. FormalRV's factory contract has a fixed latency and no acceptance probability." },
+      note: "One attempt of the factory takes the d = 3 circuit's time; it is kept for the accepted distillation syndrome and perfect stabilizers on the four syndrome qubits. The interface's factory contract has a fixed latency and no acceptance probability." },
   };
 }
 

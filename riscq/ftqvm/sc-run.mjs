@@ -1,4 +1,4 @@
-// Execute a FormalRV listing on a transmon chip, time-triggered, and check the trace against it.
+// Execute a QSysASM listing on a transmon chip, time-triggered, and check the trace against it.
 //
 // Time-triggered: every listing operation starts its pulses at the listing's own start time
 // (on the controller's batch grid), as RISC-Q's timed queues post them. Nothing is reordered or

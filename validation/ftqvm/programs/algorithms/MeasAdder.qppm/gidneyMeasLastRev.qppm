@@ -1,0 +1,75 @@
+gadget gidneyMeasLastRev(i, cb):
+  if i != 0:
+    prepare |Y+> -> anc[0]
+    measure Z q[3·(i-1)+2] X q[3·i+2] Z anc[0] -> m[0]
+    measure X anc[0] -> m[1]
+    when m[0]:
+      frame Z q[3·(i-1)+2] X q[3·i+2]
+    when m[1]:
+      frame Z q[3·(i-1)+2] X q[3·i+2]
+    prepare |Y+> -> anc[1]
+    measure Z q[3·(i-1)+2] Z anc[1] -> m[2]
+    measure X anc[1] -> m[3]
+    when m[2]:
+      frame Z q[3·(i-1)+2]
+    when m[3]:
+      frame Z q[3·(i-1)+2]
+    frame Z q[3·(i-1)+2]
+    prepare |Y+> -> anc[2]
+    measure X q[3·i+2] Z anc[2] -> m[4]
+    measure X anc[2] -> m[5]
+    when m[4]:
+      frame X q[3·i+2]
+    when m[5]:
+      frame X q[3·i+2]
+    frame X q[3·i+2]
+  prepare |Y+> -> anc[3]
+  measure Z q[3·i+2] Z anc[3] -> m[6]
+  measure X anc[3] -> m[7]
+  when m[6]:
+    frame Z q[3·i+2]
+  when m[7]:
+    frame Z q[3·i+2]
+  prepare |Y+> -> anc[4]
+  measure X q[3·i+2] Z anc[4] -> m[8]
+  measure X anc[4] -> m[9]
+  when m[8]:
+    frame X q[3·i+2]
+  when m[9]:
+    frame X q[3·i+2]
+  prepare |Y+> -> anc[5]
+  measure Z q[3·i+2] Z anc[5] -> m[10]
+  measure X anc[5] -> m[11]
+  when m[10]:
+    frame Z q[3·i+2]
+  when m[11]:
+    frame Z q[3·i+2]
+  measure Z q[3·i+2] -> c[cb]
+  when c[cb]:
+    frame X q[3·i+1]
+    prepare |Y+> -> anc[6]
+    measure Z q[3·i] Z anc[6] -> m[12]
+    measure X anc[6] -> m[13]
+    when m[12]:
+      frame Z q[3·i]
+    when m[13]:
+      frame Z q[3·i]
+    frame Z q[3·i]
+    prepare |Y+> -> anc[7]
+    measure Z q[3·i+1] Z anc[7] -> m[14]
+    measure X anc[7] -> m[15]
+    when m[14]:
+      frame Z q[3·i+1]
+    when m[15]:
+      frame Z q[3·i+1]
+    frame Z q[3·i+1]
+    prepare |Y+> -> anc[8]
+    measure Z q[3·i] Z q[3·i+1] Z anc[8] -> m[16]
+    measure X anc[8] -> m[17]
+    when m[16]:
+      frame Z q[3·i] Z q[3·i+1]
+    when m[17]:
+      frame Z q[3·i] Z q[3·i+1]
+    frame X q[3·i+1]
+    frame X q[3·i+2]
+

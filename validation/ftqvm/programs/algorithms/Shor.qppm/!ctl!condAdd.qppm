@@ -1,0 +1,5 @@
+gadget !ctl!condAdd(bits, base, cst, flag, __cw, __anc):
+  !ctl!prepMasked(bits, base, cst, flag, __cw, __anc) @ id()
+  !ctl!adder(bits, base, __cw, __anc) @ id()
+  !ctl!prepMasked(bits, base, cst, flag, __cw, __anc) @ id()
+

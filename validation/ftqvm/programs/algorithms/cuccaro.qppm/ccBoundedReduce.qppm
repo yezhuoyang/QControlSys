@@ -1,0 +1,5 @@
+gadget ccBoundedReduce(bits, base, M, flag):
+  ccCompareConst(bits, base, M, flag) @ id()
+  ccCondSub(bits, base, M, flag) @ id()
+  ccCompareConst(bits, base, M, flag) @ id()
+

@@ -1,4 +1,4 @@
-// FormalRV listings on optically controlled qubits that move: neutral atoms in tweezers and
+// QSysASM listings on optically controlled qubits that move: neutral atoms in tweezers and
 // ions in a QCCD trap. One engine, two platform profiles, two design points each.
 //
 // What the controller does for each listing operation (time-triggered, as on the transmon chip):
@@ -284,7 +284,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   const prof = design.prof, period = 1e12 / prof.dspHz;
   const b = (ns) => Math.ceil((ns * 1000) / period); // batches
   const beams = pool("beam", design.point.beams), readouts = pool("readout", design.readouts), movers = pool("mover", design.point.movers);
-  // Optical pumping has beams of its own: FormalRV charges a reset no gate slot.
+  // Optical pumping has beams of its own: the compiler charges a reset no gate slot.
   const pumps = pool("pump", design.point.pumps ?? 64);
   const state = {
     position: design.home.map((p) => [...p]),
@@ -333,7 +333,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
       // One global pulse acts on every atom of the zone at once. A one-qubit layer is the paper's
       // global Raman rotation, which takes its own duration.
       if (kind === "raman") ns = prof.globalOneQubitNs.value;
-      // FormalRV's VM issues the gates of one layer a nanosecond apart (its trace), and a global beam
+      // The resource VM issues the gates of one layer a nanosecond apart (its trace), and a global beam
       // cannot follow that: a gate shares the pulse of its kind that started at most GLOBAL_LEAD_NS
       // before it and ends inside its window. Its rotation then starts up to that much before its
       // listed start; each share records how much (`earlyNs`, the report's `globalEarlyNs`).
@@ -398,7 +398,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     return Math.max(t, Math.floor((op.end * 1000) / period) - span);
   };
   // Layers: gates of one kind whose windows allow it start together, at the latest start among
-  // them, so that one global pulse serves them all (FormalRV staggers a pipelined layer by 1 ns).
+  // them, so that one global pulse serves them all (the compiler staggers a pipelined layer by 1 ns).
   const layerStart = new Map();
   if (design.point.globalEntangle || design.point.globalOneQubit) {
     const byKind = new Map();

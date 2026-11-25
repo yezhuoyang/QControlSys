@@ -1,0 +1,10 @@
+spec revRegSwap:
+  ∀ u < 2^n . ∀ v < 2^n .
+  requires   0 < n
+  ∧  (oA + n ≤ oB  ∨  oB + n ≤ oA)
+  ∧  oA + n ≤ dim  ∧  oB + n ≤ dim
+  assumes    {{ |u⟩_q[oA, oA+n) ⊗ |v⟩_q[oB, oB+n) }}
+  ensures {{ |rev(n, v)⟩_q[oA, oA+n) ⊗ |rev(n, u)⟩_q[oB, oB+n) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_revRegSwap(n, oA, oB) + pT * NT_revRegSwap(n, oA, oB) + pI * N_I)
+  outcomes   none
+  resource   { meas: 18·n, frame: 24·n, magicT: 0, synthEps: 0 }
+

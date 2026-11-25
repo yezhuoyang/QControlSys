@@ -1,0 +1,4 @@
+spec !ctl!compareConst:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_compareConst(bits, base, N, flag, __cw, __anc) + pT * NT_ctl_compareConst(bits, base, N, flag, __cw, __anc) + pI * N_I)
+  resource   { meas: 424·bits+42, frame: 400·bits+39, magicT: 70·bits+7, synthEps: 0 }
+

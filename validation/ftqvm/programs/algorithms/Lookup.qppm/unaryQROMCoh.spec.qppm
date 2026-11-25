@@ -1,0 +1,20 @@
+spec unaryQROMCoh:
+  ∀ y < 2^W . ∀α .
+  requires  1 ≤ d
+  ∧ 1 ≤ W
+  ∧ 1 ≤ posStride
+  ∧ (∀ k < 2^d . T[tOff + base + k] < 2^W)
+  ∧ addrBase + d ≤ ancBase
+  ∧ ancBase + d ≤ posBase
+  ∧ posBase + posStride * W ≤ ctlW
+  ∧ ctlW < dim
+  ∧ ctlW < cb
+  ∧ cb + 2^d - 1 ≤ dim
+  assumes   {{ Σ k < 2^d . α(k) * ( |k⟩_q[addrBase, addrBase + d)
+  ⊗ |y⟩_q[posBase, posBase + posStride * W : posStride)
+  ⊗ |0⟩_q[ancBase, ancBase + d)
+  ⊗ |1⟩_q[ctlW] ) }}
+  ensures {{ Σ k < 2^d . α(k) * ( |k⟩_q[addrBase, addrBase + d) ⊗ |xorLow(W, y, T[tOff + base + k])⟩_q[posBase, posBase + posStride * W : posStride) ⊗ |0⟩_q[ancBase, ancBase + d) ⊗ |1⟩_q[ctlW] ) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, base, tOff, cb) + pT * NT_unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, base, tOff, cb) + pI * N_I)
+  outcomes  none
+  resource   { meas: 18·W+237, frame: 24·W+246, magicT: 21, synthEps: 0 }
+

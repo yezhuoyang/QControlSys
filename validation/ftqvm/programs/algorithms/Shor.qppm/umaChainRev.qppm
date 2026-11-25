@@ -1,0 +1,4 @@
+gadget umaChainRev(n, base):
+  for n > k >= 0:
+    UMA(base+2·k, base+2·k+1, base+2·k+2) @ id()
+

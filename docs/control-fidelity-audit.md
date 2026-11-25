@@ -174,7 +174,7 @@ What this means: a syndrome bit that crosses a board takes at least 616 ns more 
 **Optical controllers at 500 MHz** (S10, partly): `riscq/ftqvm/optical.mjs` ran its controllers at an unsourced 100 MHz. They now run at RISC-Q's 500 MHz dspClk, the clock every RTL measurement here uses and the only one the lane is measured at. At 100 MHz the lane's 16 ns word would be 1.6 cycles.
 
 - A native longer than one pulse-table entry is played as consecutive entries. A duration is 16 bits: 65,535 cycles, 131 µs.
-- FormalRV's VM issues the gates of one layer 1 ns apart. A global beam (Rydberg, Raman, pumping) is one pulse for the whole layer. A gate shares the pulse of its kind that started at most 10 ns before it (`GLOBAL_LEAD_NS`, one batch of the old 100 MHz controller, which shared within a batch) and ends inside its window. The run reports the worst early start as `globalEarlyNs`. Conformance checks ends, not starts.
+- the resource VM issues the gates of one layer 1 ns apart. A global beam (Rydberg, Raman, pumping) is one pulse for the whole layer. A gate shares the pulse of its kind that started at most 10 ns before it (`GLOBAL_LEAD_NS`, one batch of the old 100 MHz controller, which shared within a batch) and ends inside its window. The run reports the worst early start as `globalEarlyNs`. Conformance checks ends, not starts.
 
 **Barriers across boards** (`riscq/firmware.mjs` `remoteReleaseLead`): a release carries the root's stamp but reaches the i-th remote board `1 + i + laneCross + (laneWord − 1) + 7` cycles after the root dispatches it, after at most one grant per other source at that hub. Every member of a barrier shares one time base, so a multi-board segment starts that much later, about 0.7 µs at L = 3.
 
@@ -185,3 +185,11 @@ What this means: a syndrome bit that crosses a board takes at least 616 ns more 
 **Couplers past a core's nodes.** A transmon core has 16 put-window nodes. Gate, readout and demod leave 13 for CZ channels. A site with more couplers (lattice surgery on bell-d5 gives one 17) packs couplers that share a CZ carrier into one channel, one pulse-table entry each (`riscq/ftqvm/sc-chip.mjs` `czChannelsOf`).
 
 **Frames ahead of a release.** The release bound above assumes the lane is idle when the root sends the release. A lane carries one frame per 160 cycles, so a frame still queued on it delays the release by one frame time. On Besedin's circuit the decoder publishes its result just before the barrier. A remote board received the release 425 cycles after the root, against a lead of about 340, and three conditioned pulses had their amplitude and phase land 6–7 cycles after their envelope. `riscq/compile.mjs` now counts the shared bits each segment publishes, and `riscq/firmware.mjs` `laneBacklogLead` adds one frame time per bit to the next segment's lead. A frame from an earlier segment went ahead of the previous release, so it is not counted. `tests/riscq-studio-reproductions.test.mjs` runs that circuit with no fault.
+
+**A twin is a design a person can build.**
+- The hardware editor (`/riscq-design`) places every core, DAC and ADC on a board (`board`). Converter indices count per board, 0–15.
+- A board shows what it carries against a ZCU216: cores of 14, RF-DACs and RF-ADCs of 16, DSP48E2 of 2,786. The editor imports these limits from `riscq/board.mjs`, the module the design rules use.
+- The qubit macro fills the first board with room, DSP slices included. A two-board design built with the editor's own operations passes every rule and runs with no fault.
+- The 3D control view draws the RF-DACs and RF-ADCs each channel names, and their cables to the qubits. A readout DAC has eight lines.
+- "Edit this hardware" on a reproduced paper reruns the paper's own compiled program on the edited chip (`riscq/ftqvm/studio-capture.mjs` `designOverride`).
+- Still not editable by hand: the neutral-atom and trapped-ion controllers, which `riscq/ftqvm/optical.mjs` builds in code (S10).

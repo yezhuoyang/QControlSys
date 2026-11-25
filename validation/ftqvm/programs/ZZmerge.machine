@@ -1,0 +1,9 @@
+# Explicit input to QEC-to-system lowering. No implicit compiler machine defaults.
+# Timings are ns; bandwidth is bits/us and qubits/us. Capacities are provisional.
+# Existing test timing profile; changing this input requires rescheduling and rechecking.
+# The feedback read requires 80 bits/us; 128 bits/us is an explicit provisional supply.
+machine { decoder_latency_ns: 10000 ns, factories: 1 total, gate1q_ns: 25 ns, gate2q_ns: 50 ns, measure_ns: 550 ns, reset_ns: 250 ns, route_latency_ns: 1000 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 25 ns, qubits: 9739 total, max_parallel_gates: 1 total, decoders: 5 total, classical_data_bandwidth: 128 bits/us, qubit_routing_bandwidth: 16 qubits/us, ancilla_bandwidth: 64 qubits/us }
+
+# Factory implementation contract; independent of machine supply.
+spec factory:
+  resource { output_qubits: 9 total, workspace_qubits: 819 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }

@@ -1,0 +1,10 @@
+spec swapAccMult:
+  ∀ u < 2^bits . ∀ v < 2^bits .
+  requires   0 < bits  ∧  (4 * bits) + 3 ≤ dim
+  assumes    {{ |0⟩_q[0] ⊗ |0⟩_q[1] ⊗ |0⟩_q[2]
+  ⊗ |v⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2)
+  ⊗ |u⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}
+  ensures {{ |0⟩_q[0] ⊗ |0⟩_q[1] ⊗ |0⟩_q[2] ⊗ |u⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2) ⊗ |v⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_swapAccMult(bits) + pT * NT_swapAccMult(bits) + pI * N_I)
+  outcomes   none
+  resource   { meas: 18·bits, frame: 24·bits, magicT: 0, synthEps: 0 }
+

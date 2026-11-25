@@ -1,0 +1,6 @@
+gadget gidneyMeasReverse(n, cb):
+  gidneyMeasLastRev(n-1, cb) @ id()
+  for 0 <= k < n-2:
+    gidneyMeasInteriorRev(n-(k+2), cb+k+1) @ id()
+  gidneyMeasFirstRev(cb+n-1) @ id()
+

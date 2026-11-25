@@ -1,0 +1,7 @@
+spec nparH:
+  requires   0 < n  ∧  base + n ≤ dim
+  assumes    {{ |0⟩_q[base, base+n) }}
+  ensures {{ Σ v < 2^n . (1 / sqrt(2^n)) * |v⟩_q[base, base+n) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_nparH(n, base) + pT * NT_nparH(n, base) + pI * N_I)
+  outcomes   none
+  resource   { meas: 6·n, frame: 6·n, magicT: 0, synthEps: 0 }
+

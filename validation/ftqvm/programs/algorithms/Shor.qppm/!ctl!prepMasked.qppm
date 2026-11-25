@@ -1,0 +1,148 @@
+gadget !ctl!prepMasked(bits, base, cst, flag, __cw, __anc):
+  for 0 <= b < bits:
+    if (cst >> b) % 2 = 1:
+      prepare |Y+> -> anc[25·b]
+      measure Z q[2·b+base+2] Z anc[25·b] -> m[42·b]
+      measure X anc[25·b] -> m[42·b+1]
+      when m[42·b]:
+        frame Z q[2·b+base+2]
+      when m[42·b+1]:
+        frame Z q[2·b+base+2]
+      prepare |Y+> -> anc[25·b+1]
+      measure X q[2·b+base+2] Z anc[25·b+1] -> m[42·b+2]
+      measure X anc[25·b+1] -> m[42·b+3]
+      when m[42·b+2]:
+        frame X q[2·b+base+2]
+      when m[42·b+3]:
+        frame X q[2·b+base+2]
+      frame Z q[2·b+base+2]
+      prepare |T> -> anc[25·b+2]
+      measure Z q[__cw] Z anc[25·b+2] -> m[42·b+4]
+      measure X anc[25·b+2] -> m[42·b+5]
+      when m[42·b+5]:
+        frame Z q[__cw]
+      when m[42·b+4]:
+        prepare |Y+> -> anc[25·b+3]
+        measure Z q[__cw] Z anc[25·b+3] -> m[42·b+6]
+        measure X anc[25·b+3] -> m[42·b+7]
+        when m[42·b+6]:
+          frame Z q[__cw]
+        when m[42·b+7]:
+          frame Z q[__cw]
+      prepare |T> -> anc[25·b+5]
+      measure Z q[flag] Z anc[25·b+5] -> m[42·b+8]
+      measure X anc[25·b+5] -> m[42·b+9]
+      when m[42·b+9]:
+        frame Z q[flag]
+      when m[42·b+8]:
+        prepare |Y+> -> anc[25·b+6]
+        measure Z q[flag] Z anc[25·b+6] -> m[42·b+10]
+        measure X anc[25·b+6] -> m[42·b+11]
+        when m[42·b+10]:
+          frame Z q[flag]
+        when m[42·b+11]:
+          frame Z q[flag]
+      prepare |T> -> anc[25·b+8]
+      measure Z q[2·b+base+2] Z anc[25·b+8] -> m[42·b+12]
+      measure X anc[25·b+8] -> m[42·b+13]
+      when m[42·b+13]:
+        frame Z q[2·b+base+2]
+      when m[42·b+12]:
+        prepare |Y+> -> anc[25·b+9]
+        measure Z q[2·b+base+2] Z anc[25·b+9] -> m[42·b+14]
+        measure X anc[25·b+9] -> m[42·b+15]
+        when m[42·b+14]:
+          frame Z q[2·b+base+2]
+        when m[42·b+15]:
+          frame Z q[2·b+base+2]
+      prepare |T> -> anc[25·b+11]
+      measure Z q[__cw] Z q[flag] Z anc[25·b+11] -> m[42·b+16]
+      measure X anc[25·b+11] -> m[42·b+17]
+      when m[42·b+17]:
+        frame Z q[__cw] Z q[flag]
+      when m[42·b+16]:
+        prepare |Y+> -> anc[25·b+12]
+        measure Z q[__cw] Z q[flag] Z anc[25·b+12] -> m[42·b+18]
+        measure X anc[25·b+12] -> m[42·b+19]
+        when m[42·b+18]:
+          frame Z q[__cw] Z q[flag]
+        when m[42·b+19]:
+          frame Z q[__cw] Z q[flag]
+      prepare |Y+> -> anc[25·b+13]
+      measure Z q[__cw] Z q[flag] Z anc[25·b+13] -> m[42·b+20]
+      measure X anc[25·b+13] -> m[42·b+21]
+      when m[42·b+20]:
+        frame Z q[__cw] Z q[flag]
+      when m[42·b+21]:
+        frame Z q[__cw] Z q[flag]
+      frame Z q[__cw] Z q[flag]
+      prepare |T> -> anc[25·b+14]
+      measure Z q[__cw] Z q[2·b+base+2] Z anc[25·b+14] -> m[42·b+22]
+      measure X anc[25·b+14] -> m[42·b+23]
+      when m[42·b+23]:
+        frame Z q[__cw] Z q[2·b+base+2]
+      when m[42·b+22]:
+        prepare |Y+> -> anc[25·b+15]
+        measure Z q[__cw] Z q[2·b+base+2] Z anc[25·b+15] -> m[42·b+24]
+        measure X anc[25·b+15] -> m[42·b+25]
+        when m[42·b+24]:
+          frame Z q[__cw] Z q[2·b+base+2]
+        when m[42·b+25]:
+          frame Z q[__cw] Z q[2·b+base+2]
+      prepare |Y+> -> anc[25·b+16]
+      measure Z q[__cw] Z q[2·b+base+2] Z anc[25·b+16] -> m[42·b+26]
+      measure X anc[25·b+16] -> m[42·b+27]
+      when m[42·b+26]:
+        frame Z q[__cw] Z q[2·b+base+2]
+      when m[42·b+27]:
+        frame Z q[__cw] Z q[2·b+base+2]
+      frame Z q[__cw] Z q[2·b+base+2]
+      prepare |T> -> anc[25·b+17]
+      measure Z q[flag] Z q[2·b+base+2] Z anc[25·b+17] -> m[42·b+28]
+      measure X anc[25·b+17] -> m[42·b+29]
+      when m[42·b+29]:
+        frame Z q[flag] Z q[2·b+base+2]
+      when m[42·b+28]:
+        prepare |Y+> -> anc[25·b+18]
+        measure Z q[flag] Z q[2·b+base+2] Z anc[25·b+18] -> m[42·b+30]
+        measure X anc[25·b+18] -> m[42·b+31]
+        when m[42·b+30]:
+          frame Z q[flag] Z q[2·b+base+2]
+        when m[42·b+31]:
+          frame Z q[flag] Z q[2·b+base+2]
+      prepare |Y+> -> anc[25·b+19]
+      measure Z q[flag] Z q[2·b+base+2] Z anc[25·b+19] -> m[42·b+32]
+      measure X anc[25·b+19] -> m[42·b+33]
+      when m[42·b+32]:
+        frame Z q[flag] Z q[2·b+base+2]
+      when m[42·b+33]:
+        frame Z q[flag] Z q[2·b+base+2]
+      frame Z q[flag] Z q[2·b+base+2]
+      prepare |T> -> anc[25·b+20]
+      measure Z q[__cw] Z q[flag] Z q[2·b+base+2] Z anc[25·b+20] -> m[42·b+34]
+      measure X anc[25·b+20] -> m[42·b+35]
+      when m[42·b+35]:
+        frame Z q[__cw] Z q[flag] Z q[2·b+base+2]
+      when m[42·b+34]:
+        prepare |Y+> -> anc[25·b+21]
+        measure Z q[__cw] Z q[flag] Z q[2·b+base+2] Z anc[25·b+21] -> m[42·b+36]
+        measure X anc[25·b+21] -> m[42·b+37]
+        when m[42·b+36]:
+          frame Z q[__cw] Z q[flag] Z q[2·b+base+2]
+        when m[42·b+37]:
+          frame Z q[__cw] Z q[flag] Z q[2·b+base+2]
+      prepare |Y+> -> anc[25·b+23]
+      measure X q[2·b+base+2] Z anc[25·b+23] -> m[42·b+38]
+      measure X anc[25·b+23] -> m[42·b+39]
+      when m[42·b+38]:
+        frame X q[2·b+base+2]
+      when m[42·b+39]:
+        frame X q[2·b+base+2]
+      prepare |Y+> -> anc[25·b+24]
+      measure Z q[2·b+base+2] Z anc[25·b+24] -> m[42·b+40]
+      measure X anc[25·b+24] -> m[42·b+41]
+      when m[42·b+40]:
+        frame Z q[2·b+base+2]
+      when m[42·b+41]:
+        frame Z q[2·b+base+2]
+

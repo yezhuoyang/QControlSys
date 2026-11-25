@@ -1,0 +1,7 @@
+spec program:
+  requires  0 < n
+  resource  { meas: n, correct: n, magicT: 0, magicCCZ: 0 }
+
+spec program:
+  requires  0 < n
+  resource  { meas: n, correct: n, magicT: 0, magicCCZ: 0 }

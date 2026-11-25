@@ -1,0 +1,9 @@
+spec mmSwapAccMult:
+  ∀ acc < 2^bits . ∀ x < 2^bits .
+  requires   1 ≤ bits  ∧  (3 * bits) + 3 ≤ dim
+  assumes    {{ |acc⟩_q[3, (2 * bits) + 2 : 2)
+  ⊗ |x⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}
+  ensures {{ |x⟩_q[3, (2 * bits) + 2 : 2) ⊗ |acc⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_mmSwapAccMult(bits) + pT * NT_mmSwapAccMult(bits) + pI * N_I)
+  outcomes   none
+  resource   { meas: 18·bits, frame: 24·bits, magicT: 0, synthEps: 0 }
+

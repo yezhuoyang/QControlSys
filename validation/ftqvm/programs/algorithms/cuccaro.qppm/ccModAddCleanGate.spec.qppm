@@ -1,0 +1,10 @@
+spec ccModAddCleanGate:
+  ∀ x < N .
+  requires   0 < bits  ∧  0 < N  ∧  (2 * N) ≤ 2^bits  ∧  0 < cst  ∧  cst < N
+  ∧  (2 * bits) + 3 ≤ dim
+  assumes    {{ |0⟩_q[2] ⊗ |x⟩_q[3, (2 * bits) + 2 : 2)
+  ⊗ |0⟩_q[4, (2 * bits) + 3 : 2) ⊗ |0⟩_q[1] }}
+  ensures {{ |0⟩_q[2] ⊗ |(x + cst) % N⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2) ⊗ |0⟩_q[1] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccModAddCleanGate(bits, N, cst) + pT * NT_ccModAddCleanGate(bits, N, cst) + pI * N_I)
+  outcomes   none
+  resource   { meas: 412·bits+12, frame: 422·bits+17, magicT: 56·bits, synthEps: 0 }
+

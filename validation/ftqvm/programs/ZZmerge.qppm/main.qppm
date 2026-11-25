@@ -1,0 +1,5 @@
+program[q: 2, c: 1]:
+  measure Z q[a] Z q[b] -> c[0]
+  when c[0]:
+    frame X q[b]
+

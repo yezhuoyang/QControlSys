@@ -79,17 +79,17 @@ export function optical(id, overrides = {}) {
           : v(design.point.beams, "derived", design.point.beams + " locally addressed beams"),
         decoders: v(design.decoders, "derived", design.decoders + " decoder unit(s) of " + design.coresPerDecoder + " cores"),
         classical_data_bandwidth: v(100, "derived", "the board hub carries one put of one bit per batch at 100 MHz (riscq/limits.mjs)"),
-        // FormalRV charges a request ⌈1000·N/D⌉ items/µs, at least 1 however slow it is. With
+        // The compiler charges a request ⌈1000·N/D⌉ items/µs, at least 1 however slow it is. With
         // routes and resets of 100 µs and more, a physical rate (a few qubits/µs) would refuse
         // listings the hardware runs; the capacity is stated as the number of such requests the
         // hardware serves at once (at least the physical rate). Recorded as a finding.
         // On the twin a route is an AOD job and the device has `movers` AODs. Routes that start in
-        // the same batch share a job, but FormalRV cannot state that, so the capacity is the AODs:
-        // FormalRV then runs a transversal gate's per-pair routes a few at a time (a finding).
+        // the same batch share a job, but the compiler cannot state that, so the capacity is the AODs:
+        // The compiler then runs a transversal gate's per-pair routes a few at a time (a finding).
         qubit_routing_bandwidth: v(Math.max(Math.ceil((1000 * design.point.movers) / route), design.point.movers), "derived",
-          design.point.movers + (design.prof.platform === "neutral" ? " AOD jobs" : " electrode lanes") + " at once; FormalRV's ceiling charges each at least 1 qubit/µs"),
+          design.point.movers + (design.prof.platform === "neutral" ? " AOD jobs" : " electrode lanes") + " at once; the interface's ceiling charges each at least 1 qubit/µs"),
         ancilla_bandwidth: design.point.globalPump
-          ? v(design.prof.atoms.value, "derived", "global optical pumping serves every one of " + design.prof.atoms.value + " atoms at once; FormalRV's ceiling charges each request at least 1 qubit/µs")
+          ? v(design.prof.atoms.value, "derived", "global optical pumping serves every one of " + design.prof.atoms.value + " atoms at once; the interface's ceiling charges each request at least 1 qubit/µs")
           : v(Math.max(Math.ceil((1000 * (design.point.pumps ?? 64)) / reset), design.point.pumps ?? 64), "derived", (design.point.pumps ?? 64) + " pumping beams at once"),
       };
     },

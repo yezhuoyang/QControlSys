@@ -1,4 +1,4 @@
-// A transmon chip for a placed FormalRV listing, written as a hardware design document
+// A transmon chip for a placed QSysASM listing, written as a hardware design document
 // (riscq/design.mjs) that the simulator runs and the design editor opens.
 //
 // What the chip has, and why:
@@ -36,7 +36,7 @@ const buildUrl = new URL("../../validation/riscq/x6y3.json", import.meta.url);
  * The chip design for a placement. options: { pitchMm, boardMm, chipMm, name }.
  * Returns { design, sites: [{ site, qubit, part }], pairs } where `qubit` is the design's qubit index.
  */
-export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0], chipMm = [700, 0, -350], name = "FormalRV listing chip",
+export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0], chipMm = [700, 0, -350], name = "QSysASM listing chip",
   qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, drivesPerDac, device } = {}) {
   const calibration = JSON.parse(readFileSync(calibrationUrl, "utf8"));
   const build = JSON.parse(readFileSync(buildUrl, "utf8"));

@@ -1,0 +1,4 @@
+gadget !ctl!adder(n, base, __cw, __anc):
+  !ctl!majChain(n, base, __cw, __anc) @ id()
+  !ctl!umaChainRev(n, base, __cw, __anc) @ id()
+

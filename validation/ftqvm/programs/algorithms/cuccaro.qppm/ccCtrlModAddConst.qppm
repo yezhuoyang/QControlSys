@@ -1,0 +1,30 @@
+gadget ccCtrlModAddConst(bits, base, N, cst, ctl, flag):
+  if not cst = 0:
+    ccCondAdd(bits, base, cst, ctl) @ id()
+    ccCompareConst(bits, base, N, flag) @ id()
+    ccCondSub(bits, base, N, flag) @ id()
+    ccCtrlCompareConst(bits, base, cst, ctl, flag) @ id()
+    prepare |Y+> -> anc[0]
+    measure Z q[ctl] X q[flag] Z anc[0] -> m[0]
+    measure X anc[0] -> m[1]
+    when m[0]:
+      frame Z q[ctl] X q[flag]
+    when m[1]:
+      frame Z q[ctl] X q[flag]
+    prepare |Y+> -> anc[1]
+    measure Z q[ctl] Z anc[1] -> m[2]
+    measure X anc[1] -> m[3]
+    when m[2]:
+      frame Z q[ctl]
+    when m[3]:
+      frame Z q[ctl]
+    frame Z q[ctl]
+    prepare |Y+> -> anc[2]
+    measure X q[flag] Z anc[2] -> m[4]
+    measure X anc[2] -> m[5]
+    when m[4]:
+      frame X q[flag]
+    when m[5]:
+      frame X q[flag]
+    frame X q[flag]
+

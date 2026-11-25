@@ -1,0 +1,5 @@
+gadget ccModAddDirty(bits, base, N, cst, flag):
+  ccAddConst(bits, base, cst) @ id()
+  ccCompareConst(bits, base, N, flag) @ id()
+  ccCondSub(bits, base, N, flag) @ id()
+

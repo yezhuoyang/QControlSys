@@ -1,0 +1,9 @@
+spec UMA:
+  ∀ u < 2 . ∀ v < 2 . ∀ w < 2 .
+  requires   a ≠ b  ∧  a ≠ cw  ∧  b ≠ cw
+  ∧  a < dim  ∧  b < dim  ∧  cw < dim
+  assumes    {{ |u⟩_q[a] ⊗ |v⟩_q[b] ⊗ |w⟩_q[cw] }}
+  ensures {{ |u ⊕ (w ⊕ (u * v))⟩_q[a] ⊗ |v ⊕ (u ⊕ (w ⊕ (u * v)))⟩_q[b] ⊗ |w ⊕ (u * v)⟩_q[cw] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_UMA(a, b, cw) + pT * NT_UMA(a, b, cw) + pI * N_I)
+  outcomes   none
+  resource   { meas: 50, frame: 50, magicT: 7, synthEps: 0 }
+

@@ -1,0 +1,3 @@
+params  a, b
+witness a=0, b=1
+

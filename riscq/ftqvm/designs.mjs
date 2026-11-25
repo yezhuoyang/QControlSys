@@ -1,14 +1,14 @@
 // Editable digital twins of the reproduced papers: what /reproduce/<id>/design shows and runs.
 //
 // A design page runs a row of a reproduction again on an edited twin. The program is fixed: it is
-// the listing FormalRV compiled for the paper's twin (validation/ftqvm/twins/<id>/<key>.json,
+// the QSysASM listing compiled for the paper's twin (validation/ftqvm/twins/<id>/<key>.json,
 // written by riscq/ftqvm/papers.mjs), with the windows of the spec derived for that twin. An edit
 // changes the hardware only (gate, readout and transport durations, and the control system's
 // cores, decoders, beams and movers). The run is the same time-triggered run in the Lean SoC
 // model, and its trace is checked against the listing. So the answer to an edit is whether the
 // same compiled program still runs inside its windows on the changed machine. To compile for the
-// changed machine, FormalRV must derive its spec again (the paper's command in reproductions.mjs),
-// which needs FormalRV and the riscv32 clang and is not done by the web server.
+// changed machine, the compiler must derive its spec again (the paper's command in reproductions.mjs),
+// which needs the compiler and the riscv32 clang and is not done by the web server.
 //
 // Contract (shared with riscq/ftqvm/magic.mjs MAGIC_DESIGNS):
 //   params()      → [{ key, label, value, unit?, min?, max?, step?, source?, group?, options? }]
@@ -27,7 +27,7 @@ function sources(id) {
 }
 
 const rowParam = (rows) => ({ key: "row", label: "Run", group: "Program", value: rows[0]?.key, options: rows.map((r) => ({ value: r.key, label: r.label })),
-  source: "the listing FormalRV compiled for the paper's twin; fixed on this page" });
+  source: "the QSysASM listing compiled for the paper's twin; fixed on this page" });
 
 const num = (key, label, value, unit, min, max, step, source, group) => ({ key, label, value, unit, min, max, step, source, group });
 

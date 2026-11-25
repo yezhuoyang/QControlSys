@@ -1,0 +1,3 @@
+gadget mmStep(bits, N, a, j):
+  ccCtrlModAddConst(bits, 2, N, (a·2^(j)) mod N, 2·bits+j+3, 1) @ id()
+

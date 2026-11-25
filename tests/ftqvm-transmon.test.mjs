@@ -1,19 +1,20 @@
-// A FormalRV listing on a transmon chip: placement, the generated chip, time-triggered
+// A QSysASM listing on a transmon chip: placement, the generated chip, time-triggered
 // execution in the Lean model, and a system specification derived from the trace.
-// FormalRV is used unchanged; the tests skip without a built checkout (riscq/ftqvm/formalrv.mjs).
+// The compiler is used unchanged; the tests skip without a built checkout (riscq/ftqvm/ftcompiler.mjs).
 import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import * as formalrv from "../riscq/ftqvm/formalrv.mjs";
+import { fileURLToPath } from "node:url";
+import * as ftc from "../riscq/ftqvm/ftcompiler.mjs";
 import { deriveTransmon } from "../riscq/ftqvm/derive.mjs";
 import { conformance } from "../riscq/ftqvm/sc-run.mjs";
 import { check } from "../riscq/design.mjs";
 
-const skip = !formalrv.available() && "no built FormalRV checkout";
+const skip = !ftc.available() && "no built compiler checkout";
 
 let derived;
 const derive = async () => {
-  const ex = join(formalrv.formalrvRoot(), "FormalRV", "Examples", "QParamPPM");
+  const ex = fileURLToPath(new URL("../validation/ftqvm/programs/", import.meta.url));
   return (derived ??= deriveTransmon({ qppm: join(ex, "ZZmerge.qppm"), specialize: { a: 0, b: 1 }, baseMachine: join(ex, "ZZmerge.machine"),
     gadgets: ["surfaceRound", "surfaceRoundLogicalAncilla"], maxIterations: 5 }));
 };
@@ -33,7 +34,7 @@ test("placement puts every round check on its rotated-surface-code site", { skip
   assert.ok(placement.sites.length < 18 + placement.live.size);
 });
 
-test("FormalRV's test-profile durations do not hold on the chip; the derived ones do", { skip, timeout: 300_000 }, async () => {
+test("The compiler's test-profile durations do not hold on the chip; the derived ones do", { skip, timeout: 300_000 }, async () => {
   const { iterations } = await derive();
   const [first] = iterations, last = iterations.at(-1);
   assert.equal(first.verdict, "RESOURCE_VALIDATED");
@@ -58,7 +59,7 @@ test("FormalRV's test-profile durations do not hold on the chip; the derived one
   assert.deepEqual(check(last.design).errors, []);
 });
 
-test("the round contract is measured, and FormalRV admits the program against it", { skip, timeout: 300_000 }, async () => {
+test("the round contract is measured, and the compiler admits the program against it", { skip, timeout: 300_000 }, async () => {
   const { iterations } = await derive();
   const last = iterations.at(-1);
   const round = last.contracts.surfaceRound;

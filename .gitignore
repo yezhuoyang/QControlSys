@@ -3,6 +3,8 @@ node_modules/
 output/
 .playwright-cli/
 __pycache__/
+# Local path to the fault-tolerant compiler checkout (one line); FT_COMPILER_ROOT overrides it
+ft-compiler.local
 
 # Private planning notes (they name an unpublished paper): never commit
 docs/ftqvm-*.md

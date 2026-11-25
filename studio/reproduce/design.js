@@ -1,7 +1,7 @@
 // The design page of a reproduction (/reproduce/<id>/design): the paper's twin with its hardware
 // as editable parameters, and the compiled program run again on the edited machine.
 //
-// The program does not change: it is the listing FormalRV compiled for the paper's twin. A rerun
+// The program does not change: it is the QSysASM listing compiled for the paper's twin. A rerun
 // plays it time-triggered on the edited machine in the Lean model of the control system
 // (POST /api/reproduce/run, riscq/ftqvm/designs.mjs and magic.mjs) and checks every operation
 // against the window the listing gave it.
@@ -58,13 +58,15 @@ function failuresTable(failures) {
     failures.map((f) => `<tr><td><code>${esc(f.kind)}</code></td><td>${esc(f.line ?? "–")}</td><td>${ns(f.start)} – ${ns(f.end)}</td><td>${f.hardwareNs ? ns(f.hardwareNs[0]) + " – " + ns(f.hardwareNs[1]) : "–"}${f.bitNs ? " (bit at " + ns(f.bitNs) + ")" : ""}</td><td>${esc(f.reason ?? "")}</td></tr>`).join("")}</tbody></table></div>`;
 }
 
-export async function renderDesign(el, id) {
+export async function renderDesign(el, id, { section = "reproduce" } = {}) {
+  // `section`: "reproduce" (a paper's twin) or "examples" (an Examples study, /examples/<id>/design).
+  const ex = section === "examples", base = ex ? "/examples" : "/reproduce", sectionName = ex ? "Examples" : "Reproduce";
   let meta, stored, params, intro, studioRows = [];
   try {
-    const list = await json("/reproduce/data/index.json");
+    const list = await json(base + "/data/index.json");
     meta = list.find((r) => r.id === id);
-    if (!meta) throw Error("no reproduction named " + id);
-    stored = meta.hasResults ? await json("/reproduce/data/" + id + ".json").catch(() => null) : null;
+    if (!meta) throw Error("no " + (ex ? "example" : "reproduction") + " named " + id);
+    stored = ex || meta.hasResults ? await json(base + "/data/" + id + ".json").catch(() => null) : null;
     const p = await json("/api/reproduce/params?id=" + encodeURIComponent(id));
     if (p.error) throw Error(p.error);
     params = p.params;
@@ -72,25 +74,25 @@ export async function renderDesign(el, id) {
     // Rows the studio can open (riscq/ftqvm/studio-runs.mjs): reproduction:<id>:<row>.
     studioRows = (await json("/api/riscq/examples").catch(() => [])).filter((e) => e.id.startsWith("reproduction:" + id + ":")).map((e) => e.id.split(":")[2]);
   } catch (error) {
-    el.innerHTML = `<p class="kicker"><a href="/reproduce">Reproduce</a></p><p class="no">This design could not be loaded: ${esc(error.message)}</p>`;
+    el.innerHTML = `<p class="kicker"><a href="${base}">${sectionName}</a></p><p class="no">This design could not be loaded: ${esc(error.message)}</p>`;
     return;
   }
-  document.title = "Design · " + meta.title + " · Reproduce · QuantumOS";
+  document.title = "Design · " + meta.title + " · " + sectionName + " · QuantumOS";
   // Values: the paper's, then any kept in the address (#key=value&…), so an edited design can be shared.
   const values = Object.fromEntries(params.map((p) => [p.key, p.value]));
   for (const [k, v] of new URLSearchParams(location.hash.slice(1))) if (k in values) values[k] = v;
   const groups = [...new Set(params.map((p) => p.group ?? "Parameters"))];
   el.innerHTML = `
-    <p class="kicker"><a href="/reproduce">Reproduce</a> · <a href="/reproduce/${esc(id)}">${esc(meta.title)}</a> · design</p>
-    <h1>The machine of ${esc(meta.paper?.authors?.split(",")[0] ?? "")} ${esc(meta.paper?.venue?.match(/\((\d{4})\)/)?.[1] ?? "")}: edit it and run it again</h1>
-    <p class="lead">This is the twin the reproduction ran on, down to its control system. Change the device or the controller, then run the same compiled program again. Each pulse plays at the time the program gives it, in the Lean model of the RISC-Q board, and every operation is checked against the window FormalRV's specification gave it.</p>
-    ${intro ? `<div class="note">${esc(intro)}</div>` : `<div class="note">The program stays fixed: it is the listing FormalRV compiled for the paper's twin. If an operation no longer fits its window, FormalRV has to derive the specification again for the edited machine (<code>${esc(meta.command ?? "")}</code>, which needs a FormalRV checkout). The run then reports which operations overrun, and by how much.</div>`}
+    <p class="kicker"><a href="${base}">${sectionName}</a> · <a href="${base}/${esc(id)}">${esc(meta.title)}</a> · design</p>
+    <h1>${ex ? esc(meta.title) + ": choose the machine and run it" : `The machine of ${esc(meta.paper?.authors?.split(",")[0] ?? "")} ${esc(meta.paper?.venue?.match(/\((\d{4})\)/)?.[1] ?? "")}: edit it and run it again`}</h1>
+    ${ex ? `<p class="lead">The study's run as a starting point: choose the program, the hardware design and how the operating system runs it, then run it on the cycle-exact model of the control system. Every operation is checked against its window.</p>` : ""}<p class="lead"${ex ? " hidden" : ""}>This is the twin the reproduction ran on, down to its control system. Change the device or the controller, then run the same compiled program again. Each pulse plays at the time the program gives it, in the Lean model of the RISC-Q board, and every operation is checked against the window the compiler's specification gave it.</p>
+    ${intro ? `<div class="note">${esc(intro)}</div>` : `<div class="note">The program stays fixed: it is the QSysASM listing compiled for the paper's twin. If an operation no longer fits its window, the compiler has to derive the specification again for the edited machine (<code>${esc(meta.command ?? "")}</code>, which needs a compiler checkout). The run then reports which operations overrun, and by how much.</div>`}
     <div class="design-grid">
       <form class="dform" autocomplete="off">
         ${groups.map((g) => `<fieldset><legend>${esc(g)}</legend>${params.filter((p) => (p.group ?? "Parameters") === g).map((p) => field(p, values[p.key])).join("")}</fieldset>`).join("")}
         <div class="dactions">
           <button type="submit" class="btn">Run on this machine</button>
-          <button type="button" class="btn alt" data-act="reset">Paper's values</button>
+          <button type="button" class="btn alt" data-act="reset">${ex ? "The study's values" : "Paper's values"}</button>
         </div>
         <p class="dstatus" role="status"></p>
       </form>
@@ -133,10 +135,12 @@ export async function renderDesign(el, id) {
       ${failuresTable(row.failures)}
       <h2>The control system</h2>${controllerTable(row.track?.controller)}
       ${design ? `<p><button type="button" class="btn" data-act="editor">Open the chip in the hardware editor</button> <span class="cite">The edited chip, its control board and every cable, in the RISC-Q design editor.</span></p>` : ""}
-      ${studioRows.includes(studioKey()) ? `<p><a class="btn" href="/riscq-studio?${new URLSearchParams({ example: "reproduction:" + id + ":" + studioKey() })}">Open this run in the RISC-Q studio</a> <span class="cite">The paper's twin, without your edits, in the studio: the FormalRV listing, the hardware instructions, every core's firmware and the Lean trace, step by step.</span></p>` : ""}`;
+      ${studioRows.includes(studioKey()) ? `<p><a class="btn" href="/riscq-studio?${new URLSearchParams({ example: "reproduction:" + id + ":" + studioKey() })}">Open this run in the RISC-Q studio</a> <span class="cite">The paper's twin, without your edits, in the studio: the QSysASM listing, the hardware instructions, every core's firmware and the Lean trace, step by step.</span></p>` : ""}`;
     result.querySelector('[data-act="editor"]')?.addEventListener("click", () => {
       try {
-        localStorage.setItem("riscq-design:reproduce", JSON.stringify({ design }));
+        // With its run's id, the editor reruns the paper's own program on the chip as it is edited there.
+        const key = studioKey();
+        localStorage.setItem("riscq-design:reproduce", JSON.stringify({ design, ...(studioRows.includes(key) ? { reproduction: "reproduction:" + id + ":" + key } : {}) }));
         location.href = "/riscq-design?from=reproduce";
       } catch (error) {
         alert("The chip could not be handed to the editor: " + error.message);
@@ -146,7 +150,9 @@ export async function renderDesign(el, id) {
 
   // First the stored run of the paper (no rerun needed), then reruns on request.
   // A stored row is shown only when it is the run of these parameters (its twin key is the row's).
-  const storedRow = (key) => (stored?.rows ?? []).find((r) => r.twinKey !== undefined && r.twinKey === key && r.track);
+  // An Examples study keys its stored runs by all their parameters (riscq/calib/example-runs.mjs key()).
+  const exampleKey = (p) => JSON.stringify([p.program, p.design, p.execution || "timetable", String(p.decoders ?? ""), String(p.factories ?? ""), String(p.ancillas ?? 100), p.windows || "spec"]);
+  const storedRow = (key) => (stored?.rows ?? []).find((r) => r.twinKey !== undefined && r.twinKey === (ex ? exampleKey(current()) : key) && r.track);
   let running = false;
   async function rerun() {
     if (running) return;
@@ -158,7 +164,7 @@ export async function renderDesign(el, id) {
       const out = await json("/api/reproduce/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id, params: current() }) });
       if (out.error) throw Error(out.error);
       const edits = mark();
-      await show(out.rows[0], { design: out.design, label: edits.length ? "Edited machine (" + edits.map((p) => p.label.toLowerCase()).join(", ") + ")" : "The paper's machine, run again" });
+      await show(out.rows[0], { design: out.design, label: edits.length ? "Edited machine (" + edits.map((p) => p.label.toLowerCase()).join(", ") + ")" : ex ? "The study's run, run again" : "The paper's machine, run again" });
       status.textContent = `Ran in ${((performance.now() - t0) / 1000).toFixed(1)} s.`;
     } catch (error) {
       status.innerHTML = `<span class="no">The run failed: ${esc(error.message)}</span>`;
@@ -175,9 +181,9 @@ export async function renderDesign(el, id) {
   });
   form.querySelector('[data-key="row"]')?.addEventListener("change", (e) => {
     const s = storedRow(e.target.value);
-    if (s && !mark().length) show(s, { label: "The paper's run" });
+    if (s && !mark().length) show(s, { label: ex ? "The study's run" : "The paper's run" });
   });
   const edits = mark(), first = storedRow(values.row);
-  if (first && !edits.length) await show(first, { label: "The paper's run" });
+  if (first && !edits.length) await show(first, { label: ex ? "The study's run" : "The paper's run" });
   else await rerun();
 }

@@ -1,0 +1,4 @@
+spec !ctl!modMulInPlace:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_modMulInPlace(bits, N, a, ainv, __cw, __anc) + pT * NT_ctl_modMulInPlace(bits, N, a, ainv, __cw, __anc) + pI * N_I)
+  resource   { meas: 374·bits+3824·bits^(2), frame: 348·bits+3572·bits^(2), magicT: 63·bits+644·bits^(2), synthEps: 0 }
+

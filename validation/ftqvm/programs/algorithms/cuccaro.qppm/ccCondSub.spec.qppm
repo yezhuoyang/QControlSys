@@ -1,0 +1,11 @@
+spec ccCondSub:
+  ∀ x < 2^bits . ∀ d < 2 .
+  requires   0 < bits  ∧  1 ≤ N  ∧  N ≤ 2^bits
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  ctl < dim
+  ∧  (∀ i < bits . ctl ≠ base + (2 * i) + 2)
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |d⟩_q[ctl] }}
+  ensures {{ |0⟩_q[base] ⊗ |(x + (d * (2^bits - N))) % 2^bits⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |d⟩_q[ctl] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccCondSub(bits, base, N, ctl) + pT * NT_ccCondSub(bits, base, N, ctl) + pI * N_I)
+  outcomes   none
+  resource   { meas: 112·bits, frame: 116·bits, magicT: 14·bits, synthEps: 0 }
+

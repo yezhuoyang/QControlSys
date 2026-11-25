@@ -1,0 +1,3 @@
+gadget unaryQROMCoh(d, W, addrBase, ancBase, posBase, posStride, ctlW, base, tOff, cb):
+  unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, W, 0, ctlW, base, tOff, cb) @ id()
+

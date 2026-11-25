@@ -1,0 +1,4 @@
+gadget ccMajChain(n, base):
+  for 0 <= k < n headfirst:
+    ccMAJ(base+2·k, base+2·k+1, base+2·k+2) @ id()
+

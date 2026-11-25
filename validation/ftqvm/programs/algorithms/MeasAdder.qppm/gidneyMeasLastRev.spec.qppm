@@ -1,0 +1,8 @@
+spec gidneyMeasLastRev:
+  ∀ x < 2^(3*i+3) .
+  requires   1 ≤ i  ∧  3*i + 3 ≤ dim  ∧  cb + 1 ≤ dim  ∧  3*i + 3 ≤ cb
+  assumes    {{ |x⟩_q[0, 3*i+3) }}
+  ensures {{ |vMLast(i, x)⟩_q[0, 3*i+3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyMeasLastRev(i, cb) + pT * NT_gidneyMeasLastRev(i, cb) + pI * N_I)
+  outcomes   none
+  resource   { meas: 19, frame: 25, magicT: 0, synthEps: 0 }
+

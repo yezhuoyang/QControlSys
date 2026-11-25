@@ -1,0 +1,18 @@
+spec program:
+  ∀ y < 2^W . ∀α .
+  requires  1 ≤ d
+  ∧ 1 ≤ W
+  ∧ 1 ≤ posStride
+  ∧ (∀ k < 2^d . T[k] < 2^W)
+  ∧ addrBase + d ≤ ancBase
+  ∧ ancBase + d ≤ posBase
+  ∧ posBase + posStride * W ≤ ctlW
+  ∧ ctlW < dim
+  ∧ ctlW + 2^d ≤ dim
+  assumes   {{ Σ k < 2^d . α(k) * ( |k⟩_q[addrBase, addrBase + d)
+  ⊗ |y⟩_q[posBase, posBase + posStride * W : posStride)
+  ⊗ |0⟩_q[ancBase, ancBase + d)
+  ⊗ |0⟩_q[ctlW] ) }}
+  ensures {{ Σ k < 2^d . α(k) * ( |k⟩_q[addrBase, addrBase + d) ⊗ |xorLow(W, y, T[k])⟩_q[posBase, posBase + posStride * W : posStride) ⊗ |0⟩_q[ancBase, ancBase + d) ⊗ |1⟩_q[ctlW] ) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * N_L + pT * N_T + pI * N_I)
+  outcomes  none
+  resource   { meas: 6·W+79, frame: 8·W+83, magicT: 7, synthEps: 0, bound: unknown }

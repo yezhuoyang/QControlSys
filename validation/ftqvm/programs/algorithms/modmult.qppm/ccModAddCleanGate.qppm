@@ -1,0 +1,4 @@
+gadget ccModAddCleanGate(bits, N, cst):
+  if not cst = 0:
+    ccModAddClean(bits, 2, N, cst, 1) @ id()
+

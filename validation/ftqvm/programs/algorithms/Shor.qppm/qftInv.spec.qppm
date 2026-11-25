@@ -1,0 +1,8 @@
+spec qftInv:
+  ∀ x < 2^n .
+  requires   0 < n  ∧  base + n ≤ dim
+  assumes    {{ |rev(n, x)⟩_q[base, base+n) }}
+  ensures {{ Σ y < 2^n . (ω(-(x * y), 2^n) / sqrt(2^n)) * |rev(n, y)⟩_q[base, base+n) }}  within ||Tr_anc(.)||_1 <= (Σ rv_i < n . (Σ rv_s < rv_i . 3·synthEps[rv_i-rv_s+2])) + 2 * (pL * NL_qftInv(n, base) + pT * NT_qftInv(n, base) + pI * N_I)
+  outcomes   none
+  resource   { meas: 6·n+18·(n/2), frame: 6·n+24·(n/2), magicT: (Σ rv_i < n . (Σ rv_s < rv_i . 3·tSynth[rv_i-rv_s+2])), synthEps: (Σ rv_i < n . (Σ rv_s < rv_i . 3·synthEps[rv_i-rv_s+2])) }
+

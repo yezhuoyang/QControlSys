@@ -1,0 +1,9 @@
+spec ccCompareConstForward:
+  ∀ x < 2^bits .
+  requires   0 < bits  ∧  0 < N  ∧  N ≤ 2^bits  ∧  base + (2 * bits) + 1 ≤ dim
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) }}
+  ensures {{ |majWord(bits, 2^bits - N, x, 0)⟩_q[base, base + (2 * bits) : 2) ⊗ |xorN(bits, 2^bits - N, x)⟩_q[base+1, base + (2 * bits) : 2) ⊗ |cmpGE(x, N)⟩_q[base + (2 * bits)] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccCompareConstForward(bits, base, N) + pT * NT_ccCompareConstForward(bits, base, N) + pI * N_I)
+  outcomes   none
+  resource   { meas: 50·bits, frame: 51·bits, magicT: 7·bits, synthEps: 0 }
+

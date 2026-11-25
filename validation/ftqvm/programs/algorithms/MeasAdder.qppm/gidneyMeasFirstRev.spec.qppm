@@ -1,0 +1,8 @@
+spec gidneyMeasFirstRev:
+  ∀ x < 2^5 .
+  requires   5 ≤ dim  ∧  cb + 1 ≤ dim  ∧  5 ≤ cb
+  assumes    {{ |x⟩_q[0, 5) }}
+  ensures {{ |vMFirst(x)⟩_q[0, 5) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyMeasFirstRev(cb) + pT * NT_gidneyMeasFirstRev(cb) + pI * N_I)
+  outcomes   none
+  resource   { meas: 21, frame: 28, magicT: 0, synthEps: 0 }
+

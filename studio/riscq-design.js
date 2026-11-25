@@ -34,6 +34,11 @@ const GHz = (hz) => fmt(hz / 1e9, 6) + " GHz";
 
 // ───────────────────────────── state ─────────────────────────────
 let doc, qasm = "", template = "chain3";
+// A reproduced paper's chip, handed over by the studio or the reproduce page: its own compiled program
+// ("reproduction:<id>:<row>", riscq/ftqvm/studio-runs.mjs) runs on the chip as edited here. Writing an
+// OpenQASM program in the program box runs that instead.
+let reproduction = null;
+const reproductionNote = (id) => "# The paper's own compiled program runs on this chip: " + id + "\n# (its QSysASM listing or circuit, as on its reproduce page). Replace this text with\n# OpenQASM to run a program of your own instead.";
 let rules = { components: {}, media: D.SPEEDS, toleranceMm: 0.5 };
 let verdict = { errors: [], warnings: [], wires: [], pulses: [] }, checked = false, checkToken = 0, checkTimer = 0;
 let badIds = new Set();
@@ -254,6 +259,12 @@ function commitFrom(before) {
   refresh(true);
 }
 function replaceDoc(next, how) {
+  // Another chip is no longer the reproduction's: its program box goes back to OpenQASM.
+  if (reproduction) {
+    reproduction = null;
+    qasm = ringCache.ring?.qasm ?? "";
+    $("qasm").value = qasm;
+  }
   if (doc) undoStack.push(JSON.stringify(doc));
   redoStack = [];
   doc = next;
@@ -283,7 +294,7 @@ function refresh(changed) {
 }
 function save() {
   try {
-    localStorage.setItem(STORE, JSON.stringify({ design: doc, qasm, template }));
+    localStorage.setItem(STORE, JSON.stringify({ design: doc, qasm, template, ...(reproduction ? { reproduction } : {}) }));
   } catch {
     /* Storage may be unavailable. The design stays in the page. */
   }
@@ -369,7 +380,7 @@ function paintOutline() {
   }, label, extra ? el("span", { class: "muted", text: " " + extra }) : null);
   const ofType = (type) => doc.parts.filter((p) => p.type === type);
   put($("outline"),
-    group("Board and cores", [...ofType("control-board"), ...ofType("core")].map((p) => item({ kind: "part", id: p.id }, p.id, p.type === "core" ? D.channelsOf(doc, p.id).length + " ch" + (doc.decoder === p.id ? " · decoder" : "") : "board"))),
+    group("Board and cores", [...ofType("control-board"), ...ofType("core")].map((p) => item({ kind: "part", id: p.id }, p.id, p.type === "core" ? D.channelsOf(doc, p.id).length + " ch" + (doc.decoder === p.id ? " · decoder" : "") + (D.boardIds(doc).length > 1 ? " · " + D.boardOfPart(doc, p) : "") : D.boardContents(doc, p.id).cores.length + " cores"))),
     group("Converters", [...ofType("dac"), ...ofType("adc")].map((p) => item({ kind: "part", id: p.id }, p.id, p.type + " " + p.index))),
     group("Qubits", doc.qubits.map((q, i) => item({ kind: "part", id: q.part }, "q[" + i + "] " + q.part, GHz(q.freqHz ?? NaN)))),
     group("Chip parts", [...ofType("resonator"), ...ofType("stage")].map((p) => item({ kind: "part", id: p.id }, p.id, p.type)), false),
@@ -457,9 +468,19 @@ function partInspector(p) {
         else alertBox("The id " + v + " is taken by another part, channel or wire.");
       }, { type: "text" }),
       xyz("pos", "Position", p.centerMm, (v) => edit((d) => D.movePart(d, p.id, v))),
-      p.type === "dac" || p.type === "adc" ? field("index", "Index", p.index, (v) => edit((d) => (D.part(d, p.id).index = v)), { step: 1 }) : null),
+      ["core", "dac", "adc"].includes(p.type) ? field("board", "Board", D.boardOfPart(doc, p), (v) => edit((d) => D.setBoard(d, p.id, v)),
+        { options: D.boardIds(doc).map((b, k) => [b, b + (k === 0 ? " (first)" : "")]) }) : null,
+      p.type === "dac" || p.type === "adc" ? field("index", "Index on its board", p.index, (v) => edit((d) => (D.part(d, p.id).index = v)), { step: 1 }) : null),
   ];
-  if (p.type === "control-board") out.push(el("h4", { text: "Board" }), boardForm());
+  if (p.type === "control-board") {
+    const c = D.boardContents(doc, p.id), L = D.BOARD_LIMITS;
+    const line = (n, max, what) => el("div", { class: n > max ? "bad" : "", text: n + " of " + max + " " + what });
+    out.push(el("h4", { text: "On this board" }),
+      el("div", { class: "usage" }, line(c.cores.length, L.cores, "cores"), line(c.dac.length, L.dac, "RF-DACs"), line(c.adc.length, L.adc, "RF-ADCs"), line(c.dsp, L.dsp, "DSP48E2 (estimate)")),
+      el("p", { class: "note", text: "An AMD ZCU216: RISC-Q's floorplan fits 14 cores; the chip has 16 RF-DACs and 16 RF-ADCs. The rules also check each board's DSP slices (riscq/board.mjs). " +
+        (D.boardIds(doc)[0] === p.id ? "This is the first board, the barrier root; other boards join it over RISC-Q's PutLane." : "It joins the first board over RISC-Q's PutLane.") }),
+      el("h4", { text: "Board settings (every board)" }), boardForm());
+  }
   if (p.type === "core") out.push(...coreSection(p));
   if (p.type === "dac" || p.type === "adc") {
     const users = D.channelsUsing(doc, p.id);
@@ -480,7 +501,8 @@ function partInspector(p) {
 }
 function coreSection(p) {
   const chans = D.channelsOf(doc, p.id);
-  const converters = (kind) => doc.parts.filter((x) => x.type === { pulse: "dac", demod: "adc" }[kind]).map((x) => [x.id]);
+  // A channel's converter is one on its core's board.
+  const converters = (kind) => doc.parts.filter((x) => x.type === { pulse: "dac", demod: "adc" }[kind] && D.boardOfPart(doc, x) === D.boardOfPart(doc, p)).map((x) => [x.id, x.id + " · " + x.type.toUpperCase() + " " + x.index]);
   const setCh = (id, k) => (v) => edit((d) => (D.channel(d, id)[k] = v));
   return [
     el("h4", { text: "Channels (" + chans.length + " of 16)" }),
@@ -706,7 +728,10 @@ svg.addEventListener("pointerdown", (e) => {
   if (placing) {
     const at = snapPoint(fromScreen(sx, sy, depthFor(placing)), editAxes(), e);
     let id;
-    edit((d) => (id = D.addPart(d, placing, at).id));
+    // A core, DAC or ADC goes on the selected board, or on the board of the selected part.
+    const sel = selection?.kind === "part" ? D.part(doc, selection.id) : null;
+    const onBoard = sel?.type === "control-board" ? sel.id : sel ? D.boardOfPart(doc, sel) : undefined;
+    edit((d) => (id = D.addPart(d, placing, at, undefined, onBoard).id));
     select({ kind: "part", id });
     if (!e.shiftKey) setPlacing(null);
     return;
@@ -916,13 +941,15 @@ $("template").onchange = async (e) => {
 };
 $("qasm").onchange = () => {
   qasm = $("qasm").value;
+  if (reproduction && qasm !== reproductionNote(reproduction)) reproduction = null;
   save();
 };
 $("runIt").onclick = () => {
   if (verdict.errors.length) return;
   qasm = $("qasm").value;
   try {
-    localStorage.setItem(RUN, JSON.stringify({ design: doc, qasm }));
+    if (reproduction && qasm !== reproductionNote(reproduction)) reproduction = null;
+    localStorage.setItem(RUN, JSON.stringify(reproduction ? { design: doc, reproduction } : { design: doc, qasm }));
   } catch (error) {
     return alertBox("The browser would not hand the design to the debugger: " + error.message);
   }
@@ -1009,7 +1036,8 @@ try {
   }
   if (kept?.design?.kind === "riscq-design") {
     doc = kept.design;
-    qasm = kept.qasm ?? start.qasm;
+    reproduction = kept.reproduction ?? null;
+    qasm = reproduction ? reproductionNote(reproduction) : kept.qasm ?? start.qasm;
     template = kept.template ?? "mine";
     if (["run", "reproduce"].includes(query.get("from"))) template = "mine";
     if (["run", "reproduce"].includes(query.get("from"))) history.replaceState(null, "", location.pathname);

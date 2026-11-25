@@ -1,0 +1,61 @@
+code surface d=3
+
+params  n
+
+noise   measure, prepare |Y+>      : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pL·tr(ρ)
+        prepare |T>, prepare |CCZ> : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pT·tr(ρ)
+        idle                       : ||(N - id)(ρ)||_1 <= 2·pI·tr(ρ)
+        frame                      : Φ~ = Φ
+        N_L = NL_gidneyAddMeasured(n, 3 * n)
+        N_T = NT_gidneyAddMeasured(n, 3 * n)
+        N_I = V
+        NL_gidneyAddMeasured(n, cb) = NL_gidneyForward(n) + NL_finalCxCascade(n) + NL_gidneyMeasReverse(n, cb)
+        NT_gidneyAddMeasured(n, cb) = NT_gidneyForward(n) + NT_finalCxCascade(n) + NT_gidneyMeasReverse(n, cb)
+        NL_gidneyForward(n) = NL_gidneyForwardProp(max(0, n - 1)) + NL_gidneyLast(max(0, n - 1))
+        NT_gidneyForward(n) = NT_gidneyForwardProp(max(0, n - 1)) + NT_gidneyLast(max(0, n - 1))
+        NL_gidneyForwardProp(m) = Σ i < m . (if i ≠ 0 then NL_gidneyInterior(i) else NL_gidneyFirst())
+        NT_gidneyForwardProp(m) = Σ i < m . (if i ≠ 0 then NT_gidneyInterior(i) else NT_gidneyFirst())
+        NL_gidneyInterior(i) = 77
+        NT_gidneyInterior(i) = 7
+        NL_gidneyFirst() = 68
+        NT_gidneyFirst() = 7
+        NL_gidneyLast(i) = 56 + (if i ≠ 0 then 9 else 0)
+        NT_gidneyLast(i) = 7 + (if i ≠ 0 then 0 else 0)
+        NL_finalCxCascade(n) = Σ i < n . 9
+        NT_finalCxCascade(n) = 0
+        NL_gidneyMeasReverse(n, cb) = NL_gidneyMeasLastRev(max(0, n - 1), cb) + (Σ k < max(0, n - 2) . NL_gidneyMeasInteriorRev(max(0, n - (k + 2)), cb + k + 1)) + NL_gidneyMeasFirstRev(max(0, cb + n - 1))
+        NT_gidneyMeasReverse(n, cb) = NT_gidneyMeasLastRev(max(0, n - 1), cb) + (Σ k < max(0, n - 2) . NT_gidneyMeasInteriorRev(max(0, n - (k + 2)), cb + k + 1)) + NT_gidneyMeasFirstRev(max(0, cb + n - 1))
+        NL_gidneyMeasLastRev(i, cb) = 19 + (if i ≠ 0 then 9 else 0)
+        NT_gidneyMeasLastRev(i, cb) = if i ≠ 0 then 0 else 0
+        NL_gidneyMeasInteriorRev(i, cb) = 40
+        NT_gidneyMeasInteriorRev(i, cb) = 0
+        NL_gidneyMeasFirstRev(cb) = 31
+        NT_gidneyMeasFirstRev(cb) = 0
+        NL_measANDNRelease(r, tgt, anc, s) = 19
+        NT_measANDNRelease(r, tgt, anc, s) = 0
+
+define bit(e, k)           = (e >> k) % 2
+define flip(x, k)         = if bit(x, k) = 1 then x - 2^k else x + 2^k
+define xorInto(x, k, v)   = if v = 1 then flip(x, k) else x
+define cxV(u, w, x)       = xorInto(x, w, bit(x, u))
+define ccxV(u, v, w, x)   = xorInto(x, w, bit(x, u) * bit(x, v))
+define relV(w, x)         = if bit(x, w) = 1 then x - 2^w else x
+define vFirst(x)          = cxV(2, 4, cxV(2, 3, ccxV(0, 1, 2, x)))
+define vInt(i, x)         = cxV(3*i+2, 3*(i+1)+1,
+  cxV(3*i+2, 3*(i+1),
+  cxV(3*(i-1)+2, 3*i+2, ccxV(3*i, 3*i+1, 3*i+2, x))))
+define vLast(i, x)        = cxV(3*(i-1)+2, 3*i+2, ccxV(3*i, 3*i+1, 3*i+2, x))
+define vFwd(0, x)         = vFirst(x)
+define vFwd(m+1, x)       = vInt(m+1, vFwd(m, x))
+define vCas(0, x)         = x
+define vCas(m+1, x)       = cxV(3*m, 3*m+1, vCas(m, x))
+define vMLast(i, x)       = relV(3*i+2, cxV(3*(i-1)+2, 3*i+2, x))
+define vMInt(i, x)        = relV(3*i+2,
+  cxV(3*(i-1)+2, 3*i+2,
+  cxV(3*i+2, 3*(i+1), cxV(3*i+2, 3*(i+1)+1, x))))
+define vMFirst(x)         = relV(2, cxV(2, 3, cxV(2, 4, x)))
+define vRevSeg(0, j, x)   = x
+define vRevSeg(m+1, j, x) = vMInt(j - m, vRevSeg(m, j, x))
+define vAll(j, x)         = vMFirst(vRevSeg(j, j,
+  vMLast(j+1, vCas(j+2, vLast(j+1, vFwd(j, x))))))
+

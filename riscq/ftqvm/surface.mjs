@@ -1,9 +1,9 @@
-// The rotated surface code of distance d on a lattice, in FormalRV's orientation.
+// The rotated surface code of distance d on a lattice, in the compiler's orientation.
 //
 // Data qubit j sits at row ⌊j/d⌋, column j mod d. An interior plaquette at (r + ½, c + ½) checks
 // the four qubits around it and is an X check when r + c is even. A weight-2 check on the top or
 // bottom edge is an X check beside a Z plaquette; one on the left or right edge is a Z check
-// beside an X plaquette. For d = 3 this is exactly FormalRV's `Surface [[9,1,3]]` declaration:
+// beside an X plaquette. For d = 3 this is exactly the compiler's `Surface [[9,1,3]]` declaration:
 // X[1]X[2], X[0]X[1]X[3]X[4], X[4]X[5]X[7]X[8], X[6]X[7], Z[0]Z[3], Z[1]Z[2]Z[4]Z[5],
 // Z[3]Z[4]Z[6]Z[7], Z[5]Z[8] (tests/ftqvm-surface.test.mjs checks the correspondence).
 

@@ -1,0 +1,4 @@
+gadget revRegSwap(n, oA, oB):
+  for 0 <= r < n:
+    qubitSwap(oA+r, oB+(n-(r+1))) @ id()
+

@@ -1,0 +1,4 @@
+spec !ctl!cAddModN:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_cAddModN(bits, base, N, cst, ctrl, flag, __cw, __anc) + pT * NT_ctl_cAddModN(bits, base, N, cst, ctrl, flag, __cw, __anc) + pI * N_I)
+  resource   { meas: 1912·bits+126, frame: 1786·bits+117, magicT: 322·bits+21, synthEps: 0 }
+

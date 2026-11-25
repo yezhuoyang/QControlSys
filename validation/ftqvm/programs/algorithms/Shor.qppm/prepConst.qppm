@@ -1,0 +1,5 @@
+gadget prepConst(bits, base, cst):
+  for 0 <= b < bits:
+    if (cst >> b) % 2 = 1:
+      frame X q[2·b+base+2]
+

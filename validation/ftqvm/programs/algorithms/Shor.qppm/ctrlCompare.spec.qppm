@@ -1,0 +1,14 @@
+spec ctrlCompare:
+  ∀ u < 2^bits . ∀ f < 2 . ∀ d < 2 .
+  requires   0 < cst  ∧  cst ≤ 2^bits
+  ∧  (ctrl < base  ∨  base + (2 * bits) + 1 ≤ ctrl)
+  ∧  (flag < base  ∨  base + (2 * bits) + 1 ≤ flag)
+  ∧  ctrl ≠ flag
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  ctrl < dim  ∧  flag < dim
+  assumes    {{ |0⟩_q[base] ⊗ |u⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2)
+  ⊗ |f⟩_q[flag] ⊗ |d⟩_q[ctrl] }}
+  ensures {{ |0⟩_q[base] ⊗ |u⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |f ⊕ (d * cmpGE(u, cst))⟩_q[flag] ⊗ |d⟩_q[ctrl] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctrlCompare(bits, base, cst, ctrl, flag) + pT * NT_ctrlCompare(bits, base, cst, ctrl, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 112·bits+6, frame: 116·bits+8, magicT: 14·bits, synthEps: 0 }
+

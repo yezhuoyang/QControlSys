@@ -1,0 +1,8 @@
+spec gidneyMeasReverse:
+  ∀ x < 2^(3*n) .
+  requires   2 ≤ n  ∧  3*n ≤ dim  ∧  cb + n ≤ dim  ∧  3*n ≤ cb
+  assumes    {{ |x⟩_q[0, 3*n) }}
+  ensures {{ |vMFirst(vRevSeg(n-2, n-2, vMLast(n-1, x)))⟩_q[0, 3*n) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyMeasReverse(n, cb) + pT * NT_gidneyMeasReverse(n, cb) + pI * N_I)
+  outcomes   none
+  resource   { meas: 27·(n-2)+40, frame: 36·(n-2)+53, magicT: 0, synthEps: 0 }
+

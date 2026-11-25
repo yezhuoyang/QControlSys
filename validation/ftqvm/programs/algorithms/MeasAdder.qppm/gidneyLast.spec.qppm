@@ -1,0 +1,8 @@
+spec gidneyLast:
+  ∀ x < 2^(3*i+3) .
+  requires   1 ≤ i  ∧  3*i + 3 ≤ dim
+  assumes    {{ |x⟩_q[0, 3*i+3) }}
+  ensures {{ |vLast(i, x)⟩_q[0, 3*i+3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyLast(i) + pT * NT_gidneyLast(i) + pI * N_I)
+  outcomes   none
+  resource   { meas: 48, frame: 47, magicT: 7, synthEps: 0 }
+

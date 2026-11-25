@@ -1,0 +1,8 @@
+spec mmQubitSwap:
+  ∀ u < 2 . ∀ v < 2 .
+  requires   x ≠ y  ∧  x < dim  ∧  y < dim
+  assumes    {{ |u⟩_q[x] ⊗ |v⟩_q[y] }}
+  ensures {{ |v⟩_q[x] ⊗ |u⟩_q[y] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_mmQubitSwap(x, y) + pT * NT_mmQubitSwap(x, y) + pI * N_I)
+  outcomes   none
+  resource   { meas: 18, frame: 24, magicT: 0, synthEps: 0 }
+

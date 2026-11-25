@@ -1,6 +1,6 @@
 // Sections of the two magic-state reproduction pages (riscq/ftqvm/magic.mjs): a run of the
 // paper's own circuit on its twin, the noise simulation beside the paper's numbers, and the
-// factory as a system call that FormalRV compiles. reproduce.js loads this module only for a page
+// factory as a system call that the compiler lowers. reproduce.js loads this module only for a page
 // whose rows are circuit runs (`view: "circuit"`).
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -183,43 +183,43 @@ export function sections(data) {
     const spec = Object.entries(c.spec ?? {}).map(([k, val]) => [`<code>${esc(k)}</code>`, esc(val.value), esc(val.source), `<span class="src">${esc(val.note ?? "")}</span>`]);
     const rm = c.requestMagic?.[0];
     out.push(`<h2>The factory as a system call</h2>
-      ${c.error ? `<p class="no">FormalRV did not compile the program: ${esc(c.error)}</p>` : `
-      <p>FormalRV compiled the program below against a machine whose <code>request_magic</code> service is this factory: ${f.qubits} qubits (${c.factories.factory.output_qubits} output, ${c.factories.factory.workspace_qubits} workspace) and the factory's time on the twin as its latency. FormalRV's VM: <b class="${c.verdict === "RESOURCE_VALIDATED" ? "yes" : "no"}">${esc(c.verdict)}</b>. The listing has ${c.ops} timed operations (${c.kinds.map((k) => `<code>${esc(k)}</code>`).join(", ")}); the factory's window is ${rm ? `[${us(rm.start)}, ${us(rm.end)}) µs` : "–"}, its whole duration on the twin.</p>
-      <div class="note"><b>Postselection is not in the contract.</b> ${esc(f.note)} With the simulated acceptance of ${pct(f.acceptance, 2)}, a kept state takes ${f.expectedNs >= 1e6 ? (f.expectedNs / 1e6).toFixed(1) + " ms" : us(f.expectedNs, 1) + " µs"} on average, ${(f.expectedNs / f.latencyNs).toFixed(1)} times the latency FormalRV reserves.</div>
-      <details class="block" open><summary>The FormalRV program</summary><pre class="code">${esc(c.programText)}</pre></details>
-      <details class="block"><summary>The listing FormalRV compiled (first lines of ${c.listingLines})</summary><pre class="code">${esc(c.listingHead)}</pre></details>
+      ${c.error ? `<p class="no">The compiler refused the program: ${esc(c.error)}</p>` : `
+      <p>The compiler lowered the program below against a machine whose <code>request_magic</code> service is this factory: ${f.qubits} qubits (${c.factories.factory.output_qubits} output, ${c.factories.factory.workspace_qubits} workspace) and the factory's time on the twin as its latency. The resource VM: <b class="${c.verdict === "RESOURCE_VALIDATED" ? "yes" : "no"}">${esc(c.verdict)}</b>. The listing has ${c.ops} timed operations (${c.kinds.map((k) => `<code>${esc(k)}</code>`).join(", ")}); the factory's window is ${rm ? `[${us(rm.start)}, ${us(rm.end)}) µs` : "–"}, its whole duration on the twin.</p>
+      <div class="note"><b>Postselection is not in the contract.</b> ${esc(f.note)} With the simulated acceptance of ${pct(f.acceptance, 2)}, a kept state takes ${f.expectedNs >= 1e6 ? (f.expectedNs / 1e6).toFixed(1) + " ms" : us(f.expectedNs, 1) + " µs"} on average, ${(f.expectedNs / f.latencyNs).toFixed(1)} times the latency the compiler reserves.</div>
+      <details class="block" open><summary>The logical program</summary><pre class="code">${esc(c.programText)}</pre></details>
+      <details class="block"><summary>The QSysASM listing compiled (first lines of ${c.listingLines})</summary><pre class="code">${esc(c.listingHead)}</pre></details>
       <details class="block"><summary>The machine it compiled against</summary>${table(["Field", "Value", "Source", "Note"], spec)}<pre class="code">${esc(c.machineText)}</pre><pre class="code">${esc(c.sysspecText)}</pre></details>`}`);
   }
   return out.join("\n");
 }
 
-/** decode_syndrome as a system call: what the decoder was measured to do, and what FormalRV is told. */
+/** decode_syndrome as a system call: what the decoder was measured to do, and what the compiler is told. */
 function calibrationHtml(cal) {
   const fields = Object.entries(cal.fields).map(([k, x]) => [`<code>${esc(k)}</code>`, esc(x.value), esc(x.source), `<span class="src">${esc(x.note ?? "")}</span>`]);
   const w = cal.workloads.map((x) => [x.d, x.rounds, x.p, x.detectors, x.shots, us(x.ns.median, 1), us(x.ns.p99, 1), us(x.ns.max, 1), x.accuracy ? `${x.accuracy.agree} / ${x.shots}` : "–",
     x.accuracy ? `${x.accuracy.ufWrong} / ${x.accuracy.pymatchingWrong}` : "–"]);
   const r = cal.inRun ?? {};
   return `<h2>The decoder as a system call</h2>
-    <p>Decoding is the <code>decode_syndrome</code> system call, served by a decoder core of the RISC-Q board. The service is a C program, <code>riscq/decoders/uf_decoder.c</code>: union-find with peeling on the circuit's own detector graph (or, when the error model is a hypergraph, cluster growth then GF(2) elimination inside each cluster), generated as C tables for each circuit, compiled with clang for the core (RV32I with a multiplier, 64 KiB), and run instruction by instruction in the Lean model of the board, the same model that plays the pulses. Nothing about the decoder is assumed: the fields FormalRV is given below are measured on it.</p>
+    <p>Decoding is the <code>decode_syndrome</code> system call, served by a decoder core of the RISC-Q board. The service is a C program, <code>riscq/decoders/uf_decoder.c</code>: union-find with peeling on the circuit's own detector graph (or, when the error model is a hypergraph, cluster growth then GF(2) elimination inside each cluster), generated as C tables for each circuit, compiled with clang for the core (RV32I with a multiplier, 64 KiB), and run instruction by instruction in the Lean model of the board, the same model that plays the pulses. Nothing about the decoder is assumed: the fields the compiler is given below are measured on it.</p>
     <h3>Calibration: decode times on noisy syndromes</h3>
     <p>Rotated surface-code memories under SI1000 noise, each shot decoded by the compiled decoder in the Lean model and compared with PyMatching. Times in µs.</p>
     ${table(["d", "Rounds", "p", "Detectors", "Shots", "Median", "99th pct.", "Longest", "Same correction as PyMatching", "Logical errors: compiled / PyMatching"], w)}
     <h3>In the control program</h3>
     <p>On ${esc(r.circuit ?? "a memory circuit")}: the bits reach the decoder ${us(r.bitsInNs)} µs after the last readout window closes, the decode takes ${us(r.computeNs, 1)} µs, its result reaches another core ${us(r.resultOutNs)} µs later, and the conditioned pulse starts ${us(r.toPulseNs, 1)} µs after the readout. The board's hub shares at most 128 bits per decode, which bounds the decoding window.</p>
-    <h3>What FormalRV is told</h3>
+    <h3>What the compiler is told</h3>
     ${table(["Field", "Value", "Source", "How"], fields)}
     <p class="src">Measured on ${esc((cal.generated ?? "").slice(0, 10))} by <code>node riscq/decoders/calibrate.mjs</code>.</p>`;
 }
 
-/** The paper's logical operation as a FormalRV program, compiled on the paper's device and, if refused there, on the least machine FormalRV's VM admits. */
+/** The paper's logical operation as a logical program, compiled on the paper's device and, if refused there, on the least machine the resource VM admits. */
 function logicalCallHtml(c) {
   const verdict = (r) => `<b class="${r.verdict === "RESOURCE_VALIDATED" ? "yes" : "no"}">${esc(r.verdict)}</b>${r.message ? ": " + esc(r.message) : ""}`;
   const listing = (r, name) => r?.listingHead ? `<details class="block"><summary>${name}: the listing (first lines of ${r.listingLines})</summary><pre class="code">${esc(r.listingHead)}</pre></details>
     <details class="block"><summary>${name}: the machine it compiled against</summary><pre class="code">${esc(r.machineText)}</pre><pre class="code">${esc(r.sysspecText)}</pre></details>` : "";
   return `<h2>The logical operation as a system call</h2>
-    <p>FormalRV compiled the program below against the twin: its gate, measurement and reset times, the decoder's measured latency, and the frame update as measured in this page's run.</p>
-    <details class="block" open><summary>The FormalRV program</summary><pre class="code">${esc(c.programText)}</pre></details>
-    <p>On the paper's device (${c.onDevice.qubits} qubits), FormalRV's VM: ${verdict(c.onDevice)}.</p>
+    <p>The compiler lowered the program below against the twin: its gate, measurement and reset times, the decoder's measured latency, and the frame update as measured in this page's run.</p>
+    <details class="block" open><summary>The logical program</summary><pre class="code">${esc(c.programText)}</pre></details>
+    <p>On the paper's device (${c.onDevice.qubits} qubits), the resource VM: ${verdict(c.onDevice)}.</p>
     ${c.admitted ? `<p>On the smallest machine the VM admits (${c.admitted.qubits} qubits): ${verdict(c.admitted)}, ${c.admitted.ops} timed operations, ${us(c.admitted.makespanNs)} µs.</p>` : ""}
     ${listing(c.onDevice, "On the device")}${listing(c.admitted, "Admitted")}
     ${c.decoder ? `<div class="note"><b>The decoder's fields.</b> ${esc(c.decoder.note)} Calibrated latency model: <code>${esc(c.decoder.latencyModel?.value)}</code> ns for n input bits; bandwidth ${esc(c.decoder.bandwidth?.value)} bits/µs; window ${esc(c.decoder.windowRounds?.value)} rounds.</div>` : ""}`;

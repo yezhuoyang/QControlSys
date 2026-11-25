@@ -49,18 +49,20 @@
         <div class="wrap">
           <h2>One operating system over every kind of qubit</h2>
           <p class="lead">
-            Programs name system calls, never physical qubits or paths. The machine declares how long each call takes and how much
-            of a shared service it holds. The scheduler turns contention into waiting, and a resource VM admits the program or names
-            the constraint it breaks. Underneath, QuantumOS simulates the machine itself with its control system, so every declared
-            cost can be measured.
+            Fault-tolerant compilation lowers a logical program to the <b>Fault-Tolerant Quantum Execution Interface</b>, written
+            in QSysASM: physical instructions interleaved with system calls. The instructions say what to do to physical qubits; the
+            system calls delegate what is shared (ancillas, routes, magic states, decoders, the Pauli frame) to the operating system.
+            The machine declares how long each call takes and how much of a shared service it holds. The scheduler turns contention
+            into waiting, and a resource VM admits the program or names the constraint it breaks. Underneath, QuantumOS simulates the
+            machine with its RISC-Q control system, so every declared cost can be measured.
           </p>
           <figure class="arch">
-            <img src="/docs/media/quantumos-architecture.svg" width="1200" height="1040"
-              alt="Three layers. Fault-tolerant programs compile to system calls. The operating system layer holds eight system calls, a scheduler, a machine declaration and a resource VM. The bottom layer simulates a quantum computer with its control system: RISC-Q cores, a board hub, a decoder core and converters driving transmons, trapped ions and neutral atoms." />
+            <img src="/docs/media/quantumos-architecture.svg" width="1200" height="896"
+              alt="A logical quantum program is lowered by fault-tolerant compilation to the Fault-Tolerant Quantum Execution Interface, written in QSysASM: physical instructions (H, S, X, CNOT, measure and others) and system calls (request_ancilla, release_ancilla, request_magic, route, decode_syndrome, pauli_frame_update). Below it the Quantum OS manages resources and executes the program, on RISC-Q control hardware that drives superconducting, trapped-ion and neutral-atom qubits. Measured costs flow back up." />
           </figure>
           <div class="calls" role="region" aria-label="System calls" tabindex="0">
             <table>
-              <thead><tr><th>System call</th><th>What the hardware does</th><th>Holds</th><th>In QuantumOS today</th></tr></thead>
+              <thead><tr><th>Instruction or system call</th><th>What the hardware does</th><th>Holds</th><th>In QuantumOS today</th></tr></thead>
               <tbody>
                 <tr><td><code>request_ancilla N</code></td><td>Reset N qubits to |0⟩: an active reset pulse, re-cooling and optical pumping, or atoms reloaded from a reservoir</td><td>qubits, ancilla preparation</td><td><span class="st next">next</span> No reset operation is calibrated yet</td></tr>
                 <tr><td><code>route q₁ … qₙ</code></td><td>Bring qubits together for two-qubit gates: couplers or SWAP chains, ion shuttling, AOD tweezer moves</td><td>routing</td><td><span class="st meas">measured</span> Ion shuttles 64–128 µs, AOD moves 90–145 µs, taken from the trace; not yet a call</td></tr>
@@ -74,7 +76,7 @@
             </table>
           </div>
           <p class="note">
-            These are the system calls of QuantumOS. The times are results of the model, read
+            These are the instructions and system calls of the interface. The times are results of the model, read
             from its trace on the shipped examples (the transmon ring at 500 MHz, QCCD Studio's GHZ program, a 14-qubit ZAC program)
             with cited constants where a program states none. They are not measurements of hardware.
             <a href="/riscq-studio?example=superconducting-repetition&amp;outcome=s0=1">Run a decode and a frame update →</a>

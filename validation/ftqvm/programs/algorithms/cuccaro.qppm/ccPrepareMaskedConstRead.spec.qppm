@@ -1,0 +1,9 @@
+spec ccPrepareMaskedConstRead:
+  ∀ u < 2^bits . ∀ d < 2 .
+  requires   0 < bits  ∧  base + (2 * bits) + 1 ≤ dim  ∧  ctl < dim
+  ∧  (∀ i < bits . ctl ≠ base + (2 * i) + 2)
+  assumes    {{ |u⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |d⟩_q[ctl] }}
+  ensures {{ |xorN(bits, u, d * cst)⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |d⟩_q[ctl] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccPrepareMaskedConstRead(bits, base, cst, ctl) + pT * NT_ccPrepareMaskedConstRead(bits, base, cst, ctl) + pI * N_I)
+  outcomes   none
+  resource   { meas: 6·bits, frame: 8·bits, magicT: 0, synthEps: 0 }
+

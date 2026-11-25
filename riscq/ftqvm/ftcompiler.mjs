@@ -1,10 +1,12 @@
-// FormalRV, used unchanged: its compiler lowers a program to a .sysprog listing against a system
-// specification that QuantumOS writes (spec.mjs), its OCaml VM admits the listing, and its own
-// expander gives the timed operations QuantumOS executes (bridge/ftqvm_expand.py).
+// The fault-tolerant compiler, used unchanged: it lowers a logical program to a QSysASM listing
+// (.sysprog) against a system specification that QuantumOS writes (spec.mjs), its resource VM
+// admits the listing, and its own expander gives the timed operations QuantumOS executes
+// (bridge/ftqvm_expand.py).
 //
-// Nothing here re-implements FormalRV's semantics. The FormalRV checkout is the sibling folder
-// `FormalRV` or the directory named by FORMALRV_ROOT; its compiler must be built
-// (`dune build` in FormalRV/compiler). Outputs go to a directory of ours, never into FormalRV.
+// Nothing here re-implements the compiler's semantics. Its checkout is the directory named by
+// FT_COMPILER_ROOT, or else by the first line of the git-ignored file ft-compiler.local at the
+// repository root; it must be built (`dune build` in its compiler/ folder). Outputs go to a
+// directory of ours, never into the checkout.
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -14,20 +16,23 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "..", "..");
 const EXE = ".exe"; // dune names executables *.exe on every OS
 
-export function formalrvRoot() {
-  return resolve(process.env.FORMALRV_ROOT || join(REPO, "..", "FormalRV"));
+export function compilerRoot() {
+  if (process.env.FT_COMPILER_ROOT) return resolve(process.env.FT_COMPILER_ROOT);
+  const local = join(REPO, "ft-compiler.local");
+  const line = existsSync(local) ? readFileSync(local, "utf8").trim().split(/\s*\n/)[0] : "";
+  return resolve(REPO, line || "ft-compiler");
 }
 
-// FORMALRV_BUILD names a dune build directory of FormalRV's compiler outside its checkout (a build
+// FT_COMPILER_BUILD names a dune build directory of the compiler outside its checkout (a build
 // of its current source, `dune build --root compiler --build-dir <dir>`); default: the checkout's own.
-const bin = (name) => join(process.env.FORMALRV_BUILD || join(formalrvRoot(), "compiler", "_build"), "default", "bin", name + EXE);
+const bin = (name) => join(process.env.FT_COMPILER_BUILD || join(compilerRoot(), "compiler", "_build"), "default", "bin", name + EXE);
 
-/** Whether a built FormalRV is present (tests skip without one). */
+/** Whether a built compiler is present (tests skip without one). */
 export function available() {
-  return existsSync(join(formalrvRoot(), "ftq_vm", "sysprog.py")) && existsSync(bin("qec_sys")) && existsSync(bin("prepare_qec"));
+  return existsSync(join(compilerRoot(), "ftq_vm", "sysprog.py")) && existsSync(bin("qec_sys")) && existsSync(bin("prepare_qec"));
 }
 
-function run(file, args, { cwd = formalrvRoot(), timeoutMs = 600_000 } = {}) {
+function run(file, args, { cwd = compilerRoot(), timeoutMs = 600_000 } = {}) {
   return new Promise((ok, fail) => {
     execFile(file, args, { cwd, windowsHide: true, maxBuffer: 1 << 28, timeout: timeoutMs }, (error, stdout, stderr) => {
       if (error && !stdout) return fail(new Error(`${file.split(/[\\/]/).pop()} failed: ${(stderr || error.message).trim()}`));
@@ -39,7 +44,7 @@ function run(file, args, { cwd = formalrvRoot(), timeoutMs = 600_000 } = {}) {
 const python = () => process.env.QCONTROL_PYTHON || "python";
 
 /**
- * .qppm → .qec with FormalRV's prepare_qec: `code` and `distance` choose the code family,
+ * .qppm → .qec with the compiler's prepare_qec: `code` and `distance` choose the code family,
  * `specialize` fixes program parameters ({a: 0, b: 1}).
  */
 export async function prepareQec(qppm, out, { code = "surface", distance = 3, specialize = {} } = {}) {
@@ -65,7 +70,7 @@ export async function prepareQecWith(qppm, out, { code = "surface", distance = 3
   return out;
 }
 
-/** .prog → .qppm with FormalRV's prepare_qppm. */
+/** .prog → .qppm with the compiler's prepare_qppm. */
 export async function prepareQppm(prog, out) {
   mkdirSync(dirname(resolve(out)), { recursive: true });
   rmSync(out, { force: true, recursive: true });
@@ -74,31 +79,31 @@ export async function prepareQppm(prog, out) {
   return out;
 }
 
-/** .qec → .sysprog with FormalRV's back end, against our machine and system spec files. */
+/** .qec → .sysprog with the compiler's back end, against our machine and system spec files. */
 export async function compileSys(qec, { machine, sysspec, out, options = [], staged = false }) {
   rmSync(out, { force: true, recursive: true }); // a listing left by an earlier run must not pass for this one
-  // `staged`: FormalRV's staged back end (qec_sys_staged), which also lowers transversal gates.
+  // `staged`: the compiler's staged back end (qec_sys_staged), which also lowers transversal gates.
   const r = await run(bin(staged ? "qec_sys_staged" : "qec_sys"), [resolve(qec), "--machine", resolve(machine), "--system-spec", resolve(sysspec), "-o", resolve(out), ...options]);
   if (!existsSync(out)) throw new Error("qec_sys refused: " + (r.stdout + r.stderr).trim());
   return out;
 }
 
-/** FormalRV's OCaml VM, the evaluator of record: { status, ... } as it prints it. */
+/** The compiler's OCaml VM, the evaluator of record: { status, ... } as it prints it. */
 export async function admit(sysprog) {
   const r = await run(python(), ["-m", "ftq_vm", "run-symbolic", resolve(sysprog), "--json"]);
   return JSON.parse(r.stdout);
 }
 
-/** FormalRV's own expansion of the listing into timed operations (bridge/ftqvm_expand.py). */
+/** The compiler's own expansion of the listing into timed operations (bridge/ftqvm_expand.py). */
 export async function expand(sysprog, { maxOps = 1_000_000 } = {}) {
   const r = await run(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps)], { cwd: REPO });
   const out = JSON.parse(r.stdout);
-  if (out.error) throw new Error(`FormalRV refused the listing: ${out.error.code}: ${out.error.message}`);
+  if (out.error) throw new Error(`The compiler refused the listing: ${out.error.code}: ${out.error.message}`);
   return out;
 }
 
 /**
- * The round gadgets FormalRV's back end will emit for a .qec, which the system spec must give
+ * The round gadgets the compiler's back end will emit for a .qec, which the system spec must give
  * a contract each. Found by asking the compiler: it names a missing contract, and a contract
  * for a gadget it does not emit. `sysspecFor(names)` writes the spec text for a candidate list.
  */
@@ -122,11 +127,11 @@ export async function discoverGadgets(qec, { machine, sysspecFor, dir, name = "d
       else throw error;
     }
   }
-  throw Error("FormalRV kept asking for contracts: " + names.join(", "));
+  throw Error("The compiler kept asking for contracts: " + names.join(", "));
 }
 
 /**
- * The whole FormalRV path for one program: .qppm → .qec → .sysprog against `spec`
+ * The whole the compiler path for one program: .qppm → .qec → .sysprog against `spec`
  * (machine and system-spec text from spec.mjs), then admission and expansion.
  * Returns { dir, files, verdict, listing } with listing = expand()'s result.
  */

@@ -11,14 +11,14 @@
    "url": "https://arxiv.org/abs/2501.04612"
   },
   "summary": "A distance-three surface code on 17 transmons is split by lattice surgery into two distance-three repetition codes, which leaves them in a logical Bell state: ⟨Z_L1·Z_L2⟩ = +0.730 decoded and +0.998 postselected after the split, ⟨X_L1·X_L2⟩ = +0.56 postselected.",
-  "program": "The paper's gate sequence (its gate-sequence figure), transmon for transmon: logical |0⟩, four X and three Z stabilizer cycles, the split by measuring D2, D5 and D8, two Z cycles of each repetition code, and the data readout; no qubit is reset after its readout. Then the `decode_syndrome` system call on the decoder core, and the Pauli-frame update the paper applies in software as real pulses: X on L2's data (D3, D6, D9) when the decoded Z_L1·Z_L2 is −1. The system call level: FormalRV compiles the inverse operation, a Bell pair by an X⊗X merge of two d = 3 surface-code blocks, against the twin's durations and the decoder's calibrated latency.",
+  "program": "The paper's gate sequence (its gate-sequence figure), transmon for transmon: logical |0⟩, four X and three Z stabilizer cycles, the split by measuring D2, D5 and D8, two Z cycles of each repetition code, and the data readout; no qubit is reset after its readout. Then the `decode_syndrome` system call on the decoder core, and the Pauli-frame update the paper applies in software as real pulses: X on L2's data (D3, D6, D9) when the decoded Z_L1·Z_L2 is −1. The system call level: the compiler lowers the inverse operation, a Bell pair by an X⊗X merge of two d = 3 surface-code blocks, against the twin's durations and the decoder's calibrated latency.",
   "twin": "The 17 transmons at their chip positions (the paper's micrograph) with a coupler for every gated pair, the paper's gate times (48 ns single-qubit DRAG pulses, CZ 101.5 ns with its buffers), 300 ns readouts (the longest of its 175–300 ns), on the layer timeline derived from its 1.66 µs period between same-type cycles. One RISC-Q core per transmon at 500 MHz, a frame core and the decoder core.",
   "findings": [
    "Every operation of both circuits ran inside its window on the twin: the stabilizer cycles, the split and the readout take 8.85 µs (Z·Z) and 8.89 µs (X·X), the paper's layer timeline on the controller's 2 ns grid.",
    "In the same Lean run the decoder starts 0.29 µs after the last readout window closes, decodes the 36 detectors in 93.0 µs, and the three conditioned X pulses start 0.48 µs after its result. The paper applies this frame update offline; done in real time on this controller it costs 93.7 µs, about ten times the circuit.",
    "Under the paper's simulation model the twin gives raw ⟨Z_L1·Z_L2⟩ = +0.228 (paper +0.189) and ⟨X_L1·X_L2⟩ = +0.213 (+0.255); decoded Z·Z = +0.575 with PyMatching and +0.570 with the compiled decoder, against the paper's +0.730 (its matching graph's weights are learned from the device's data); postselected +0.998 with 1.8% of shots kept and +0.501 with 2.1%, against +0.998 (5.5%) and +0.56 (6.3%).",
    "The compiled decoder's correction equals PyMatching's on 88% (Z·Z) and 86% (X·X) of noisy shots: without resets each detector compares measurements two rounds apart, and union-find, which is not minimum weight, differs more often on that graph.",
-   "As a system call: FormalRV's VM refuses the merge on the 17-qubit device (two d = 3 surface-code blocks reserve 18 data qubits, QUBIT_CAPACITY) and admits it on a 42-qubit machine: 820 timed operations in 302.8 µs, the decoder declared with its measured worst case. The paper fits 17 qubits because its two halves are repetition codes, which FormalRV does not offer as a code.",
+   "As a system call: the resource VM refuses the merge on the 17-qubit device (two d = 3 surface-code blocks reserve 18 data qubits, QUBIT_CAPACITY) and admits it on a 42-qubit machine: 820 timed operations in 302.8 µs, the decoder declared with its measured worst case. The paper fits 17 qubits because its two halves are repetition codes, which the compiler does not offer as a code.",
    "One ZCU216 holds at most 14 RISC-Q cores (riscq/board.mjs, sized from RISC-Q's RTL and Vivado records), so this twin's 19 cores need at least 2 boards. The Lean run keeps them on one board's hub, so syndrome bits that would cross boards arrive without the about 0.6 µs a crossing costs on RISC-Q's board-to-board network."
   ],
   "limits": [
@@ -20146,7 +20146,7 @@
     "qubits": {
      "value": 42,
      "source": "derived",
-     "note": "the least FormalRV's VM admits"
+     "note": "the least the resource VM admits"
     },
     "factories": {
      "value": 1,
@@ -20238,7 +20238,7 @@
     "source": "derived",
     "note": "the decoder core's RAM; the largest compiled image takes 3417 of its 16384 words"
    },
-   "note": "The installed FormalRV compiler predates decoder_latency_model, and its VM refuses decoder_bandwidth: the decoder is declared to it as decoder_latency_ns (the measured worst case). The model and bandwidth are the calibration's, for a FormalRV built from its current source (it needs OCaml 5)."
+   "note": "The installed compiler predates decoder_latency_model, and its VM refuses decoder_bandwidth: the decoder is declared to it as decoder_latency_ns (the measured worst case). The model and bandwidth are the calibration's, for a compiler built from its current source (it needs OCaml 5)."
   }
  },
  "exactness": [

@@ -1,0 +1,4 @@
+gadget ccAdder(n, base):
+  ccMajChain(n, base) @ id()
+  ccUmaChainRev(n, base) @ id()
+

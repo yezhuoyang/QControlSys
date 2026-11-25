@@ -1,0 +1,47 @@
+code surface d=3
+
+params  n, k, s, anc, rec
+amps    α
+
+noise   measure, prepare |Y+>      : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pL·tr(ρ)
+        prepare |T>, prepare |CCZ> : Φ~ = N∘Φ, ||(N - id)(ρ)||_1 <= 2·pT·tr(ρ)
+        idle                       : ||(N - id)(ρ)||_1 <= 2·pI·tr(ρ)
+        frame                      : Φ~ = Φ
+        N_L = (Σ i < n . 9) + (Σ r < k . NL_groverIterate(n, s, anc)) + (Σ i < n . 1)
+        N_T = Σ r < k . NT_groverIterate(n, s, anc)
+        N_I = V
+        NL_groverIterate(n, s, anc) = NL_groverOracle(n, s, anc) + NL_groverDiffusion(n, anc)
+        NT_groverIterate(n, s, anc) = NT_groverOracle(n, s, anc) + NT_groverDiffusion(n, anc)
+        NL_groverDiffusion(n, anc) = (Σ i < n . 9) + NL_mcz(n, anc) + (Σ i < n . 9)
+        NT_groverDiffusion(n, anc) = NT_mcz(n, anc)
+        NL_groverOracle(n, s, anc) = (Σ i < n . (if (s // 2^i % 2) = 1 then 0 else 0)) + NL_mcz(n, anc) + (Σ i < n . (if (s // 2^i % 2) = 1 then 0 else 0))
+        NT_groverOracle(n, s, anc) = (Σ i < n . (if (s // 2^i % 2) = 1 then 0 else 0)) + NT_mcz(n, anc) + (Σ i < n . (if (s // 2^i % 2) = 1 then 0 else 0))
+        NL_mcz(n, anc) = if max(0, n - 2) ≠ 0 then (9 + NL_andChain(n, anc) + NL_andChainRev(n, anc)) else 9
+        NT_mcz(n, anc) = if max(0, n - 2) ≠ 0 then (NT_andChain(n, anc) + NT_andChainRev(n, anc)) else 0
+        NL_andChain(n, anc) = 56 + (Σ j < max(0, n - 2) . (if j < 1 then 0 else 56))
+        NT_andChain(n, anc) = 7 + (Σ j < max(0, n - 2) . (if j < 1 then 0 else 7))
+        NL_andChainRev(n, anc) = 56 + (Σ j < max(0, n - 2) . (if j < 1 then 0 else 56))
+        NT_andChainRev(n, anc) = 7 + (Σ j < max(0, n - 2) . (if j < 1 then 0 else 7))
+        NL_groverStep(n, s, anc) = NL_groverOracle(n, s, anc) + NL_groverDiffusion(n, anc)
+        NT_groverStep(n, s, anc) = NT_groverOracle(n, s, anc) + NT_groverDiffusion(n, anc)
+
+define bit(e, k)           = (e >> k) % 2
+define grvDelta(x, y)         = if x = y then 1 else 0
+define zeroBits(0, s)         = 0
+define zeroBits(k+1, s)       = zeroBits(k, s) + (if bit(s, k) = 0 then 1 else 0)
+define binom(0, j)            = if j = 0 then 1 else 0
+define binom(m+1, j)          = if j = 0 then 1 else binom(m, j) + binom(m, j - 1)
+define grvSin(n)              = 1 / sqrt(2^n)
+define grvCos(n)              = sqrt(2^n - 1) / sqrt(2^n)
+define grvAmp(n, k)           = Σ j < k + 1 . (-1)^j * binom(2*k + 1, 2*j + 1)
+  * (grvCos(n))^(2*(k - j)) * (grvSin(n))^(2*j + 1)
+define groverProb(n, k)       = (grvAmp(n, k))^2
+define grvMark(s, α)(x)       = α(x) - 2 * grvDelta(x, s) * α(s)
+define grvMcz(n, α)(x)        = grvMark(2^n - 1, α)(x)
+define grvDiffuse(n, α)(x)    = 2 * (Σ y < 2^n . α(y)) / 2^n - α(x)
+define grvNegDiffuse(n, α)(x) = -grvDiffuse(n, α)(x)
+define l1Update(n, s, α)(x)   = grvMark(s, α)(x) - 2 * (Σ y < 2^n . grvMark(s, α)(y)) / 2^n
+define andChainBit(0, x, y)   = bit(y, 0) ⊕ (bit(x, 0) * bit(x, 1))
+define andChainBit(k+1, x, y) = bit(y, k+1) ⊕ (bit(x, k+2) * andChainBit(k, x, y))
+define andChainOut(m, x, y)   = Σ j < m . 2^j * andChainBit(j, x, y)
+

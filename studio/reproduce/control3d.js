@@ -5,9 +5,9 @@
 // the batches the Lean trace shows one of its channels playing a pulse, and a signal packet runs
 // along the cable to the site the pulse drives (back from it for a readout). Decoder cores glow
 // while the decoder service runs a decode, the frame core while it updates the Pauli frame.
-// Which cores exist, their channels and the sites they drive are the build's (the riscq-design
-// or optical design the run used). Placement of the board, converters, optics and host around
-// the device is schematic: it is not the geometry of a lab.
+// Which boards and cores exist, their channels, the RF-DAC and RF-ADC each channel names, and the sites
+// they drive are the build's (the riscq-design or optical design the run used). Where the boards,
+// converters, optics and host sit around the device is drawn for legibility: it is not a lab's geometry.
 import * as THREE from "three";
 
 export const ROLE_COLORS = {
@@ -137,30 +137,53 @@ export function buildControl(scene, controller, device) {
     return { mesh: m, color, core: c, until: -1 };
   });
 
-  // ---- converters on each board's front edge: one DAC block per core that plays pulses ----
-  const dacAt = new Map();
+  // ---- converters on each board's front edge ----
+  // A channel names its converter ([kind, name, index] in riscq/ftqvm/track.mjs: a pulse channel's DAC,
+  // a demod channel's ADC, by index on its core's board), so every RF-DAC and RF-ADC the design uses is
+  // drawn once, and a trace runs from each core to every converter one of its channels names. A track
+  // stored before converters were recorded draws one DAC block per core that plays pulses.
+  const recorded = cores.some((c) => c.channels.some((ch) => ch[2] !== undefined));
+  const convOf = (ci, ch) => {
+    const c = cores[ci], [k, , index] = c?.channels[ch] ?? [];
+    if (k !== "pulse" && k !== "demod") return undefined;
+    return recorded ? boardOf(c) + ":" + (k === "demod" ? "adc" : "dac") + ":" + index : "core:" + ci;
+  };
+  const convAt = new Map(), convCores = new Map();
   const convMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.5 });
+  const adcMat = new THREE.MeshStandardMaterial({ color: 0x0c2d3a, roughness: 0.4, metalness: 0.5 });
   let anyPulsing = false;
-  fpgas.forEach(({ at, mine }) => {
-    const pulsing = mine.filter((i) => cores[i].channels.some(([k]) => k === "pulse"));
-    anyPulsing ||= pulsing.length > 0;
-    const convW = Math.min(0.5, (bw - 1) / Math.max(1, pulsing.length));
-    pulsing.forEach((ci, j) => {
-      const x = at.x - ((pulsing.length - 1) * convW) / 2 + j * convW, z = at.z + bd / 2 - 0.35;
-      const chip = new THREE.Mesh(new THREE.BoxGeometry(convW * 0.8, 0.16, 0.4), convMat);
+  fpgas.forEach(({ at, mine }, b) => {
+    const keys = [];
+    for (const ci of mine) cores[ci].channels.forEach((_, ch) => {
+      const key = convOf(ci, ch);
+      if (key === undefined) return;
+      if (!convCores.has(key)) { convCores.set(key, new Set()); keys.push(key); }
+      convCores.get(key).add(ci);
+    });
+    // DACs by index, then ADCs by index, as on the board's RF front end.
+    keys.sort((x, y) => (x.includes(":adc:") - y.includes(":adc:")) || Number(x.split(":").at(-1)) - Number(y.split(":").at(-1)));
+    anyPulsing ||= keys.length > 0;
+    const convW = Math.min(0.5, (bw - 1) / Math.max(1, keys.length));
+    keys.forEach((key, j) => {
+      const x = at.x - ((keys.length - 1) * convW) / 2 + j * convW, z = at.z + bd / 2 - 0.35;
+      const isAdc = key.includes(":adc:");
+      const chip = new THREE.Mesh(new THREE.BoxGeometry(convW * 0.8, 0.16, 0.4), isAdc ? adcMat : convMat);
       chip.position.set(x, 0.2, z);
-      chip.userData = { pick: "converter", core: cores[ci] };
+      const users = [...convCores.get(key)].map((ci) => cores[ci]);
+      chip.userData = recorded ? { pick: "converter", board: b, type: isAdc ? "ADC" : "DAC", index: Number(key.split(":").at(-1)), users } : { pick: "converter", core: users[0] };
       group.add(chip);
-      dacAt.set(ci, new THREE.Vector3(x, 0.28, z + 0.2));
-      // The board trace from the core to its converter.
-      const from = tiles[ci].mesh.position.clone().setY(0.36), to = new THREE.Vector3(x, 0.14, z - 0.2);
-      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([from, new THREE.Vector3(from.x, 0.14, from.z), new THREE.Vector3(from.x, 0.14, (from.z + to.z) / 2), new THREE.Vector3(to.x, 0.14, (from.z + to.z) / 2), to]),
-        new THREE.LineBasicMaterial({ color: 0xc9a227, transparent: true, opacity: 0.55 }));
-      group.add(line);
+      convAt.set(key, new THREE.Vector3(x, 0.28, z + 0.2));
+      // The board traces from each core whose channels name this converter.
+      for (const ci of convCores.get(key)) {
+        const from = tiles[ci].mesh.position.clone().setY(0.36), to = new THREE.Vector3(x, 0.14, z - 0.2);
+        const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([from, new THREE.Vector3(from.x, 0.14, from.z), new THREE.Vector3(from.x, 0.14, (from.z + to.z) / 2), new THREE.Vector3(to.x, 0.14, (from.z + to.z) / 2), to]),
+          new THREE.LineBasicMaterial({ color: isAdc ? 0x78c2de : 0xc9a227, transparent: true, opacity: 0.55 }));
+        group.add(line);
+      }
     });
   });
   if (anyPulsing) {
-    const l = textSprite(optical ? "DACs → AOM / AOD / electrode drivers" : "DACs (drive, flux, readout tone) and ADCs (demodulation)", { size: 0.46 });
+    const l = textSprite(optical ? "RF-DACs → AOM / AOD / electrode drivers" : "RF-DACs (drive, flux, readout tones) and RF-ADCs (readout returns)", { size: 0.46 });
     l.position.set(B.x, 1.5, B.z + bd / 2 - 0.2);
     group.add(l);
   }
@@ -199,18 +222,19 @@ export function buildControl(scene, controller, device) {
     const fl = textSprite("dilution refrigerator · chip at about 10 mK", { size: 0.5 });
     fl.position.set(center.x - r + 1.5, 3.0, center.z - r * 0.7);
     group.add(fl);
-    cores.forEach((c, ci) => {
-      const from = dacAt.get(ci);
-      if (!from) return;
-      for (const s of c.sites) {
+    // A coax line from each converter to every transmon (or its resonator) driven or read through it:
+    // a readout DAC carries eight qubits' tones and its ADC their returns, so it has eight lines.
+    for (const [key, users] of convCores) {
+      const from = convAt.get(key);
+      for (const s of new Set([...users].flatMap((ci) => cores[ci].sites))) {
         if (s >= siteCount) continue;
         const to = positionAt(s, 0).clone().setY(0.06);
         const curve = new THREE.CubicBezierCurve3(from, from.clone().setY(2.8), to.clone().setY(3.2), to);
         const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 28, 0.022, 5), tubeMat(0xffffff));
         group.add(mesh);
-        cables.set(ci + ":" + s, { curve, mesh });
+        cables.set(key + ">" + s, { curve, mesh });
       }
-    });
+    }
   } else {
     // An optical table between board and device: one instrument per kind of core, driven by its
     // cores' DACs; its light reaches the array when one of them plays.
@@ -240,15 +264,14 @@ export function buildControl(scene, controller, device) {
       l.position.copy(mesh.position).setY(j % 2 ? 1.85 : 1.2); // staggered, so neighbours do not overlap
       group.add(l);
       Object.assign(o, { mesh, aperture, color, at: mesh.position.clone(), beam: null });
-      // Cables from each core's DAC to the instrument.
-      for (const ci of o.cores) {
-        const from = dacAt.get(ci);
-        if (!from) continue;
-        const to = mesh.position.clone().add(new THREE.Vector3(0, 0, -0.5));
+      // Cables from every converter its cores' channels name to the instrument.
+      for (const [key, users] of convCores) {
+        if (![...users].some((ci) => o.cores.includes(ci)) || cables.has(key)) continue;
+        const from = convAt.get(key), to = mesh.position.clone().add(new THREE.Vector3(0, 0, -0.5));
         const curve = new THREE.CubicBezierCurve3(from, from.clone().add(new THREE.Vector3(0, 0.9, 0.9)), to.clone().add(new THREE.Vector3(0, 0.9, -0.9)), to);
         const cm = new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 0.025, 5), tubeMat(0xffffff));
         group.add(cm);
-        cables.set(String(ci), { curve, mesh: cm, optics: o });
+        cables.set(key, { curve, mesh: cm, optics: o });
       }
       // Its light path to the array: a beam drawn while one of its cores plays.
       const beamGeo = new THREE.BufferGeometry().setFromPoints([o.aperture.position, center.clone().setY(0.1)]);
@@ -296,9 +319,10 @@ export function buildControl(scene, controller, device) {
       const [ci, ch, t0, t1] = p, color = channelColor(ci, ch), tl = tiles[ci];
       if (tl) { tl.mesh.material.emissive.setHex(tl.color); tl.mesh.material.emissiveIntensity = 1.8; }
       const f = Math.min(1, Math.max(0, (t - t0) / Math.max(1, t1 - t0))), back = isReadout(ci, ch);
+      const key = convOf(ci, ch);
       if (!optical) {
         for (let k = 4; k < p.length; k++) {
-          const c = cables.get(ci + ":" + p[k]);
+          const c = cables.get(key + ">" + p[k]);
           if (!c) continue;
           c.mesh.material.emissive.setHex(color);
           c.mesh.material.emissiveIntensity = 1.2;
@@ -312,7 +336,7 @@ export function buildControl(scene, controller, device) {
           }
         }
       } else {
-        const c = cables.get(String(ci));
+        const c = cables.get(key);
         if (c) {
           c.mesh.material.emissive.setHex(color);
           c.mesh.material.emissiveIntensity = 1.2;
@@ -341,6 +365,9 @@ export function buildControl(scene, controller, device) {
 
 /** What the inspector shows for a picked part of the control system. */
 export function describePick(data, controller) {
+  if (data.pick === "converter" && data.type)
+    return `<b>board ${data.board} · RF-${data.type} ${data.index}</b><br>named by ${data.users.length} core${data.users.length > 1 ? "s" : ""}: ${data.users.slice(0, 10).map((c) => c.name).join(", ")}${data.users.length > 10 ? ", …" : ""}` +
+      (data.type === "DAC" && data.users.length > 1 ? "<br>their pulse channels are summed into its output (riscq/design.mjs)" : "");
   if (data.pick === "core" || data.pick === "converter") {
     const c = data.core;
     const channels = c.channels.map(([k, name]) => name + (k === "pulse" ? "" : " (" + k + ")"));

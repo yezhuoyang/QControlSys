@@ -1,0 +1,9 @@
+spec prepMasked:
+  ∀ u < 2^bits . ∀ f < 2 .
+  requires   (∀ i < bits . flag ≠ base + (2 * i) + 2)
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  flag < dim
+  assumes    {{ |f⟩_q[flag] ⊗ |u⟩_q[base+2, base + (2 * bits) + 1 : 2) }}
+  ensures {{ |f⟩_q[flag] ⊗ |xorN(bits, u, f * cst)⟩_q[base+2, base + (2 * bits) + 1 : 2) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_prepMasked(bits, base, cst, flag) + pT * NT_prepMasked(bits, base, cst, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 6·bits, frame: 8·bits, magicT: 0, synthEps: 0 }
+

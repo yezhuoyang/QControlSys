@@ -1,0 +1,9 @@
+spec ccAddConst:
+  ∀ x < 2^bits .
+  requires   0 < bits  ∧  cst < 2^bits  ∧  base + (2 * bits) + 1 ≤ dim
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) }}
+  ensures {{ |0⟩_q[base] ⊗ |(x + cst) % 2^bits⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccAddConst(bits, base, cst) + pT * NT_ccAddConst(bits, base, cst) + pI * N_I)
+  outcomes   none
+  resource   { meas: 100·bits, frame: 102·bits, magicT: 14·bits, synthEps: 0 }
+

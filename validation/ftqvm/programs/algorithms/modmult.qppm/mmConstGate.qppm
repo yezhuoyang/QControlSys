@@ -1,0 +1,4 @@
+gadget mmConstGate(bits, N, a):
+  for 0 <= j < bits:
+    mmStep(bits, N, a, j) @ id()
+

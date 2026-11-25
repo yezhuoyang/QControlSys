@@ -1,0 +1,12 @@
+spec modMulInPlace:
+  ∀ u < N .
+  requires   1 ≤ bits  ∧  0 < N  ∧  2 * N ≤ 2^bits
+  ∧  0 < ainv  ∧  ainv ≤ N  ∧  (a * ainv) % N = 1
+  ∧  (4 * bits) + 3 ≤ dim
+  assumes    {{ |0⟩_q[0] ⊗ |0⟩_q[1] ⊗ |0⟩_q[2]
+  ⊗ |0⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2)
+  ⊗ |u⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}
+  ensures {{ |0⟩_q[0] ⊗ |0⟩_q[1] ⊗ |0⟩_q[2] ⊗ |0⟩_q[3, (2 * bits) + 2 : 2) ⊗ |0⟩_q[4, (2 * bits) + 3 : 2) ⊗ |(a * u) % N⟩_q[(2 * bits) + 3, (3 * bits) + 3) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_modMulInPlace(bits, N, a, ainv) + pT * NT_modMulInPlace(bits, N, a, ainv) + pI * N_I)
+  outcomes   none
+  resource   { meas: 54·bits+872·bits^(2), frame: 72·bits+900·bits^(2), magicT: 112·bits^(2), synthEps: 0 }
+

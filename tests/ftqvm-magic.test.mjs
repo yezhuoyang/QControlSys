@@ -1,6 +1,6 @@
 // The two magic-state reproductions (riscq/ftqvm/magic.mjs): the papers' circuits as transcribed,
-// their twins, their runs on RISC-Q, the factory as a FormalRV system call, and the noise.
-// FormalRV parts are skipped without a built FormalRV checkout; noise parts without Python's stim.
+// their twins, their runs on RISC-Q, the factory as a QSysASM system call, and the noise.
+// The compiler parts are skipped without a built compiler checkout; noise parts without Python's stim.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -8,13 +8,13 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import * as mc from "../riscq/ftqvm/magic-circuits.mjs";
 import * as mg from "../riscq/ftqvm/magic.mjs";
-import * as formalrv from "../riscq/ftqvm/formalrv.mjs";
+import * as ftc from "../riscq/ftqvm/ftcompiler.mjs";
 
 const hasStim = (() => {
   try { execFileSync(process.env.QCONTROL_PYTHON || "python", ["-I", "-c", "import stim"], { stdio: "ignore" }); return true; } catch { return false; }
 })();
 const noStim = !hasStim && "Python's stim is not installed";
-const noFormalrv = !formalrv.available() && "no built FormalRV checkout";
+const noCompiler = !ftc.available() && "no built compiler checkout";
 
 let seed = 11;
 const rng = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
@@ -103,7 +103,7 @@ test("QuEra's d = 3 factory runs on the Gemini twin with every operation in its 
   assert.equal(run.report.byKind.measure.count, 35);
 });
 
-test("the factory serves FormalRV's request_magic: the VM admits a T gate on a Steane block", { skip: noFormalrv || noStim, timeout: 900_000 }, async () => {
+test("the factory serves the compiler's request_magic: the VM admits a T gate on a Steane block", { skip: noCompiler || noStim, timeout: 900_000 }, async () => {
   const r = await mg.queraDistillation({ shots: 4000, distances: [3], dir: join(tmpdir(), "quantumos-test-magic-" + process.pid) });
   assert.equal(r.call.verdict, "RESOURCE_VALIDATED");
   const [w] = r.call.requestMagic;

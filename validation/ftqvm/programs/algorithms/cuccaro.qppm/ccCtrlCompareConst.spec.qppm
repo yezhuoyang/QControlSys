@@ -1,0 +1,14 @@
+spec ccCtrlCompareConst:
+  ∀ x < 2^bits . ∀ d < 2 . ∀ f < 2 .
+  requires   0 < bits  ∧  0 < cst  ∧  cst ≤ 2^bits
+  ∧  base + (2 * bits) + 1 ≤ dim  ∧  ctl < dim  ∧  flag < dim
+  ∧  ctl ≠ flag  ∧  flag ≠ base + (2 * bits)
+  ∧  (∀ i < bits . ctl ≠ base + (2 * i) + 2)
+  ∧  (∀ i < bits . flag ≠ base + (2 * i) + 2)
+  assumes    {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2)
+  ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2)
+  ⊗ |d⟩_q[ctl] ⊗ |f⟩_q[flag] }}
+  ensures {{ |0⟩_q[base] ⊗ |x⟩_q[base+1, base + (2 * bits) : 2) ⊗ |0⟩_q[base+2, base + (2 * bits) + 1 : 2) ⊗ |d⟩_q[ctl] ⊗ |f ⊕ (d * cmpGE(x, cst))⟩_q[flag] }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ccCtrlCompareConst(bits, base, cst, ctl, flag) + pT * NT_ccCtrlCompareConst(bits, base, cst, ctl, flag) + pI * N_I)
+  outcomes   none
+  resource   { meas: 112·bits+6, frame: 116·bits+8, magicT: 14·bits, synthEps: 0 }
+

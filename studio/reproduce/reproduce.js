@@ -1,4 +1,4 @@
-// /reproduce: published experiments compiled with FormalRV system calls onto digital twins.
+// /reproduce: published experiments compiled with QSysASM system calls onto digital twins.
 // The list comes from /reproduce/data/index.json (riscq/ftqvm/reproductions.mjs); a page's
 // numbers come from its run, /reproduce/data/<id>.json (riscq/ftqvm/papers.mjs).
 
@@ -52,7 +52,7 @@ function resultsTable(rows) {
     ["distance", "d", (r) => r.distance], ["basis", "Basis or setting", (r) => r.basis ?? "–"], ["rounds", "Rounds", (r) => r.rounds ?? "–"],
     ["qubits", "Qubits placed", (r) => r.qubits ?? "–"], ["ops", "Operations", (r) => r.ops ?? "–"],
     ["conforms", "Every operation in its window", (r) => (r.error ? `<span class="no">${esc(r.error.slice(0, 90))}</span>` : r.conforms ? '<span class="yes">yes</span>' : '<span class="no">no</span>')],
-    ["roundNs", "FormalRV round (µs)", (r) => µs(r.roundNs, 2)], ["paper", "Paper cycle (µs)", (r) => (r.paper ? µs(r.paper.cycleNs) : "–")],
+    ["roundNs", "Compiled round (µs)", (r) => µs(r.roundNs, 2)], ["paper", "Paper cycle (µs)", (r) => (r.paper ? µs(r.paper.cycleNs) : "–")],
     ["transversalSpreadNs", "Transversal CNOTs spread over (µs)", (r) => µs(r.transversalSpreadNs)],
     ["routeNs", "Route (µs)", (r) => µs(r.routeNs)], ["gate2qNs", "Two-qubit gate (µs)", (r) => µs(r.gate2qNs, 3)],
     ["measureNs", "Measure (µs)", (r) => µs(r.measureNs, 2)], ["decoderNs", "Decoder (µs)", (r) => µs(r.decoderNs)],
@@ -74,16 +74,16 @@ function runDetail(r) {
   }).join("");
   return `
     <h3>Compiled listing</h3>
-    <p>The listing FormalRV compiled against the specification below has ${r.listingLines ?? "–"} lines and expands to ${r.ops} timed operations. Its first lines:</p>
+    <p>The QSysASM listing compiled against the specification below has ${r.listingLines ?? "–"} lines and expands to ${r.ops} timed operations. Its first lines:</p>
     <pre class="code">${esc(r.listingHead ?? "")}</pre>
     <h3>Derived system specification</h3>
-    <p>What FormalRV compiled against, in its own format. A value marked <b>measured</b> is the longest time the twin's trace showed for that kind of operation; <b>derived</b> counts the twin's parts; <b>provisional</b> is not yet realized by this twin.</p>
+    <p>The specification the compiler was given, in its own format. A value marked <b>measured</b> is the longest time the twin's trace showed for that kind of operation; <b>derived</b> counts the twin's parts; <b>provisional</b> is not yet realized by this twin.</p>
     <div class="tbl"><table><thead><tr><th>Field</th><th>Value</th><th>Source</th><th class="src">Note</th></tr></thead><tbody>${spec}</tbody></table></div>
     <details class="block"><summary>The .machine and .sysspec files</summary><pre class="code">${esc(r.machineText)}</pre><pre class="code">${esc(r.sysspecText)}</pre></details>
     <h3>Every operation against its window</h3>
     <p>For each kind of operation: how many finished inside the window the listing gave them, the listed duration, and the hardware time the trace shows (min / median / max, ns). The difference is the slack the specification leaves.</p>
     <div class="tbl"><table><thead><tr><th>Operation</th><th>In window</th><th>Listed (ns)</th><th>Hardware min / median / max (ns)</th><th>Longest overrun (ns)</th></tr></thead><tbody>${kinds}</tbody></table></div>
-    <details class="block"><summary>The FormalRV program</summary><pre class="code">${esc(r.programText ?? "")}</pre></details>`;
+    <details class="block"><summary>The logical program</summary><pre class="code">${esc(r.programText ?? "")}</pre></details>`;
 }
 
 export async function renderPaper(el, id) {
@@ -127,7 +127,7 @@ export async function renderPaper(el, id) {
     <h2>What we found</h2><ul>${m.findings.map((f) => `<li>${code(f)}</li>`).join("")}</ul>
     ${m.limits.length ? `<h2>Limits of this reproduction</h2><ul>${m.limits.map((f) => `<li>${code(f)}</li>`).join("")}</ul>` : ""}
     ${rows.length ? `<h2>One run in detail</h2><div class="runpick" role="group" aria-label="Run">${runButtons}</div><div id="run"></div>` : ""}
-    ${m.command ? `<h2>Reproduce it yourself</h2><p>With QuantumOS and a built FormalRV checkout next to it:</p><pre class="code">${esc(m.command)}</pre>` : ""}`;
+    ${m.command ? `<h2>Reproduce it yourself</h2><p>With QuantumOS and a built compiler checkout next to it:</p><pre class="code">${esc(m.command)}</pre>` : ""}`;
   const run = el.querySelector("#run"), twin = el.querySelector("#twin");
   let viewer;
   const show = async (i) => {

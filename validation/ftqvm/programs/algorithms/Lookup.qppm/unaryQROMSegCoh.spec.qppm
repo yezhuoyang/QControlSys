@@ -1,0 +1,23 @@
+spec unaryQROMSegCoh:
+  ∀ y < 2^W . ∀ u < 2 . ∀α .
+  requires  1 ≤ W
+  ∧ 1 ≤ segLen
+  ∧ 1 ≤ posStride
+  ∧ (∀ k < 2^d . T[tOff + base + k] < 2^W)
+  ∧ (∀ m < W . posSeg(posBase, segStride, posStride, segLen, m) = posAt(posBase, posStride, m))
+  ∧ addrBase + d ≤ ancBase
+  ∧ ancBase + d ≤ posBase
+  ∧ ancBase + d ≤ ctlW
+  ∧ (∀ m < W . ctlW ≠ posAt(posBase, posStride, m))
+  ∧ posBase + posStride * W ≤ dim
+  ∧ ctlW < dim
+  ∧ ctlW < cb
+  ∧ cb + 2^d - 1 ≤ dim
+  assumes   {{ Σ k < 2^d . α(k) * ( |k⟩_q[addrBase, addrBase + d)
+  ⊗ |y⟩_q[posBase, posBase + posStride * W : posStride)
+  ⊗ |0⟩_q[ancBase, ancBase + d)
+  ⊗ |u⟩_q[ctlW] ) }}
+  ensures {{ Σ k < 2^d . α(k) * ( |k⟩_q[addrBase, addrBase + d) ⊗ |xorLow(W, y, u * T[tOff + base + k])⟩_q[posBase, posBase + posStride * W : posStride) ⊗ |0⟩_q[ancBase, ancBase + d) ⊗ |u⟩_q[ctlW] ) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ctlW, base, tOff, cb) + pT * NT_unaryQROMSegCoh(d, W, addrBase, ancBase, posBase, posStride, segLen, segStride, ctlW, base, tOff, cb) + pI * N_I)
+  outcomes  none
+  resource   { meas: 42·W+553, frame: 56·W+574, magicT: 49, synthEps: 0 }
+

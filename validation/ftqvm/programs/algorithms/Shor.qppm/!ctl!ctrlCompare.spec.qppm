@@ -1,0 +1,4 @@
+spec !ctl!ctrlCompare:
+  ensures    unspecified  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_ctl_ctrlCompare(bits, base, cst, ctrl, flag, __cw, __anc) + pT * NT_ctl_ctrlCompare(bits, base, cst, ctrl, flag, __cw, __anc) + pI * N_I)
+  resource   { meas: 496·bits+42, frame: 462·bits+39, magicT: 84·bits+7, synthEps: 0 }
+

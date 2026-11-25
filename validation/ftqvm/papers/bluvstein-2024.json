@@ -11,16 +11,16 @@
    "url": "https://arxiv.org/abs/2312.03982"
   },
   "summary": "Two surface codes, one in |+⟩ and one in |0⟩, entangled by a transversal CNOT: one AOD move interlaces the two grids and one global Rydberg pulse acts on every pair.",
-  "program": "An encoded FormalRV program: |+⟩_L prepared in a logical ancilla block, `transversal CX` onto the data block, one stabilizer round on each block, then the Z⊗Z or X⊗X logical readout. FormalRV's staged back end compiles it with its `pipeline-loops` option, so the pairs of the transversal gate start within a few ns of each other.",
+  "program": "An encoded logical program: |+⟩_L prepared in a logical ancilla block, `transversal CX` onto the data block, one stabilizer round on each block, then the Z⊗Z or X⊗X logical readout. The compiler's staged back end compiles it with its `pipeline-loops` option, so the pairs of the transversal gate start within a few ns of each other.",
   "twin": "The paper's zoned array: gate sites 10 µm apart (5 × 20 of them), one global Rydberg pulse of 270 ns for every gate site, global Raman layers of about 1 µs, a 200 µs AOD job per route on 2 AODs, readout as a 200 µs move to the readout zone and 500 µs imaging, up to 280 atoms, global optical pumping (100 µs, Norcia et al. 2023, as the paper gives no reset time).",
   "findings": [
    "At d = 3 every operation ran inside its listed window, in both readout bases.",
-   "Global pulses need synchronized layers: FormalRV times every gate on its own clock, and cannot ask that all gates of one kind in a zone happen together. The twin groups gates that its windows let start together; at d = 5 layers of different kinds still collide on the one Raman beam, and the derivation does not converge yet.",
-   "A route is not an AOD job: routes that start together share one AOD move on the device, but FormalRV charges each route on its own. With the twin's real capacity of 2 AODs, FormalRV spreads the 9 pairs of the d = 3 transversal CNOT over about 0.8 ms, where one 200 µs move would carry them all.",
-   "FormalRV's rate rule ⌈1000·N/D⌉ charges every concurrent request at least one item per µs. On a platform where a reset, a route or a readout takes 100 µs or more, capacities must be stated as concurrent requests, not physical rates; at d = 7, 120 concurrent 701 µs readouts are charged 120 bits/µs against a 100 bits/µs hub, although they need about 0.17."
+   "Global pulses need synchronized layers: the compiler times every gate on its own clock, and cannot ask that all gates of one kind in a zone happen together. The twin groups gates that its windows let start together; at d = 5 layers of different kinds still collide on the one Raman beam, and the derivation does not converge yet.",
+   "A route is not an AOD job: routes that start together share one AOD move on the device, but the compiler charges each route on its own. With the twin's real capacity of 2 AODs, the compiler spreads the 9 pairs of the d = 3 transversal CNOT over about 0.8 ms, where one 200 µs move would carry them all.",
+   "The interface's rate rule ⌈1000·N/D⌉ charges every concurrent request at least one item per µs. On a platform where a reset, a route or a readout takes 100 µs or more, capacities must be stated as concurrent requests, not physical rates; at d = 7, 120 concurrent 701 µs readouts are charged 120 bits/µs against a 100 bits/µs hub, although they need about 0.17."
   ],
   "limits": [
-   "FormalRV's staged back end does not yet expand a transversal H on one block, so |+⟩_L is prepared directly (as the paper prepares it).",
+   "The compiler's staged back end does not yet expand a transversal H on one block, so |+⟩_L is prepared directly (as the paper prepares it).",
    "Background maintenance of idle blocks is a reservation in the listing, not executed operations; the twin does not execute it.",
    "The camera readout (one exposure for every atom) is not modeled yet; this blocks d = 7."
   ],
@@ -151,12 +151,12 @@
     "qubit_routing_bandwidth": {
      "value": 2,
      "source": "derived",
-     "note": "2 AOD jobs at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+     "note": "2 AOD jobs at once; the interface's ceiling charges each at least 1 qubit/µs"
     },
     "ancilla_bandwidth": {
      "value": 280,
      "source": "derived",
-     "note": "global optical pumping serves every one of 280 atoms at once; FormalRV's ceiling charges each request at least 1 qubit/µs"
+     "note": "global optical pumping serves every one of 280 atoms at once; the interface's ceiling charges each request at least 1 qubit/µs"
     },
     "gate1q_ns": {
      "value": 1000,
@@ -16350,12 +16350,12 @@
     "qubit_routing_bandwidth": {
      "value": 2,
      "source": "derived",
-     "note": "2 AOD jobs at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+     "note": "2 AOD jobs at once; the interface's ceiling charges each at least 1 qubit/µs"
     },
     "ancilla_bandwidth": {
      "value": 280,
      "source": "derived",
-     "note": "global optical pumping serves every one of 280 atoms at once; FormalRV's ceiling charges each request at least 1 qubit/µs"
+     "note": "global optical pumping serves every one of 280 atoms at once; the interface's ceiling charges each request at least 1 qubit/µs"
     },
     "gate1q_ns": {
      "value": 1000,
@@ -32631,12 +32631,12 @@
     "qubit_routing_bandwidth": {
      "value": 2,
      "source": "derived",
-     "note": "2 AOD jobs at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+     "note": "2 AOD jobs at once; the interface's ceiling charges each at least 1 qubit/µs"
     },
     "ancilla_bandwidth": {
      "value": 280,
      "source": "derived",
-     "note": "global optical pumping serves every one of 280 atoms at once; FormalRV's ceiling charges each request at least 1 qubit/µs"
+     "note": "global optical pumping serves every one of 280 atoms at once; the interface's ceiling charges each request at least 1 qubit/µs"
     },
     "gate1q_ns": {
      "value": 4960,
@@ -105863,12 +105863,12 @@
     "qubit_routing_bandwidth": {
      "value": 2,
      "source": "derived",
-     "note": "2 AOD jobs at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+     "note": "2 AOD jobs at once; the interface's ceiling charges each at least 1 qubit/µs"
     },
     "ancilla_bandwidth": {
      "value": 280,
      "source": "derived",
-     "note": "global optical pumping serves every one of 280 atoms at once; FormalRV's ceiling charges each request at least 1 qubit/µs"
+     "note": "global optical pumping serves every one of 280 atoms at once; the interface's ceiling charges each request at least 1 qubit/µs"
     },
     "gate1q_ns": {
      "value": 4960,
@@ -179066,12 +179066,12 @@
   {
    "distance": 7,
    "basis": "Z",
-   "error": "FormalRV's VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-20568\\\\d7Z\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.046,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"fir"
+   "error": "The resource VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-20568\\\\d7Z\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.046,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"fir"
   },
   {
    "distance": 7,
    "basis": "X",
-   "error": "FormalRV's VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-20568\\\\d7X\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.047,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"fir"
+   "error": "The resource VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-20568\\\\d7X\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.047,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"fir"
   }
  ]
 }
