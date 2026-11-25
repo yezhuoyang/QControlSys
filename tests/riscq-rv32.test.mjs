@@ -108,15 +108,19 @@ test("immediate forms, loads, stores, branches and links behave as specified", a
   assert.equal(r("zero"), 0);
   // auipc reads its own address.
   assert.equal(r("a5"), image.labels.end);
-  // The timing model charges five extra cycles for each taken transfer and one for each bus access.
+  // Timing is RISC-Q's pipeline (QControl/RiscQ/Pipe.lean, checked against its RTL in
+  // validation/riscq/rtl/microbench.mjs): the first time a site transfers control, the branch target
+  // buffer has no entry for it, the corrector redirects at register write and the successor commits 10
+  // cycles after the transfer.
   const frames = result.frames.filter((f) => f.part === "c0");
-  const taken = frames.filter((f, i) => i + 1 < frames.length && frames[i + 1].state.pc !== f.state.pc + 4 && f.op === "exec");
-  for (const f of taken) {
-    const next = frames[frames.indexOf(f) + 1];
-    assert.equal(next.atBatch - f.atBatch, 6, f.state.text);
-  }
-  const load = frames.find((f) => f.state.text?.startsWith("lw"));
-  assert.equal(frames[frames.indexOf(load) + 1].atBatch - load.atBatch, 2);
+  const seen = new Set();
+  const first = frames.filter((f, i) => {
+    if (i + 1 >= frames.length || f.op !== "exec" || frames[i + 1].state.pc === f.state.pc + 4 || seen.has(f.state.pc)) return false;
+    seen.add(f.state.pc);
+    return true;
+  });
+  assert.ok(first.length >= 5);
+  for (const f of first) assert.equal(frames[frames.indexOf(f) + 1].atBatch - f.atBatch, 10, f.state.text);
 });
 
 test("every word the assembler emits is decoded by the Lean model as the same instruction", async () => {

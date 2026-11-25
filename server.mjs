@@ -182,6 +182,8 @@ async function designOf(id) {
   if (DESIGNS[id]) return DESIGNS[id];
   const { MAGIC_DESIGNS } = await import("./riscq/ftqvm/magic.mjs");
   if (MAGIC_DESIGNS?.[id]) return MAGIC_DESIGNS[id];
+  const logical = await import("./riscq/ftqvm/logical.mjs").catch(() => null);
+  if (logical?.LOGICAL_DESIGNS?.[id]) return logical.LOGICAL_DESIGNS[id];
   throw Error("no editable twin for " + id);
 }
 function runDesign(id, params) {

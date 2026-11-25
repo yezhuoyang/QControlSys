@@ -95,14 +95,30 @@ export function model(spec, overrides = {}) {
     bridge: 1, // PutBridge.md: the store is forwarded as one beat after a one-cycle ack
     fireToPush: 2, // PulseParamBuffer.md: a fired pulse reaches the queue push 2 cycles after its beat
     freqToPush: 1, // PulseParamBuffer.scala: io.freq.valid := RegNext(hit(freqAddr))
-    coreTimeLag: linkPipe, // assumed: ARCH.md says the core copy reads dspTime − D for a constant link delay D
+    // Measured on RISC-Q's RTL (validation/riscq/rtl/microbench.mjs "time-read", firmware-rtl.mjs): a load of
+    // the time register returns the SoC batch time of its bus request, 5 cycles before it commits,
+    // whatever the link depth; a pulse opens at the channel output 2 batches after the SoC time reaches
+    // its start time (the per-core time replica, RegNext(syncTime), and the generator's output register).
+    // In this model's time base, the channel's compare time, the load therefore returns 5 − 2 = 3
+    // batches before its commit.
+    coreTimeLag: 3,
     waitSlack: 3, // ControlMemMaps.scala: delay = 3
     dacPipe: dacPipe(spec),
     redirectPenalty: 5, // assumed upper bound: RISCV.md stages 0–4 refill after a redirect at jumpAt
     busPenalty: 1, // LsuPlugin.md: a load or store halts execute until the response, one cycle
-    hubDown: 1 + linkPipe + 2 + 4, // PutHub.md: bridge, link, queue and arbiter, decode and dispatch
-    hubUp: 1 + linkPipe + 2 + linkPipe + 1, // PutHub.md: replica and link, core merge, link, inbox
-    reportUp: 3 + 2 + linkPipe + 1, // EventLink.md: up to three puts, merge, link, sink (assumed worst case)
+    // A system put leaves the PutBridge and crosses the link (`xput = nonLocal(getPipe(cmd, linkPipe))`)
+    // to `hub.in`. The hub itself is modeled register by register (QControl/RiscQ/Soc.lean hubServe).
+    hubDown: linkPipe,
+    // From a hub dispatch to a read that sees it: the output stage (1), the per-core replica pipe
+    // (linkPipe), the up-link queue (StreamFifo latency 2), the up-link (linkPipe) into the inbox, and the
+    // control block's sampling one cycle after a read's request (a read returns 4 cycles after it).
+    // Measured on RISC-Q's RTL (validation/riscq/rtl/firmware-rtl.mjs, xcore.elf): dispatch → inbox 3 + 2·linkPipe.
+    hubUp: 1 + linkPipe + 2 + linkPipe + 4,
+    // A demodulation result leaves the decoder as three up-link puts, the last two cycles after the first;
+    // the up-link queue and merge (3), the link (linkPipe), and a read returns 4 cycles after its request.
+    // Measured on RISC-Q's RTL (validation/riscq/rtl/readout-rtl.mjs, link depth 2): the beats reach the
+    // inbox 14, 15 and 16 cycles after the window closes and the halted read returns at 20 = decoder 9 + 11.
+    reportUp: 2 + 3 + linkPipe + 4,
     decoder: 9, // ReadoutDecoder.md: ComplexMul 6 + 1 + log2Up(4)
     sinkDepth: 8, // EventLink.md: consume-on-read queue of depth 8
     hubQueue: 8, // PutHub.md: one queue of depth 8 per source in front of the round-robin arbiter
@@ -176,7 +192,8 @@ export function program(spec, images, options = {}) {
 }
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const executable = path.join(root, ".lake", "build", "bin", process.platform === "win32" ? "qcontrol.exe" : "qcontrol");
+// QCONTROL_BIN pins a copy of the executable, so a long run survives a rebuild of .lake/build/bin.
+const executable = process.env.QCONTROL_BIN || path.join(root, ".lake", "build", "bin", process.platform === "win32" ? "qcontrol.exe" : "qcontrol");
 
 /** Run or check a document with the Lean executable. */
 export function execute(document, { checkTrace = false } = {}) {

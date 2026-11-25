@@ -1,6 +1,7 @@
 import Lean
 import QControl.RiscQ.Rv32
 import QControl.RiscQ.Timing
+import QControl.RiscQ.Pipe
 
 /-! Executable model of a RISC-Q system-on-chip.
 
@@ -18,8 +19,9 @@ import QControl.RiscQ.Timing
 
     Units: `atBatch` counts dspClk cycles from reset release. `atPs = atBatch · dspPeriodPs`.
     Boundaries, each also listed in `docs/riscq-controller.md`:
-    * Core timing is a cost model: one cycle per instruction, a refill after a taken control
-      transfer, an extra cycle for a load or store. Converter timing does not depend on it
+    * Core timing is the cycle model of RISC-Q's pipeline in `QControl.RiscQ.Pipe` (fetch ring,
+      branch prediction, interlock, store buffer, data-bus latencies), checked instruction by
+      instruction against RISC-Q's RTL in Verilator. Converter timing does not depend on it
       while the lead-time margin holds (`land_exact`).
     * Carrier synthesis is its latency. A pulse frame reports the scheduled codes.
     * No quantum state. Readout results and digital input edges are supplied by the program.
@@ -182,7 +184,7 @@ def Program.validate (p : Program) : Except String Unit := do
   unless m.linkPipe ≤ 64 && m.bridge ≤ 8 && m.fireToPush ≤ 8 && m.freqToPush ≤ 8 && m.coreTimeLag ≤ 256 &&
       m.waitSlack ≤ 16 && m.dacPipe ≤ 64 && m.redirectPenalty ≤ 16 && m.busPenalty ≤ 8 &&
       m.hubDown ≤ 256 && m.hubUp ≤ 256 && m.reportUp ≤ 256 && m.decoder ≤ 256 &&
-      0 < m.sinkDepth && m.sinkDepth ≤ 1024 && 0 < m.hubDown && 0 < m.hubQueue && m.hubQueue ≤ 64 do
+      0 < m.sinkDepth && m.sinkDepth ≤ 1024 && 0 < m.hubQueue && m.hubQueue ≤ 64 do
     throw "A latency parameter is out of range."
   unless 0 < p.cores.size && p.cores.size ≤ 64 do throw "Use 1–64 cores."
   for c in p.cores do
@@ -310,6 +312,8 @@ structure CoreState where
   lastFrame : String := ""
   wakeFrame : String := ""
   sources : Array String := #[]
+  /-- The core's pipeline (`QControl.RiscQ.Pipe`). -/
+  pipe : Pipe := {}
   /-- Source of the last tagged data word the core loaded. It names the operation that
       untagged instructions, such as a table-driven loop, are working on. -/
   dataSource : String := ""
@@ -359,20 +363,29 @@ structure Beat where
   /-- A `wait` frame has reported this put. -/
   announced : Bool := false
 
-/-- The board hub. Every core's system puts pass one arbiter, one per cycle. -/
+/-- The board hub (RISC-Q `src/riscq/soc/link/PutHub.scala`), register by register: per source a
+    `StreamFifo` (depth 8, latency 2) and its `m2sPipe`; the registered round-robin `grant` and `prio`;
+    `popReg`; the `s1`, `s2` and `arb` pipe registers (`s2` halts on a barrier hazard); the write-back
+    `wb`. The dispatch at `arb` leaves through one more register (`out << beat.stage()`). -/
 structure HubState where
   groups : Array UInt32 := Array.replicate groupNodes 0
   arrivers : Array (List Nat) := Array.replicate barrierIds []
   expected : Array Nat := Array.replicate barrierIds 0
   countMismatch : Bool := false
-  /-- Waiting system puts, one queue per source core, oldest first. -/
-  queues : Array (List Beat) := #[]
-  /-- The source granted last. The next scan starts after it. -/
-  granted : Option Nat := none
-  /-- An arbiter cycle is on the agenda. -/
+  /-- Per source: the FIFO (each put with the cycle its pop side shows it) and the `m2sPipe` register. -/
+  queues : Array (List (Beat × Nat)) := #[]
+  heads : Array (Option Beat) := #[]
+  grant : Option Nat := none
+  /-- `prio`: the source the round robin scans from. -/
+  prio : Nat := 0
+  popReg : Option Nat := none
+  s1 : Option Beat := none
+  s2 : Option Beat := none
+  arb : Option Beat := none
+  /-- Barrier id written back this cycle (`wb.valid`). -/
+  wb : Option Nat := none
+  /-- A hub cycle is on the agenda. -/
   serving : Bool := false
-  /-- Barrier id of the put granted last and the cycle of that grant. -/
-  lastBarrier : Option (Nat × Nat) := none
   served : Nat := 0
   maxWait : Nat := 0
   peakWaiting : Nat := 0
@@ -479,10 +492,11 @@ private def sinkJson (s : SinkState) : Json :=
     Json.mkObj [("kind", s.kind), ("count", s.events.size), ("nextSeq", s.nextSeq),
       ("events", toJson (s.events.map fun e ↦ Json.mkObj [("word", e.word.toNat), ("time", e.time.toNat), ("seq", e.seq)]))]
 
-/-- Let a stalled core retry its read on the cycle after its sink changed. -/
+/-- Let a stalled core complete its read on the cycle its sink becomes readable. Sink updates are
+    scheduled at the cycle a read first sees them, and link events apply before cores act. -/
 private def wake (core : CoreState) (cycle : Nat) (frame : String) (waitsFor : Wait → Bool) : CoreState :=
   if core.stopped.isNone && waitsFor core.wait then
-    { core with readyAt := some (cycle + 1), wakeFrame := frame }
+    { core with readyAt := some cycle, wakeFrame := frame }
   else core
 
 private def setCore (w : World) (i : Nat) (core : CoreState) : World :=
@@ -588,6 +602,8 @@ private def applyHub (p : Program) (w : World) (t : Nat) (item : Item) (ci node 
   let mut op := "dispatch"
   let mut detail : List (String × Json) := [("from", toJson (partOf p ci)), ("node", toJson node),
     ("waited", toJson waited), ("waiting", toJson waiting)]
+  -- The beat leaves the output stage, crosses the per-core replica pipe, the up-link queue and link
+  -- (`hubUp`, from riscq/soc.mjs); a read sees it from then on.
   let up := t + p.model.hubUp
   if node < localNodes + groupNodes then
     let g := node - localNodes
@@ -610,7 +626,10 @@ private def applyHub (p : Program) (w : World) (t : Nat) (item : Item) (ci node 
     detail := detail ++ [("barrier", toJson b), ("arrived", toJson arrived.length), ("expected", toJson expected)]
     if arrived.length ≥ expected then
       -- The last arrival releases every arriver with the hub's own time.
-      let t0 := (p.timeReg t).toUInt32
+      -- `hub.time := RegNext(syncTime)`. This model's time base is the batch at which a pulse opens at
+      -- its channel output for its start time: two batches behind `RegNext(syncTime)` (measured on RISC-Q's
+      -- RTL, validation/riscq/rtl/firmware-rtl.mjs).
+      let t0 := (p.timeReg t + 2).toUInt32
       for target in arrived do
         w := w.schedule up id item.pc item.source (.releaseBox target t0)
       hub := { hub with arrivers := hub.arrivers.set! b [], expected := hub.expected.set! b 0, countMismatch := mismatch }
@@ -637,64 +656,107 @@ private def applyHub (p : Program) (w : World) (t : Nat) (item : Item) (ci node 
     id, atBatch := t, atPs := 0, op, part := "hub", targets := [], parents := [cause],
     pc? := item.pc, source? := item.source, state := Json.mkObj detail }
 
-/-- A system put reaches the hub and joins the queue of its source (depth `hubQueue`). A put
-    into a full queue is dropped, as on the posted link. -/
+/-- The barrier a hub beat arrives at, if it is a barrier arrival. -/
+private def Beat.barrier (b : Beat) : Option Nat :=
+  if localNodes + groupNodes ≤ b.node && b.node < inboxNode0 then some (b.node - localNodes - groupNodes) else none
+
+/-- System puts the hub holds: in its FIFOs, its source registers and its pipe registers. -/
+private def hubHeld (h : HubState) : Nat :=
+  -- A source register being popped (`popReg`) still shows the put that `s1` already holds.
+  let heads := (h.heads.zipIdx.filter fun (b, i) ↦ b.isSome && h.popReg != some i).size
+  h.queues.foldl (fun k q ↦ k + q.length) 0 + heads +
+    [h.s1, h.s2, h.arb].foldl (fun k b ↦ k + (if b.isSome then 1 else 0)) 0
+
+/-- A system put reaches the hub (`hub.in(i)`, the `xput` flow) at cycle `t` and is pushed into its
+    source's FIFO, whose pop side shows it two cycles later (`StreamFifo`, latency 2). A put into a
+    full FIFO (depth `hubQueue`) is dropped: the input is a `Flow`, posted. -/
 private def hubArrive (p : Program) (w : World) (t : Nat) (item : Item) (ci node : Nat) (offset data : UInt32) : World :=
   Id.run do
-  let queues := if w.hub.queues.size < p.cores.size then Array.replicate p.cores.size [] else w.hub.queues
-  let queue := queues.getD ci []
+  let n := p.cores.size
+  let hub := if w.hub.queues.size < n then
+      { w.hub with queues := Array.replicate n [], heads := Array.replicate n none } else w.hub
+  let queue := hub.queues.getD ci []
   if queue.length ≥ p.model.hubQueue then
     let w := w.fault t "hub" s!"the hub queue of {partOf p ci} is full: its system put to node {node} is dropped"
     return w.emit p {
       id := s!"e{item.seq}", atBatch := t, atPs := 0, op := "drop", part := "hub", targets := [],
       parents := [item.cause], pc? := item.pc, source? := item.source,
       state := Json.mkObj [("from", toJson (partOf p ci)), ("node", toJson node), ("queued", toJson queue.length)] }
-  let beat : Beat := { item, core := ci, node, offset, data, arrived := t }
-  let mut w := { w with hub := { w.hub with queues := queues.set! ci (queue ++ [beat]) } }
+  let beat : Beat := { item, core := ci, node, offset, data, arrived := t, announced := true }
+  let queues := hub.queues.set! ci (queue ++ [((beat, t + 2) : Beat × Nat)])
+  let hub := { hub with queues := queues }
+  let waiting := hubHeld hub
+  let mut w := { w with hub := { hub with peakWaiting := max hub.peakWaiting waiting } }
+  -- Every put is held in the hub's pipeline from its arrival to its dispatch; its dispatch names
+  -- this frame as its cause, and the dispatch frame states how many puts the hub still holds.
+  w := w.emit p {
+    id := s!"e{item.seq}.wait", atBatch := t, atPs := 0, op := "wait", part := "hub", targets := [],
+    parents := [item.cause], pc? := item.pc, source? := item.source,
+    state := Json.mkObj [("from", toJson (partOf p ci)), ("node", toJson node), ("waiting", toJson waiting)] }
   unless w.hub.serving do
     w := { w with hub := { w.hub with serving := true } }
-    w := w.schedule t "hub" none none .hubServe
+    w := w.schedule (t + 2) "hub" none none .hubServe
   return w
 
-/-- One arbiter cycle. The next waiting put in round-robin order is dispatched. A barrier put
-    directly behind one for the same barrier waits one cycle for that barrier's state
-    (PutHub.md). Every put that stays behind is reported once by a `wait` frame, before the
-    dispatch it waits behind. `waiting` in a hub frame counts the reported puts still held. -/
+/-- One cycle of the hub, as the registers of `PutHub.scala` update at its end. The arbiter output
+    (`arb`) is always accepted on a one-board build, so a beat at `arb` dispatches this cycle. -/
 private def hubServe (p : Program) (w : World) (t : Nat) : World := Id.run do
   let mut w := w
-  let some ci := nextSource (w.hub.queues.map fun q ↦ !q.isEmpty) w.hub.granted
-    | return { w with hub := { w.hub with serving := false } }
-  let queue := w.hub.queues.getD ci []
-  let some beat := queue.head? | return { w with hub := { w.hub with serving := false } }
-  let barrier : Option Nat :=
-    if localNodes + groupNodes ≤ beat.node && beat.node < inboxNode0 then some (beat.node - localNodes - groupNodes)
-    else none
-  let held := match barrier, w.hub.lastBarrier with
-    | some b, some (b', cycle) => b == b' && cycle + 1 == t
-    | _, _ => false
-  let mut waiting := w.hub.queues.foldl (fun n q ↦ n + (q.filter (·.announced)).length) 0
-  let mut queues := if held then w.hub.queues else w.hub.queues.set! ci queue.tail
-  for i in [0:queues.size] do
-    let mut seen : List Beat := []
-    for b in queues[i]! do
-      seen := seen ++ [{ b with announced := true }]
-      unless b.announced do
-        waiting := waiting + 1
-        w := w.emit p {
-          id := s!"e{b.item.seq}.wait", atBatch := t, atPs := 0, op := "wait", part := "hub", targets := [],
-          parents := [b.item.cause], pc? := b.item.pc, source? := b.item.source,
-          state := Json.mkObj [("from", toJson (partOf p b.core)), ("node", toJson b.node), ("waiting", toJson waiting)] }
-    queues := queues.set! i seen
-  w := { w with hub := { w.hub with queues, peakWaiting := max w.hub.peakWaiting waiting } }
-  if !held then
-    w := { w with hub := { w.hub with
-      granted := some ci, lastBarrier := barrier.map (·, t), served := w.hub.served + 1,
-      maxWait := max w.hub.maxWait (t - beat.arrived) } }
-    let cause := if beat.announced then s!"e{beat.item.seq}.wait" else beat.item.cause
-    let left := if beat.announced then waiting - 1 else waiting
-    w := applyHub p w t beat.item beat.core beat.node beat.offset beat.data cause (t - beat.arrived) left
-  if queues.any (!·.isEmpty) then return w.schedule (t + 1) "hub" none none .hubServe
-  return { w with hub := { w.hub with serving := false } }
+  let h := w.hub
+  let n := h.heads.size
+  let valids := h.heads.map (·.isSome)
+  -- Combinational signals of this cycle.
+  let hazard := match h.s2.bind Beat.barrier with
+    | some b => (h.arb.bind Beat.barrier) == some b || h.wb == some b
+    | none => false
+  let s2Fire := h.s2.isSome && !hazard
+  let s2In := h.s2.isNone || s2Fire
+  let s1Fire := h.s1.isSome && s2In
+  let s1In := h.s1.isNone || s1Fire
+  let picked : Option Beat := match h.grant with
+    | some g => if valids.getD g false && h.popReg != some g then h.heads[g]! else none
+    | none => none
+  let pickedFire := picked.isSome && s1In
+  let advance := picked.isNone || s1In
+  -- Dispatch at `arb`.
+  if let some beat := h.arb then
+    let waiting := hubHeld h - 1
+    w := applyHub p w t beat.item beat.core beat.node beat.offset beat.data s!"e{beat.item.seq}.wait" (t - beat.arrived) waiting
+    w := { w with hub := { w.hub with served := w.hub.served + 1, maxWait := max w.hub.maxWait (t - beat.arrived) } }
+  -- Next state. (`applyHub` changed only the group words and barrier counts.)
+  let wb := match h.arb with
+    | some beat => beat.barrier
+    | none => none
+  let arb := if s2Fire then h.s2 else none
+  let s2 := if s2In then (if s1Fire then h.s1 else none) else h.s2
+  let s1 := if s1In then (if pickedFire then picked else none) else h.s1
+  let popReg := if pickedFire then h.grant else none
+  let mut grant := h.grant
+  let mut prio := h.prio
+  if advance then
+    -- `OHMasking.roundRobin(valids, prio)`: the first requesting source at or after `prio`.
+    let next := ((List.range n).map fun k ↦ (h.prio + k) % n).find? fun i ↦ valids.getD i false
+    grant := next
+    if let some g := next then prio := (g + 1) % n
+  -- Each source's `m2sPipe` takes the FIFO head when it is empty or popped (`s.ready := popReg(i)`).
+  let mut heads := h.heads
+  let mut queues := h.queues
+  for i in [0:n] do
+    let popped := h.popReg == some i
+    if h.heads[i]!.isNone || popped then
+      match queues[i]! with
+      | (beat, visible) :: rest =>
+        if visible ≤ t then
+          heads := heads.set! i (some beat)
+          queues := queues.set! i rest
+        else heads := heads.set! i none
+      | [] => heads := heads.set! i none
+  let hub := { w.hub with heads, queues, grant, prio, popReg, s1, s2, arb, wb }
+  let busy := hub.heads.any (·.isSome) || hub.queues.any (!·.isEmpty) || hub.s1.isSome || hub.s2.isSome ||
+    hub.arb.isSome || hub.wb.isSome || hub.grant.isSome || hub.popReg.isSome
+  w := { w with hub := { hub with serving := busy } }
+  if busy then return w.schedule (t + 1) "hub" none none .hubServe
+  return w
 
 /-- Apply one scheduled converter-edge, link or hub event. -/
 def applyItem (p : Program) (w : World) (item : Item) : World := Id.run do
@@ -942,8 +1004,10 @@ private def rdOf : Instr → Option Nat
 
 private def hex32 (v : UInt32) : String := "0x" ++ String.ofList (Nat.toDigits 16 v.toNat)
 
-/-- Retire one instruction of core `ci`, or finish its stalled read. -/
-def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
+/-- The architectural effect of the instruction of core `ci` that leaves execute at cycle `t`, or
+    the completion of its stalled read. `outAt`: for a store, the cycle the write leaves the core on
+    the posted link or the host window (`Pipe.acceptStore`). -/
+def retire (p : Program) (w : World) (t ci : Nat) (outAt : Nat) : World := Id.run do
   let spec := p.cores[ci]!
   let core := w.cores[ci]!
   -- Take the core out of the array so its RAM is updated in place.
@@ -981,13 +1045,12 @@ def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
   let instr := decode word spec.withMul
   if instr.isSelfJump then return stop w core "park" "parked in a self jump"
   let step := exec core.cpu instr
-  let cost := 1 + (if step.redirect then p.model.redirectPenalty else 0)
   -- Built only for an instruction that is recorded: most instructions of a long program are not.
   let base := fun (_ : Unit) ↦ ([("word", toJson word.toNat), ("text", toJson instr.text)] : List (String × Json))
   match step.access with
   | .stop reason => return stop w core "fault" reason
   | .none =>
-    let core := { core with cpu := step.cpu, readyAt := some (t + cost), retired := core.retired + 1 }
+    let core := { core with cpu := step.cpu, readyAt := some (t + 1), retired := core.retired + 1 }
     if !full then return setCore w ci core
     let write := match rdOf instr with
       | some rd => if rd == 0 then [] else [("rd", toJson rd), ("value", toJson (step.cpu.reg rd).toNat)]
@@ -998,7 +1061,7 @@ def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
       let some v := readRam core.mem op address | return stop w core "fault" s!"misaligned load at {hex32 address}"
       let tag := (core.sources[((address - ramBase) >>> 2).toNat]?).getD ""
       let core := { core with
-        cpu := step.cpu.setReg rd v, readyAt := some (t + cost + p.model.busPenalty),
+        cpu := step.cpu.setReg rd v, readyAt := some (t + 1),
         retired := core.retired + 1, dataSource := if tag == "" then core.dataSource else tag }
       if !full then return setCore w ci core
       return (setCore w ci { core with lastFrame := id, wakeFrame := "" }).emit p
@@ -1007,7 +1070,7 @@ def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
     match loadIo p t { core with cpu := step.cpu } address rd with
     | .value v core register =>
       let core := { core with
-        cpu := core.cpu.setReg rd v, readyAt := some (t + cost + p.model.busPenalty),
+        cpu := core.cpu.setReg rd v, readyAt := some (t + 1),
         retired := core.retired + 1, lastFrame := id, wakeFrame := "" }
       return (setCore w ci core).emit p (frame "read" [] (base () ++
         [("register", toJson register), ("address", toJson address.toNat), ("rd", toJson rd), ("value", toJson v.toNat)]))
@@ -1027,12 +1090,12 @@ def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
       let core := { core with mem := #[] }
       let some mem := writeRam ram op address value
         | return stop w { core with mem := ram } "fault" s!"misaligned store at {hex32 address}"
-      let core := { core with cpu := step.cpu, mem, readyAt := some (t + cost + p.model.busPenalty), retired := core.retired + 1 }
+      let core := { core with cpu := step.cpu, mem, readyAt := some (t + 1), retired := core.retired + 1 }
       if !full then return setCore w ci core
       return (setCore w ci { core with lastFrame := id, wakeFrame := "" }).emit p
         (frame "exec" [] (base () ++ [("address", toJson a), ("store", toJson value.toNat)]))
     let core := { core with
-      cpu := step.cpu, readyAt := some (t + cost + p.model.busPenalty), retired := core.retired + 1,
+      cpu := step.cpu, readyAt := some (t + 1), retired := core.retired + 1,
       lastFrame := id, wakeFrame := "" }
     let detail := base () ++ [("address", toJson a), ("store", toJson value.toNat)]
     if a ≥ hostWindow && a < hostWindow + 16777216 then
@@ -1040,7 +1103,7 @@ def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
       let (bytes, stored) := match op with
         | .sb => (1, value &&& 0xFF) | .sh => (2, value &&& 0xFFFF) | .sw => (4, value)
       w := { w with host := w.host.push (Json.mkObj [("core", ci), ("offset", a - hostWindow), ("bytes", bytes),
-        ("value", stored.toNat), ("atBatch", t), ("frame", id)]) }
+        ("value", stored.toNat), ("atBatch", outAt), ("frame", id)]) }
       return (setCore w ci core).emit p (frame "host" ["host"] (detail ++ [("offset", toJson (a - hostWindow))]))
     if op != .sw || address &&& 3 != 0 then
       return stop w { core with retired := core.retired - 1 } "fault" s!"control registers take aligned word stores ({hex32 address})"
@@ -1057,14 +1120,69 @@ def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
       w := setCore w ci core
       if node < localNodes then
         if node < spec.channels.size then
-          w := w.schedule (t + p.model.bridge + p.model.linkPipe) id (some pc.toNat) source (.put ci node offset value)
+          w := w.schedule (outAt + p.model.linkPipe) id (some pc.toNat) source (.put ci node offset value)
           return w.emit p (frame "put" [s!"{name}.link", channelPart p ci node]
             (detail ++ [("channel", toJson node), ("offset", toJson offset.toNat)]))
         w := w.fault t name s!"put to missing channel {node}"
         return w.emit p (frame "put" [s!"{name}.link"] (detail ++ [("channel", toJson node), ("dropped", true)]))
-      w := w.schedule (t + p.model.hubDown) id (some pc.toNat) source (.hub ci node offset value)
+      w := w.schedule (outAt + p.model.hubDown) id (some pc.toNat) source (.hub ci node offset value)
       return w.emit p (frame "put" [s!"{name}.link", "hub"] (detail ++ [("node", toJson node), ("offset", toJson offset.toNat)]))
     return stop w { core with retired := core.retired - 1 } "fault" s!"store to unmapped address {hex32 address}"
+
+/-- One cycle of core `ci`'s pipeline (`QControl.RiscQ.Pipe`): a redirect at register write,
+    the instruction at execute entering, waiting or leaving (its architectural effect is `retire`),
+    and every other stage moving on. The core acts again on the next cycle, or sleeps until its
+    halted read can complete once nothing else in its pipeline can change. -/
+def stepCore (p : Program) (w : World) (t ci : Nat) : World := Id.run do
+  let cfg : PipeConfig := {}
+  let spec := p.cores[ci]!
+  let core := w.cores[ci]!
+  if core.stopped.isSome then return w
+  let mut pipe := core.pipe
+  -- A misprediction at register write throws away stages 0–7 and steers fetch to the target.
+  if let some target := pipe.redirect then
+    pipe := Pipe.applyLearns cfg (Pipe.flush cfg pipe t target) t
+    return setCore w ci { core with pipe, readyAt := some (t + 1) }
+  let mut w := w
+  let mut fired := false
+  if let some slot := pipe.stages[7]! then
+    let word := (readRam core.mem .lw slot.pc).getD 0
+    let instr := decode word spec.withMul
+    -- First cycle at execute: the halt this instruction will need.
+    if pipe.exEnter.isNone then
+      let step := exec core.cpu instr
+      match step.access, instr with
+      | .store .., _ =>
+        let (accept, start, q) := Pipe.acceptStore cfg pipe t
+        pipe := { q with exEnter := some t, exFire := some (accept + 1), exBus := some start }
+      | .load .., _ =>
+        let (_, resp, q) := Pipe.startLoad cfg pipe t
+        pipe := { q with exEnter := some t, exFire := some resp }
+      | _, .mulOp .. => pipe := { pipe with exEnter := some t, exFire := some (t + cfg.mulLatency) }
+      | _, _ => pipe := { pipe with exEnter := some t, exFire := some t }
+    if pipe.exFire.all (· ≤ t) then
+      let outAt := (pipe.exBus.map (· + cfg.busToOut)).getD t
+      let before := core.cpu.pc
+      w := retire p (setCore w ci { core with pipe }) t ci outAt
+      let after := w.cores[ci]!
+      if after.wait == .none then
+        fired := true
+        -- The corrector (`BranchPlugin`): the true successor against the fetched prediction.
+        let next := after.cpu.pc
+        if next != slot.predNext then pipe := { pipe with redirect := some next }
+        match instr with
+        | .branch .. => pipe := Pipe.learn cfg pipe t slot (next != before + 4) next true
+        | .jal .. | .jalr .. => pipe := Pipe.learn cfg pipe t slot true next false
+        | _ => pure ()
+        pipe := { pipe with exEnter := none, exFire := none, exBus := none }
+  let core := w.cores[ci]!
+  if core.stopped.isSome then return setCore w ci { core with pipe }
+  let word := fun (pc : UInt32) ↦ (readRam core.mem .lw pc).getD 0
+  let moved := Pipe.applyLearns cfg (Pipe.advance cfg pipe t fired word) t
+  -- A core halted on a read whose pipeline can no longer change sleeps until the read can complete.
+  let quiet := core.wait != .none && moved == pipe
+  let readyAt := if quiet then core.readyAt else some (t + 1)
+  return setCore w ci { core with pipe := moved, readyAt }
 
 /-- Reset state. Every core starts at the base of its RAM with zeroed registers. -/
 def initial (p : Program) : World :=

@@ -45,11 +45,13 @@ test("at distance 3 the firmware returns the reference root of every node, inclu
   assert.deepEqual(c.cases.filter((x) => /^upstream test/.test(x.origin)).map((x) => [x.id, x.weight]), [[1001, 0], [1022, 1], [1051, 2]]);
   // Each syndrome is 12 values in and an id and 12 roots out, stored to the host window.
   assert.equal(c.result.summary.host.length, 14 * 13);
-  // Decode time in the model: 8,579 batches (17.2 µs at 2 ns) with no defect. A defect makes
-  // the clusters grow for more passes: 34 µs to 58 µs here.
-  assert.equal(c.cases[0].decodeBatches, 8579);
+  // Decode time on RISC-Q's core (QControl/RiscQ/Pipe.lean; every one of the run's 274,388
+  // instructions commits on the cycle RISC-Q's RTL commits it, validation/riscq/rtl/helios-rtl.mjs):
+  // 17,839 batches (35.7 µs at 2 ns) with no defect. A defect makes the clusters grow for more
+  // passes: 69 µs to 119 µs here.
+  assert.equal(c.cases[0].decodeBatches, 17839);
   const withDefect = c.cases.filter((x) => x.weight > 0).map((x) => x.decodeNs);
-  assert.ok(Math.min(...withDefect) > 33000 && Math.max(...withDefect) < 59000);
+  assert.ok(Math.min(...withDefect) > 68000 && Math.max(...withDefect) < 120000);
   // Without a defect every node is its own cluster. With defects some nodes share a root.
   assert.equal(c.cases[0].clusters, 12);
   assert.ok(c.cases.filter((x) => x.weight > 0).every((x) => x.clusters < 12));
@@ -60,9 +62,9 @@ test("at distance 5 the firmware agrees with the natively compiled upstream prog
   assert.deepEqual(c.result.summary.faults, []);
   assert.equal(c.nodes, 60);
   assert.ok(c.cases.length === 9 && c.cases.every((x) => x.matches));
-  // 94 µs without a defect and up to 285 µs with defects: the program visits every edge on every pass.
-  assert.equal(Math.round(c.cases[0].decodeNs / 1000), 94);
-  assert.ok(c.cases.every((x) => x.decodeNs < 290000));
+  // 190 µs without a defect and up to 573 µs with defects: the program visits every edge on every pass.
+  assert.equal(Math.round(c.cases[0].decodeNs / 1000), 190);
+  assert.ok(c.cases.every((x) => x.decodeNs < 575000));
 });
 
 test("at distance 7 the firmware agrees with the natively compiled upstream program", { skip: process.env.QCONTROL_SLOW ? false : "set QCONTROL_SLOW=1 (about 40 s)" }, async () => {

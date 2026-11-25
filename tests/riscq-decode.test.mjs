@@ -45,21 +45,25 @@ test("a repetition-code round decodes each syndrome, flips the frame without a p
 test("the decode path reports when the syndrome arrived, how long the lookup took and when the correction opened", async () => {
   const bundle = await run({ example: "superconducting-repetition", outcomes: { s0: 1, s1: 1 } });
   const [sample] = decodeSamples(bundle);
-  // ns after the last syndrome window closed, at 2 ns per batch: the bit is at the decoder
-  // after 43 batches, the decoder has met the other cores and reads it after 56, the three
-  // decoded bits are stored 32 batches later, and the conditioned pulse opens after 245.
+  // ns after the last syndrome window closed, at 2 ns per batch. Every instruction of every core of
+  // this run commits on the cycle RISC-Q's RTL commits it (validation/riscq/rtl/readout-rtl.mjs
+  // superconducting-repetition): the bit is readable at the decoder after 58 batches, the decoder has
+  // met the other cores and reads it after 90, the three decoded bits are stored 52 batches later,
+  // and the conditioned pulse opens after 393.
   assert.deepEqual(
     { input: sample.inputAtDecoderNs, start: sample.decodeStartNs, decode: sample.decodeNs, decoded: sample.decodedNs,
       everywhere: sample.decodedAtEveryCoreNs, pulse: sample.firstConditionedPulseNs },
-    { input: 86, start: 112, decode: 64, decoded: 176, everywhere: 196, pulse: 490 });
+    { input: 116, start: 180, decode: 104, decoded: 284, everywhere: 320, pulse: 786 });
   assert.deepEqual([sample.syndromeBits, sample.decodedBits], [2, 3]);
-  // A frame update whose bit is set stores its word 22 ns and 38 ns after the decode.
+  // A frame update whose bit is set stores its word to the host window 356 ns or 390 ns after the
+  // last syndrome window.
   const first = decodeSamples(await run({ example: "superconducting-repetition", outcomes: { s0: 1 } }))[0];
-  assert.deepEqual(first.frameUpdates.map((u) => [u.qubit, u.applied, u.frame, u.storedNs]), [[0, true, 1, 198], [4, false, undefined, undefined]]);
+  assert.deepEqual(first.frameUpdates.map((u) => [u.qubit, u.applied, u.frame, u.storedNs]), [[0, true, 1, 356], [4, false, undefined, undefined]]);
   const second = decodeSamples(await run({ example: "superconducting-repetition", outcomes: { s1: 1 } }))[0];
-  assert.deepEqual(second.frameUpdates.map((u) => [u.qubit, u.applied, u.storedNs]), [[0, false, undefined], [4, true, 214]]);
-  // The barrier arrivals of six cores wait at the hub, two cycles apart.
-  assert.deepEqual(report(bundle).hub, { served: 21, longestWaitNs: 16, peakWaiting: 4 });
+  assert.deepEqual(second.frameUpdates.map((u) => [u.qubit, u.applied, u.storedNs]), [[0, false, undefined], [4, true, 390]]);
+  // The barrier arrivals of six cores pass the hub three cycles apart (same-barrier hazard); every put
+  // is held 7 cycles from the hub input to dispatch even alone.
+  assert.deepEqual(report(bundle).hub, { served: 21, longestWaitNs: 38, peakWaiting: 5 });
 });
 
 test("two rounds decode from separate fields of the shared word", async () => {
@@ -82,15 +86,17 @@ test("two rounds decode from separate fields of the shared word", async () => {
   assert.deepEqual(reads, [0b0001, 0b1001]);
 });
 
-test("the decoder takes up to eight simultaneous syndrome bits, and each decoded bit costs 14 ns", async () => {
+test("the decoder takes up to eight simultaneous syndrome bits, and each decoded bit costs 20 ns", async () => {
   for (const k of [1, 4, 8]) {
     const sample = await limits.decodeFanIn(k);
     assert.deepEqual(sample.faults, []);
     assert.ok(sample.correct);
     // This ring's readout windows end at different times, so the syndrome bits do not meet
-    // at the hub and the last one arrives after the same 86 ns.
-    assert.equal(sample.inputAtDecoderNs, 86);
-    assert.equal(sample.decodeNs, 14 * k + 14);
+    // at the hub and the last one is readable at the decoder after the same 116 ns.
+    assert.equal(sample.inputAtDecoderNs, 116);
+    // The lookup on RISC-Q's core: a load, the table lookup, and per decoded bit a shift, mask and
+    // store (riscq/firmware.mjs decode); 17 + 10·k cycles at 2 ns.
+    assert.equal(sample.decodeNs, 20 * k + 34);
   }
 });
 

@@ -9,8 +9,21 @@
 import { Assembler } from "./rv32.mjs";
 import { MAP, LEAD, READOUT_LEAD, channelBase, sinkAddress, pack16 } from "./soc.mjs";
 
-/** Batches added to a barrier time before the first start time: lead plus delivery of the release. */
-export const SYNC_LEAD = LEAD + 32;
+/**
+ * Cycles from a segment's time read (now() or the barrier release) to the core's first issue wait:
+ * the read's own latency, the table addresses and the first loop iteration's loads. Measured 53 on the
+ * core model that matches RISC-Q's RTL (QControl/RiscQ/Pipe.lean); 64 keeps the margin RISC-Q's own LEAD
+ * keeps for its CPU jitter. Each bit fetched from another core before the segment adds FETCH_COST.
+ */
+export const SEGMENT_SETUP = 64;
+export const FETCH_COST = 14;
+/**
+ * Batches added to a barrier release before the first start time: the lead, the segment setup, and the
+ * age of the release stamp when the core reads it (the hub stamps it at dispatch; it reaches the core's
+ * inbox 3 + 2·linkPipe later and the read returns 4 after that, riscq/soc.mjs hubUp).
+ */
+export const syncLead = (spec) => LEAD + SEGMENT_SETUP + 1 + spec.linkPipe + 2 + spec.linkPipe + 4;
+export const SYNC_LEAD = LEAD + 32; // kept for older callers; compileCore uses syncLead(spec)
 /** Smallest distance from a fire's issue to its start that still lands on time, with margin. */
 export const MIN_ISSUE_LEAD = 64;
 
@@ -254,12 +267,36 @@ export class Firmware {
 
 /** Batches from the close of a readout window until the stalled result read has returned. */
 export const READ_SETTLE = 40;
-/** Core cycles budgeted to issue one operation from the table-driven loop. */
-export const TABLE_COST = 32;
+/**
+ * Core cycles to issue one operation from the table-driven loop, back to back: measured on the core
+ * model that matches RISC-Q's RTL cycle for cycle (QControl/RiscQ/Pipe.lean, validation/riscq/rtl/):
+ * four table loads (6 cycles each on the data bus), the timeCmp write and the waitTimeCmp read that
+ * waits for it to drain, the two posted stores (they drain one per 6 cycles), the loop branch.
+ * 63 cycles per write (tests/riscq-limits.test.mjs re-measures it).
+ */
+export const TABLE_COST = 63;
 
-/** Core cycles budgeted to issue one inline operation. */
+/**
+ * Core cycles to issue one inline operation, back to back, measured on the same model: 38–40 for a
+ * fire with one field or a phase offset, about 4.5 more per further field set (41–42 for two, 46 for
+ * three). A condition (`when`) adds the load of its bit (6 cycles) and its branch, which the 2-entry
+ * branch target buffer mispredicts when it skips (10 cycles): 17 at most.
+ */
 function inlineCost(op) {
-  return 20 + 5 * ((op.set?.length ?? 0) + (op.phaseOffset !== undefined ? 1 : 0)) + (op.when !== undefined ? 4 : 0);
+  return 35 + 5 * ((op.set?.length ?? 0) + (op.phaseOffset !== undefined ? 1 : 0)) + (op.when !== undefined ? 17 : 0);
+}
+
+/**
+ * Core cycles that a decode, a Pauli-frame update or a parity occupies the core, measured on the core
+ * model that matches RISC-Q's RTL (each routine run alone, between two host-window markers): a lookup
+ * decode of k syndrome bits 17 + 10·k (27 for one bit, 97 for eight; riscq/limits.mjs decodeFanIn),
+ * plus about 6 per decoded bit it publishes; a frame update 21; a parity of k bits 13 + 8·k.
+ */
+export function busyCycles(op) {
+  if (op.decode) return 17 + 10 * op.decode.width + 6 * (op.publishes?.length ?? 0);
+  if (op.frame) return 21;
+  if (op.parity) return 13 + 8 * op.parity.inputs.length;
+  return 0;
 }
 
 /**
@@ -277,6 +314,9 @@ export function issueOrder(ops, core, channelOf, cost = inlineCost) {
   for (const op of ops) {
     if (op.read) holds.push({ begin: op.at + READOUT_LEAD, end: op.read.until + READ_SETTLE });
     if (op.count) holds.push({ begin: op.at, end: op.count.until + 8 });
+    // Classical work the core does when it reaches it holds the core for its measured duration.
+    const busy = busyCycles(op);
+    if (busy) holds.push({ begin: op.at, end: op.at + busy });
   }
   const history = new Map();
   const items = [];
@@ -303,12 +343,38 @@ export function issueOrder(ops, core, channelOf, cost = inlineCost) {
     }
     earlier.push(op.at);
     history.set(key, earlier);
-    items.push({ op, issue, order, channel, floor, name });
+    items.push({ op, issue, order, channel, floor, name, key });
   }
-  // Fires precede a hold that begins at the same batch.
-  items.sort((x, y) => x.issue - y.issue || (x.hold ? 1 : 0) - (y.hold ? 1 : 0) || x.order - y.order);
-  for (let i = items.length - 2; i >= 0; i--)
-    if (!items[i].hold) items[i].issue = Math.min(items[i].issue, items[i + 1].issue - cost(items[i].op));
+  // Fires precede a hold that begins at the same batch. The backward pass can pull a write earlier
+  // than a hold (a result read, a count, classical work) that precedes it: the core must then issue it
+  // before entering the hold, and a write pulled into a hold's busy window goes before it. Sort and
+  // pass again until nothing moves (issues only decrease, so this ends).
+  const inHold = (issue) => holds.find((hold) => issue >= hold.begin - 24 && issue <= hold.end);
+  for (let changed = true; changed; ) {
+    changed = false;
+    items.sort((x, y) => x.issue - y.issue || (x.hold ? 1 : 0) - (y.hold ? 1 : 0) || x.order - y.order);
+    for (let i = items.length - 2; i >= 0; i--) {
+      if (items[i].hold) continue;
+      let issue = Math.min(items[i].issue, items[i + 1].issue - cost(items[i].op));
+      for (let hold = inHold(issue); hold; hold = inHold(issue)) issue = hold.begin - 25;
+      if (issue !== items[i].issue) {
+        items[i].issue = issue;
+        changed = true;
+      }
+    }
+    // A channel's timed queues are first in, first out: its writes must enter in start order, so an
+    // earlier write is issued no later than a later one on the same queue.
+    const queues = new Map();
+    for (const item of items) if (!item.hold) (queues.get(item.key) ?? queues.set(item.key, []).get(item.key)).push(item);
+    for (const queue of queues.values()) {
+      queue.sort((x, y) => x.order - y.order);
+      for (let k = queue.length - 2; k >= 0; k--)
+        if (queue[k].issue > queue[k + 1].issue) {
+          queue[k].issue = queue[k + 1].issue;
+          changed = true;
+        }
+    }
+  }
   for (const item of items)
     if (!item.hold && item.issue < item.floor)
       throw Error("Channel " + item.name + " cannot take this write on time: the core must issue it at batch " +
@@ -370,12 +436,13 @@ export function compileCore(spec, coreIndex, plan) {
   let writes = 0;
   for (const [segmentIndex, segment] of (plan.segments ?? []).entries()) {
     a.source("segment" + segmentIndex + "/sync");
+    const setup = FETCH_COST * (segment.fetch?.length ?? 0);
     if (segment.sync) {
       fw.barrier(segment.sync.barrier, segment.sync.members, "a0");
-      a.li("t1", SYNC_LEAD);
+      a.li("t1", syncLead(spec) + setup);
     } else {
       fw.now("a0");
-      a.li("t1", LEAD);
+      a.li("t1", LEAD + SEGMENT_SETUP + setup);
     }
     a.add("s0", "a0", "t1");
     for (const f of segment.fetch ?? []) {

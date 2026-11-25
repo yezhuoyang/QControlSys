@@ -18,14 +18,16 @@ test("the reserved rate follows the virtual machine's rule", () => {
   assert.equal(reservedRate(2, 145050), 1);
 });
 
-test("superconducting feedback: a measured bit reaches another core 86 ns after its window closes", async () => {
+test("superconducting feedback: a measured bit reaches another core 116 ns after its window closes", async () => {
   const r = report(await run({ example: "superconducting-feedforward", outcomes: { c: 1 } }));
   assert.equal(r.route.samples, 0);
-  // Decoder (9 batches) and report (8 batches at link depth 2) bring the result to the
-  // measuring core. The store, the hub and the link back bring it to every core 26 batches
-  // later. The conditioned pulse then waits for the next barrier and its schedule lead.
+  // Every instruction of this run commits on the cycle RISC-Q's RTL commits it
+  // (validation/riscq/rtl/readout-rtl.mjs). The decoder (9 batches) and the result's path to a read
+  // (11 at link depth 2) bring the result to the measuring core; its store, the hub and the link
+  // back make it readable at every core 38 batches later. The conditioned pulse then waits for the
+  // next barrier, the segment setup and its schedule lead.
   assert.deepEqual(r.feedback, [{ bit: "c", measure: "h19",
-    resultAtCoreNs: 34, publishedAtHubNs: 70, atOtherCoresNs: 86, firstConditionedPulseNs: 344 }]);
+    resultAtCoreNs: 40, publishedAtHubNs: 94, atOtherCoresNs: 116, firstConditionedPulseNs: 514 }]);
   assert.equal(r.control.periodNs, 2);
   assert.equal(r.control.widestBurst, 2);
 });
@@ -53,8 +55,9 @@ test("QCCD: a 24-channel transport cycle delays its segment by the time the core
   assert.ok(r.route.allDelivered);
   assert.equal(r.route.latencyNs.max, 5000);
   assert.equal(r.control.widestBurst, 24);
-  // Three cores each issue eight simultaneous waveforms. The burst costs 2.24 µs of preroll.
-  assert.deepEqual(r.control.prerollNs, [2240]);
+  // Three cores each issue eight simultaneous waveforms. At 63 core cycles per timed write
+  // (riscq/firmware.mjs TABLE_COST) the burst costs 4.53 µs of preroll.
+  assert.deepEqual(r.control.prerollNs, [4530]);
   // Each ion makes one journey of four hops, 20 µs in all.
   assert.deepEqual(ionJourneys(bundle).map((j) => [j.ion, j.from, j.to, j.hops, j.latencyNs]),
     [["ion-a", "S0", "S2", 4, 20000], ["ion-b", "S4", "S6", 4, 20000]]);

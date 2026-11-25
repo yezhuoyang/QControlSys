@@ -65,12 +65,14 @@ One batch is one dspClk cycle. It carries 16 DAC samples or 4 ADC samples. All t
 | Carrier update leads: carrier, phasors | 36, lanes + 36 | Same derivation. Phasors regenerate serially |
 | Generator to DAC port | adder tree + 2 | `map.py` `dac_pipe` |
 | Decoder | 9 | `ReadoutDecoder.md` |
-| Publish to every core's board | 3 × link depth + 11: 23 at link depth 4 (RISC-Q's figure), 17 on the x6y3 ring (depth 2), plus the wait at the arbiter | `PutHub.md` |
+| System put to the hub input | 2 (PutBridge) + link depth after its data-bus write starts | RTL, measured |
+| Hub, input to dispatch | 7 alone; the hub is modeled register by register (FIFOs, round robin, `s1`/`s2`/`arb`, barrier hazard, output stage) | `PutHub.scala`, RTL-checked under contention |
+| Hub dispatch to a read that sees it | 1 + link depth + 2 + link depth + 4 | RTL, measured (`xcore.elf`) |
 | Hub throughput, queue per core | 1 message per batch, 8 | `PutHub.md` |
 | Sink queue depth | 8 | `EventLink.md` |
-| Core time lag | link depth | Assumed. RISC-Q states a constant lag without a number |
-| Report to sink | 3 + 2 + link depth + 1 | Assumed worst case of the stages in `EventLink.md` |
-| Taken branch or jump, load or store | +5, +1 | Assumed upper bound from the pipeline stages in `RISCV.md`, and `LsuPlugin.md` |
+| Time register read | returns the batch time of the load's data-bus request, 5 cycles before it commits (3 in this model's time base, the channel compare time) | RTL, measured at link depths 2 and 4 |
+| Readout result to a read | decoder 9, then 2 + 3 + link depth to the inbox, and a read returns 4 later | RTL, measured |
+| Core instruction timing | the cycle model of the core's pipeline (`QControl/RiscQ/Pipe.lean`): 9 stages with `fetchLatency = 4`, a 5-cycle instruction fetch, 2-entry BTB, 6-bit GShare, redirect at register write (10 cycles), an interlock on every 1-ahead dependency, loads 6 cycles, stores through a 4-entry posted buffer that drains one per 6 cycles, multiply 3 | `src/riscq/riscv/`, RTL-checked instruction by instruction |
 
 [Lean model](../QControl/RiscQ/Soc.lean) · [Timing contracts and proofs](../QControl/RiscQ/Timing.lean) · [RV32I semantics](../QControl/RiscQ/Rv32.lean) · [Address map and latency parameters](../riscq/soc.mjs)
 
@@ -89,11 +91,11 @@ node validation/decoders/helios/make-reference.mjs    # rebuild references and i
 
 | Distance (rounds) | Nodes | Decode time in the model | Checked against |
 | --- | --- | --- | --- |
-| 3 (3) | 12 | 17 µs with no defect, 34 µs to 58 µs with defects | Helios's own test vectors and the natively compiled program: 14 of 14 syndromes |
-| 5 (5) | 60 | 94 µs to 285 µs | the natively compiled program: 9 of 9 |
-| 7 (7) | 168 | 274 µs to 813 µs | the natively compiled program: 7 of 7 |
+| 3 (3) | 12 | 35.7 µs with no defect, 69 µs to 119 µs with defects | Helios's own test vectors and the natively compiled program: 14 of 14 syndromes |
+| 5 (5) | 60 | 190 µs to 573 µs | the natively compiled program: 9 of 9 |
+| 7 (7) | 168 | 547 µs to 1.61 ms | the natively compiled program: 7 of 7 |
 
-For comparison, the same algorithm in FPGA logic is reported at 56 ns for a worst-case distance-3 pattern, and 65 ns and 90 ns on average at distances 5 and 7 for p = 0.001 (arXiv:2603.16203). The compiled program is a reference model that visits every edge on every pass, and it runs here on a soft core with the assumed cost of one batch per instruction. The comparison shows what decoding in control-core software costs, not what Helios costs. The program reports the root node of every node. It does not derive a correction, so it is not yet wired to `decode_syndrome` on a machine: the eight-transmon ring is too small for a surface code. Micro Blossom's embedded MWPM firmware targets `riscv32i` too, but needs its accelerator in the FPGA fabric, which this model does not have.
+For comparison, the same algorithm in FPGA logic is reported at 56 ns for a worst-case distance-3 pattern, and 65 ns and 90 ns on average at distances 5 and 7 for p = 0.001 (arXiv:2603.16203). The compiled program is a reference model that visits every edge on every pass, and it runs here on RISC-Q's soft core: at distance 3 every one of its 274,388 instructions commits on the cycle RISC-Q's RTL commits it in Verilator (`validation/riscq/rtl/helios-rtl.mjs`). The comparison shows what decoding in control-core software costs, not what Helios costs. The program reports the root node of every node. It does not derive a correction, so it is not yet wired to `decode_syndrome` on a machine: the eight-transmon ring is too small for a surface code. Micro Blossom's embedded MWPM firmware targets `riscv32i` too, but needs its accelerator in the FPGA fabric, which this model does not have.
 
 [Build flow](../riscq/toolchain.mjs) · [Decoder module](../riscq/decoders/helios.mjs) · [File layer](../riscq/decoders/libc/rq_libc.c) · [Vendored source, vectors and images](../validation/decoders/helios/) · [Tests](../tests/riscq-helios.test.mjs)
 
@@ -166,7 +168,9 @@ The tests replay runs and require the state the page rebuilds at the last frame 
 
 **Conformance tests, against independent references.** Arithmetic, shifts, comparisons, multiplies, loads, stores, branches and links are checked against values computed outside the model, and every word the assembler emits is decoded by Lean as the same instruction. Gate decompositions are checked as 2×2 matrices up to a global phase. [Instruction semantics](../tests/riscq-rv32.test.mjs) · [Superconducting path](../tests/riscq-superconducting.test.mjs) · [QCCD path](../tests/riscq-qccd.test.mjs) · [Neutral-atom path](../tests/riscq-neutral.test.mjs)
 
-**Assumed or schematic.** The three assumed latencies in the table above. The arbiter starts its round at core 0 and is modeled at the dispatch stage. The cost model of the core: one batch per instruction plus the two penalties. Pulse timing does not depend on it while the lead margin holds, which is what `land_exact` states. Decode times do depend on it. The controller floorplan positions. The mapping of one Studio time unit to one shuttle. The path inside a neutral-atom move. The positions of the ring written as a hardware design.
+**Checked against RISC-Q's RTL.** RISC-Q's SpinalHDL is built with its own flow and simulated in Verilator (`riscq/rtl.mjs`, `validation/riscq/rtl/`); the same program document runs there and in Lean. Every instruction of every core commits on the same cycle, and pulses, host writes and hub traffic land on the same cycles, for: 16 micro-benchmarks of the core, the Helios decoder (274,388 instructions), RISC-Q's `pulse_sched.elf` and `xcore.elf`, a 4-core hub contention test, the superconducting feed-forward example (8 cores) and the repetition-code system calls with the decoder core (9 cores). See `docs/control-fidelity-audit.md`.
+
+**Assumed or schematic.** The controller floorplan positions. The mapping of one Studio time unit to one shuttle. The path inside a neutral-atom move. The positions of the ring written as a hardware design.
 
 **Not modeled.** Carrier synthesis is represented by its latency. A pulse frame reports the scheduled codes, and a waveform is drawn from them for display. Electrode voltages, ion motion and heating remain QCCD Studio's models. A frequency step is not phase continuous on the RISC-Q generator. The two ring pairs whose CZ needs a pulse on the second excited level are not offered. Multi-board operation over White Rabbit, interrupts and CSRs are absent.
 
@@ -178,22 +182,22 @@ QuantumOS models each service of a fault-tolerant computer by one latency and on
 | --- | --- | --- |
 | Route latency | ZAC 14-qubit program, 26 rearrangement jobs | 90.5 µs to 145.1 µs, median 101.2 µs. One declared latency of 145.1 µs overcharges the median route by 43% |
 | Route latency | Studio rotation, 4 cycles of 24 control channels | 5 µs per cycle. Issuing the 24 simultaneous waveforms delays the segment by 2.24 µs |
-| Feedback | Transmon ring, measured bit conditions an X on another core | Result at the measuring core 34 ns after the window closes, at the hub 70 ns, at every core 86 ns, conditioned pulse 344 ns |
-| Issue rate | Table loop at 100 MHz | At most 29 posted writes per µs per core, two per timed write |
+| Feedback | Transmon ring, measured bit conditions an X on another core | Result at the measuring core 40 ns after the window closes, dispatched at the hub 94 ns, readable at every core 116 ns, conditioned pulse 514 ns |
+| Issue rate | Table loop | One timed write per 63 core cycles (two posted stores each): 1.6 per µs at 100 MHz, 7.9 per µs at 500 MHz |
 | Program memory | H2 GHZ program | 4 words per timed write. 16 control channels on one core need 16,577 words and the core RAM holds 16,064 |
-| Gate concurrency | *n* pulses on one batch from one core, 100 MHz | All open on the same batch after (*n* − 1) · 32 batches of preroll: 480 batches for 16 pulses |
-| Pulse rate | Back-to-back train of 60 pulses on one channel | Shortest pulse 48, 31, 29 and 16 batches at queue depth 1, 4, 8 and 32 |
-| Link depth | One pulse issued 96 batches ahead | On time up to 13 link stages. At 14 the phase lands late while the window still opens. This depends on the assumed core time lag |
-| Classical bandwidth of the hub | *n* cores publish one bit on the same batch, 500 MHz | One bit per batch for the whole board: 500 bits/µs. Bit *k* reaches every core after 23 + *k* batches. One core offers a bit every 4 batches, so four cores fill the hub and eight overflow its queues |
-| Barrier | *n* cores arrive on the same batch | Every core holds the common time after 23 + 2 · (*n* − 1) batches at link depth 4: 37 batches for 8 cores, which is 74 ns at a 500 MHz clock and 370 ns at 100 MHz |
-| Syndrome to decoder | Repetition-code round, 2 syndrome bits | The last bit is in the decoder's board register 86 ns after its window closes. The same 86 ns holds for 8 bits here, because this ring's readout windows end at different times |
-| Decode | Lookup decoder on a RISC-Q core | The decoder has met the other cores and reads the syndrome at 112 ns. The lookup and stores take 14 ns plus 14 ns per decoded bit, and 8 ns more for each decoded bit that is published to another core: 64 ns for three bits with one published, decoded at 176 ns |
-| Pauli-frame update | Frame word in the decoder's RAM, no pulse | The first update is stored 22 ns after the decode, the second 16 ns later |
-| Feed-forward through the decoder | X on a data qubit conditioned on a decoded bit | The decoded bit is at every core at 196 ns and the pulse opens at 490 ns. A pulse conditioned directly on a measured bit opens at 344 ns |
+| Gate concurrency | *n* pulses on one batch from one core, 100 MHz | All open on the same batch after (*n* − 1) · 63 batches of preroll: 945 batches for 16 pulses |
+| Pulse rate | Back-to-back train of 60 pulses on one channel | Shortest pulse 63, 60, 56 and 30 batches at queue depth 1, 4, 8 and 32 |
+| Link depth | One pulse, schedule lead plus the measured segment setup | On time up to 36 link stages. At 37 the phase lands late while the window still opens |
+| Classical bandwidth of the hub | *n* cores publish one bit on the same batch, 500 MHz | One bit per batch for the whole board: 500 bits/µs. Bit *k* is readable at every core 29 + *k* batches after its store. A core offers a bit every 6 batches (its posted stores drain one per 6 cycles), so six cores fill the hub and eight overflow its queues |
+| Barrier | *n* cores arrive on the same batch | Arrivals for one barrier pass the hub 3 cycles apart (it holds one while the previous is written back). Every core reads the common time 32 + 3 · (*n* − 2) batches after the stores at link depth 4: 50 batches for 8 cores |
+| Syndrome to decoder | Repetition-code round, 2 syndrome bits | The last bit is readable at the decoder 116 ns after its window closes. The same 116 ns holds for 8 bits here, because this ring's readout windows end at different times |
+| Decode | Lookup decoder on a RISC-Q core | The decoder has met the other cores and reads the syndrome at 180 ns. The lookup and stores take 17 + 10 · *k* cycles for *k* syndrome bits: 104 ns here, decoded at 284 ns |
+| Pauli-frame update | Frame word in the decoder's RAM, no pulse | Stored to the host window 356 ns (first update) or 390 ns (second) after the last syndrome window |
+| Feed-forward through the decoder | X on a data qubit conditioned on a decoded bit | The decoded bit is readable at every core at 320 ns and the pulse opens at 786 ns. A pulse conditioned directly on a measured bit opens at 514 ns |
 
 [Limit sweeps](../riscq/limits.mjs) · [Their tests](../tests/riscq-limits.test.mjs)
 
-These are costs of the classical controller and of the scheduled operations in the model. They are not measurements of hardware, and they say nothing about gate fidelity. The decoder here is firmware on a soft core, with the assumed cost of one batch per instruction. A decoder in dedicated logic would have other numbers. The hub carries one bit per message, so the syndrome traffic of a large surface-code machine, thousands of bits per microsecond, would need a wider path than this hub.
+These are costs of the classical controller and of the scheduled operations in the model. They are not measurements of hardware, and they say nothing about gate fidelity. The decoder here is firmware on RISC-Q's soft core, timed by the pipeline model that matches its RTL. A decoder in dedicated logic would have other numbers. The hub carries one bit per message, so the syndrome traffic of a large surface-code machine, thousands of bits per microsecond, would need a wider path than this hub.
 
 ## What comes next
 

@@ -68,7 +68,10 @@ test("pulse_sched.elf schedules one gate pulse that opens exactly at its start t
   const store = byId.get(fire.parents[0]);
   assert.equal(store.op, "put");
   assert.equal(store.state.text, "sw x0, 0(x6)");
-  assert.equal(fire.atBatch - store.atBatch, 1 + spec.linkPipe);
+  // The store is accepted at execute and posted: its data-bus write starts two cycles later (here one
+  // more, behind the start-time write before it), leaves the PutBridge two cycles after that, then
+  // crosses the link. On RISC-Q's RTL the pulse opens on the same batch (validation/riscq/rtl/firmware-rtl.mjs).
+  assert.equal(fire.atBatch - store.atBatch, 4 + spec.linkPipe);
   assert.equal(run.summary.cores[0].stopped, "parked in a self jump");
 });
 
@@ -114,13 +117,16 @@ test("xcore.elf: two cores publish, signal, rendezvous and schedule from one bar
   const [pulse] = run.summary.pulses;
   assert.deepEqual([pulse.converter, pulse.opens, pulse.dur], ["dac1", t0 + 1024, 6]);
   assert.equal(run.summary.hub.countMismatch, false);
-  // PutHub.md: a publish reaches every core's board 23 cycles after the store.
+  // A publish is readable at every core 29 cycles after its store commits: on RISC-Q's RTL the store
+  // commits at 18, the hub dispatches it at 32 (out at 33), the inbox takes it at 43, and a read
+  // returns 4 cycles after its request.
   const publish = run.frames.find((f) => f.op === "put" && f.state.node === 16);
   const board = run.frames.find((f) => f.op === "board");
-  assert.equal(board.atBatch - publish.atBatch, 23);
-  // RISC-Q reports about 46 cycles from reset release to the scheduled barrier (XcoreCpuSim).
+  assert.equal(board.atBatch - publish.atBatch, 29);
+  // The read of the release commits 72 cycles after reset release, the cycle RISC-Q's RTL commits it
+  // (validation/riscq/rtl/firmware-rtl.mjs: every instruction of both cores commits on the RTL's cycle).
   const resumed = run.frames.find((f) => f.op === "resume" && f.state.register === "release");
-  assert.ok(resumed.atBatch >= 36 && resumed.atBatch <= 56, "barrier released at " + resumed.atBatch);
+  assert.equal(resumed.atBatch, 72);
 });
 
 test("host_window.elf writes its ramp, byte lanes and sentinel, then reports completion", async () => {
