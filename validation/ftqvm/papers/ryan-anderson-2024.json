@@ -26,7 +26,7 @@
   ],
   "command": "node riscq/ftqvm/papers.mjs quantinuum"
  },
- "generated": "2026-11-25T10:00:04.847Z",
+ "generated": "2026-11-25T15:29:21.433Z",
  "design": {
   "id": "quantinuum-h2",
   "profile": {
@@ -8479,19 +8479,23 @@
        "channels": [
         [
          "pulse",
-         "b0"
+         "b0",
+         0
         ],
         [
          "pulse",
-         "b1"
+         "b1",
+         1
         ],
         [
          "pulse",
-         "b2"
+         "b2",
+         2
         ],
         [
          "pulse",
-         "b3"
+         "b3",
+         3
         ]
        ],
        "sites": []
@@ -8503,19 +8507,23 @@
        "channels": [
         [
          "pulse",
-         "b4"
+         "b4",
+         4
         ],
         [
          "pulse",
-         "b5"
+         "b5",
+         5
         ],
         [
          "pulse",
-         "b6"
+         "b6",
+         6
         ],
         [
          "pulse",
-         "b7"
+         "b7",
+         7
         ]
        ],
        "sites": []
@@ -8527,19 +8535,23 @@
        "channels": [
         [
          "pulse",
-         "b8"
+         "b8",
+         8
         ],
         [
          "pulse",
-         "b9"
+         "b9",
+         9
         ],
         [
          "pulse",
-         "b10"
+         "b10",
+         10
         ],
         [
          "pulse",
-         "b11"
+         "b11",
+         11
         ]
        ],
        "sites": []
@@ -8551,19 +8563,23 @@
        "channels": [
         [
          "pulse",
-         "b12"
+         "b12",
+         12
         ],
         [
          "pulse",
-         "b13"
+         "b13",
+         13
         ],
         [
          "pulse",
-         "b14"
+         "b14",
+         14
         ],
         [
          "pulse",
-         "b15"
+         "b15",
+         15
         ]
        ],
        "sites": []
@@ -8575,19 +8591,23 @@
        "channels": [
         [
          "pulse",
-         "b16"
+         "b16",
+         0
         ],
         [
          "pulse",
-         "b17"
+         "b17",
+         1
         ],
         [
          "pulse",
-         "b18"
+         "b18",
+         2
         ],
         [
          "pulse",
-         "b19"
+         "b19",
+         3
         ]
        ],
        "sites": []
@@ -8599,19 +8619,23 @@
        "channels": [
         [
          "pulse",
-         "b20"
+         "b20",
+         4
         ],
         [
          "pulse",
-         "b21"
+         "b21",
+         5
         ],
         [
          "pulse",
-         "b22"
+         "b22",
+         6
         ],
         [
          "pulse",
-         "b23"
+         "b23",
+         7
         ]
        ],
        "sites": []
@@ -8623,19 +8647,23 @@
        "channels": [
         [
          "pulse",
-         "b24"
+         "b24",
+         8
         ],
         [
          "pulse",
-         "b25"
+         "b25",
+         9
         ],
         [
          "pulse",
-         "b26"
+         "b26",
+         10
         ],
         [
          "pulse",
-         "b27"
+         "b27",
+         11
         ]
        ],
        "sites": []
@@ -8647,19 +8675,23 @@
        "channels": [
         [
          "pulse",
-         "b28"
+         "b28",
+         0
         ],
         [
          "pulse",
-         "b29"
+         "b29",
+         1
         ],
         [
          "pulse",
-         "b30"
+         "b30",
+         2
         ],
         [
          "pulse",
-         "b31"
+         "b31",
+         3
         ]
        ],
        "sites": []
@@ -8671,19 +8703,23 @@
        "channels": [
         [
          "pulse",
-         "b32"
+         "b32",
+         4
         ],
         [
          "pulse",
-         "b33"
+         "b33",
+         5
         ],
         [
          "pulse",
-         "b34"
+         "b34",
+         6
         ],
         [
          "pulse",
-         "b35"
+         "b35",
+         7
         ]
        ],
        "sites": []
@@ -8695,19 +8731,23 @@
        "channels": [
         [
          "pulse",
-         "b36"
+         "b36",
+         8
         ],
         [
          "pulse",
-         "b37"
+         "b37",
+         9
         ],
         [
          "pulse",
-         "b38"
+         "b38",
+         10
         ],
         [
          "pulse",
-         "b39"
+         "b39",
+         11
         ]
        ],
        "sites": []
@@ -8719,19 +8759,23 @@
        "channels": [
         [
          "pulse",
-         "p0"
+         "p0",
+         12
         ],
         [
          "pulse",
-         "p1"
+         "p1",
+         13
         ],
         [
          "pulse",
-         "p2"
+         "p2",
+         14
         ],
         [
          "pulse",
-         "p3"
+         "p3",
+         15
         ]
        ],
        "sites": []
@@ -8743,19 +8787,23 @@
        "channels": [
         [
          "pulse",
-         "p4"
+         "p4",
+         0
         ],
         [
          "pulse",
-         "p5"
+         "p5",
+         1
         ],
         [
          "pulse",
-         "p6"
+         "p6",
+         2
         ],
         [
          "pulse",
-         "p7"
+         "p7",
+         3
         ]
        ],
        "sites": []
@@ -8767,19 +8815,23 @@
        "channels": [
         [
          "pulse",
-         "p8"
+         "p8",
+         4
         ],
         [
          "pulse",
-         "p9"
+         "p9",
+         5
         ],
         [
          "pulse",
-         "p10"
+         "p10",
+         6
         ],
         [
          "pulse",
-         "p11"
+         "p11",
+         7
         ]
        ],
        "sites": []
@@ -8791,19 +8843,23 @@
        "channels": [
         [
          "pulse",
-         "p12"
+         "p12",
+         8
         ],
         [
          "pulse",
-         "p13"
+         "p13",
+         9
         ],
         [
          "pulse",
-         "p14"
+         "p14",
+         10
         ],
         [
          "pulse",
-         "p15"
+         "p15",
+         11
         ]
        ],
        "sites": []
@@ -8815,19 +8871,23 @@
        "channels": [
         [
          "pulse",
-         "p16"
+         "p16",
+         0
         ],
         [
          "pulse",
-         "p17"
+         "p17",
+         1
         ],
         [
          "pulse",
-         "p18"
+         "p18",
+         2
         ],
         [
          "pulse",
-         "p19"
+         "p19",
+         3
         ]
        ],
        "sites": []
@@ -8839,19 +8899,23 @@
        "channels": [
         [
          "pulse",
-         "p20"
+         "p20",
+         4
         ],
         [
          "pulse",
-         "p21"
+         "p21",
+         5
         ],
         [
          "pulse",
-         "p22"
+         "p22",
+         6
         ],
         [
          "pulse",
-         "p23"
+         "p23",
+         7
         ]
        ],
        "sites": []
@@ -8863,19 +8927,23 @@
        "channels": [
         [
          "pulse",
-         "p24"
+         "p24",
+         8
         ],
         [
          "pulse",
-         "p25"
+         "p25",
+         9
         ],
         [
          "pulse",
-         "p26"
+         "p26",
+         10
         ],
         [
          "pulse",
-         "p27"
+         "p27",
+         11
         ]
        ],
        "sites": []
@@ -8887,19 +8955,23 @@
        "channels": [
         [
          "pulse",
-         "p28"
+         "p28",
+         12
         ],
         [
          "pulse",
-         "p29"
+         "p29",
+         13
         ],
         [
          "pulse",
-         "p30"
+         "p30",
+         14
         ],
         [
          "pulse",
-         "p31"
+         "p31",
+         15
         ]
        ],
        "sites": []
@@ -8911,19 +8983,23 @@
        "channels": [
         [
          "pulse",
-         "p32"
+         "p32",
+         0
         ],
         [
          "pulse",
-         "p33"
+         "p33",
+         1
         ],
         [
          "pulse",
-         "p34"
+         "p34",
+         2
         ],
         [
          "pulse",
-         "p35"
+         "p35",
+         3
         ]
        ],
        "sites": []
@@ -8935,19 +9011,23 @@
        "channels": [
         [
          "pulse",
-         "p36"
+         "p36",
+         4
         ],
         [
          "pulse",
-         "p37"
+         "p37",
+         5
         ],
         [
          "pulse",
-         "p38"
+         "p38",
+         6
         ],
         [
          "pulse",
-         "p39"
+         "p39",
+         7
         ]
        ],
        "sites": []
@@ -8959,19 +9039,23 @@
        "channels": [
         [
          "pulse",
-         "p40"
+         "p40",
+         8
         ],
         [
          "pulse",
-         "p41"
+         "p41",
+         9
         ],
         [
          "pulse",
-         "p42"
+         "p42",
+         10
         ],
         [
          "pulse",
-         "p43"
+         "p43",
+         11
         ]
        ],
        "sites": []
@@ -8983,19 +9067,23 @@
        "channels": [
         [
          "pulse",
-         "p44"
+         "p44",
+         0
         ],
         [
          "pulse",
-         "p45"
+         "p45",
+         1
         ],
         [
          "pulse",
-         "p46"
+         "p46",
+         2
         ],
         [
          "pulse",
-         "p47"
+         "p47",
+         3
         ]
        ],
        "sites": []
@@ -9007,19 +9095,23 @@
        "channels": [
         [
          "pulse",
-         "p48"
+         "p48",
+         4
         ],
         [
          "pulse",
-         "p49"
+         "p49",
+         5
         ],
         [
          "pulse",
-         "p50"
+         "p50",
+         6
         ],
         [
          "pulse",
-         "p51"
+         "p51",
+         7
         ]
        ],
        "sites": []
@@ -9031,19 +9123,23 @@
        "channels": [
         [
          "pulse",
-         "p52"
+         "p52",
+         8
         ],
         [
          "pulse",
-         "p53"
+         "p53",
+         9
         ],
         [
          "pulse",
-         "p54"
+         "p54",
+         10
         ],
         [
          "pulse",
-         "p55"
+         "p55",
+         11
         ]
        ],
        "sites": []
@@ -9055,19 +9151,23 @@
        "channels": [
         [
          "pulse",
-         "p56"
+         "p56",
+         12
         ],
         [
          "pulse",
-         "p57"
+         "p57",
+         13
         ],
         [
          "pulse",
-         "p58"
+         "p58",
+         14
         ],
         [
          "pulse",
-         "p59"
+         "p59",
+         15
         ]
        ],
        "sites": []
@@ -9079,19 +9179,23 @@
        "channels": [
         [
          "pulse",
-         "p60"
+         "p60",
+         0
         ],
         [
          "pulse",
-         "p61"
+         "p61",
+         1
         ],
         [
          "pulse",
-         "p62"
+         "p62",
+         2
         ],
         [
          "pulse",
-         "p63"
+         "p63",
+         3
         ]
        ],
        "sites": []
@@ -9103,19 +9207,23 @@
        "channels": [
         [
          "pulse",
-         "m0"
+         "m0",
+         4
         ],
         [
          "pulse",
-         "m1"
+         "m1",
+         5
         ],
         [
          "pulse",
-         "m2"
+         "m2",
+         6
         ],
         [
          "pulse",
-         "m3"
+         "m3",
+         7
         ]
        ],
        "sites": []
@@ -9127,19 +9235,23 @@
        "channels": [
         [
          "pulse",
-         "m4"
+         "m4",
+         8
         ],
         [
          "pulse",
-         "m5"
+         "m5",
+         9
         ],
         [
          "pulse",
-         "m6"
+         "m6",
+         10
         ],
         [
          "pulse",
-         "m7"
+         "m7",
+         11
         ]
        ],
        "sites": []
@@ -9151,19 +9263,23 @@
        "channels": [
         [
          "pulse",
-         "m8"
+         "m8",
+         0
         ],
         [
          "pulse",
-         "m9"
+         "m9",
+         1
         ],
         [
          "pulse",
-         "m10"
+         "m10",
+         2
         ],
         [
          "pulse",
-         "m11"
+         "m11",
+         3
         ]
        ],
        "sites": []
@@ -9175,19 +9291,23 @@
        "channels": [
         [
          "pulse",
-         "m12"
+         "m12",
+         4
         ],
         [
          "pulse",
-         "m13"
+         "m13",
+         5
         ],
         [
          "pulse",
-         "m14"
+         "m14",
+         6
         ],
         [
          "pulse",
-         "m15"
+         "m15",
+         7
         ]
        ],
        "sites": []
@@ -9199,19 +9319,23 @@
        "channels": [
         [
          "pulse",
-         "m16"
+         "m16",
+         8
         ],
         [
          "pulse",
-         "m17"
+         "m17",
+         9
         ],
         [
          "pulse",
-         "m18"
+         "m18",
+         10
         ],
         [
          "pulse",
-         "m19"
+         "m19",
+         11
         ]
        ],
        "sites": []
@@ -9223,19 +9347,23 @@
        "channels": [
         [
          "pulse",
-         "m20"
+         "m20",
+         12
         ],
         [
          "pulse",
-         "m21"
+         "m21",
+         13
         ],
         [
          "pulse",
-         "m22"
+         "m22",
+         14
         ],
         [
          "pulse",
-         "m23"
+         "m23",
+         15
         ]
        ],
        "sites": []
@@ -9247,19 +9375,23 @@
        "channels": [
         [
          "pulse",
-         "m24"
+         "m24",
+         0
         ],
         [
          "pulse",
-         "m25"
+         "m25",
+         1
         ],
         [
          "pulse",
-         "m26"
+         "m26",
+         2
         ],
         [
          "pulse",
-         "m27"
+         "m27",
+         3
         ]
        ],
        "sites": []
@@ -9271,19 +9403,23 @@
        "channels": [
         [
          "pulse",
-         "m28"
+         "m28",
+         4
         ],
         [
          "pulse",
-         "m29"
+         "m29",
+         5
         ],
         [
          "pulse",
-         "m30"
+         "m30",
+         6
         ],
         [
          "pulse",
-         "m31"
+         "m31",
+         7
         ]
        ],
        "sites": []
@@ -9295,19 +9431,23 @@
        "channels": [
         [
          "pulse",
-         "m32"
+         "m32",
+         8
         ],
         [
          "pulse",
-         "m33"
+         "m33",
+         9
         ],
         [
          "pulse",
-         "m34"
+         "m34",
+         10
         ],
         [
          "pulse",
-         "m35"
+         "m35",
+         11
         ]
        ],
        "sites": []
@@ -9319,19 +9459,23 @@
        "channels": [
         [
          "pulse",
-         "m36"
+         "m36",
+         0
         ],
         [
          "pulse",
-         "m37"
+         "m37",
+         1
         ],
         [
          "pulse",
-         "m38"
+         "m38",
+         2
         ],
         [
          "pulse",
-         "m39"
+         "m39",
+         3
         ]
        ],
        "sites": []
@@ -9343,7 +9487,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         4
         ],
         [
          "dio",
@@ -9359,7 +9504,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         5
         ],
         [
          "dio",
@@ -9375,7 +9521,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         6
         ],
         [
          "dio",
@@ -9391,7 +9538,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -9407,7 +9555,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         8
         ],
         [
          "dio",
@@ -9423,7 +9572,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         9
         ],
         [
          "dio",
@@ -9439,7 +9589,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         10
         ],
         [
          "dio",
@@ -9455,7 +9606,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         11
         ],
         [
          "dio",
@@ -9471,7 +9623,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         12
         ],
         [
          "dio",
@@ -9487,7 +9640,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         13
         ],
         [
          "dio",
@@ -9503,7 +9657,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         14
         ],
         [
          "dio",
@@ -9519,7 +9674,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         15
         ],
         [
          "dio",
@@ -9535,7 +9691,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         0
         ],
         [
          "dio",
@@ -9551,7 +9708,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         0
         ],
         [
          "dio",
@@ -9567,7 +9725,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         1
         ],
         [
          "dio",
@@ -9583,7 +9742,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         2
         ],
         [
          "dio",

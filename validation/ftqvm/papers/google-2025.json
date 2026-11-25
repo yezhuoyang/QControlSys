@@ -25,7 +25,7 @@
   ],
   "command": "node riscq/ftqvm/papers.mjs google 10"
  },
- "generated": "2026-11-25T09:58:38.390Z",
+ "generated": "2026-11-25T15:28:14.903Z",
  "device": {
   "id": "google-willow",
   "title": "Google 105-qubit processor (Willow), distance-7 patch",
@@ -5873,23 +5873,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -5903,27 +5908,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -5937,27 +5948,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -5971,27 +5988,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6005,27 +6028,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6039,27 +6068,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6077,7 +6112,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -6093,7 +6129,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -6109,7 +6146,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -6125,7 +6163,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -6141,7 +6180,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -6153,23 +6193,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6183,27 +6228,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6217,31 +6268,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6255,31 +6313,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6293,31 +6358,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6331,31 +6403,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6369,31 +6448,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6407,27 +6493,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6441,27 +6533,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6475,31 +6573,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6513,31 +6618,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6551,31 +6663,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6589,31 +6708,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6627,31 +6753,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6665,27 +6798,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6699,27 +6838,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6733,31 +6878,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6771,31 +6923,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6809,31 +6968,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6847,31 +7013,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6885,31 +7058,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6923,27 +7103,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6957,27 +7143,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -6991,31 +7183,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7029,31 +7228,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7067,31 +7273,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7105,31 +7318,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7143,31 +7363,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7181,27 +7408,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7215,27 +7448,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7249,31 +7488,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7287,31 +7533,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7325,31 +7578,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7363,31 +7623,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7401,31 +7668,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7439,27 +7713,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7473,23 +7753,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7503,27 +7788,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7537,27 +7828,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7571,27 +7868,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7605,27 +7908,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7639,27 +7948,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7673,23 +7988,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7703,31 +8023,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7741,31 +8068,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7779,31 +8113,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7817,31 +8158,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7855,31 +8203,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7893,31 +8248,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7931,31 +8293,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -7969,31 +8338,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8007,31 +8383,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8045,31 +8428,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8083,31 +8473,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8121,31 +8518,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8159,31 +8563,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8197,31 +8608,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8235,31 +8653,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8273,31 +8698,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8311,31 +8743,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8349,31 +8788,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8387,31 +8833,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8425,31 +8878,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8463,31 +8923,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8501,31 +8968,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8539,31 +9013,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8577,31 +9058,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8615,31 +9103,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8653,31 +9148,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8691,31 +9193,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8729,31 +9238,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8767,31 +9283,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8805,31 +9328,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8843,31 +9373,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8881,31 +9418,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8919,31 +9463,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8957,31 +9508,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -8995,31 +9553,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9033,31 +9598,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9071,23 +9643,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9101,23 +9678,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9131,23 +9713,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9161,23 +9748,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9191,23 +9783,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9221,23 +9818,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9251,23 +9853,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9281,23 +9888,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9311,23 +9923,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9341,23 +9958,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         6
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         6
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         6
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9371,23 +9993,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -9401,23 +10028,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33392,23 +34024,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33422,27 +34059,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33456,27 +34099,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33490,27 +34139,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33524,27 +34179,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33558,27 +34219,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33596,7 +34263,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -33612,7 +34280,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -33628,7 +34297,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -33644,7 +34314,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -33660,7 +34331,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -33672,23 +34344,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33702,27 +34379,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33736,31 +34419,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33774,31 +34464,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33812,31 +34509,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33850,31 +34554,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33888,31 +34599,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33926,27 +34644,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33960,27 +34684,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -33994,31 +34724,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34032,31 +34769,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34070,31 +34814,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34108,31 +34859,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34146,31 +34904,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34184,27 +34949,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34218,27 +34989,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34252,31 +35029,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34290,31 +35074,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34328,31 +35119,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34366,31 +35164,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34404,31 +35209,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34442,27 +35254,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34476,27 +35294,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34510,31 +35334,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34548,31 +35379,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34586,31 +35424,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34624,31 +35469,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34662,31 +35514,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34700,27 +35559,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34734,27 +35599,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34768,31 +35639,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34806,31 +35684,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34844,31 +35729,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34882,31 +35774,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34920,31 +35819,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34958,27 +35864,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -34992,23 +35904,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35022,27 +35939,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35056,27 +35979,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35090,27 +36019,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35124,27 +36059,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35158,27 +36099,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35192,23 +36139,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35222,31 +36174,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35260,31 +36219,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35298,31 +36264,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35336,31 +36309,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35374,31 +36354,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35412,31 +36399,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35450,31 +36444,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35488,31 +36489,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35526,31 +36534,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35564,31 +36579,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35602,31 +36624,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35640,31 +36669,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35678,31 +36714,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35716,31 +36759,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35754,31 +36804,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35792,31 +36849,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35830,31 +36894,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35868,31 +36939,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35906,31 +36984,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35944,31 +37029,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -35982,31 +37074,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36020,31 +37119,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36058,31 +37164,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36096,31 +37209,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36134,31 +37254,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36172,31 +37299,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36210,31 +37344,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36248,31 +37389,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36286,31 +37434,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36324,31 +37479,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36362,31 +37524,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36400,31 +37569,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36438,31 +37614,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36476,31 +37659,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36514,31 +37704,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36552,31 +37749,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36590,23 +37794,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36620,23 +37829,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36650,23 +37864,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36680,23 +37899,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36710,23 +37934,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36740,23 +37969,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36770,23 +38004,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36800,23 +38039,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36830,23 +38074,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36860,23 +38109,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         6
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         6
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         6
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36890,23 +38144,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -36920,23 +38179,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95271,23 +96535,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95301,27 +96570,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95335,27 +96610,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95369,27 +96650,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95403,27 +96690,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95437,27 +96730,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95475,7 +96774,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -95491,7 +96791,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -95507,7 +96808,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -95523,7 +96825,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -95539,7 +96842,8 @@
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": []
@@ -95551,23 +96855,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95581,27 +96890,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95615,31 +96930,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95653,31 +96975,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95691,31 +97020,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95729,31 +97065,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95767,31 +97110,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95805,27 +97155,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95839,27 +97195,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95873,31 +97235,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95911,31 +97280,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95949,31 +97325,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -95987,31 +97370,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96025,31 +97415,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96063,27 +97460,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96097,27 +97500,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96131,31 +97540,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96169,31 +97585,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96207,31 +97630,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96245,31 +97675,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96283,31 +97720,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96321,27 +97765,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96355,27 +97805,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96389,31 +97845,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96427,31 +97890,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96465,31 +97935,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96503,31 +97980,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96541,31 +98025,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96579,27 +98070,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96613,27 +98110,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96647,31 +98150,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96685,31 +98195,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96723,31 +98240,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96761,31 +98285,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96799,31 +98330,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96837,27 +98375,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96871,23 +98415,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96901,27 +98450,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96935,27 +98490,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -96969,27 +98530,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97003,27 +98570,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97037,27 +98610,33 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97071,23 +98650,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97101,31 +98685,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97139,31 +98730,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97177,31 +98775,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97215,31 +98820,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97253,31 +98865,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97291,31 +98910,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97329,31 +98955,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97367,31 +99000,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97405,31 +99045,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97443,31 +99090,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97481,31 +99135,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97519,31 +99180,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97557,31 +99225,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97595,31 +99270,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97633,31 +99315,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97671,31 +99360,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97709,31 +99405,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97747,31 +99450,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97785,31 +99495,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97823,31 +99540,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97861,31 +99585,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97899,31 +99630,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97937,31 +99675,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -97975,31 +99720,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98013,31 +99765,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98051,31 +99810,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98089,31 +99855,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98127,31 +99900,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98165,31 +99945,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98203,31 +99990,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98241,31 +100035,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98279,31 +100080,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         3
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98317,31 +100125,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         4
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98355,31 +100170,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         0
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98393,31 +100215,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         1
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98431,31 +100260,38 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "cz2"
+         "cz2",
+         2
         ],
         [
          "pulse",
-         "cz3"
+         "cz3",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98469,23 +100305,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98499,23 +100340,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98529,23 +100375,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98559,23 +100410,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98589,23 +100445,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98619,23 +100480,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         2
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         2
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         2
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98649,23 +100515,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         3
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         3
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         3
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98679,23 +100550,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         4
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         4
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         4
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98709,23 +100585,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         5
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         5
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         5
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98739,23 +100620,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         6
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         6
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         6
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98769,23 +100655,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         0
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         0
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         0
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [
@@ -98799,23 +100690,28 @@
        "channels": [
         [
          "pulse",
-         "gate"
+         "gate",
+         1
         ],
         [
          "pulse",
-         "cz0"
+         "cz0",
+         1
         ],
         [
          "pulse",
-         "cz1"
+         "cz1",
+         1
         ],
         [
          "pulse",
-         "ro"
+         "ro",
+         15
         ],
         [
          "demod",
-         "demod"
+         "demod",
+         0
         ]
        ],
        "sites": [

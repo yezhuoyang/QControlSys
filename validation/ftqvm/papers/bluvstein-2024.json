@@ -26,7 +26,7 @@
   ],
   "command": "node riscq/ftqvm/papers.mjs bluvstein 3,5,7"
  },
- "generated": "2026-11-25T09:59:51.946Z",
+ "generated": "2026-11-25T15:29:13.246Z",
  "design": {
   "id": "bluvstein-2024",
   "profile": {
@@ -6873,7 +6873,8 @@
        "channels": [
         [
          "pulse",
-         "b0"
+         "b0",
+         0
         ]
        ],
        "sites": []
@@ -6885,7 +6886,8 @@
        "channels": [
         [
          "pulse",
-         "rydberg"
+         "rydberg",
+         1
         ]
        ],
        "sites": []
@@ -6897,7 +6899,8 @@
        "channels": [
         [
          "pulse",
-         "raman"
+         "raman",
+         2
         ]
        ],
        "sites": []
@@ -6909,7 +6912,8 @@
        "channels": [
         [
          "pulse",
-         "pump"
+         "pump",
+         3
         ]
        ],
        "sites": []
@@ -6921,7 +6925,8 @@
        "channels": [
         [
          "pulse",
-         "p0"
+         "p0",
+         4
         ]
        ],
        "sites": []
@@ -6933,11 +6938,13 @@
        "channels": [
         [
          "pulse",
-         "m0"
+         "m0",
+         5
         ],
         [
          "pulse",
-         "m1"
+         "m1",
+         6
         ]
        ],
        "sites": []
@@ -6949,7 +6956,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -6965,7 +6973,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         8
         ],
         [
          "dio",
@@ -6981,7 +6990,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         9
         ],
         [
          "dio",
@@ -6997,7 +7007,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         10
         ],
         [
          "dio",
@@ -7013,7 +7024,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         11
         ],
         [
          "dio",
@@ -7029,7 +7041,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         12
         ],
         [
          "dio",
@@ -7045,7 +7058,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         13
         ],
         [
          "dio",
@@ -7061,7 +7075,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         14
         ],
         [
          "dio",
@@ -7077,7 +7092,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         0
         ],
         [
          "dio",
@@ -7093,7 +7109,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         1
         ],
         [
          "dio",
@@ -7109,7 +7126,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         2
         ],
         [
          "dio",
@@ -7125,7 +7143,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         3
         ],
         [
          "dio",
@@ -7141,7 +7160,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         4
         ],
         [
          "dio",
@@ -7157,7 +7177,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         5
         ],
         [
          "dio",
@@ -7173,7 +7194,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         6
         ],
         [
          "dio",
@@ -7189,7 +7211,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -23072,7 +23095,8 @@
        "channels": [
         [
          "pulse",
-         "b0"
+         "b0",
+         0
         ]
        ],
        "sites": []
@@ -23084,7 +23108,8 @@
        "channels": [
         [
          "pulse",
-         "rydberg"
+         "rydberg",
+         1
         ]
        ],
        "sites": []
@@ -23096,7 +23121,8 @@
        "channels": [
         [
          "pulse",
-         "raman"
+         "raman",
+         2
         ]
        ],
        "sites": []
@@ -23108,7 +23134,8 @@
        "channels": [
         [
          "pulse",
-         "pump"
+         "pump",
+         3
         ]
        ],
        "sites": []
@@ -23120,7 +23147,8 @@
        "channels": [
         [
          "pulse",
-         "p0"
+         "p0",
+         4
         ]
        ],
        "sites": []
@@ -23132,11 +23160,13 @@
        "channels": [
         [
          "pulse",
-         "m0"
+         "m0",
+         5
         ],
         [
          "pulse",
-         "m1"
+         "m1",
+         6
         ]
        ],
        "sites": []
@@ -23148,7 +23178,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -23164,7 +23195,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         8
         ],
         [
          "dio",
@@ -23180,7 +23212,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         9
         ],
         [
          "dio",
@@ -23196,7 +23229,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         10
         ],
         [
          "dio",
@@ -23212,7 +23246,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         11
         ],
         [
          "dio",
@@ -23228,7 +23263,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         12
         ],
         [
          "dio",
@@ -23244,7 +23280,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         13
         ],
         [
          "dio",
@@ -23260,7 +23297,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         14
         ],
         [
          "dio",
@@ -23276,7 +23314,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         0
         ],
         [
          "dio",
@@ -23292,7 +23331,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         1
         ],
         [
          "dio",
@@ -23308,7 +23348,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         2
         ],
         [
          "dio",
@@ -23324,7 +23365,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         3
         ],
         [
          "dio",
@@ -23340,7 +23382,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         4
         ],
         [
          "dio",
@@ -23356,7 +23399,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         5
         ],
         [
          "dio",
@@ -23372,7 +23416,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         6
         ],
         [
          "dio",
@@ -23388,7 +23433,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -63173,7 +63219,8 @@
        "channels": [
         [
          "pulse",
-         "b0"
+         "b0",
+         0
         ]
        ],
        "sites": []
@@ -63185,7 +63232,8 @@
        "channels": [
         [
          "pulse",
-         "rydberg"
+         "rydberg",
+         1
         ]
        ],
        "sites": []
@@ -63197,7 +63245,8 @@
        "channels": [
         [
          "pulse",
-         "raman"
+         "raman",
+         2
         ]
        ],
        "sites": []
@@ -63209,7 +63258,8 @@
        "channels": [
         [
          "pulse",
-         "pump"
+         "pump",
+         3
         ]
        ],
        "sites": []
@@ -63221,7 +63271,8 @@
        "channels": [
         [
          "pulse",
-         "p0"
+         "p0",
+         4
         ]
        ],
        "sites": []
@@ -63233,11 +63284,13 @@
        "channels": [
         [
          "pulse",
-         "m0"
+         "m0",
+         5
         ],
         [
          "pulse",
-         "m1"
+         "m1",
+         6
         ]
        ],
        "sites": []
@@ -63249,7 +63302,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -63265,7 +63319,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         8
         ],
         [
          "dio",
@@ -63281,7 +63336,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         9
         ],
         [
          "dio",
@@ -63297,7 +63353,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         10
         ],
         [
          "dio",
@@ -63313,7 +63370,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         11
         ],
         [
          "dio",
@@ -63329,7 +63387,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         12
         ],
         [
          "dio",
@@ -63345,7 +63404,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         13
         ],
         [
          "dio",
@@ -63361,7 +63421,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         14
         ],
         [
          "dio",
@@ -63377,7 +63438,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         0
         ],
         [
          "dio",
@@ -63393,7 +63455,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         1
         ],
         [
          "dio",
@@ -63409,7 +63472,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         2
         ],
         [
          "dio",
@@ -63425,7 +63489,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         3
         ],
         [
          "dio",
@@ -63441,7 +63506,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         4
         ],
         [
          "dio",
@@ -63457,7 +63523,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         5
         ],
         [
          "dio",
@@ -63473,7 +63540,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         6
         ],
         [
          "dio",
@@ -63489,7 +63557,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -136405,7 +136474,8 @@
        "channels": [
         [
          "pulse",
-         "b0"
+         "b0",
+         0
         ]
        ],
        "sites": []
@@ -136417,7 +136487,8 @@
        "channels": [
         [
          "pulse",
-         "rydberg"
+         "rydberg",
+         1
         ]
        ],
        "sites": []
@@ -136429,7 +136500,8 @@
        "channels": [
         [
          "pulse",
-         "raman"
+         "raman",
+         2
         ]
        ],
        "sites": []
@@ -136441,7 +136513,8 @@
        "channels": [
         [
          "pulse",
-         "pump"
+         "pump",
+         3
         ]
        ],
        "sites": []
@@ -136453,7 +136526,8 @@
        "channels": [
         [
          "pulse",
-         "p0"
+         "p0",
+         4
         ]
        ],
        "sites": []
@@ -136465,11 +136539,13 @@
        "channels": [
         [
          "pulse",
-         "m0"
+         "m0",
+         5
         ],
         [
          "pulse",
-         "m1"
+         "m1",
+         6
         ]
        ],
        "sites": []
@@ -136481,7 +136557,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -136497,7 +136574,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         8
         ],
         [
          "dio",
@@ -136513,7 +136591,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         9
         ],
         [
          "dio",
@@ -136529,7 +136608,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         10
         ],
         [
          "dio",
@@ -136545,7 +136625,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         11
         ],
         [
          "dio",
@@ -136561,7 +136642,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         12
         ],
         [
          "dio",
@@ -136577,7 +136659,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         13
         ],
         [
          "dio",
@@ -136593,7 +136676,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         14
         ],
         [
          "dio",
@@ -136609,7 +136693,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         0
         ],
         [
          "dio",
@@ -136625,7 +136710,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         1
         ],
         [
          "dio",
@@ -136641,7 +136727,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         2
         ],
         [
          "dio",
@@ -136657,7 +136744,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         3
         ],
         [
          "dio",
@@ -136673,7 +136761,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         4
         ],
         [
          "dio",
@@ -136689,7 +136778,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         5
         ],
         [
          "dio",
@@ -136705,7 +136795,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         6
         ],
         [
          "dio",
@@ -136721,7 +136812,8 @@
        "channels": [
         [
          "pulse",
-         "detect"
+         "detect",
+         7
         ],
         [
          "dio",
@@ -179066,12 +179158,12 @@
   {
    "distance": 7,
    "basis": "Z",
-   "error": "The resource VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-20568\\\\d7Z\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.046,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"fir"
+   "error": "The resource VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-30572\\\\d7Z\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.047,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"f"
   },
   {
    "distance": 7,
    "basis": "X",
-   "error": "The resource VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-20568\\\\d7X\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.047,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"fir"
+   "error": "The resource VM did not admit iteration 1: {\"status\":\"ERROR\",\"mode\":\"resource-only-upper-bound\",\"source\":\"C:\\\\Users\\\\yezhu\\\\AppData\\\\Local\\\\Temp\\\\quantumos-bluvstein-30572\\\\d7X\\\\iter1.sysprog\",\"code\":\"CAPACITY_NOT_ADMITTED\",\"message\":\"classical_data_bandwidth: reservation 116 exceeds limit 100\",\"line\":0,\"cpu_seconds\":0.031,\"protocol_findings\":{\"complete\":false,\"gate_without_route\":{\"count\":null,\"f"
   }
  ]
 }
