@@ -449,7 +449,7 @@ export async function paperCall({ program, code = "surface", distance = 3, qubit
     const need = Number(/reservation (\d+) exceeds limit/.exec(onDevice.verdictDetail?.message ?? "")?.[1]);
     if (need) for (let n = need; n <= need + 64 && !admitted; n += 4) { const r = await compile(n); if (r.verdict === "RESOURCE_VALIDATED") admitted = { qubits: n, ...r }; }
   }
-  const brief = (r) => r && { verdict: r.verdict, message: r.verdictDetail?.message, code: r.verdictDetail?.code, ops: r.ops, kinds: r.kinds, makespanNs: r.makespanNs, listingHead: r.listingHead, listingLines: r.listingLines, machineText: r.machineText, sysspecText: r.sysspecText, spec: r.spec };
+  const brief = (r) => r && { verdict: r.verdict, message: r.verdictDetail?.message, code: r.verdictDetail?.code, ops: r.ops, kinds: r.kinds, makespanNs: r.makespanNs, listingHead: r.listingHead, listingLines: r.listingLines, machineText: r.machineText, spec: r.spec };
   return { programText: onDevice.programText, onDevice: { qubits, ...brief(onDevice) }, admitted: admitted && { qubits: admitted.qubits, ...brief(admitted) },
     decoder: { latencyModel: cal.fields.decoder_latency_model, bandwidth: cal.fields.decoder_bandwidth, windowRounds: cal.fields.decoder_window_rounds, memory: cal.fields.classical_memory,
       note: "The installed compiler predates decoder_latency_model, and its VM refuses decoder_bandwidth: the decoder is declared to it as decoder_latency_ns (the measured worst case). The model and bandwidth are the calibration's, for a compiler built from its current source (it needs OCaml 5)." } };

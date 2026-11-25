@@ -8,16 +8,19 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as ftc from "./ftcompiler.mjs";
 import * as specText from "./spec.mjs";
+import * as qsysasm from "./qsysasm.mjs";
 import { byId } from "./reproductions.mjs";
 
 /** What a reader of /reproduce sees of one run: program, listing, spec with sources, conformance. */
 export function details(last, qec) {
-  const listing = last.files?.sysprog ? readFileSync(last.files.sysprog, "utf8").split("\n") : [];
+  // The listing as flat QSysASM (riscq/ftqvm/qsysasm.mjs): its machine and factory headers, then one
+  // statement per operation. The compiler's gadget contracts are its own input and are not shown.
+  const text = last.listing?.qsysasm ?? qsysasm.canonical(last.listing ?? { ops: [] }).text;
   return {
     programText: readFileSync(qec, "utf8"),
-    listingHead: listing.filter((l) => l.trim() && !l.startsWith("#")).slice(0, 40).join("\n"),
-    listingLines: listing.length,
-    machineText: specText.machineText(last.spec), sysspecText: specText.sysspecText(last.spec),
+    listingHead: qsysasm.head(text, 40),
+    listingLines: last.listing?.ops.length ?? 0,
+    machineText: qsysasm.headerOf(specText.machineText(last.spec)),
     spec: last.spec.machine, factories: last.spec.factories,
     byKind: last.report.byKind, slack: last.slack,
     track: last.report.track,
@@ -200,7 +203,10 @@ export async function bluvsteinExperiment({ distances = [3, 5, 7], bases = ["Z",
       const last = iterations.at(-1);
       const m = Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, v.value]));
       const ops = last.listing.ops;
-      const tx = ops.filter((o) => o.kind === "CNOT" && /rv_tv/.test(o.text));
+      // A transversal CNOT pairs qubits of two code blocks; a stabilizer's CNOT always involves a
+      // check ancilla, which the listing requests one at a time (count=1).
+      const checkAncillas = new Set(ops.filter((o) => o.kind === "request_ancilla" && o.qubits.length === 1).map((o) => o.qubits[0].register + "[" + o.qubits[0].index + "]"));
+      const tx = ops.filter((o) => o.kind === "CNOT" && o.qubits.every((q) => !checkAncillas.has(q.register + "[" + q.index + "]")));
       rows.push({
         distance: d, basis, qubits: last.sites, ops: ops.length, conforms: last.report.conforms, verdict: last.verdict,
         transversalCnots: tx.length, transversalSpreadNs: tx.length ? Math.max(...tx.map((o) => o.start)) - Math.min(...tx.map((o) => o.start)) : 0,

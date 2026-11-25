@@ -8,6 +8,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { geometry } from "../geometry.mjs";
 import * as hardwareDesign from "../design.mjs";
 import { measuredBits } from "../compile.mjs";
+import { flatten } from "./qsysasm.mjs";
 
 const twinsDir = new URL("../../validation/ftqvm/twins/", import.meta.url);
 const PREFIX = "reproduction:";
@@ -39,7 +40,7 @@ export async function studioExamples() {
     const rows = rowsOf(r.id);
     for (const row of rows)
       out.push({ id: PREFIX + r.id + ":" + row.key, platform: platformOf(row), title: "Reproduction · " + r.title + " · " + row.label,
-        description: r.summary, source: { language: "QSysASM listing" } });
+        description: r.summary, source: { language: "QSysASM" } });
     if (rows.length) continue;
     const registry = await registryOf(r.id);
     const choice = registry && (await registry.params())[0];
@@ -76,12 +77,9 @@ function platformOf(row) {
   return /h2|ion|qccd/i.test(row.platform.id) ? "qccd" : "neutral";
 }
 
-/** The listing as text, each operation on the line the compiler's sysprog gave it. */
-function listingText(listing, title) {
-  const lines = ["# " + title + ": the QSysASM listing compiled for this twin. Each operation is on its line of the",
-    "# compiled sysprog, which the hardware instructions name; the program's declarations are not stored with the twin."];
-  for (const op of listing.ops) lines[op.line - 1] = op.text;
-  return Array.from(lines, (l) => l ?? "").join("\n");
+/** The listing as flat QSysASM (riscq/ftqvm/qsysasm.mjs): one statement per operation, at its absolute time. */
+function flatListing(listing, title) {
+  return flatten(listing, { title: title + ": the QSysASM program compiled for this twin, one statement per operation" });
 }
 
 /** Run one stored row and return a studio run bundle. */
@@ -98,8 +96,10 @@ export async function studioRun(exampleId, { trace = "io", design: edited } = {}
   const { REPRODUCTIONS } = await import("./reproductions.mjs");
   const paper = REPRODUCTIONS.find((r) => r.id === id);
   if (paper && key?.includes("=")) return circuitRun(exampleId, paper, key.slice(0, key.indexOf("=")), key.slice(key.indexOf("=") + 1), edited);
-  const src = rowsOf(id).find((r) => r.key === key);
-  if (!paper || !src) throw Error("Unknown reproduction run " + exampleId + ".");
+  const row = rowsOf(id).find((r) => r.key === key);
+  if (!paper || !row) throw Error("Unknown reproduction run " + exampleId + ".");
+  const flat = flatListing(row.listing, paper.title + " · " + row.label);
+  const src = { ...row, listing: flat.listing };
   const platform = platformOf(src);
   let m, hardware, built, result, spec, period, design, report;
   if (src.platform.kind === "transmonTwin") {
@@ -123,7 +123,7 @@ export async function studioRun(exampleId, { trace = "io", design: edited } = {}
   }
   if (edited && src.platform.kind !== "transmonTwin") throw Error("Only a transmon chip can be edited in /riscq-design; this twin's controller is built in riscq/ftqvm/optical.mjs.");
   return bundle({ exampleId, paper, label: src.label + (edited ? " · on the edited chip" : ""), platform, spec, period, hardware, built, result, design, m, track: report?.track, baseBatch: report?.baseBatch,
-    source: { language: "QSysASM listing", text: listingText(src.listing, paper.title + " · " + src.label) },
+    source: { language: "QSysASM", text: flat.text },
     program: "the QSysASM listing compiled for this twin (validation/ftqvm/twins/" + id + "/" + key + ".json)", conforms: report?.conforms });
 }
 

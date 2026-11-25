@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schedule and Compilation · QuantumOS</title>
+  <meta name="description" content="How the QuantumOS operating system schedules a QSysASM program, why scheduling is hard (deadlock, starvation, decoders that fall behind), how the timetable is compiled to RISC-Q firmware, and how every system call is calibrated.">
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+  <style>
+    .page { grid-template-columns: 210px minmax(0, 860px); max-width: 1180px; }
+    .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); margin: 12px 0 16px; }
+    .tbl table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .tbl th { text-align: left; font: 600 11px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--ink2); background: #f7f8fc; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .tbl td { padding: 6px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+    .tbl tr:last-child td { border-bottom: 0; }
+    .tbl td.n, .tbl th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tbl.scroll { max-height: 420px; overflow-y: auto; }
+    pre.code { font: 12.5px/1.5 var(--mono); background: #f7f6f2; max-height: 420px; }
+    .fig { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 12px 8px; margin: 14px 0 18px; overflow-x: auto; }
+    .fig figcaption { font-size: 13px; color: var(--ink2); margin-top: 6px; }
+    .fig svg { display: block; max-width: 100%; height: auto; }
+    .fig svg text { font: 11px var(--sans); fill: var(--ink2); }
+    .fig svg text.mono { font: 10.5px var(--mono); }
+    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 14px 0; }
+    .facts div { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .facts b { display: block; font-size: 20px; font-weight: 640; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .facts span { font-size: 12.5px; color: var(--ink2); }
+    .yes { color: var(--green); font-weight: 600; } .no { color: var(--red); font-weight: 600; }
+    details.fw { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); margin: 10px 0; }
+    details.fw > summary { cursor: pointer; padding: 9px 12px; font-weight: 600; font-size: 14px; }
+    details.fw > summary span { font-weight: 400; color: var(--ink2); font-size: 13px; }
+    .asm { font: 12px/1.45 var(--mono); max-height: 520px; overflow: auto; border-top: 1px solid var(--line); }
+    .asm table { border-collapse: collapse; width: 100%; }
+    .asm td { padding: 1px 8px; white-space: pre; vertical-align: top; }
+    .asm td.pc { color: var(--ink3); text-align: right; }
+    .asm td.hex { color: var(--ink3); }
+    .asm td.cm { color: var(--ink2); font-family: var(--sans); font-size: 12px; white-space: normal; }
+    .asm tr.grp td { background: var(--accent-soft); color: var(--navy); font-family: var(--sans); font-weight: 600; padding: 5px 8px; white-space: normal; }
+    .asm tr.sec td { background: #f3f4f8; color: var(--ink2); font-family: var(--sans); font-size: 12px; padding: 4px 8px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink2); margin: 6px 0 0; }
+    .legend i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+    .q { font-weight: 600; }
+    .def { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
+    .def p { margin: 6px 0; }
+    .muted { color: var(--ink2); font-size: 13.5px; }
+  </style>
+</head>
+<body>
+<main class="page">
+  <nav class="side" aria-label="On this page"><h5>On this page</h5><ol id="toc"></ol></nav>
+  <article id="page" aria-live="polite">Loading…</article>
+</main>
+<script type="module" src="/site-nav.js"></script>
+<script type="module">
+  import { render } from "/schedule.js";
+  render(document.getElementById("page"), document.getElementById("toc"));
+</script>
+</body>
+</html>

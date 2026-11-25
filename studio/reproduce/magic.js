@@ -187,8 +187,8 @@ export function sections(data) {
       <p>The compiler lowered the program below against a machine whose <code>request_magic</code> service is this factory: ${f.qubits} qubits (${c.factories.factory.output_qubits} output, ${c.factories.factory.workspace_qubits} workspace) and the factory's time on the twin as its latency. The resource VM: <b class="${c.verdict === "RESOURCE_VALIDATED" ? "yes" : "no"}">${esc(c.verdict)}</b>. The listing has ${c.ops} timed operations (${c.kinds.map((k) => `<code>${esc(k)}</code>`).join(", ")}); the factory's window is ${rm ? `[${us(rm.start)}, ${us(rm.end)}) µs` : "–"}, its whole duration on the twin.</p>
       <div class="note"><b>Postselection is not in the contract.</b> ${esc(f.note)} With the simulated acceptance of ${pct(f.acceptance, 2)}, a kept state takes ${f.expectedNs >= 1e6 ? (f.expectedNs / 1e6).toFixed(1) + " ms" : us(f.expectedNs, 1) + " µs"} on average, ${(f.expectedNs / f.latencyNs).toFixed(1)} times the latency the compiler reserves.</div>
       <details class="block" open><summary>The logical program</summary><pre class="code">${esc(c.programText)}</pre></details>
-      <details class="block"><summary>The QSysASM listing compiled (first lines of ${c.listingLines})</summary><pre class="code">${esc(c.listingHead)}</pre></details>
-      <details class="block"><summary>The machine it compiled against</summary>${table(["Field", "Value", "Source", "Note"], spec)}<pre class="code">${esc(c.machineText)}</pre><pre class="code">${esc(c.sysspecText)}</pre></details>`}`);
+      <details class="block"><summary>The QSysASM program (first lines of ${c.listingLines} statements)</summary><pre class="code">${esc(c.listingHead)}</pre></details>
+      <details class="block"><summary>The machine it compiled against</summary>${table(["Field", "Value", "Source", "Note"], spec)}<pre class="code">${esc(c.machineText)}</pre></details>`}`);
   }
   return out.join("\n");
 }
@@ -214,8 +214,8 @@ function calibrationHtml(cal) {
 /** The paper's logical operation as a logical program, compiled on the paper's device and, if refused there, on the least machine the resource VM admits. */
 function logicalCallHtml(c) {
   const verdict = (r) => `<b class="${r.verdict === "RESOURCE_VALIDATED" ? "yes" : "no"}">${esc(r.verdict)}</b>${r.message ? ": " + esc(r.message) : ""}`;
-  const listing = (r, name) => r?.listingHead ? `<details class="block"><summary>${name}: the listing (first lines of ${r.listingLines})</summary><pre class="code">${esc(r.listingHead)}</pre></details>
-    <details class="block"><summary>${name}: the machine it compiled against</summary><pre class="code">${esc(r.machineText)}</pre><pre class="code">${esc(r.sysspecText)}</pre></details>` : "";
+  const listing = (r, name) => r?.listingHead ? `<details class="block"><summary>${name}: the QSysASM program (first lines of ${r.listingLines} statements)</summary><pre class="code">${esc(r.listingHead)}</pre></details>
+    <details class="block"><summary>${name}: the machine it compiled against</summary><pre class="code">${esc(r.machineText)}</pre></details>` : "";
   return `<h2>The logical operation as a system call</h2>
     <p>The compiler lowered the program below against the twin: its gate, measurement and reset times, the decoder's measured latency, and the frame update as measured in this page's run.</p>
     <details class="block" open><summary>The logical program</summary><pre class="code">${esc(c.programText)}</pre></details>

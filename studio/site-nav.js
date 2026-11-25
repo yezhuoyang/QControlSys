@@ -43,6 +43,7 @@ const LINKS = [
   ["Background", "/learn"],
   ["Reproduce", "/reproduce"],
   ["Examples", "/examples"],
+  ["Schedule", "/schedule"],
   ["Platforms", null],
   ["Design", "/riscq-design"],
   ["Workspace", "/riscq-studio"],

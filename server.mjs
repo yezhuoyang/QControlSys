@@ -43,6 +43,10 @@ const routes = new Map([
   ["/quantumos.svg", "studio/quantumos.svg"],
   ["/favicon.ico", "studio/quantumos.svg"],
   ["/learn", "studio/learn.html"],
+  // Schedule and Compilation: the page, its renderer and its data (riscq/os/schedule-study.mjs).
+  ["/schedule", "studio/schedule.html"],
+  ["/schedule.js", "studio/schedule.js"],
+  ["/os/schedule.json", "validation/os/schedule.json"],
   ["/site-nav.js", "studio/site-nav.js"],
   // Resizable and hideable panels and present mode of the design editor and the workspace.
   ["/panels.js", "studio/panels.js"],

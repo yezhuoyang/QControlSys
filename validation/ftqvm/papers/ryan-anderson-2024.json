@@ -106,10 +106,9 @@
    ],
    "failing": {},
    "programText": "\ncodes:\n  Steane [[7,1,3]]:\n    stab    X[3]X[4]X[5]X[6]\n    stab    X[1]X[2]X[5]X[6]\n    stab    X[0]X[2]X[4]X[6]\n    stab    Z[3]Z[4]Z[5]Z[6]\n    stab    Z[1]Z[2]Z[5]Z[6]\n    stab    Z[0]Z[2]Z[4]Z[6]\n    logX[0] X[0]X[1]X[2]\n    logZ[0] Z[0]Z[1]Z[2]\n  merged1 = canonical_product base=Steane factors=1 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n  merged2 = canonical_product base=Steane factors=2 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n  merged3 = canonical_product base=Steane factors=3 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n\nprogram[LogicData: 1, c: 12, ancilla: 60] (Steane[1] LogicData, Steane[2] LogicalAncilla):\n  alloc LogicalAncilla[0,2)\n  prepare |+> -> LogicalAncilla[0,1)\n  prepare |0> -> LogicalAncilla[1,2)\n  transversal CX LogicalAncilla[0] LogicalAncilla[1]\n  extract LogicalAncilla[0][0] rounds=1 using ancilla[0,6) -> syndrome[0,6)\n  extract LogicalAncilla[1][0] rounds=1 using ancilla[6,12) -> syndrome[6,12)\n  decode rounds=1 syndrome[0,12)\n  transversal CX LogicData[0] LogicalAncilla[0]\n  measure X[LogicData[0][0]] -> c[0,3)\n  measure Z[LogicalAncilla[0][0]] -> c[3,6)\n  decode rounds=1 c[0,6)\n  frame on c[0,3) Z[LogicalAncilla[1][0]]\n  frame on c[3,6) X[LogicalAncilla[1][0]]\n",
-   "listingHead": "resource { gate1q: 7, gate2q: 50, measures: 18, allocs: 13, routes: 14, decodes: 5, magic: 0, frame_updates: 2, idle_extracts: 0, call_sites: 5, loops: 8, guards: 0, nodes: 259 }\nmachine { qubits: 56 total, decoders: 4 total, factories: 1 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 64 qubits/us, max_parallel_gates: 40 total, gate1q_ns: 5010 ns, gate2q_ns: 295000 ns, measure_ns: 125070 ns, reset_ns: 50000 ns, route_latency_ns: 10 ns, decoder_latency_ns: 430 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 370 ns }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 13 total, runtime: 7260140 ns, gates: 3 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 1 bits/us, qubit_routing_bandwidth: 500 qubits/us, ancilla_bandwidth: 6 qubits/us }\nspec surfaceRound:\n  resource { qubits: 13 total, runtime: 7260140 ns, gates: 3 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 1 bits/us, qubit_routing_bandwidth: 500 qubits/us, ancilla_bandwidth: 6 qubits/us }\nspec program:\n  resource { qubits_min: 0 total, qubits: 56 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec maintenance:\n  resource { block_qubits: 7 total, measure_qubits: 6 total, gates: 3 total, decoders: 1 total, classical_data_bandwidth: 1 bits/us, ancilla_bandwidth: 6 qubits/us, round: 7260140 ns }\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\ngadget surfaceRoundLogicalAncilla[data: 0, ancilla: abase + dbase + 13, c: 0, syndrome: cbase + 6](dbase, abase, cbase) spans 7260140 ns:\n  @0 ns  request_ancilla  count=1  ancilla[abase]\n  @50000 ns  H  ancilla[abase]\n  @55010 ns  route  ancilla[abase], ancilla[dbase + 3:dbase + 6]\n  @55020 ns  CNOT  ancilla[abase], ancilla[dbase + 3]\n  @350020 ns  CNOT  ancilla[abase], ancilla[dbase + 4]\n  @645020 ns  CNOT  ancilla[abase], ancilla[dbase + 5]\n  @940020 ns  CNOT  ancilla[abase], ancilla[dbase + 6]\n  @1235020 ns  measure  basis=X  ancilla[abase]  -> syndrome[cbase]\n  @1360090 ns  release_ancilla  count=1  ancilla[abase]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 1]\n  @50000 ns  H  ancilla[abase + 1]\n  @1235020 ns  route  ancilla[abase + 1], ancilla[dbase + 1:dbase + 2], ancilla[dbase + 5:dbase + 6]\n  @1235030 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 1]\n  @1530030 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 2]\n  @1825030 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 5]\n  @2120030 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 6]\n  @2415030 ns  measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]\n  @2540100 ns  release_ancilla  count=1  ancilla[abase + 1]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 2]\n  @50000 ns  H  ancilla[abase + 2]\n  @2415030 ns  route  ancilla[abase + 2], ancilla[dbase], ancilla[dbase + 2], ancilla[dbase + 4], ancilla[dbase + 6]\n  @2415040 ns  CNOT  ancilla[abase + 2], ancilla[dbase]\n  @2710040 ns  CNOT  ancilla[abase + 2], ancilla[dbase + 2]\n  @3005040 ns  CNOT  ancilla[abase + 2], ancilla[dbase + 4]\n  @3300040 ns  CNOT  ancilla[abase + 2], ancilla[dbase + 6]\n  @3595040 ns  measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]\n  @3720110 ns  release_ancilla  count=1  ancilla[abase + 2]",
-   "listingLines": 154,
-   "machineText": "machine { qubits: 56 total, factories: 1 total, max_parallel_gates: 40 total, decoders: 4 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 64 qubits/us, gate1q_ns: 5010 ns, gate2q_ns: 295000 ns, measure_ns: 125070 ns, reset_ns: 50000 ns, route_latency_ns: 10 ns, decoder_latency_ns: 430 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 370 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
-   "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 56 total, runtime_min: 0 ns, runtime: 1000000000 ns }\n",
+   "listingHead": "machine { qubits: 56 total, factories: 1 total, max_parallel_gates: 40 total, decoders: 4 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 64 qubits/us, gate1q_ns: 5010 ns, gate2q_ns: 295000 ns, measure_ns: 125070 ns, reset_ns: 50000 ns, route_latency_ns: 10 ns, decoder_latency_ns: 430 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 370 ns }\nfactory { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n\n@0 ns         request_ancilla  count=14  ancilla[0:13]\n@50000 ns     H  ancilla[0]\n@50001 ns     H  ancilla[1]\n@50002 ns     H  ancilla[2]\n@50003 ns     H  ancilla[3]\n@50004 ns     H  ancilla[4]\n@50005 ns     H  ancilla[5]\n@50006 ns     H  ancilla[6]\n@55016 ns     request_ancilla  count=1  ancilla[14]\n@55016 ns     request_ancilla  count=1  ancilla[15]\n@55016 ns     request_ancilla  count=1  ancilla[16]\n@55016 ns     request_ancilla  count=1  ancilla[17]\n@55016 ns     request_ancilla  count=1  ancilla[18]\n@55016 ns     request_ancilla  count=1  ancilla[19]\n@105016 ns    H  ancilla[14]\n@105016 ns    H  ancilla[15]\n@105016 ns    H  ancilla[16]\n@110026 ns    route  ancilla[14], ancilla[3:6]\n@110036 ns    CNOT  ancilla[14], ancilla[3]\n@405036 ns    CNOT  ancilla[14], ancilla[4]\n@700036 ns    CNOT  ancilla[14], ancilla[5]\n@995036 ns    CNOT  ancilla[14], ancilla[6]\n@1290036 ns   measure  basis=X  ancilla[14] -> syndrome[12]\n@1290036 ns   route  ancilla[15], ancilla[1:2], ancilla[5:6]\n@1290046 ns   CNOT  ancilla[15], ancilla[1]\n@1415106 ns   release_ancilla  count=1  ancilla[14]\n@1585046 ns   CNOT  ancilla[15], ancilla[2]\n@1880046 ns   CNOT  ancilla[15], ancilla[5]\n@2175046 ns   CNOT  ancilla[15], ancilla[6]\n@2470046 ns   measure  basis=X  ancilla[15] -> syndrome[13]\n@2470046 ns   route  ancilla[16], ancilla[0], ancilla[2], ancilla[4], ancilla[6]\n@2470056 ns   CNOT  ancilla[16], ancilla[0]\n@2595116 ns   release_ancilla  count=1  ancilla[15]\n@2765056 ns   CNOT  ancilla[16], ancilla[2]\n@3060056 ns   CNOT  ancilla[16], ancilla[4]\n@3355056 ns   CNOT  ancilla[16], ancilla[6]\n@3650056 ns   measure  basis=X  ancilla[16] -> syndrome[14]",
+   "listingLines": 611,
+   "machineText": "machine { qubits: 56 total, factories: 1 total, max_parallel_gates: 40 total, decoders: 4 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 64 qubits/us, gate1q_ns: 5010 ns, gate2q_ns: 295000 ns, measure_ns: 125070 ns, reset_ns: 50000 ns, route_latency_ns: 10 ns, decoder_latency_ns: 430 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 370 ns }\n\nfactory { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }",
    "spec": {
     "qubits": {
      "value": 56,
@@ -629,7 +628,7 @@
       "s": [
        7
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[0]"
      },
      {
       "k": "1q",
@@ -638,7 +637,7 @@
       "s": [
        8
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[1]"
      },
      {
       "k": "1q",
@@ -647,7 +646,7 @@
       "s": [
        9
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[2]"
      },
      {
       "k": "1q",
@@ -656,7 +655,7 @@
       "s": [
        10
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[3]"
      },
      {
       "k": "1q",
@@ -665,7 +664,7 @@
       "s": [
        11
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[4]"
      },
      {
       "k": "1q",
@@ -674,7 +673,7 @@
       "s": [
        12
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[5]"
      },
      {
       "k": "1q",
@@ -683,7 +682,7 @@
       "s": [
        13
       ],
-      "line": "H  ancilla[rv_h2]"
+      "line": "H  ancilla[6]"
      },
      {
       "k": "reset",
@@ -692,7 +691,7 @@
       "s": [
        21
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[14]"
      },
      {
       "k": "reset",
@@ -701,7 +700,7 @@
       "s": [
        22
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[15]"
      },
      {
       "k": "reset",
@@ -710,7 +709,7 @@
       "s": [
        23
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[16]"
      },
      {
       "k": "reset",
@@ -719,7 +718,7 @@
       "s": [
        24
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[17]"
      },
      {
       "k": "reset",
@@ -728,7 +727,7 @@
       "s": [
        25
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[18]"
      },
      {
       "k": "reset",
@@ -737,7 +736,7 @@
       "s": [
        26
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[19]"
      },
      {
       "k": "1q",
@@ -746,7 +745,7 @@
       "s": [
        21
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[14]"
      },
      {
       "k": "1q",
@@ -755,7 +754,7 @@
       "s": [
        22
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[15]"
      },
      {
       "k": "1q",
@@ -764,7 +763,7 @@
       "s": [
        23
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[16]"
      },
      {
       "k": "2q",
@@ -774,7 +773,7 @@
        21,
        10
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[14], ancilla[3]"
      },
      {
       "k": "2q",
@@ -784,7 +783,7 @@
        21,
        11
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[14], ancilla[4]"
      },
      {
       "k": "2q",
@@ -794,7 +793,7 @@
        21,
        12
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[14], ancilla[5]"
      },
      {
       "k": "2q",
@@ -804,7 +803,7 @@
        21,
        13
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[14], ancilla[6]"
      },
      {
       "k": "measure",
@@ -813,7 +812,7 @@
       "s": [
        21
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[14] -> syndrome[12]"
      },
      {
       "k": "2q",
@@ -823,7 +822,7 @@
        22,
        8
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[15], ancilla[1]"
      },
      {
       "k": "2q",
@@ -833,7 +832,7 @@
        22,
        9
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[15], ancilla[2]"
      },
      {
       "k": "2q",
@@ -843,7 +842,7 @@
        22,
        12
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[15], ancilla[5]"
      },
      {
       "k": "2q",
@@ -853,7 +852,7 @@
        22,
        13
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[15], ancilla[6]"
      },
      {
       "k": "measure",
@@ -862,7 +861,7 @@
       "s": [
        22
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[15] -> syndrome[13]"
      },
      {
       "k": "2q",
@@ -872,7 +871,7 @@
        23,
        7
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[16], ancilla[0]"
      },
      {
       "k": "2q",
@@ -882,7 +881,7 @@
        23,
        9
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[16], ancilla[2]"
      },
      {
       "k": "2q",
@@ -892,7 +891,7 @@
        23,
        11
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[16], ancilla[4]"
      },
      {
       "k": "2q",
@@ -902,7 +901,7 @@
        23,
        13
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[16], ancilla[6]"
      },
      {
       "k": "measure",
@@ -911,7 +910,7 @@
       "s": [
        23
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[16] -> syndrome[14]"
      },
      {
       "k": "2q",
@@ -921,7 +920,7 @@
        10,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[3], ancilla[17]"
      },
      {
       "k": "2q",
@@ -931,7 +930,7 @@
        11,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[4], ancilla[17]"
      },
      {
       "k": "2q",
@@ -941,7 +940,7 @@
        12,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[5], ancilla[17]"
      },
      {
       "k": "2q",
@@ -951,7 +950,7 @@
        13,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[6], ancilla[17]"
      },
      {
       "k": "measure",
@@ -960,7 +959,7 @@
       "s": [
        24
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[17] -> syndrome[15]"
      },
      {
       "k": "2q",
@@ -970,7 +969,7 @@
        8,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[1], ancilla[18]"
      },
      {
       "k": "2q",
@@ -980,7 +979,7 @@
        9,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[2], ancilla[18]"
      },
      {
       "k": "2q",
@@ -990,7 +989,7 @@
        12,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[5], ancilla[18]"
      },
      {
       "k": "2q",
@@ -1000,7 +999,7 @@
        13,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[6], ancilla[18]"
      },
      {
       "k": "measure",
@@ -1009,7 +1008,7 @@
       "s": [
        25
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[18] -> syndrome[16]"
      },
      {
       "k": "2q",
@@ -1019,7 +1018,7 @@
        7,
        26
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[0], ancilla[19]"
      },
      {
       "k": "2q",
@@ -1029,7 +1028,7 @@
        9,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[2], ancilla[19]"
      },
      {
       "k": "2q",
@@ -1039,7 +1038,7 @@
        11,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[4], ancilla[19]"
      },
      {
       "k": "2q",
@@ -1049,7 +1048,7 @@
        13,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[6], ancilla[19]"
      },
      {
       "k": "measure",
@@ -1058,7 +1057,7 @@
       "s": [
        26
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[19] -> syndrome[17]"
      },
      {
       "k": "reset",
@@ -1067,7 +1066,7 @@
       "s": [
        21
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[20]"
      },
      {
       "k": "reset",
@@ -1076,7 +1075,7 @@
       "s": [
        22
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[21]"
      },
      {
       "k": "reset",
@@ -1085,7 +1084,7 @@
       "s": [
        23
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[22]"
      },
      {
       "k": "reset",
@@ -1094,7 +1093,7 @@
       "s": [
        24
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[23]"
      },
      {
       "k": "reset",
@@ -1103,7 +1102,7 @@
       "s": [
        25
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[24]"
      },
      {
       "k": "reset",
@@ -1112,7 +1111,7 @@
       "s": [
        26
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[25]"
      },
      {
       "k": "1q",
@@ -1121,7 +1120,7 @@
       "s": [
        21
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[20]"
      },
      {
       "k": "1q",
@@ -1130,7 +1129,7 @@
       "s": [
        22
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[21]"
      },
      {
       "k": "1q",
@@ -1139,7 +1138,7 @@
       "s": [
        23
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[22]"
      },
      {
       "k": "2q",
@@ -1149,7 +1148,7 @@
        21,
        10
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[20], ancilla[3]"
      },
      {
       "k": "2q",
@@ -1159,7 +1158,7 @@
        21,
        11
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[20], ancilla[4]"
      },
      {
       "k": "2q",
@@ -1169,7 +1168,7 @@
        21,
        12
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[20], ancilla[5]"
      },
      {
       "k": "2q",
@@ -1179,7 +1178,7 @@
        21,
        13
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[20], ancilla[6]"
      },
      {
       "k": "measure",
@@ -1188,7 +1187,7 @@
       "s": [
        21
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[20] -> syndrome[18]"
      },
      {
       "k": "2q",
@@ -1198,7 +1197,7 @@
        22,
        8
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[21], ancilla[1]"
      },
      {
       "k": "2q",
@@ -1208,7 +1207,7 @@
        22,
        9
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[21], ancilla[2]"
      },
      {
       "k": "2q",
@@ -1218,7 +1217,7 @@
        22,
        12
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[21], ancilla[5]"
      },
      {
       "k": "2q",
@@ -1228,7 +1227,7 @@
        22,
        13
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[21], ancilla[6]"
      },
      {
       "k": "measure",
@@ -1237,7 +1236,7 @@
       "s": [
        22
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[21] -> syndrome[19]"
      },
      {
       "k": "2q",
@@ -1247,7 +1246,7 @@
        23,
        7
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[22], ancilla[0]"
      },
      {
       "k": "2q",
@@ -1257,7 +1256,7 @@
        23,
        9
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[22], ancilla[2]"
      },
      {
       "k": "2q",
@@ -1267,7 +1266,7 @@
        23,
        11
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[22], ancilla[4]"
      },
      {
       "k": "2q",
@@ -1277,7 +1276,7 @@
        23,
        13
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[22], ancilla[6]"
      },
      {
       "k": "measure",
@@ -1286,7 +1285,7 @@
       "s": [
        23
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[22] -> syndrome[20]"
      },
      {
       "k": "2q",
@@ -1296,7 +1295,7 @@
        10,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[3], ancilla[23]"
      },
      {
       "k": "2q",
@@ -1306,7 +1305,7 @@
        11,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[4], ancilla[23]"
      },
      {
       "k": "2q",
@@ -1316,7 +1315,7 @@
        12,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[5], ancilla[23]"
      },
      {
       "k": "2q",
@@ -1326,7 +1325,7 @@
        13,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[6], ancilla[23]"
      },
      {
       "k": "measure",
@@ -1335,7 +1334,7 @@
       "s": [
        24
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[23] -> syndrome[21]"
      },
      {
       "k": "2q",
@@ -1345,7 +1344,7 @@
        8,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[1], ancilla[24]"
      },
      {
       "k": "2q",
@@ -1355,7 +1354,7 @@
        9,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[2], ancilla[24]"
      },
      {
       "k": "2q",
@@ -1365,7 +1364,7 @@
        12,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[5], ancilla[24]"
      },
      {
       "k": "2q",
@@ -1375,7 +1374,7 @@
        13,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[6], ancilla[24]"
      },
      {
       "k": "measure",
@@ -1384,7 +1383,7 @@
       "s": [
        25
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[24] -> syndrome[22]"
      },
      {
       "k": "2q",
@@ -1394,7 +1393,7 @@
        7,
        26
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[0], ancilla[25]"
      },
      {
       "k": "2q",
@@ -1404,7 +1403,7 @@
        9,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[2], ancilla[25]"
      },
      {
       "k": "2q",
@@ -1414,7 +1413,7 @@
        11,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[4], ancilla[25]"
      },
      {
       "k": "2q",
@@ -1424,7 +1423,7 @@
        13,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[6], ancilla[25]"
      },
      {
       "k": "measure",
@@ -1433,7 +1432,7 @@
       "s": [
        26
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[25] -> syndrome[23]"
      },
      {
       "k": "reset",
@@ -1442,7 +1441,7 @@
       "s": [
        21
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[26]"
      },
      {
       "k": "reset",
@@ -1451,7 +1450,7 @@
       "s": [
        22
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[27]"
      },
      {
       "k": "reset",
@@ -1460,7 +1459,7 @@
       "s": [
        23
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[28]"
      },
      {
       "k": "reset",
@@ -1469,7 +1468,7 @@
       "s": [
        24
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[29]"
      },
      {
       "k": "reset",
@@ -1478,7 +1477,7 @@
       "s": [
        25
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[30]"
      },
      {
       "k": "reset",
@@ -1487,7 +1486,7 @@
       "s": [
        26
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[31]"
      },
      {
       "k": "1q",
@@ -1496,7 +1495,7 @@
       "s": [
        21
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[26]"
      },
      {
       "k": "1q",
@@ -1505,7 +1504,7 @@
       "s": [
        22
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[27]"
      },
      {
       "k": "1q",
@@ -1514,7 +1513,7 @@
       "s": [
        23
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[28]"
      },
      {
       "k": "2q",
@@ -1524,7 +1523,7 @@
        21,
        10
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[26], ancilla[3]"
      },
      {
       "k": "2q",
@@ -1534,7 +1533,7 @@
        21,
        11
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[26], ancilla[4]"
      },
      {
       "k": "2q",
@@ -1544,7 +1543,7 @@
        21,
        12
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[26], ancilla[5]"
      },
      {
       "k": "2q",
@@ -1554,7 +1553,7 @@
        21,
        13
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[26], ancilla[6]"
      },
      {
       "k": "measure",
@@ -1563,7 +1562,7 @@
       "s": [
        21
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[26] -> syndrome[24]"
      },
      {
       "k": "2q",
@@ -1573,7 +1572,7 @@
        22,
        8
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[27], ancilla[1]"
      },
      {
       "k": "2q",
@@ -1583,7 +1582,7 @@
        22,
        9
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[27], ancilla[2]"
      },
      {
       "k": "2q",
@@ -1593,7 +1592,7 @@
        22,
        12
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[27], ancilla[5]"
      },
      {
       "k": "2q",
@@ -1603,7 +1602,7 @@
        22,
        13
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[27], ancilla[6]"
      },
      {
       "k": "measure",
@@ -1612,7 +1611,7 @@
       "s": [
        22
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[27] -> syndrome[25]"
      },
      {
       "k": "2q",
@@ -1622,7 +1621,7 @@
        23,
        7
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[28], ancilla[0]"
      },
      {
       "k": "2q",
@@ -1632,7 +1631,7 @@
        23,
        9
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[28], ancilla[2]"
      },
      {
       "k": "2q",
@@ -1642,7 +1641,7 @@
        23,
        11
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[28], ancilla[4]"
      },
      {
       "k": "2q",
@@ -1652,7 +1651,7 @@
        23,
        13
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[28], ancilla[6]"
      },
      {
       "k": "measure",
@@ -1661,7 +1660,7 @@
       "s": [
        23
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[28] -> syndrome[26]"
      },
      {
       "k": "2q",
@@ -1671,7 +1670,7 @@
        10,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[3], ancilla[29]"
      },
      {
       "k": "2q",
@@ -1681,7 +1680,7 @@
        11,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[4], ancilla[29]"
      },
      {
       "k": "2q",
@@ -1691,7 +1690,7 @@
        12,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[5], ancilla[29]"
      },
      {
       "k": "2q",
@@ -1701,7 +1700,7 @@
        13,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[6], ancilla[29]"
      },
      {
       "k": "measure",
@@ -1710,7 +1709,7 @@
       "s": [
        24
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[29] -> syndrome[27]"
      },
      {
       "k": "2q",
@@ -1720,7 +1719,7 @@
        8,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[1], ancilla[30]"
      },
      {
       "k": "2q",
@@ -1730,7 +1729,7 @@
        9,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[2], ancilla[30]"
      },
      {
       "k": "2q",
@@ -1740,7 +1739,7 @@
        12,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[5], ancilla[30]"
      },
      {
       "k": "2q",
@@ -1750,7 +1749,7 @@
        13,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[6], ancilla[30]"
      },
      {
       "k": "measure",
@@ -1759,7 +1758,7 @@
       "s": [
        25
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[30] -> syndrome[28]"
      },
      {
       "k": "2q",
@@ -1769,7 +1768,7 @@
        7,
        26
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[0], ancilla[31]"
      },
      {
       "k": "2q",
@@ -1779,7 +1778,7 @@
        9,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[2], ancilla[31]"
      },
      {
       "k": "2q",
@@ -1789,7 +1788,7 @@
        11,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[4], ancilla[31]"
      },
      {
       "k": "2q",
@@ -1799,7 +1798,7 @@
        13,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[6], ancilla[31]"
      },
      {
       "k": "measure",
@@ -1808,7 +1807,7 @@
       "s": [
        26
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[31] -> syndrome[29]"
      },
      {
       "k": "decode",
@@ -1824,7 +1823,7 @@
       "s": [
        27
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[32]"
      },
      {
       "k": "reset",
@@ -1833,7 +1832,7 @@
       "s": [
        28
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[33]"
      },
      {
       "k": "reset",
@@ -1842,7 +1841,7 @@
       "s": [
        29
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[34]"
      },
      {
       "k": "reset",
@@ -1851,7 +1850,7 @@
       "s": [
        30
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[35]"
      },
      {
       "k": "reset",
@@ -1860,7 +1859,7 @@
       "s": [
        31
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[36]"
      },
      {
       "k": "reset",
@@ -1869,7 +1868,7 @@
       "s": [
        32
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[37]"
      },
      {
       "k": "1q",
@@ -1878,7 +1877,7 @@
       "s": [
        27
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[32]"
      },
      {
       "k": "1q",
@@ -1887,7 +1886,7 @@
       "s": [
        28
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[33]"
      },
      {
       "k": "1q",
@@ -1896,7 +1895,7 @@
       "s": [
        29
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[34]"
      },
      {
       "k": "2q",
@@ -1906,7 +1905,7 @@
        27,
        17
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[32], ancilla[10]"
      },
      {
       "k": "2q",
@@ -1916,7 +1915,7 @@
        27,
        18
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[32], ancilla[11]"
      },
      {
       "k": "2q",
@@ -1926,7 +1925,7 @@
        27,
        19
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[32], ancilla[12]"
      },
      {
       "k": "2q",
@@ -1936,7 +1935,7 @@
        27,
        20
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[32], ancilla[13]"
      },
      {
       "k": "measure",
@@ -1945,7 +1944,7 @@
       "s": [
        27
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[32] -> syndrome[30]"
      },
      {
       "k": "2q",
@@ -1955,7 +1954,7 @@
        28,
        15
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[33], ancilla[8]"
      },
      {
       "k": "2q",
@@ -1965,7 +1964,7 @@
        28,
        16
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[33], ancilla[9]"
      },
      {
       "k": "2q",
@@ -1975,7 +1974,7 @@
        28,
        19
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[33], ancilla[12]"
      },
      {
       "k": "2q",
@@ -1985,7 +1984,7 @@
        28,
        20
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[33], ancilla[13]"
      },
      {
       "k": "measure",
@@ -1994,7 +1993,7 @@
       "s": [
        28
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[33] -> syndrome[31]"
      },
      {
       "k": "2q",
@@ -2004,7 +2003,7 @@
        29,
        14
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[34], ancilla[7]"
      },
      {
       "k": "2q",
@@ -2014,7 +2013,7 @@
        29,
        16
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[34], ancilla[9]"
      },
      {
       "k": "2q",
@@ -2024,7 +2023,7 @@
        29,
        18
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[34], ancilla[11]"
      },
      {
       "k": "2q",
@@ -2034,7 +2033,7 @@
        29,
        20
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[34], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2043,7 +2042,7 @@
       "s": [
        29
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[34] -> syndrome[32]"
      },
      {
       "k": "2q",
@@ -2053,7 +2052,7 @@
        17,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[10], ancilla[35]"
      },
      {
       "k": "2q",
@@ -2063,7 +2062,7 @@
        18,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[11], ancilla[35]"
      },
      {
       "k": "2q",
@@ -2073,7 +2072,7 @@
        19,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[12], ancilla[35]"
      },
      {
       "k": "2q",
@@ -2083,7 +2082,7 @@
        20,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[13], ancilla[35]"
      },
      {
       "k": "measure",
@@ -2092,7 +2091,7 @@
       "s": [
        30
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[35] -> syndrome[33]"
      },
      {
       "k": "2q",
@@ -2102,7 +2101,7 @@
        15,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[8], ancilla[36]"
      },
      {
       "k": "2q",
@@ -2112,7 +2111,7 @@
        16,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[9], ancilla[36]"
      },
      {
       "k": "2q",
@@ -2122,7 +2121,7 @@
        19,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[12], ancilla[36]"
      },
      {
       "k": "2q",
@@ -2132,7 +2131,7 @@
        20,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[13], ancilla[36]"
      },
      {
       "k": "measure",
@@ -2141,7 +2140,7 @@
       "s": [
        31
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[36] -> syndrome[34]"
      },
      {
       "k": "2q",
@@ -2151,7 +2150,7 @@
        14,
        32
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[7], ancilla[37]"
      },
      {
       "k": "2q",
@@ -2161,7 +2160,7 @@
        16,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[9], ancilla[37]"
      },
      {
       "k": "2q",
@@ -2171,7 +2170,7 @@
        18,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[11], ancilla[37]"
      },
      {
       "k": "2q",
@@ -2181,7 +2180,7 @@
        20,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[13], ancilla[37]"
      },
      {
       "k": "measure",
@@ -2190,7 +2189,7 @@
       "s": [
        32
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[37] -> syndrome[35]"
      },
      {
       "k": "reset",
@@ -2199,7 +2198,7 @@
       "s": [
        27
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[38]"
      },
      {
       "k": "reset",
@@ -2208,7 +2207,7 @@
       "s": [
        28
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[39]"
      },
      {
       "k": "reset",
@@ -2217,7 +2216,7 @@
       "s": [
        29
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[40]"
      },
      {
       "k": "reset",
@@ -2226,7 +2225,7 @@
       "s": [
        30
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[41]"
      },
      {
       "k": "reset",
@@ -2235,7 +2234,7 @@
       "s": [
        31
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[42]"
      },
      {
       "k": "reset",
@@ -2244,7 +2243,7 @@
       "s": [
        32
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[43]"
      },
      {
       "k": "1q",
@@ -2253,7 +2252,7 @@
       "s": [
        27
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[38]"
      },
      {
       "k": "1q",
@@ -2262,7 +2261,7 @@
       "s": [
        28
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[39]"
      },
      {
       "k": "1q",
@@ -2271,7 +2270,7 @@
       "s": [
        29
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[40]"
      },
      {
       "k": "2q",
@@ -2281,7 +2280,7 @@
        27,
        17
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[38], ancilla[10]"
      },
      {
       "k": "2q",
@@ -2291,7 +2290,7 @@
        27,
        18
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[38], ancilla[11]"
      },
      {
       "k": "2q",
@@ -2301,7 +2300,7 @@
        27,
        19
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[38], ancilla[12]"
      },
      {
       "k": "2q",
@@ -2311,7 +2310,7 @@
        27,
        20
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[38], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2320,7 +2319,7 @@
       "s": [
        27
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[38] -> syndrome[36]"
      },
      {
       "k": "2q",
@@ -2330,7 +2329,7 @@
        28,
        15
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[39], ancilla[8]"
      },
      {
       "k": "2q",
@@ -2340,7 +2339,7 @@
        28,
        16
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[39], ancilla[9]"
      },
      {
       "k": "2q",
@@ -2350,7 +2349,7 @@
        28,
        19
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[39], ancilla[12]"
      },
      {
       "k": "2q",
@@ -2360,7 +2359,7 @@
        28,
        20
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[39], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2369,7 +2368,7 @@
       "s": [
        28
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[39] -> syndrome[37]"
      },
      {
       "k": "2q",
@@ -2379,7 +2378,7 @@
        29,
        14
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[40], ancilla[7]"
      },
      {
       "k": "2q",
@@ -2389,7 +2388,7 @@
        29,
        16
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[40], ancilla[9]"
      },
      {
       "k": "2q",
@@ -2399,7 +2398,7 @@
        29,
        18
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[40], ancilla[11]"
      },
      {
       "k": "2q",
@@ -2409,7 +2408,7 @@
        29,
        20
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[40], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2418,7 +2417,7 @@
       "s": [
        29
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[40] -> syndrome[38]"
      },
      {
       "k": "2q",
@@ -2428,7 +2427,7 @@
        17,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[10], ancilla[41]"
      },
      {
       "k": "2q",
@@ -2438,7 +2437,7 @@
        18,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[11], ancilla[41]"
      },
      {
       "k": "2q",
@@ -2448,7 +2447,7 @@
        19,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[12], ancilla[41]"
      },
      {
       "k": "2q",
@@ -2458,7 +2457,7 @@
        20,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[13], ancilla[41]"
      },
      {
       "k": "measure",
@@ -2467,7 +2466,7 @@
       "s": [
        30
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[41] -> syndrome[39]"
      },
      {
       "k": "2q",
@@ -2477,7 +2476,7 @@
        15,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[8], ancilla[42]"
      },
      {
       "k": "2q",
@@ -2487,7 +2486,7 @@
        16,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[9], ancilla[42]"
      },
      {
       "k": "2q",
@@ -2497,7 +2496,7 @@
        19,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[12], ancilla[42]"
      },
      {
       "k": "2q",
@@ -2507,7 +2506,7 @@
        20,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[13], ancilla[42]"
      },
      {
       "k": "measure",
@@ -2516,7 +2515,7 @@
       "s": [
        31
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[42] -> syndrome[40]"
      },
      {
       "k": "2q",
@@ -2526,7 +2525,7 @@
        14,
        32
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[7], ancilla[43]"
      },
      {
       "k": "2q",
@@ -2536,7 +2535,7 @@
        16,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[9], ancilla[43]"
      },
      {
       "k": "2q",
@@ -2546,7 +2545,7 @@
        18,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[11], ancilla[43]"
      },
      {
       "k": "2q",
@@ -2556,7 +2555,7 @@
        20,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[13], ancilla[43]"
      },
      {
       "k": "measure",
@@ -2565,7 +2564,7 @@
       "s": [
        32
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[43] -> syndrome[41]"
      },
      {
       "k": "reset",
@@ -2574,7 +2573,7 @@
       "s": [
        27
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[44]"
      },
      {
       "k": "reset",
@@ -2583,7 +2582,7 @@
       "s": [
        28
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[45]"
      },
      {
       "k": "reset",
@@ -2592,7 +2591,7 @@
       "s": [
        29
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[46]"
      },
      {
       "k": "reset",
@@ -2601,7 +2600,7 @@
       "s": [
        30
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[47]"
      },
      {
       "k": "reset",
@@ -2610,7 +2609,7 @@
       "s": [
        31
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[48]"
      },
      {
       "k": "reset",
@@ -2619,7 +2618,7 @@
       "s": [
        32
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[49]"
      },
      {
       "k": "1q",
@@ -2628,7 +2627,7 @@
       "s": [
        27
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[44]"
      },
      {
       "k": "1q",
@@ -2637,7 +2636,7 @@
       "s": [
        28
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[45]"
      },
      {
       "k": "1q",
@@ -2646,7 +2645,7 @@
       "s": [
        29
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[46]"
      },
      {
       "k": "2q",
@@ -2656,7 +2655,7 @@
        27,
        17
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[44], ancilla[10]"
      },
      {
       "k": "2q",
@@ -2666,7 +2665,7 @@
        27,
        18
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[44], ancilla[11]"
      },
      {
       "k": "2q",
@@ -2676,7 +2675,7 @@
        27,
        19
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[44], ancilla[12]"
      },
      {
       "k": "2q",
@@ -2686,7 +2685,7 @@
        27,
        20
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[44], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2695,7 +2694,7 @@
       "s": [
        27
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[44] -> syndrome[42]"
      },
      {
       "k": "2q",
@@ -2705,7 +2704,7 @@
        28,
        15
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[45], ancilla[8]"
      },
      {
       "k": "2q",
@@ -2715,7 +2714,7 @@
        28,
        16
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[45], ancilla[9]"
      },
      {
       "k": "2q",
@@ -2725,7 +2724,7 @@
        28,
        19
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[45], ancilla[12]"
      },
      {
       "k": "2q",
@@ -2735,7 +2734,7 @@
        28,
        20
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[45], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2744,7 +2743,7 @@
       "s": [
        28
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[45] -> syndrome[43]"
      },
      {
       "k": "2q",
@@ -2754,7 +2753,7 @@
        29,
        14
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[46], ancilla[7]"
      },
      {
       "k": "2q",
@@ -2764,7 +2763,7 @@
        29,
        16
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[46], ancilla[9]"
      },
      {
       "k": "2q",
@@ -2774,7 +2773,7 @@
        29,
        18
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[46], ancilla[11]"
      },
      {
       "k": "2q",
@@ -2784,7 +2783,7 @@
        29,
        20
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[46], ancilla[13]"
      },
      {
       "k": "measure",
@@ -2793,7 +2792,7 @@
       "s": [
        29
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[46] -> syndrome[44]"
      },
      {
       "k": "2q",
@@ -2803,7 +2802,7 @@
        17,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[10], ancilla[47]"
      },
      {
       "k": "2q",
@@ -2813,7 +2812,7 @@
        18,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[11], ancilla[47]"
      },
      {
       "k": "2q",
@@ -2823,7 +2822,7 @@
        19,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[12], ancilla[47]"
      },
      {
       "k": "2q",
@@ -2833,7 +2832,7 @@
        20,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[13], ancilla[47]"
      },
      {
       "k": "measure",
@@ -2842,7 +2841,7 @@
       "s": [
        30
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[47] -> syndrome[45]"
      },
      {
       "k": "2q",
@@ -2852,7 +2851,7 @@
        15,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[8], ancilla[48]"
      },
      {
       "k": "2q",
@@ -2862,7 +2861,7 @@
        16,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[9], ancilla[48]"
      },
      {
       "k": "2q",
@@ -2872,7 +2871,7 @@
        19,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[12], ancilla[48]"
      },
      {
       "k": "2q",
@@ -2882,7 +2881,7 @@
        20,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[13], ancilla[48]"
      },
      {
       "k": "measure",
@@ -2891,7 +2890,7 @@
       "s": [
        31
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[48] -> syndrome[46]"
      },
      {
       "k": "2q",
@@ -2901,7 +2900,7 @@
        14,
        32
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[7], ancilla[49]"
      },
      {
       "k": "2q",
@@ -2911,7 +2910,7 @@
        16,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[9], ancilla[49]"
      },
      {
       "k": "2q",
@@ -2921,7 +2920,7 @@
        18,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[11], ancilla[49]"
      },
      {
       "k": "2q",
@@ -2931,7 +2930,7 @@
        20,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[13], ancilla[49]"
      },
      {
       "k": "measure",
@@ -2940,7 +2939,7 @@
       "s": [
        32
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[49] -> syndrome[47]"
      },
      {
       "k": "decode",
@@ -2957,7 +2956,7 @@
        7,
        14
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[0], ancilla[7]"
      },
      {
       "k": "2q",
@@ -2967,7 +2966,7 @@
        8,
        15
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[1], ancilla[8]"
      },
      {
       "k": "2q",
@@ -2977,7 +2976,7 @@
        9,
        16
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[2], ancilla[9]"
      },
      {
       "k": "2q",
@@ -2987,7 +2986,7 @@
        10,
        17
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[3], ancilla[10]"
      },
      {
       "k": "2q",
@@ -2997,7 +2996,7 @@
        11,
        18
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[4], ancilla[11]"
      },
      {
       "k": "2q",
@@ -3007,7 +3006,7 @@
        12,
        19
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[5], ancilla[12]"
      },
      {
       "k": "2q",
@@ -3017,7 +3016,7 @@
        13,
        20
       ],
-      "line": "CNOT  ancilla[rv_tv9], ancilla[rv_tv9 + 7]"
+      "line": "CNOT  ancilla[6], ancilla[13]"
      },
      {
       "k": "reset",
@@ -3026,7 +3025,7 @@
       "s": [
        21
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[50]"
      },
      {
       "k": "reset",
@@ -3035,7 +3034,7 @@
       "s": [
        22
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[51]"
      },
      {
       "k": "reset",
@@ -3044,7 +3043,7 @@
       "s": [
        23
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[52]"
      },
      {
       "k": "reset",
@@ -3053,7 +3052,7 @@
       "s": [
        24
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[53]"
      },
      {
       "k": "reset",
@@ -3062,7 +3061,7 @@
       "s": [
        25
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[54]"
      },
      {
       "k": "reset",
@@ -3071,7 +3070,7 @@
       "s": [
        26
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[55]"
      },
      {
       "k": "1q",
@@ -3080,7 +3079,7 @@
       "s": [
        21
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[50]"
      },
      {
       "k": "1q",
@@ -3089,7 +3088,7 @@
       "s": [
        22
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[51]"
      },
      {
       "k": "1q",
@@ -3098,7 +3097,7 @@
       "s": [
        23
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[52]"
      },
      {
       "k": "2q",
@@ -3108,7 +3107,7 @@
        21,
        10
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[50], ancilla[3]"
      },
      {
       "k": "2q",
@@ -3118,7 +3117,7 @@
        21,
        11
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[50], ancilla[4]"
      },
      {
       "k": "2q",
@@ -3128,7 +3127,7 @@
        21,
        12
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[50], ancilla[5]"
      },
      {
       "k": "2q",
@@ -3138,7 +3137,7 @@
        21,
        13
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[50], ancilla[6]"
      },
      {
       "k": "measure",
@@ -3147,7 +3146,7 @@
       "s": [
        21
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[50] -> syndrome[0]"
      },
      {
       "k": "2q",
@@ -3157,7 +3156,7 @@
        22,
        8
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[51], ancilla[1]"
      },
      {
       "k": "2q",
@@ -3167,7 +3166,7 @@
        22,
        9
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[51], ancilla[2]"
      },
      {
       "k": "2q",
@@ -3177,7 +3176,7 @@
        22,
        12
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[51], ancilla[5]"
      },
      {
       "k": "2q",
@@ -3187,7 +3186,7 @@
        22,
        13
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[51], ancilla[6]"
      },
      {
       "k": "measure",
@@ -3196,7 +3195,7 @@
       "s": [
        22
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[51] -> syndrome[1]"
      },
      {
       "k": "2q",
@@ -3206,7 +3205,7 @@
        23,
        7
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[52], ancilla[0]"
      },
      {
       "k": "2q",
@@ -3216,7 +3215,7 @@
        23,
        9
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[52], ancilla[2]"
      },
      {
       "k": "2q",
@@ -3226,7 +3225,7 @@
        23,
        11
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[52], ancilla[4]"
      },
      {
       "k": "2q",
@@ -3236,7 +3235,7 @@
        23,
        13
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[52], ancilla[6]"
      },
      {
       "k": "measure",
@@ -3245,7 +3244,7 @@
       "s": [
        23
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[52] -> syndrome[2]"
      },
      {
       "k": "2q",
@@ -3255,7 +3254,7 @@
        10,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[3], ancilla[53]"
      },
      {
       "k": "2q",
@@ -3265,7 +3264,7 @@
        11,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[4], ancilla[53]"
      },
      {
       "k": "2q",
@@ -3275,7 +3274,7 @@
        12,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[5], ancilla[53]"
      },
      {
       "k": "2q",
@@ -3285,7 +3284,7 @@
        13,
        24
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[6], ancilla[53]"
      },
      {
       "k": "measure",
@@ -3294,7 +3293,7 @@
       "s": [
        24
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[53] -> syndrome[3]"
      },
      {
       "k": "2q",
@@ -3304,7 +3303,7 @@
        8,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[1], ancilla[54]"
      },
      {
       "k": "2q",
@@ -3314,7 +3313,7 @@
        9,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[2], ancilla[54]"
      },
      {
       "k": "2q",
@@ -3324,7 +3323,7 @@
        12,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[5], ancilla[54]"
      },
      {
       "k": "2q",
@@ -3334,7 +3333,7 @@
        13,
        25
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[6], ancilla[54]"
      },
      {
       "k": "measure",
@@ -3343,7 +3342,7 @@
       "s": [
        25
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[54] -> syndrome[4]"
      },
      {
       "k": "2q",
@@ -3353,7 +3352,7 @@
        7,
        26
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[0], ancilla[55]"
      },
      {
       "k": "2q",
@@ -3363,7 +3362,7 @@
        9,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[2], ancilla[55]"
      },
      {
       "k": "2q",
@@ -3373,7 +3372,7 @@
        11,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[4], ancilla[55]"
      },
      {
       "k": "2q",
@@ -3383,7 +3382,7 @@
        13,
        26
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[6], ancilla[55]"
      },
      {
       "k": "measure",
@@ -3392,7 +3391,7 @@
       "s": [
        26
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[55] -> syndrome[5]"
      },
      {
       "k": "reset",
@@ -3401,7 +3400,7 @@
       "s": [
        27
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[56]"
      },
      {
       "k": "reset",
@@ -3410,7 +3409,7 @@
       "s": [
        28
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[57]"
      },
      {
       "k": "reset",
@@ -3419,7 +3418,7 @@
       "s": [
        29
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[58]"
      },
      {
       "k": "reset",
@@ -3428,7 +3427,7 @@
       "s": [
        30
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[59]"
      },
      {
       "k": "reset",
@@ -3437,7 +3436,7 @@
       "s": [
        31
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[60]"
      },
      {
       "k": "reset",
@@ -3446,7 +3445,7 @@
       "s": [
        32
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[61]"
      },
      {
       "k": "1q",
@@ -3455,7 +3454,7 @@
       "s": [
        27
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[56]"
      },
      {
       "k": "1q",
@@ -3464,7 +3463,7 @@
       "s": [
        28
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[57]"
      },
      {
       "k": "1q",
@@ -3473,7 +3472,7 @@
       "s": [
        29
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[58]"
      },
      {
       "k": "2q",
@@ -3483,7 +3482,7 @@
        27,
        17
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 3]"
+      "line": "CNOT  ancilla[56], ancilla[10]"
      },
      {
       "k": "2q",
@@ -3493,7 +3492,7 @@
        27,
        18
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[56], ancilla[11]"
      },
      {
       "k": "2q",
@@ -3503,7 +3502,7 @@
        27,
        19
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[56], ancilla[12]"
      },
      {
       "k": "2q",
@@ -3513,7 +3512,7 @@
        27,
        20
       ],
-      "line": "CNOT  ancilla[abase], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[56], ancilla[13]"
      },
      {
       "k": "measure",
@@ -3522,7 +3521,7 @@
       "s": [
        27
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[56] -> syndrome[6]"
      },
      {
       "k": "2q",
@@ -3532,7 +3531,7 @@
        28,
        15
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 1]"
+      "line": "CNOT  ancilla[57], ancilla[8]"
      },
      {
       "k": "2q",
@@ -3542,7 +3541,7 @@
        28,
        16
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[57], ancilla[9]"
      },
      {
       "k": "2q",
@@ -3552,7 +3551,7 @@
        28,
        19
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 5]"
+      "line": "CNOT  ancilla[57], ancilla[12]"
      },
      {
       "k": "2q",
@@ -3562,7 +3561,7 @@
        28,
        20
       ],
-      "line": "CNOT  ancilla[abase + 1], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[57], ancilla[13]"
      },
      {
       "k": "measure",
@@ -3571,7 +3570,7 @@
       "s": [
        28
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[57] -> syndrome[7]"
      },
      {
       "k": "2q",
@@ -3581,7 +3580,7 @@
        29,
        14
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase]"
+      "line": "CNOT  ancilla[58], ancilla[7]"
      },
      {
       "k": "2q",
@@ -3591,7 +3590,7 @@
        29,
        16
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 2]"
+      "line": "CNOT  ancilla[58], ancilla[9]"
      },
      {
       "k": "2q",
@@ -3601,7 +3600,7 @@
        29,
        18
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 4]"
+      "line": "CNOT  ancilla[58], ancilla[11]"
      },
      {
       "k": "2q",
@@ -3611,7 +3610,7 @@
        29,
        20
       ],
-      "line": "CNOT  ancilla[abase + 2], ancilla[dbase + 6]"
+      "line": "CNOT  ancilla[58], ancilla[13]"
      },
      {
       "k": "measure",
@@ -3620,7 +3619,7 @@
       "s": [
        29
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[58] -> syndrome[8]"
      },
      {
       "k": "2q",
@@ -3630,7 +3629,7 @@
        17,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[10], ancilla[59]"
      },
      {
       "k": "2q",
@@ -3640,7 +3639,7 @@
        18,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[11], ancilla[59]"
      },
      {
       "k": "2q",
@@ -3650,7 +3649,7 @@
        19,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[12], ancilla[59]"
      },
      {
       "k": "2q",
@@ -3660,7 +3659,7 @@
        20,
        30
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  ancilla[13], ancilla[59]"
      },
      {
       "k": "measure",
@@ -3669,7 +3668,7 @@
       "s": [
        30
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[59] -> syndrome[9]"
      },
      {
       "k": "2q",
@@ -3679,7 +3678,7 @@
        15,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[8], ancilla[60]"
      },
      {
       "k": "2q",
@@ -3689,7 +3688,7 @@
        16,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[9], ancilla[60]"
      },
      {
       "k": "2q",
@@ -3699,7 +3698,7 @@
        19,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[12], ancilla[60]"
      },
      {
       "k": "2q",
@@ -3709,7 +3708,7 @@
        20,
        31
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  ancilla[13], ancilla[60]"
      },
      {
       "k": "measure",
@@ -3718,7 +3717,7 @@
       "s": [
        31
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[60] -> syndrome[10]"
      },
      {
       "k": "2q",
@@ -3728,7 +3727,7 @@
        14,
        32
       ],
-      "line": "CNOT  ancilla[dbase], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[7], ancilla[61]"
      },
      {
       "k": "2q",
@@ -3738,7 +3737,7 @@
        16,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[9], ancilla[61]"
      },
      {
       "k": "2q",
@@ -3748,7 +3747,7 @@
        18,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[11], ancilla[61]"
      },
      {
       "k": "2q",
@@ -3758,7 +3757,7 @@
        20,
        32
       ],
-      "line": "CNOT  ancilla[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  ancilla[13], ancilla[61]"
      },
      {
       "k": "measure",
@@ -3767,7 +3766,7 @@
       "s": [
        32
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[61] -> syndrome[11]"
      },
      {
       "k": "decode",
@@ -3784,7 +3783,7 @@
        0,
        7
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[0], ancilla[0]"
      },
      {
       "k": "2q",
@@ -3794,7 +3793,7 @@
        1,
        8
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[1], ancilla[1]"
      },
      {
       "k": "2q",
@@ -3804,7 +3803,7 @@
        2,
        9
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[2], ancilla[2]"
      },
      {
       "k": "2q",
@@ -3814,7 +3813,7 @@
        3,
        10
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[3], ancilla[3]"
      },
      {
       "k": "2q",
@@ -3824,7 +3823,7 @@
        4,
        11
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[4], ancilla[4]"
      },
      {
       "k": "2q",
@@ -3834,7 +3833,7 @@
        5,
        12
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[5], ancilla[5]"
      },
      {
       "k": "2q",
@@ -3844,7 +3843,7 @@
        6,
        13
       ],
-      "line": "CNOT  data[rv_tv14], ancilla[rv_tv14]"
+      "line": "CNOT  data[6], ancilla[6]"
      },
      {
       "k": "measure",
@@ -3853,7 +3852,7 @@
       "s": [
        0
       ],
-      "line": "measure  basis=X  data[0]  -> c[0]"
+      "line": "measure  basis=X  data[0] -> c[0]"
      },
      {
       "k": "measure",
@@ -3862,7 +3861,7 @@
       "s": [
        1
       ],
-      "line": "measure  basis=X  data[1]  -> c[1]"
+      "line": "measure  basis=X  data[1] -> c[1]"
      },
      {
       "k": "measure",
@@ -3871,7 +3870,7 @@
       "s": [
        2
       ],
-      "line": "measure  basis=X  data[2]  -> c[2]"
+      "line": "measure  basis=X  data[2] -> c[2]"
      },
      {
       "k": "reset",
@@ -3880,7 +3879,7 @@
       "s": [
        33
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[62]"
      },
      {
       "k": "reset",
@@ -3889,7 +3888,7 @@
       "s": [
        34
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[63]"
      },
      {
       "k": "reset",
@@ -3898,7 +3897,7 @@
       "s": [
        35
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[64]"
      },
      {
       "k": "reset",
@@ -3907,7 +3906,7 @@
       "s": [
        36
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[65]"
      },
      {
       "k": "reset",
@@ -3916,7 +3915,7 @@
       "s": [
        37
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[66]"
      },
      {
       "k": "reset",
@@ -3925,7 +3924,7 @@
       "s": [
        38
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[67]"
      },
      {
       "k": "1q",
@@ -3934,7 +3933,7 @@
       "s": [
        33
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[62]"
      },
      {
       "k": "1q",
@@ -3943,7 +3942,7 @@
       "s": [
        34
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[63]"
      },
      {
       "k": "1q",
@@ -3952,7 +3951,7 @@
       "s": [
        35
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[64]"
      },
      {
       "k": "2q",
@@ -3962,7 +3961,7 @@
        33,
        3
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 3]"
+      "line": "CNOT  ancilla[62], data[3]"
      },
      {
       "k": "2q",
@@ -3972,7 +3971,7 @@
        33,
        4
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 4]"
+      "line": "CNOT  ancilla[62], data[4]"
      },
      {
       "k": "2q",
@@ -3982,7 +3981,7 @@
        33,
        5
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 5]"
+      "line": "CNOT  ancilla[62], data[5]"
      },
      {
       "k": "2q",
@@ -3992,7 +3991,7 @@
        33,
        6
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 6]"
+      "line": "CNOT  ancilla[62], data[6]"
      },
      {
       "k": "measure",
@@ -4001,7 +4000,7 @@
       "s": [
        33
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[62] -> syndrome[48]"
      },
      {
       "k": "2q",
@@ -4011,7 +4010,7 @@
        34,
        1
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 1]"
+      "line": "CNOT  ancilla[63], data[1]"
      },
      {
       "k": "2q",
@@ -4021,7 +4020,7 @@
        34,
        2
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 2]"
+      "line": "CNOT  ancilla[63], data[2]"
      },
      {
       "k": "2q",
@@ -4031,7 +4030,7 @@
        34,
        5
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 5]"
+      "line": "CNOT  ancilla[63], data[5]"
      },
      {
       "k": "2q",
@@ -4041,7 +4040,7 @@
        34,
        6
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 6]"
+      "line": "CNOT  ancilla[63], data[6]"
      },
      {
       "k": "measure",
@@ -4050,7 +4049,7 @@
       "s": [
        34
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[63] -> syndrome[49]"
      },
      {
       "k": "2q",
@@ -4060,7 +4059,7 @@
        35,
        0
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase]"
+      "line": "CNOT  ancilla[64], data[0]"
      },
      {
       "k": "2q",
@@ -4070,7 +4069,7 @@
        35,
        2
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 2]"
+      "line": "CNOT  ancilla[64], data[2]"
      },
      {
       "k": "2q",
@@ -4080,7 +4079,7 @@
        35,
        4
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 4]"
+      "line": "CNOT  ancilla[64], data[4]"
      },
      {
       "k": "2q",
@@ -4090,7 +4089,7 @@
        35,
        6
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 6]"
+      "line": "CNOT  ancilla[64], data[6]"
      },
      {
       "k": "measure",
@@ -4099,7 +4098,7 @@
       "s": [
        35
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[64] -> syndrome[50]"
      },
      {
       "k": "2q",
@@ -4109,7 +4108,7 @@
        3,
        36
       ],
-      "line": "CNOT  data[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  data[3], ancilla[65]"
      },
      {
       "k": "2q",
@@ -4119,7 +4118,7 @@
        4,
        36
       ],
-      "line": "CNOT  data[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  data[4], ancilla[65]"
      },
      {
       "k": "2q",
@@ -4129,7 +4128,7 @@
        5,
        36
       ],
-      "line": "CNOT  data[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  data[5], ancilla[65]"
      },
      {
       "k": "2q",
@@ -4139,7 +4138,7 @@
        6,
        36
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  data[6], ancilla[65]"
      },
      {
       "k": "measure",
@@ -4148,7 +4147,7 @@
       "s": [
        36
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[65] -> syndrome[51]"
      },
      {
       "k": "2q",
@@ -4158,7 +4157,7 @@
        1,
        37
       ],
-      "line": "CNOT  data[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  data[1], ancilla[66]"
      },
      {
       "k": "2q",
@@ -4168,7 +4167,7 @@
        2,
        37
       ],
-      "line": "CNOT  data[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  data[2], ancilla[66]"
      },
      {
       "k": "2q",
@@ -4178,7 +4177,7 @@
        5,
        37
       ],
-      "line": "CNOT  data[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  data[5], ancilla[66]"
      },
      {
       "k": "2q",
@@ -4188,7 +4187,7 @@
        6,
        37
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  data[6], ancilla[66]"
      },
      {
       "k": "measure",
@@ -4197,7 +4196,7 @@
       "s": [
        37
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[66] -> syndrome[52]"
      },
      {
       "k": "2q",
@@ -4207,7 +4206,7 @@
        0,
        38
       ],
-      "line": "CNOT  data[dbase], ancilla[abase + 5]"
+      "line": "CNOT  data[0], ancilla[67]"
      },
      {
       "k": "2q",
@@ -4217,7 +4216,7 @@
        2,
        38
       ],
-      "line": "CNOT  data[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  data[2], ancilla[67]"
      },
      {
       "k": "2q",
@@ -4227,7 +4226,7 @@
        4,
        38
       ],
-      "line": "CNOT  data[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  data[4], ancilla[67]"
      },
      {
       "k": "2q",
@@ -4237,7 +4236,7 @@
        6,
        38
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  data[6], ancilla[67]"
      },
      {
       "k": "measure",
@@ -4246,7 +4245,7 @@
       "s": [
        38
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[67] -> syndrome[53]"
      },
      {
       "k": "reset",
@@ -4255,7 +4254,7 @@
       "s": [
        33
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[68]"
      },
      {
       "k": "reset",
@@ -4264,7 +4263,7 @@
       "s": [
        34
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[69]"
      },
      {
       "k": "reset",
@@ -4273,7 +4272,7 @@
       "s": [
        35
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[70]"
      },
      {
       "k": "reset",
@@ -4282,7 +4281,7 @@
       "s": [
        36
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[71]"
      },
      {
       "k": "reset",
@@ -4291,7 +4290,7 @@
       "s": [
        37
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[72]"
      },
      {
       "k": "reset",
@@ -4300,7 +4299,7 @@
       "s": [
        38
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[73]"
      },
      {
       "k": "1q",
@@ -4309,7 +4308,7 @@
       "s": [
        33
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[68]"
      },
      {
       "k": "1q",
@@ -4318,7 +4317,7 @@
       "s": [
        34
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[69]"
      },
      {
       "k": "1q",
@@ -4327,7 +4326,7 @@
       "s": [
        35
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[70]"
      },
      {
       "k": "2q",
@@ -4337,7 +4336,7 @@
        33,
        3
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 3]"
+      "line": "CNOT  ancilla[68], data[3]"
      },
      {
       "k": "2q",
@@ -4347,7 +4346,7 @@
        33,
        4
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 4]"
+      "line": "CNOT  ancilla[68], data[4]"
      },
      {
       "k": "2q",
@@ -4357,7 +4356,7 @@
        33,
        5
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 5]"
+      "line": "CNOT  ancilla[68], data[5]"
      },
      {
       "k": "2q",
@@ -4367,7 +4366,7 @@
        33,
        6
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 6]"
+      "line": "CNOT  ancilla[68], data[6]"
      },
      {
       "k": "measure",
@@ -4376,7 +4375,7 @@
       "s": [
        33
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[68] -> syndrome[54]"
      },
      {
       "k": "2q",
@@ -4386,7 +4385,7 @@
        34,
        1
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 1]"
+      "line": "CNOT  ancilla[69], data[1]"
      },
      {
       "k": "2q",
@@ -4396,7 +4395,7 @@
        34,
        2
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 2]"
+      "line": "CNOT  ancilla[69], data[2]"
      },
      {
       "k": "2q",
@@ -4406,7 +4405,7 @@
        34,
        5
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 5]"
+      "line": "CNOT  ancilla[69], data[5]"
      },
      {
       "k": "2q",
@@ -4416,7 +4415,7 @@
        34,
        6
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 6]"
+      "line": "CNOT  ancilla[69], data[6]"
      },
      {
       "k": "measure",
@@ -4425,7 +4424,7 @@
       "s": [
        34
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[69] -> syndrome[55]"
      },
      {
       "k": "2q",
@@ -4435,7 +4434,7 @@
        35,
        0
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase]"
+      "line": "CNOT  ancilla[70], data[0]"
      },
      {
       "k": "2q",
@@ -4445,7 +4444,7 @@
        35,
        2
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 2]"
+      "line": "CNOT  ancilla[70], data[2]"
      },
      {
       "k": "2q",
@@ -4455,7 +4454,7 @@
        35,
        4
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 4]"
+      "line": "CNOT  ancilla[70], data[4]"
      },
      {
       "k": "2q",
@@ -4465,7 +4464,7 @@
        35,
        6
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 6]"
+      "line": "CNOT  ancilla[70], data[6]"
      },
      {
       "k": "measure",
@@ -4474,7 +4473,7 @@
       "s": [
        35
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[70] -> syndrome[56]"
      },
      {
       "k": "2q",
@@ -4484,7 +4483,7 @@
        3,
        36
       ],
-      "line": "CNOT  data[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  data[3], ancilla[71]"
      },
      {
       "k": "2q",
@@ -4494,7 +4493,7 @@
        4,
        36
       ],
-      "line": "CNOT  data[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  data[4], ancilla[71]"
      },
      {
       "k": "2q",
@@ -4504,7 +4503,7 @@
        5,
        36
       ],
-      "line": "CNOT  data[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  data[5], ancilla[71]"
      },
      {
       "k": "2q",
@@ -4514,7 +4513,7 @@
        6,
        36
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  data[6], ancilla[71]"
      },
      {
       "k": "measure",
@@ -4523,7 +4522,7 @@
       "s": [
        36
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[71] -> syndrome[57]"
      },
      {
       "k": "2q",
@@ -4533,7 +4532,7 @@
        1,
        37
       ],
-      "line": "CNOT  data[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  data[1], ancilla[72]"
      },
      {
       "k": "2q",
@@ -4543,7 +4542,7 @@
        2,
        37
       ],
-      "line": "CNOT  data[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  data[2], ancilla[72]"
      },
      {
       "k": "2q",
@@ -4553,7 +4552,7 @@
        5,
        37
       ],
-      "line": "CNOT  data[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  data[5], ancilla[72]"
      },
      {
       "k": "2q",
@@ -4563,7 +4562,7 @@
        6,
        37
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  data[6], ancilla[72]"
      },
      {
       "k": "measure",
@@ -4572,7 +4571,7 @@
       "s": [
        37
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[72] -> syndrome[58]"
      },
      {
       "k": "2q",
@@ -4582,7 +4581,7 @@
        0,
        38
       ],
-      "line": "CNOT  data[dbase], ancilla[abase + 5]"
+      "line": "CNOT  data[0], ancilla[73]"
      },
      {
       "k": "2q",
@@ -4592,7 +4591,7 @@
        2,
        38
       ],
-      "line": "CNOT  data[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  data[2], ancilla[73]"
      },
      {
       "k": "2q",
@@ -4602,7 +4601,7 @@
        4,
        38
       ],
-      "line": "CNOT  data[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  data[4], ancilla[73]"
      },
      {
       "k": "2q",
@@ -4612,7 +4611,7 @@
        6,
        38
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  data[6], ancilla[73]"
      },
      {
       "k": "measure",
@@ -4621,7 +4620,7 @@
       "s": [
        38
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[73] -> syndrome[59]"
      },
      {
       "k": "reset",
@@ -4630,7 +4629,7 @@
       "s": [
        33
       ],
-      "line": "request_ancilla  count=1  ancilla[abase]"
+      "line": "request_ancilla  count=1  ancilla[74]"
      },
      {
       "k": "reset",
@@ -4639,7 +4638,7 @@
       "s": [
        34
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 1]"
+      "line": "request_ancilla  count=1  ancilla[75]"
      },
      {
       "k": "reset",
@@ -4648,7 +4647,7 @@
       "s": [
        35
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 2]"
+      "line": "request_ancilla  count=1  ancilla[76]"
      },
      {
       "k": "reset",
@@ -4657,7 +4656,7 @@
       "s": [
        36
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 3]"
+      "line": "request_ancilla  count=1  ancilla[77]"
      },
      {
       "k": "reset",
@@ -4666,7 +4665,7 @@
       "s": [
        37
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 4]"
+      "line": "request_ancilla  count=1  ancilla[78]"
      },
      {
       "k": "reset",
@@ -4675,7 +4674,7 @@
       "s": [
        38
       ],
-      "line": "request_ancilla  count=1  ancilla[abase + 5]"
+      "line": "request_ancilla  count=1  ancilla[79]"
      },
      {
       "k": "1q",
@@ -4684,7 +4683,7 @@
       "s": [
        33
       ],
-      "line": "H  ancilla[abase]"
+      "line": "H  ancilla[74]"
      },
      {
       "k": "1q",
@@ -4693,7 +4692,7 @@
       "s": [
        34
       ],
-      "line": "H  ancilla[abase + 1]"
+      "line": "H  ancilla[75]"
      },
      {
       "k": "1q",
@@ -4702,7 +4701,7 @@
       "s": [
        35
       ],
-      "line": "H  ancilla[abase + 2]"
+      "line": "H  ancilla[76]"
      },
      {
       "k": "2q",
@@ -4712,7 +4711,7 @@
        33,
        3
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 3]"
+      "line": "CNOT  ancilla[74], data[3]"
      },
      {
       "k": "2q",
@@ -4722,7 +4721,7 @@
        33,
        4
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 4]"
+      "line": "CNOT  ancilla[74], data[4]"
      },
      {
       "k": "2q",
@@ -4732,7 +4731,7 @@
        33,
        5
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 5]"
+      "line": "CNOT  ancilla[74], data[5]"
      },
      {
       "k": "2q",
@@ -4742,7 +4741,7 @@
        33,
        6
       ],
-      "line": "CNOT  ancilla[abase], data[dbase + 6]"
+      "line": "CNOT  ancilla[74], data[6]"
      },
      {
       "k": "measure",
@@ -4751,7 +4750,7 @@
       "s": [
        33
       ],
-      "line": "measure  basis=X  ancilla[abase]  -> syndrome[cbase]"
+      "line": "measure  basis=X  ancilla[74] -> syndrome[60]"
      },
      {
       "k": "2q",
@@ -4761,7 +4760,7 @@
        34,
        1
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 1]"
+      "line": "CNOT  ancilla[75], data[1]"
      },
      {
       "k": "2q",
@@ -4771,7 +4770,7 @@
        34,
        2
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 2]"
+      "line": "CNOT  ancilla[75], data[2]"
      },
      {
       "k": "2q",
@@ -4781,7 +4780,7 @@
        34,
        5
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 5]"
+      "line": "CNOT  ancilla[75], data[5]"
      },
      {
       "k": "2q",
@@ -4791,7 +4790,7 @@
        34,
        6
       ],
-      "line": "CNOT  ancilla[abase + 1], data[dbase + 6]"
+      "line": "CNOT  ancilla[75], data[6]"
      },
      {
       "k": "measure",
@@ -4800,7 +4799,7 @@
       "s": [
        34
       ],
-      "line": "measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]"
+      "line": "measure  basis=X  ancilla[75] -> syndrome[61]"
      },
      {
       "k": "2q",
@@ -4810,7 +4809,7 @@
        35,
        0
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase]"
+      "line": "CNOT  ancilla[76], data[0]"
      },
      {
       "k": "2q",
@@ -4820,7 +4819,7 @@
        35,
        2
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 2]"
+      "line": "CNOT  ancilla[76], data[2]"
      },
      {
       "k": "2q",
@@ -4830,7 +4829,7 @@
        35,
        4
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 4]"
+      "line": "CNOT  ancilla[76], data[4]"
      },
      {
       "k": "2q",
@@ -4840,7 +4839,7 @@
        35,
        6
       ],
-      "line": "CNOT  ancilla[abase + 2], data[dbase + 6]"
+      "line": "CNOT  ancilla[76], data[6]"
      },
      {
       "k": "measure",
@@ -4849,7 +4848,7 @@
       "s": [
        35
       ],
-      "line": "measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]"
+      "line": "measure  basis=X  ancilla[76] -> syndrome[62]"
      },
      {
       "k": "2q",
@@ -4859,7 +4858,7 @@
        3,
        36
       ],
-      "line": "CNOT  data[dbase + 3], ancilla[abase + 3]"
+      "line": "CNOT  data[3], ancilla[77]"
      },
      {
       "k": "2q",
@@ -4869,7 +4868,7 @@
        4,
        36
       ],
-      "line": "CNOT  data[dbase + 4], ancilla[abase + 3]"
+      "line": "CNOT  data[4], ancilla[77]"
      },
      {
       "k": "2q",
@@ -4879,7 +4878,7 @@
        5,
        36
       ],
-      "line": "CNOT  data[dbase + 5], ancilla[abase + 3]"
+      "line": "CNOT  data[5], ancilla[77]"
      },
      {
       "k": "2q",
@@ -4889,7 +4888,7 @@
        6,
        36
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 3]"
+      "line": "CNOT  data[6], ancilla[77]"
      },
      {
       "k": "measure",
@@ -4898,7 +4897,7 @@
       "s": [
        36
       ],
-      "line": "measure  basis=Z  ancilla[abase + 3]  -> syndrome[cbase + 3]"
+      "line": "measure  basis=Z  ancilla[77] -> syndrome[63]"
      },
      {
       "k": "2q",
@@ -4908,7 +4907,7 @@
        1,
        37
       ],
-      "line": "CNOT  data[dbase + 1], ancilla[abase + 4]"
+      "line": "CNOT  data[1], ancilla[78]"
      },
      {
       "k": "2q",
@@ -4918,7 +4917,7 @@
        2,
        37
       ],
-      "line": "CNOT  data[dbase + 2], ancilla[abase + 4]"
+      "line": "CNOT  data[2], ancilla[78]"
      },
      {
       "k": "2q",
@@ -4928,7 +4927,7 @@
        5,
        37
       ],
-      "line": "CNOT  data[dbase + 5], ancilla[abase + 4]"
+      "line": "CNOT  data[5], ancilla[78]"
      },
      {
       "k": "2q",
@@ -4938,7 +4937,7 @@
        6,
        37
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 4]"
+      "line": "CNOT  data[6], ancilla[78]"
      },
      {
       "k": "measure",
@@ -4947,7 +4946,7 @@
       "s": [
        37
       ],
-      "line": "measure  basis=Z  ancilla[abase + 4]  -> syndrome[cbase + 4]"
+      "line": "measure  basis=Z  ancilla[78] -> syndrome[64]"
      },
      {
       "k": "2q",
@@ -4957,7 +4956,7 @@
        0,
        38
       ],
-      "line": "CNOT  data[dbase], ancilla[abase + 5]"
+      "line": "CNOT  data[0], ancilla[79]"
      },
      {
       "k": "2q",
@@ -4967,7 +4966,7 @@
        2,
        38
       ],
-      "line": "CNOT  data[dbase + 2], ancilla[abase + 5]"
+      "line": "CNOT  data[2], ancilla[79]"
      },
      {
       "k": "2q",
@@ -4977,7 +4976,7 @@
        4,
        38
       ],
-      "line": "CNOT  data[dbase + 4], ancilla[abase + 5]"
+      "line": "CNOT  data[4], ancilla[79]"
      },
      {
       "k": "2q",
@@ -4987,7 +4986,7 @@
        6,
        38
       ],
-      "line": "CNOT  data[dbase + 6], ancilla[abase + 5]"
+      "line": "CNOT  data[6], ancilla[79]"
      },
      {
       "k": "measure",
@@ -4996,7 +4995,7 @@
       "s": [
        38
       ],
-      "line": "measure  basis=Z  ancilla[abase + 5]  -> syndrome[cbase + 5]"
+      "line": "measure  basis=Z  ancilla[79] -> syndrome[65]"
      },
      {
       "k": "measure",
@@ -5005,7 +5004,7 @@
       "s": [
        7
       ],
-      "line": "measure  basis=Z  ancilla[0]  -> c[3]"
+      "line": "measure  basis=Z  ancilla[0] -> c[3]"
      },
      {
       "k": "measure",
@@ -5014,7 +5013,7 @@
       "s": [
        8
       ],
-      "line": "measure  basis=Z  ancilla[1]  -> c[4]"
+      "line": "measure  basis=Z  ancilla[1] -> c[4]"
      },
      {
       "k": "measure",
@@ -5023,7 +5022,7 @@
       "s": [
        9
       ],
-      "line": "measure  basis=Z  ancilla[2]  -> c[5]"
+      "line": "measure  basis=Z  ancilla[2] -> c[5]"
      },
      {
       "k": "decode",

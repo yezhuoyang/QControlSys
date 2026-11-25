@@ -80,13 +80,13 @@ function runDetail(r) {
     return `<tr><td><code>${esc(k)}</code></td><td>${v.ok} / ${v.count}</td><td>${s ? s.declaredNs : "–"}</td><td>${s ? [s.minNs, s.medianNs, s.maxNs].join(" / ") : "–"}</td><td>${v.maxOverrunNs || 0}</td></tr>`;
   }).join("");
   return `
-    <h3>Compiled listing</h3>
-    <p>The QSysASM listing compiled against the specification below has ${r.listingLines ?? "–"} lines and expands to ${r.ops} timed operations. Its first lines:</p>
+    <h3>Compiled program</h3>
+    <p>The QSysASM program compiled against the specification below: ${r.ops} statements, one per timed operation, each a physical instruction or a system call on concrete qubits at its absolute start (no gadgets, loops or parameters). Its first lines:</p>
     <pre class="code">${esc(r.listingHead ?? "")}</pre>
     <h3>Derived system specification</h3>
     <p>The specification the compiler was given, in its own format. A value marked <b>measured</b> is the longest time the twin's trace showed for that kind of operation; <b>derived</b> counts the twin's parts; <b>provisional</b> is not yet realized by this twin.</p>
     <div class="tbl"><table><thead><tr><th>Field</th><th>Value</th><th>Source</th><th class="src">Note</th></tr></thead><tbody>${spec}</tbody></table></div>
-    <details class="block"><summary>The .machine and .sysspec files</summary><pre class="code">${esc(r.machineText)}</pre><pre class="code">${esc(r.sysspecText)}</pre></details>
+    <details class="block"><summary>The machine line, as the program states it</summary><pre class="code">${esc(r.machineText)}</pre></details>
     <h3>Every operation against its window</h3>
     <p>For each kind of operation: how many finished inside the window the listing gave them, the listed duration, and the hardware time the trace shows (min / median / max, ns). The difference is the slack the specification leaves.</p>
     <div class="tbl"><table><thead><tr><th>Operation</th><th>In window</th><th>Listed (ns)</th><th>Hardware min / median / max (ns)</th><th>Longest overrun (ns)</th></tr></thead><tbody>${kinds}</tbody></table></div>

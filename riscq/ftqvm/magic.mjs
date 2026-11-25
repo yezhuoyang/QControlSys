@@ -31,6 +31,7 @@ import { conformance, addRows } from "./sc-run.mjs";
 import { slack, specFor } from "./derive.mjs";
 import * as ftc from "./ftcompiler.mjs";
 import * as specText from "./spec.mjs";
+import * as qsysasm from "./qsysasm.mjs";
 import * as mc from "./magic-circuits.mjs";
 import { placeOnBoards } from "../board.mjs";
 import { controllerTrack } from "./track.mjs";
@@ -560,14 +561,14 @@ export async function systemCall({ code, distance, factory, durations, capacitie
     sysspecFor: (names) => specText.sysspecText(specFor(durations, capacities, base, { gadgets: names, gridNs })) });
   const spec = specFor(durations, capacities, base, { gadgets, factories, gridNs });
   const built = await ftc.build({ qec, spec: specText.files(spec), name: "t-gate", dir });
-  const listing = readFileSync(built.files.sysprog, "utf8").split("\n");
   const magic = built.listing.ops.filter((o) => o.kind === "request_magic");
   const peak = Math.max(0, ...built.listing.ops.map((o) => o.end));
   return {
     programText, qecText: readFileSync(qec, "utf8"), verdict: built.verdict.status, verdictDetail: built.verdict,
-    machineText: specText.machineText(spec), sysspecText: specText.sysspecText(spec), spec: spec.machine, factories,
+    // The listing as flat QSysASM (riscq/ftqvm/qsysasm.mjs); the compiler's gadget contracts are its own input.
+    machineText: qsysasm.headerOf(specText.machineText(spec)), spec: spec.machine, factories,
     ops: built.listing.ops.length, kinds: [...new Set(built.listing.ops.map((o) => o.kind))],
-    listingHead: listing.filter((l) => l.trim() && !l.startsWith("#")).slice(0, 40).join("\n"), listingLines: listing.length,
+    listingHead: qsysasm.head(built.listing.qsysasm, 40), listingLines: built.listing.ops.length,
     requestMagic: magic.map((o) => ({ start: o.start, end: o.end, output: o.qubits.length, workspace: o.work?.length ?? 0, text: o.text })),
     makespanNs: peak,
   };

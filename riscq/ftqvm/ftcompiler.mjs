@@ -11,6 +11,7 @@ import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import * as qsysasm from "./qsysasm.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "..", "..");
@@ -94,12 +95,18 @@ export async function admit(sysprog) {
   return JSON.parse(r.stdout);
 }
 
-/** The compiler's own expansion of the listing into timed operations (bridge/ftqvm_expand.py). */
+/**
+ * The compiler's own expansion of the listing into timed operations (bridge/ftqvm_expand.py),
+ * restated as flat QSysASM (riscq/ftqvm/qsysasm.mjs): every op's `text` and `line` are its
+ * statement in the flat program, which has no gadgets, loops or parameters. `qsysasm` is that
+ * program's text.
+ */
 export async function expand(sysprog, { maxOps = 1_000_000 } = {}) {
   const r = await run(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps)], { cwd: REPO });
   const out = JSON.parse(r.stdout);
   if (out.error) throw new Error(`The compiler refused the listing: ${out.error.code}: ${out.error.message}`);
-  return out;
+  const flat = qsysasm.canonical(out);
+  return { ...flat.listing, qsysasm: flat.text };
 }
 
 /**
