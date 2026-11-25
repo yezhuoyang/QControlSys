@@ -2,25 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reproduce · QuantumOS</title>
+  <title>Reproduce published experiments · QuantumOS</title>
   <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/course/course.css">
   <link rel="stylesheet" href="/reproduce/reproduce.css">
     <link rel="stylesheet" href="/reproduce/twin3d.css" />
     <link rel="stylesheet" href="/reproduce/journal.css" />
+  <!-- Each card plays its run's 3D twin (studio/reproduce/twin3d.js), which imports "three". -->
+  <script type="importmap">{ "imports": { "three": "/three/three.module.js" } }</script>
 </head>
 <body>
 <main class="page wide"><article>
   <p class="kicker">QuantumOS · Reproduce</p>
-  <h1>Published experiments, compiled with system calls onto digital twins</h1>
-  <p class="lead">Each experiment here is written as a logical program, compiled by the fault-tolerant compiler into timed system calls, and run on a digital twin of the machine the paper used. The twin executes every operation at its listed time in the Lean model of the control system, and the trace decides whether the machine kept the schedule.</p>
-  <div class="note"><b>How to read a page.</b> The paper's numbers are quoted with their source. Every number the twin uses names where it comes from: the paper, a cited paper when this one gives none, or a measurement in the twin's own trace. What is measured is a property of the model, not of the laboratory hardware. Each page ends with the command that regenerates it.</div>
-  <h2>The workflow</h2>
+  <h1>Reproduce published experiments with our OS design</h1>
+  <p class="lead">QuantumOS is an operating system for fault-tolerant quantum computers. Programs reach the machine only through its execution interface: system calls such as <code>request_ancilla</code>, <code>route</code>, <code>decode_syndrome</code> and <code>pauli_frame_update</code>, each with a time window, which the OS executes on its control system. Here, experiments from the literature are written as logical programs and run through that interface, to see whether the OS can carry what the papers did.</p>
+  <div class="note"><b>How we evaluate the OS.</b> Each experiment runs on a digital twin of the machine its paper used: the paper's device and durations, under a cycle-exact model of the RISC-Q control system. The twin is the measuring instrument, not the subject. The question is whether every system call the OS issued ran inside its window. The paper's numbers are quoted with their source, and every number the twin uses names where it comes from: the paper, a cited paper when this one gives none, or a measurement in the twin's own trace. What is measured is a property of the model, not of the laboratory hardware. Each page ends with the command that regenerates it.</div>
+  <h2>From experiment to the OS</h2>
   <ol class="steps">
-    <li><b>Program.</b> The experiment as a logical program, using the compiler's code declarations.</li>
-    <li><b>Twin.</b> The paper's device as a fixed machine: its qubits, couplers or zones, and its published durations.</li>
-    <li><b>Compile.</b> The compiler lowers the program against a system specification of the twin; its resource VM must admit the listing. Every placed qubit must be a qubit of the device.</li>
-    <li><b>Run and derive.</b> The twin runs the listing time-triggered. Durations the hardware needed enter the next specification, until every operation fits its window.</li>
+    <li><b>Program.</b> The experiment as a logical program.</li>
+    <li><b>Compile to the OS interface.</b> The fault-tolerant compiler lowers the program to a QSysASM listing of system calls, against the OS's system specification of the machine. Its resource VM must admit the listing.</li>
+    <li><b>Execute.</b> The OS runs each system call at its listed time on its control system: firmware on the RISC-Q cores, pulses, readouts, decodes and the Pauli frame.</li>
+    <li><b>Evaluate on a twin.</b> The paper's machine as a digital twin checks every call against its window. Durations the hardware needed enter the next specification, until every call fits.</li>
   </ol>
   <h2>Experiments</h2>
   <div id="list" aria-live="polite">Loading…</div>

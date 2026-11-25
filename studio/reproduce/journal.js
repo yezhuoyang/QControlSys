@@ -1,11 +1,11 @@
 // A reproduced paper (or an Examples study) as one box across the page's column, set like an article in
-// a journal: a figure that plays the run in miniature (studio/reproduce/miniature.js), the journal's
-// masthead, the citation, the summary and what the reproduction found. Used by /reproduce and /examples.
-import { mountMiniature, MINIATURE_LEGEND } from "/reproduce/miniature.js";
+// a journal: its figure is the run's 3D twin exactly as its page shows it (studio/reproduce/twin3d.js,
+// the same track), then the journal's masthead, the citation, the summary and what the reproduction
+// found. Used by /reproduce and /examples.
 
-// Its stylesheet, once per page.
-if (!document.querySelector('link[href="/reproduce/journal.css"]'))
-  document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: "/reproduce/journal.css" }));
+// Its stylesheets, and the 3D twin's, once per page.
+for (const href of ["/reproduce/twin3d.css", "/reproduce/journal.css"])
+  if (!document.querySelector(`link[href="${href}"]`)) document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href }));
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const code = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -27,17 +27,14 @@ export function journalOf(venue = "") {
 
 /**
  * One box. item = { href, title, summary, kicker?, paper?: { authors, title, venue, url }, status?,
- * stats?: [text], links?: [[text, href]], figure caption? }.
+ * stats?: [text], links?: [[text, href]] }.
  */
 export function journalCard(item, index) {
   const j = item.paper ? journalOf(item.paper.venue) : null;
   const tier = j ? j.tier : "study";
   const status = item.status ? `<span class="jstatus ${/^reproduced$/.test(item.status) ? "done" : /reproduced/.test(item.status) ? "partial" : "todo"}">${esc(item.status)}</span>` : "";
   return `<article class="jcard tier-${tier}" data-card="${index}">
-    <a class="jfig" href="${esc(item.href)}" aria-label="${esc(item.title)}">
-      <canvas aria-hidden="true"></canvas>
-      <span class="jfig-cap">${esc(item.caption ?? "The run, in miniature: its opening operations as the twin's control system played them")}</span>
-    </a>
+    <div class="jfig" aria-label="${esc(item.title)}: the run's twin in 3D"><div class="jtwin"></div></div>
     <div class="jbody">
       <div class="jmast">${j
         ? `<span class="jjournal">${esc(j.name)}</span>${j.ref ? `<span class="jref">${esc(j.ref)}</span>` : ""}${j.year ? `<span class="jyear">${esc(j.year)}</span>` : ""}`
@@ -56,17 +53,44 @@ export function journalCard(item, index) {
   </article>`;
 }
 
-/** Start each card's miniature from `previews` (id → preview), and add the legend once. */
-export function mountCards(el, items, previews, { machine = "twin" } = {}) {
+/**
+ * Mount each card's twin from `cards` (id → { track: url }): the 3D twin of its page, playing. A twin is
+ * mounted while its card is on screen and disposed when it leaves, so a long list holds a few WebGL
+ * contexts at a time; a track is fetched once.
+ */
+export function mountCards(el, items, cards, { machine = "twin" } = {}) {
+  const tracks = new Map();
+  const load = (url) => {
+    if (!tracks.has(url)) tracks.set(url, fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    return tracks.get(url);
+  };
+  const live = new Map();
+  const io = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      const card = entry.target, i = Number(card.dataset.card), url = cards[items[i]?.id]?.track;
+      if (!url) continue;
+      if (entry.isIntersecting && !live.has(card)) {
+        live.set(card, null);
+        Promise.all([load(url), import("/reproduce/twin3d.js")]).then(([track, { mountTwin }]) => {
+          if (!live.has(card) || live.get(card)) return;
+          if (!track) { card.querySelector(".jfig").classList.add("empty"); live.delete(card); return; }
+          live.set(card, mountTwin(card.querySelector(".jtwin"), track, { compact: true }));
+        });
+      } else if (!entry.isIntersecting && live.has(card)) {
+        live.get(card)?.dispose();
+        live.delete(card);
+        card.querySelector(".jtwin").innerHTML = "";
+      }
+    }
+  }, { rootMargin: "200px 0px" });
   items.forEach((item, i) => {
-    const card = el.querySelector(`[data-card="${i}"]`), preview = previews[item.id]?.preview;
+    const card = el.querySelector(`[data-card="${i}"]`);
     if (!card) return;
-    if (preview) mountMiniature(card.querySelector("canvas"), preview);
+    if (cards[item.id]?.track) io.observe(card);
     else card.querySelector(".jfig").classList.add("empty");
   });
   const legend = document.createElement("p");
   legend.className = "jlegend";
-  legend.innerHTML = "In each figure: " + MINIATURE_LEGEND.map(([c, t]) => `<span><i style="background:${c}"></i>${esc(t)}</span>`).join("") +
-    `<small>Qubits sit where the ${esc(machine)} places them. The figure plays one step per start or end of an operation, so it shows the order of what the run did, not its durations; the 3D view on each page plays machine time.</small>`;
+  legend.innerHTML = `Each figure is the run's ${esc(machine)} in 3D, as its page shows it: the device and its control system, every pulse, move, readout and decode at the time the run played it. Drag to turn it, scroll to zoom, or switch between the whole machine, the device and the control system.`;
   el.prepend(legend);
 }

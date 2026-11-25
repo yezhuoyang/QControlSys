@@ -20,7 +20,6 @@ export async function renderIndex(el) {
       const p = previews[s.id];
       return {
         id: s.id, number: i + 1, href: "/examples/" + s.id, title: s.title, summary: s.summary, kicker: s.kicker,
-        caption: "The study's first run, in miniature: its opening operations as the machine's control system played them",
         stats: [p?.sites && p.sites + " qubits", p?.runs && p.runs + " run" + (p.runs > 1 ? "s" : "") + " in 3D"].filter(Boolean),
         links: [["Read the study", "/examples/" + s.id], ["Design", "/examples/" + s.id + "/design"]],
       };

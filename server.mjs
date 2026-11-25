@@ -227,30 +227,43 @@ function runDesign(id, params) {
 }
 
 /**
- * The miniature of each card on /reproduce and /examples (studio/reproduce/journal.js): the first stored
- * run with a track, as riscq/ftqvm/preview.mjs compacts it, and how many runs there are and conform.
- * Positions and beats only, no text. Rebuilt when a data file changes.
+ * The figure of each card on /reproduce and /examples (studio/reproduce/journal.js) is the 3D twin its
+ * page opens with (studio/reproduce/twin3d.js): the same track, of the run the page shows first (a
+ * paper: its first run without an error; a study: its first run). `cardTrack` serves that track;
+ * `cards` says, per page, whether it has one and how many runs there are and keep their schedule.
+ * Both are rebuilt when a data file changes.
  */
-const previewCache = new Map();
-async function previews(section) {
-  const { previewOf } = await import("./riscq/ftqvm/preview.mjs");
-  const items = section === "reproduce"
+const cardCache = new Map();
+function cardFiles(section) {
+  return section === "reproduce"
     ? REPRODUCTIONS.map((r) => ({ id: r.id, file: path.join(root, "validation", "ftqvm", "papers", r.id + ".json") }))
-    : JSON.parse(await readFile(path.join(root, "validation", "calib", "site", "index.json"), "utf8"))
-      .map((s) => ({ id: s.id, file: path.join(root, "validation", "calib", "site", s.id + ".json") }));
+    : null;
+}
+async function cardOf(section, id, file) {
+  if (!existsSync(file)) return null;
+  const stamp = statSync(file).mtimeMs, cached = cardCache.get(file);
+  if (cached?.stamp === stamp) return cached.value;
+  const rows = JSON.parse(await readFile(file, "utf8")).rows ?? [];
+  const shown = section === "reproduce" ? rows[Math.max(0, rows.findIndex((r) => !r.error))] : rows[0];
+  const value = { track: shown?.track ? JSON.stringify(shown.track) : null, runs: rows.length, conforming: rows.filter((r) => r.conforms === true).length,
+    sites: shown?.track?.device?.sites?.length };
+  cardCache.set(file, { stamp, value });
+  return value;
+}
+async function cards(section) {
+  const items = cardFiles(section) ?? JSON.parse(await readFile(path.join(root, "validation", "calib", "site", "index.json"), "utf8"))
+    .map((s) => ({ id: s.id, file: path.join(root, "validation", "calib", "site", s.id + ".json") }));
   const out = {};
   for (const { id, file } of items) {
-    if (!existsSync(file)) continue;
-    const stamp = statSync(file).mtimeMs, cached = previewCache.get(file);
-    if (cached?.stamp === stamp) { out[id] = cached.value; continue; }
-    const rows = JSON.parse(await readFile(file, "utf8")).rows ?? [];
-    const first = rows.find((r) => r.track);
-    const value = { preview: first ? previewOf(first.track) : null, runs: rows.length, conforming: rows.filter((r) => r.conforms === true).length,
-      sites: first?.track?.device?.sites?.length };
-    previewCache.set(file, { stamp, value });
-    out[id] = value;
+    const c = await cardOf(section, id, file);
+    if (c) out[id] = { track: c.track ? "/" + section + "/data/" + id + "/track.json" : null, runs: c.runs, conforming: c.conforming, sites: c.sites };
   }
   return JSON.stringify(out);
+}
+async function cardTrack(section, id) {
+  if (!/^[A-Za-z0-9._-]+$/.test(id)) return null;
+  const file = section === "reproduce" ? path.join(root, "validation", "ftqvm", "papers", id + ".json") : path.join(root, "validation", "calib", "site", id + ".json");
+  return (await cardOf(section, id, file))?.track ?? null;
 }
 
 /** The list of reproductions, with whether each has a run to show. */
@@ -601,8 +614,15 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(page));
       }
       if (url.pathname === "/reproduce/data/index.json") return reply(res, 200, "application/json", reproductionIndex());
-      if (url.pathname === "/reproduce/data/previews.json") return replyLarge(req, res, await previews("reproduce"));
-      if (url.pathname === "/examples/data/previews.json") return replyLarge(req, res, await previews("examples"));
+      if (url.pathname === "/reproduce/data/previews.json") return replyLarge(req, res, await cards("reproduce"));
+      if (url.pathname === "/examples/data/previews.json") return replyLarge(req, res, await cards("examples"));
+      {
+        const m = /^\/(reproduce|examples)\/data\/([A-Za-z0-9._-]+)\/track\.json$/.exec(url.pathname);
+        if (m) {
+          const track = await cardTrack(m[1], m[2]);
+          return track ? replyLarge(req, res, track) : reply(res, 404, "text/plain", "no run with a track");
+        }
+      }
       if (url.pathname === "/api/reproduce/params" && req.method === "GET") {
         try {
           return reply(res, 200, "application/json", JSON.stringify(await (async (d) => ({ params: await d.params(), intro: d.intro }))(await designOf(url.searchParams.get("id")))));

@@ -37,7 +37,7 @@ function haloTexture() {
 /**
  * Mount the viewer. `track` = { device, endNs, events, moves }. Returns { dispose }.
  */
-export function mountTwin(root, track, { caption = "", external = false } = {}) {
+export function mountTwin(root, track, { caption = "", external = false, compact = false } = {}) {
   root.innerHTML = `
     <div class="twin-stage"><canvas></canvas>
       <div class="twin-hud"><div class="twin-time"></div><ol class="twin-now"></ol></div>
@@ -54,6 +54,8 @@ export function mountTwin(root, track, { caption = "", external = false } = {}) 
     <p class="twin-caption">${caption}</p>`;
   // `external`: another player (the RISC-Q studio) sets the time and the view; this one keeps its stage only.
   if (external) for (const sel of [".twin-controls", ".twin-caption", ".twin-views"]) root.querySelector(sel).style.display = "none";
+  // `compact`: the same twin inside a card on /reproduce or /examples, playing on its own, without its controls.
+  if (compact) for (const sel of [".twin-controls", ".twin-caption"]) root.querySelector(sel).style.display = "none";
   const canvas = root.querySelector("canvas"), hudTime = root.querySelector(".twin-time"), hudNow = root.querySelector(".twin-now");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(2, devicePixelRatio));
@@ -264,7 +266,7 @@ export function mountTwin(root, track, { caption = "", external = false } = {}) 
   const events = track.events, endNs = Math.max(1, track.endNs);
   const maxDur = Math.max(1, ...events.map((e) => e.t1 - e.t0));
   const firstAfter = (t) => { let lo = 0, hi = events.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (events[mid].t0 < t) lo = mid + 1; else hi = mid; } return lo; };
-  let t = 0, playing = true, speed = 1, last = performance.now(), disposed = false;
+  let t = 0, playing = !(compact && matchMedia("(prefers-reduced-motion: reduce)").matches), speed = 1, last = performance.now(), disposed = false;
   const runSeconds = 45; // the whole run, at normal speed
   const controlsEl = root.querySelector(".twin-controls");
   const playBtn = controlsEl.querySelector('[data-act="play"]'), scrub = controlsEl.querySelector('[data-act="scrub"]');
@@ -365,7 +367,8 @@ export function mountTwin(root, track, { caption = "", external = false } = {}) 
   }
   requestAnimationFrame(loop);
   return {
-    dispose: () => { disposed = true; renderer.dispose(); },
+    // Frees the WebGL context too: a list of cards mounts a twin only while its card is on screen.
+    dispose: () => { disposed = true; renderer.dispose(); renderer.forceContextLoss(); },
     // For an external player: machine time in ns from the track's base, and "all" | "device" | "control".
     setTime: (ns) => { t = Math.max(0, Math.min(endNs, ns)); },
     setView: showView,
