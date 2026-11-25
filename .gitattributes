@@ -13,3 +13,4 @@ validation/decoders/helios/*.txt -text
 validation/decoders/helios/*.elf binary
 # README animations, rebuilt by docs/media/capture.mjs.
 *.gif binary
+*.sh text eol=lf
