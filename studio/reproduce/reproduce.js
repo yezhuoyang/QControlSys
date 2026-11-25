@@ -54,6 +54,8 @@ function resultsTable(rows) {
     ["measureNs", "Measure (µs)", (r) => µs(r.measureNs, 2)], ["decoderNs", "Decoder (µs)", (r) => µs(r.decoderNs)],
     ["makespanNs", "Program (ms)", (r) => (r.makespanNs ? (r.makespanNs / 1e6).toFixed(3) : "–")],
   ].filter(([key]) => rows.some((r) => r[key] !== undefined) || key === "conforms");
+  // Columns a run names itself, as { header: text } (riscq/ftqvm/magic.mjs).
+  for (const h of new Set(rows.flatMap((r) => Object.keys(r.columns ?? {})))) cols.push([h, esc(h), (r) => esc(r.columns?.[h] ?? "–")]);
   return `<div class="tbl"><table><thead><tr>${cols.map(([, h]) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${
     rows.map((r) => `<tr>${cols.map(([, , f]) => `<td>${f(r)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
@@ -93,6 +95,8 @@ export async function renderPaper(el, id) {
     return;
   }
   const m = data.meta, rows = data.rows ?? [];
+  // Pages whose rows run a paper's own circuit (riscq/ftqvm/magic.mjs) have sections of their own.
+  const extra = rows.some((r) => r.view === "circuit") ? await import("/reproduce/magic.js") : null;
   const runButtons = rows.map((r, i) =>
     `<button type="button" data-run="${i}" aria-pressed="false">d = ${r.distance}${r.basis ? " · " + r.basis : ""}${r.rounds ? " · " + r.rounds + " rounds" : ""}</button>`).join("");
   document.title = m.title + " · Reproduce · QuantumOS";
@@ -114,6 +118,7 @@ export async function renderPaper(el, id) {
     <h2>Results</h2>
     ${rows.length ? resultsTable(rows) : "<p>No run yet.</p>"}
     ${data.generated ? `<p class="cite">Run on ${esc(data.generated.slice(0, 10))}.</p>` : ""}
+    ${extra ? extra.sections(data) : ""}
     <h2>What we found</h2><ul>${m.findings.map((f) => `<li>${code(f)}</li>`).join("")}</ul>
     ${m.limits.length ? `<h2>Limits of this reproduction</h2><ul>${m.limits.map((f) => `<li>${code(f)}</li>`).join("")}</ul>` : ""}
     ${rows.length ? `<h2>One run in detail</h2><div class="runpick" role="group" aria-label="Run">${runButtons}</div><div id="run"></div>` : ""}
@@ -121,7 +126,7 @@ export async function renderPaper(el, id) {
   const run = el.querySelector("#run"), twin = el.querySelector("#twin");
   let viewer;
   const show = async (i) => {
-    run.innerHTML = runDetail(rows[i]);
+    run.innerHTML = rows[i].view === "circuit" && extra ? extra.runDetail(rows[i]) : runDetail(rows[i]);
     el.querySelectorAll(".runpick button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.run) === i)));
     if (!twin) return;
     viewer?.dispose();

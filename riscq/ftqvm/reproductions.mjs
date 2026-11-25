@@ -2,6 +2,7 @@
 // at /reproduce says about the paper, the program, the twin and what was found. The numbers on a
 // page come from the run (validation/ftqvm/papers/<id>.json, written by riscq/ftqvm/papers.mjs);
 // the text here only describes them.
+import { MAGIC_REPRODUCTIONS } from "./magic-reproductions.mjs";
 
 export const REPRODUCTIONS = [
   {
@@ -81,6 +82,8 @@ export const REPRODUCTIONS = [
     ],
     command: "node riscq/ftqvm/papers.mjs quantinuum",
   },
+  // Magic-state factories (riscq/ftqvm/magic.mjs): Google's cultivation and QuEra's distillation.
+  ...MAGIC_REPRODUCTIONS,
 ];
 
 export const byId = (id) => REPRODUCTIONS.find((r) => r.id === id);
