@@ -59,6 +59,6 @@ export function buildTrack({ listing, placement, report, device, moves = [] }) {
     events.push({ k, t0, t1, s, line: op.text.replace(/^@\S+\s+ns\s+/, "").slice(0, 90) });
   }
   events.sort((a, b) => a.t0 - b.t0);
-  const endNs = Math.max(0, ...events.map((e) => e.t1), ...moves.map((m) => m.t1));
+  const endNs = Math.max(events.reduce((m, e) => Math.max(m, e.t1), 0), moves.reduce((m, x) => Math.max(m, x.t1), 0));
   return { device, endNs, events, moves: moves.sort((a, b) => a.t0 - b.t0) };
 }

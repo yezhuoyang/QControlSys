@@ -2,6 +2,7 @@ import Lean
 import QControl.RiscQ.Rv32
 import QControl.RiscQ.Timing
 import QControl.RiscQ.Pipe
+import QControl.RiscQ.Heap
 
 /-! Executable model of a RISC-Q system-on-chip.
 
@@ -461,7 +462,11 @@ structure World where
   hubs : Array HubState := #[{}]
   /-- Per lane (`from * 16 + to`): the earliest cycle the next frame can arrive (one frame time apart). -/
   laneFree : Array Nat := Array.replicate 256 0
-  agenda : List Item := []
+  /-- Pending events, least (cycle, seq) first: the order a sorted list kept them in. -/
+  agenda : Heap Item := {}
+  /-- (ready cycle, core) of every core when it was last set; an entry counts only while it matches the
+      core's current state, so the least valid entry is the core a scan of all cores would pick. -/
+  ready : Heap (Nat × Nat) := {}
   seq : Nat := 0
   frames : Array Frame := #[]
   pulses : Array Json := #[]
@@ -476,13 +481,15 @@ def Program.timeReg (p : Program) (cycle : Nat) : Nat := (cycle + p.timeOffset) 
 def Program.coreTime (p : Program) (cycle : Int) : UInt32 :=
   ofInt (cycle + p.timeOffset - p.model.coreTimeLag)
 
+/-- Events by cycle, and in the order they were scheduled within a cycle. -/
+def itemBefore (a b : Item) : Bool := a.cycle < b.cycle || (a.cycle == b.cycle && a.seq < b.seq)
+/-- Cores by ready cycle, then by index. -/
+def readyBefore (a b : Nat × Nat) : Bool := a.1 < b.1 || (a.1 == b.1 && a.2 < b.2)
+
 def World.schedule (w : World) (cycle : Nat) (cause : String) (pc : Option Nat) (source : Option String)
     (action : Action) : World :=
   let item : Item := ⟨cycle, w.seq, cause, pc, source, action⟩
-  let rec insert : List Item → List Item
-    | [] => [item]
-    | x :: rest => if x.cycle ≤ cycle then x :: insert rest else item :: x :: rest
-  { w with agenda := insert w.agenda, seq := w.seq + 1 }
+  { w with agenda := w.agenda.push itemBefore item, seq := w.seq + 1 }
 
 def World.emit (w : World) (p : Program) (f : Frame) : World :=
   { w with frames := w.frames.push { f with atPs := f.atBatch * p.dspPeriodPs } }
@@ -525,7 +532,10 @@ private def wake (core : CoreState) (cycle : Nat) (frame : String) (waitsFor : W
   else core
 
 private def setCore (w : World) (i : Nat) (core : CoreState) : World :=
-  { w with cores := w.cores.set! i core }
+  let ready := match core.stopped, core.readyAt with
+    | none, some r => w.ready.push readyBefore (r, i)
+    | _, _ => w.ready
+  { w with cores := w.cores.set! i core, ready }
 
 private def modifyChannel (core : CoreState) (channel : Nat) (f : ChannelState → ChannelState) : CoreState :=
   { core with channels := core.channels.modify channel f }
@@ -1333,17 +1343,25 @@ def initial (p : Program) : World :=
       return table
     ({ mem, sinks, sources,
        channels := c.channels.map fun ch ↦ { buffer := { table := Array.replicate ch.slots {} } } } : CoreState)
-  let w : World := { cores }
+  -- Every core starts ready at cycle 0.
+  let ready := (List.range cores.size).foldl (fun (h : Heap (Nat × Nat)) i ↦ h.push readyBefore (0, i)) {}
+  let w : World := { cores, ready }
   p.dioInputs.foldl (fun w e ↦ w.schedule e.atBatch "" none none (.dioIn e.core e.channel e.levels)) w
 
-/-- Next core to act: the earliest ready cycle, lowest index first. -/
-private def nextCore (w : World) : Option (Nat × Nat) := Id.run do
-  let mut best : Option (Nat × Nat) := none
-  for (core, i) in w.cores.zipIdx do
-    if core.stopped.isNone then
-      if let some r := core.readyAt then
-        if best.all (r < ·.1) then best := some (r, i)
-  return best
+/-- The next core to act: the least (ready cycle, index) entry that still matches its core. Entries left
+    by earlier states are dropped on the way; the valid one stays, as the core may act again at that cycle. -/
+private def nextCore (w : World) : World × Option (Nat × Nat) := Id.run do
+  let mut ready := w.ready
+  for _ in [0:w.ready.size + 1] do
+    match ready.top? with
+    | none => return ({ w with ready }, none)
+    | some (r, i) =>
+      let valid := match w.cores[i]? with
+        | some c => c.stopped.isNone && c.readyAt == some r
+        | none => false
+      if valid then return ({ w with ready }, some (r, i))
+      ready := ready.pop readyBefore
+  return ({ w with ready }, none)
 
 /-- Schematic placement on the two-region floorplan RISC-Q documents: cores in the left
     column, converter-edge channels in the DSP columns, converters at the right edge and the
@@ -1397,8 +1415,9 @@ def run (p : Program) : Json := Id.run do
   let mut steps := 0
   for _ in [0:p.maxSteps] do
     steps := steps + 1
-    let core := nextCore w
-    let item := w.agenda.head?
+    let (w', core) := nextCore w
+    w := w'
+    let item := w.agenda.top?
     -- Converter-edge and link events apply before a core acts on the same cycle.
     let useItem : Bool := match item, core with
       | some it, some (r, _) => decide (it.cycle ≤ r)
@@ -1415,7 +1434,7 @@ def run (p : Program) : Json := Id.run do
     now := max now cycle
     if useItem then
       let some it := item | break
-      w := applyItem p { w with agenda := w.agenda.tail } it
+      w := applyItem p { w with agenda := w.agenda.pop itemBefore } it
     else
       let some (r, i) := core | break
       w := stepCore p w r i

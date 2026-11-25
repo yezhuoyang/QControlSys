@@ -423,7 +423,7 @@ export function segmentIssue(core, ops, channelOf) {
 export function prerollOf(core, ops) {
   const channelOf = (ref) => (typeof ref === "number" ? ref : core.channels.findIndex((ch) => ch.name === ref));
   const { items } = segmentIssue(core, ops, channelOf);
-  const earliest = Math.min(0, ...items.filter((item) => !item.hold).map((item) => item.issue));
+  const earliest = items.reduce((m, item) => (item.hold ? m : Math.min(m, item.issue)), 0);
   return Math.max(0, -earliest - LEAD);
 }
 

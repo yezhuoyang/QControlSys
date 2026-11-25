@@ -113,6 +113,8 @@ export function check(design) {
     const { use } = boardUse(spec);
     if (use.dsp > ZCU216.dspCeiling.value)
       fail("Board " + board.id + " needs about " + use.dsp + " DSP48E2; past " + ZCU216.dspCeiling.value + " RISC-Q's builds collapse (" + ZCU216.dspCeiling.source + ").");
+    if (use.uram > ZCU216.uram.value)
+      fail("Board " + board.id + " needs " + use.uram + " URAM288 for its cores' RAM; a ZCU216 has " + ZCU216.uram.value + " (" + ZCU216.uram.source + ").");
   }
   for (const wire of design.wires ?? []) {
     const from = parts.get(wire.from), to = parts.get(wire.to);

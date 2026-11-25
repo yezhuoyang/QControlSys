@@ -218,7 +218,7 @@ export function lowerListing(listing, placement, m, options = {}) {
     }
   }
   ops.sort((a, b) => a.t - b.t);
-  const span = Math.max(0, ...ops.map((o) => o.t + o.dur));
+  const span = ops.reduce((m, o) => Math.max(m, o.t + o.dur), 0);
   return {
     hardware: { kind: "hardware-program", version: 1, platform: "superconducting", machine: m.name, timeUnit: "ps", segments: [{ ops, span }] },
     origin, unrealized, classical, decodes, factories, quantization: { maxSlipPs, gridPs: period },

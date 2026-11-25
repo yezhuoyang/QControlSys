@@ -59,7 +59,7 @@ export function slack(report, listing) {
   const q = (xs, f) => xs[Math.floor(f * (xs.length - 1))];
   return Object.fromEntries(Object.entries(byKind).map(([k, xs]) => {
     const need = xs.map((x) => x.need).sort((a, b) => a - b);
-    return [k, { count: xs.length, minNs: q(need, 0), medianNs: q(need, 0.5), maxNs: q(need, 1), declaredNs: Math.max(...xs.map((x) => x.declared)) }];
+    return [k, { count: xs.length, minNs: q(need, 0), medianNs: q(need, 0.5), maxNs: q(need, 1), declaredNs: xs.reduce((m, x) => Math.max(m, x.declared), -Infinity) }];
   }));
 }
 
@@ -126,7 +126,7 @@ export function roundContracts(listing, placement, report) {
       return { from: o.start, to: Math.max(r?.hardwareNs?.[1] ?? o.start, r?.bitNs ?? o.start) };
     });
     const sites = new Set(ops.flatMap((o) => o.qubits.map((a) => placement.siteOf(a))));
-    const hwEnd = Math.max(call.start, ...ops.map((o) => Math.max(rows.get(o.uid)?.hardwareNs?.[1] ?? 0, rows.get(o.uid)?.bitNs ?? 0)));
+    const hwEnd = ops.reduce((m, o) => Math.max(m, rows.get(o.uid)?.hardwareNs?.[1] ?? 0, rows.get(o.uid)?.bitNs ?? 0), call.start);
     const c = { qubits: sites.size, runtime: call.end - call.start, ...listed, hardware: { ...busy, runtime: hwEnd - call.start } };
     const prev = byName.get(call.name);
     byName.set(call.name, prev ? Object.fromEntries(Object.entries(c).map(([k, v]) =>
@@ -174,7 +174,7 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
     const design = platform.design(built.listing, placement);
     const { report, result } = await platform.run(built.listing, placement, design, { outcomes, distance });
     return { spec, verdict: built.verdict.status, sites: placement.sites.length, report, files: built.files, listing: built.listing, placement, design,
-      makespanNs: Math.max(...built.listing.ops.map((o) => o.end)), batches: result?.summary?.elapsedBatches, slack: slack(report, built.listing) };
+      makespanNs: built.listing.ops.reduce((m, o) => Math.max(m, o.end), -Infinity), batches: result?.summary?.elapsedBatches, slack: slack(report, built.listing) };
   };
   for (let i = 0; i < maxIterations; i++) {
     const it = await attempt(specFor(durations, capacities, base, { gadgets, factories, gridNs, runtimeNs }), "iter" + i);

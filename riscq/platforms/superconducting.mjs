@@ -306,7 +306,7 @@ function scheduleBody(body, m, { layout } = {}) {
       for (const inner of node.ifBit.then) lower(inner.call, inner.origin ?? node.origin, node.ifBit.bit);
     }
   }
-  for (const segment of segments) segment.span = Math.max(0, ...segment.ops.map((op) => op.t + op.dur));
+  for (const segment of segments) segment.span = segment.ops.reduce((m, op) => Math.max(m, op.t + op.dur), 0);
   return { kind: "hardware-program", version: 1, platform: "superconducting", machine: m.name, timeUnit: "ps", segments };
 }
 

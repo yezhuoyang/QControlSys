@@ -7,8 +7,9 @@
 // FT_COMPILER_ROOT, or else by the first line of the git-ignored file ft-compiler.local at the
 // repository root; it must be built (`dune build` in its compiler/ folder). Outputs go to a
 // directory of ours, never into the checkout.
-import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { execFile, spawn } from "node:child_process";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, openSync, closeSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as qsysasm from "./qsysasm.mjs";
@@ -43,6 +44,31 @@ function run(file, args, { cwd = compilerRoot(), timeoutMs = 600_000 } = {}) {
 }
 
 const python = () => process.env.QCONTROL_PYTHON || "python";
+
+/**
+ * Like `run`, but stdout goes straight to a file and is read back from it: a listing of a medium-scale
+ * program is hundreds of MB, past a child process's stdout buffer (it still parses as one string, up to
+ * about 500 MB).
+ */
+function runToFile(file, args, { cwd = compilerRoot(), timeoutMs = 3_600_000 } = {}) {
+  const out = join(tmpdir(), "qos-stdout-" + process.pid + "-" + Date.now() + ".json");
+  const fd = openSync(out, "w");
+  return new Promise((ok, fail) => {
+    const child = spawn(file, args, { cwd, windowsHide: true, stdio: ["ignore", fd, "pipe"] });
+    let stderr = "";
+    child.stderr.on("data", (d) => (stderr += d));
+    const timer = setTimeout(() => child.kill(), timeoutMs);
+    child.on("error", (error) => { clearTimeout(timer); closeSync(fd); fail(error); });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      closeSync(fd);
+      const stdout = readFileSync(out, "utf8");
+      rmSync(out, { force: true });
+      if (code && !stdout) return fail(new Error(`${file.split(/[\\/]/).pop()} failed: ${stderr.trim()}`));
+      ok({ stdout, stderr, code });
+    });
+  });
+}
 
 /**
  * .qppm → .qec with the compiler's prepare_qec: `code` and `distance` choose the code family,
@@ -101,8 +127,8 @@ export async function admit(sysprog) {
  * statement in the flat program, which has no gadgets, loops or parameters. `qsysasm` is that
  * program's text.
  */
-export async function expand(sysprog, { maxOps = 1_000_000 } = {}) {
-  const r = await run(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps)], { cwd: REPO });
+export async function expand(sysprog, { maxOps = 5_000_000 } = {}) {
+  const r = await runToFile(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps)], { cwd: REPO });
   const out = JSON.parse(r.stdout);
   if (out.error) throw new Error(`The compiler refused the listing: ${out.error.code}: ${out.error.message}`);
   const flat = qsysasm.canonical(out);

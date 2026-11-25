@@ -13,9 +13,10 @@ const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) }
  *   qubitsPerCore    transmons one control core drives (1: a core per qubit)
  *   decoders         decoder units; coresPerDecoder  cores of one unit
  *   gap              empty lattice columns between code blocks
+ *   memWords         words of RAM per control core (default: RISC-Q's x6y3 build; at most 16,384)
  */
-export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name } = {}) {
-  const options = { qubitsPerCore, decoders, coresPerDecoder };
+export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords } = {}) {
+  const options = { qubitsPerCore, decoders, coresPerDecoder, ...(memWords ? { memWords } : {}) };
   return {
     name: name ?? "transmon " + JSON.stringify(options),
     options,

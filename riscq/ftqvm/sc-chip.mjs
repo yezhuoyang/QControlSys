@@ -37,7 +37,7 @@ const buildUrl = new URL("../../validation/riscq/x6y3.json", import.meta.url);
  * Returns { design, sites: [{ site, qubit, part }], pairs } where `qubit` is the design's qubit index.
  */
 export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0], chipMm = [700, 0, -350], name = "QSysASM listing chip",
-  qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, drivesPerDac, device } = {}) {
+  qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, drivesPerDac, device, memWords } = {}) {
   const calibration = JSON.parse(readFileSync(calibrationUrl, "utf8"));
   const build = JSON.parse(readFileSync(buildUrl, "utf8"));
   const czPairs = calibration.pairs.filter((p) => !p.sandwich.length);
@@ -186,7 +186,9 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
   const perDac = Math.max(...perDacOf);
   const design = JSON.parse(JSON.stringify({
     kind: "riscq-design", version: 1, name,
-    board: { dspHz: build.dsp_freq_hz, linkStages: build.link_pipe, memWords: build.mem_depth, queueDepth: build.queue_depth, envDepth: build.env_depth },
+    // Core RAM: RISC-Q's x6y3 build unless the design asks for more (a longer program's firmware needs it;
+    // each 8,192 words take one URAM288, checked per board in riscq/design.mjs).
+    board: { dspHz: build.dsp_freq_hz, linkStages: build.link_pipe, memWords: memWords ?? build.mem_depth, queueDepth: build.queue_depth, envDepth: build.env_depth },
     parts, channels: channels.map(({ pairKeys: _k, site: _s, ...c }) => c), wires, qubits, couplings: couplings.map(({ lengthLattice: _l, ...c }) => c), decoder: "decoder",
     control: { qubitsPerCore, decoders, coresPerDecoder, drivesPerDac: perDac, boards: boardSites.length,
       boardsOf: "riscq/board.mjs ZCU216: ≤ " + ZCU216.cores.value + " cores and ≤ " + ZCU216.dspCeiling.value + " DSP48E2 per board" },
