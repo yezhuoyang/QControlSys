@@ -21,7 +21,7 @@ import { DESIGNS } from "../ftqvm/corpus.mjs";
 import { OPTICAL_DESIGNS } from "../ftqvm/optical.mjs";
 
 /**
- * FormalRV's pools plus the hardware pools of an optical design (riscq/ftqvm/optical.mjs): a route
+ * The compiler's pools plus the hardware pools of an optical design (riscq/ftqvm/optical.mjs): a route
  * takes movers (atoms: one AOD job per route; ions: one electrode lane per moving ion, at most the
  * route's qubits but one), and a measurement takes one of the design's readout channels.
  */

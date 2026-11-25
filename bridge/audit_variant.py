@@ -1,9 +1,9 @@
-"""Compile one of FormalRV's paper audits against a machine with some fields replaced.
+"""Compile one of the compiler's paper audits against a machine with some fields replaced.
 
-FormalRV is used unchanged: its staged compiler (the installed binary), the audit's own .qec stage,
+The compiler is used unchanged: its staged compiler (the installed binary), the audit's own .qec stage,
 recipe and paper point, exactly as its scripts/regenerate_paper_listings.py PAPERS table states
 them. Only the machine file differs: a copy of the audit's machine with the given fields replaced,
-written to the output folder. The compiler runs from FormalRV's root (as that script runs it);
+written to the output folder. It runs from the compiler's root (as that script runs it);
 everything it writes goes to the output folder.
 
 Usage: python -I bridge/audit_variant.py PAPER OUT_DIR field=value [field=value ...]
@@ -20,7 +20,17 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = Path(os.environ.get("FORMALRV_ROOT", HERE.parents[1] / "FormalRV")).resolve()
+def _compiler_root_path():
+    """The fault-tolerant compiler's checkout: FT_COMPILER_ROOT, else the first line of the
+    git-ignored file ft-compiler.local at the repository root."""
+    if os.environ.get("FT_COMPILER_ROOT"):
+        return Path(os.environ["FT_COMPILER_ROOT"]).resolve()
+    local = HERE.parent / "ft-compiler.local"
+    line = local.read_text(encoding="utf-8").strip().splitlines()[:1] if local.is_file() else []
+    return (HERE.parent / (line[0].strip() if line else "ft-compiler")).resolve()
+
+
+ROOT = _compiler_root_path()
 
 
 def main(argv):
@@ -30,7 +40,7 @@ def main(argv):
     paper, out = argv[0], Path(argv[1]).resolve()
     fields = dict(a.split("=", 1) for a in argv[2:])
     sys.path.insert(0, str(ROOT / "scripts"))
-    import regenerate_paper_listings as regen  # FormalRV's own recipe table, read only
+    import regenerate_paper_listings as regen  # The compiler's own recipe table, read only
 
     cfg = regen.PAPERS[paper]
     out.mkdir(parents=True, exist_ok=True)

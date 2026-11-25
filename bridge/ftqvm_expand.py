@@ -1,16 +1,16 @@
-"""Expand a FormalRV .sysprog listing into its concrete timed operations, as JSON.
+"""Expand a QSysASM (.sysprog) listing into its concrete timed operations, as JSON.
 
-FormalRV's own reader and expander are used unchanged: this script imports `ftq_vm.sysprog` from
-the FormalRV checkout (a sibling folder `FormalRV`, or the directory named by FORMALRV_ROOT) and
+The compiler's own reader and expander are used unchanged: this script imports `ftq_vm.sysprog` from
+the fault-tolerant compiler's checkout (FT_COMPILER_ROOT, or the path in ft-compiler.local) and
 prints what `parse_source` and `expand` produce. QuantumOS never re-implements the listing's
-semantics; it executes what FormalRV says the listing is.
+semantics; it executes what the compiler says the listing is.
 
 Usage: python bridge/ftqvm_expand.py LISTING.sysprog [--max-ops N] [--guards taken]
 Output: {"source": {...}, "machine": {...}, "specs": {...}, "ops": [...], "calls": [...]}
 Errors are printed as {"error": {"code", "message", "line"}} with exit status 1.
 
 Units: every time is an integer number of nanoseconds, as in the listing.
-`ftq_vm.sysprog` is FormalRV's Python VM, a test oracle there; by default it refuses runtime guards
+`ftq_vm.sysprog` is the compiler's Python VM, a test oracle there; by default it refuses runtime guards
 (`when`). With `--guards taken` (or QUANTUMOS_GUARDS=taken) its own guard hook (`_expand`'s
 `choose_guard`) takes every guarded body, as the VM reserves resources for it, and each op written
 inside a guard carries `guard`: the guard's text and line, so a runtime can drop it when the measured
@@ -25,11 +25,21 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 
-def formalrv_root():
-    root = Path(os.environ.get("FORMALRV_ROOT", HERE.parents[1] / "FormalRV")).resolve()
+def _compiler_root_path():
+    """The fault-tolerant compiler's checkout: FT_COMPILER_ROOT, else the first line of the
+    git-ignored file ft-compiler.local at the repository root."""
+    if os.environ.get("FT_COMPILER_ROOT"):
+        return Path(os.environ["FT_COMPILER_ROOT"]).resolve()
+    local = HERE.parent / "ft-compiler.local"
+    line = local.read_text(encoding="utf-8").strip().splitlines()[:1] if local.is_file() else []
+    return (HERE.parent / (line[0].strip() if line else "ft-compiler")).resolve()
+
+
+def compiler_root():
+    root = _compiler_root_path()
     if not (root / "ftq_vm" / "sysprog.py").is_file():
-        raise SystemExit(json.dumps({"error": {"code": "FORMALRV_MISSING",
-                                               "message": f"no FormalRV checkout at {root}"}}))
+        raise SystemExit(json.dumps({"error": {"code": "FT_COMPILER_MISSING",
+                                               "message": f"no compiler checkout at {root} (set FT_COMPILER_ROOT)"}}))
     return root
 
 
@@ -46,11 +56,11 @@ def main(argv):
     if "--max-ops" in argv:
         max_ops = int(argv[argv.index("--max-ops") + 1])
     guards = argv[argv.index("--guards") + 1] if "--guards" in argv else os.environ.get("QUANTUMOS_GUARDS", "")
-    root = formalrv_root()
+    root = compiler_root()
     sys.path.insert(0, str(root))
-    from ftq_vm import sysprog  # FormalRV, unchanged
+    from ftq_vm import sysprog  # The compiler, unchanged
 
-    from scripts.program_sources import read_program_bytes  # FormalRV's shared stage reader
+    from scripts.program_sources import read_program_bytes  # The compiler's shared stage reader
     stripped = []
     try:
         # The staged back end writes background maintenance (`spec maintenance`, `maintenance …`)
@@ -105,7 +115,7 @@ def main(argv):
     out = {
         "source": {"path": str(Path(path).resolve()), "sha256": source.sha256, "stripped": stripped, "guards": guards or "refused",
                    "params": list(source.params), "witness": dict(source.witness),
-                   "formalrv": str(root)},
+                   "compiler": str(root)},
         "machine": source.machine,
         "specs": {name: {k: v for k, v in spec.items()} if isinstance(spec, dict) else str(spec)
                   for name, spec in source.specs.items()},

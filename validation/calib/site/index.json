@@ -15,7 +15,7 @@
   "id": "system-calls",
   "title": "Every system call on six hardware designs",
   "kicker": "Calibration · in programs",
-  "summary": "Eleven FormalRV programs (memories, Deutsch–Jozsa, Bell pairs, a Z⊗Z merge, GHZ, a checked measurement, T injection, a loop of merges, at distances 3 and 5) on two designs of each platform. For every system call, the time each operation actually needed on the cycle-exact model, against the one number the machine declares."
+  "summary": "Eleven logical programs (memories, Deutsch–Jozsa, Bell pairs, a Z⊗Z merge, GHZ, a checked measurement, T injection, a loop of merges, at distances 3 and 5) on two designs of each platform. For every system call, the time each operation actually needed on the cycle-exact model, against the one number the machine declares."
  },
  {
   "id": "choosing-the-number",
@@ -39,7 +39,7 @@
   "id": "deadlock",
   "title": "Deadlock and scheduling policy in a dynamic runtime",
   "kicker": "Contention · request_ancilla and every service",
-  "summary": "FormalRV's VM admits a program as a fixed timetable. QuantumOS's runtime simulator instead runs the same program as soon as its dependencies and resources allow, the way a dynamic operating system would. Over the whole corpus: when does that deadlock, and how much faster is it when it does not?"
+  "summary": "The resource VM admits a program as a fixed timetable. QuantumOS's runtime simulator instead runs the same program as soon as its dependencies and resources allow, the way a dynamic operating system would. Over the whole corpus: when does that deadlock, and how much faster is it when it does not?"
  },
  {
   "id": "hardware-gate",

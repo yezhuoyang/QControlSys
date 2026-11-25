@@ -7,7 +7,7 @@
 // Requests arrive at a fixed interval (a T-gate stream of a logical program) and Executor B
 // (riscq/os/des.mjs) queues them on F factories.
 //
-// What FormalRV declares: one latency per factory and a count, `factories`; the VM admits a stream
+// What the compiler declares: one latency per factory and a count, `factories`; the VM admits a stream
 // when ⌈latency / interval⌉ ≤ F. Three choices of that one latency are compared: one attempt (L),
 // the mean (L/a), and the 99th percentile of L·G.
 //

@@ -1,4 +1,4 @@
-// The calibration table: every FormalRV machine field on every design, against the audits.
+// The calibration table: every the compiler machine field on every design, against the audits.
 //
 // Inputs (all in validation/calib or validation/ftqvm):
 //   insitu/*.json            every operation of the corpus on each design (riscq/calib/insitu.mjs)
@@ -7,7 +7,7 @@
 //   backlog.json, factory.json          the contention studies (riscq/calib/backlog.mjs, factory.mjs)
 // Output: table.json and table.md, one row per field × design: the derived value (what the spec
 // must say for the corpus to conform), the distribution of what operations needed, the slack the
-// derived value leaves at the median, and the values FormalRV's audit machines declare for that
+// derived value leaves at the median, and the values the compiler's audit machines declare for that
 // platform.
 import { readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
 import { stats } from "../os/des.mjs";
@@ -22,7 +22,7 @@ const FIELD_OF = {
   request_magic: "magic_state_latency_ns",
 };
 
-/** FormalRV's audit machines, by platform (FormalRV/Audit/*; values as declared there). */
+/** The compiler's audit machines, by platform (Audit/*; values as declared there). */
 export const AUDITS = {
   superconducting: {
     GE2021: { gate1q_ns: 25, gate2q_ns: 50, measure_ns: 550, reset_ns: 250, route_latency_ns: 100, decoder_latency_ns: 10000, magic_state_latency_ns: 135000, pauli_frame_update_ns: 40, classical_data_bandwidth: 17873856, decoders: 12276 },

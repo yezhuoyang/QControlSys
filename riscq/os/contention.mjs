@@ -1,4 +1,4 @@
-// Contention across the corpus: what a dynamic runtime does with listings FormalRV admitted.
+// Contention across the corpus: what a dynamic runtime does with listings the compiler admitted.
 //
 // For every program × design with a stored listing (validation/calib/insitu/*.json, written by
 // riscq/calib/insitu.mjs), Executor B (riscq/os/des.mjs) runs the listing four ways:

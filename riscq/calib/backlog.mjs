@@ -9,7 +9,7 @@
 // cores, triggered at their ready times. A configuration is stable when the waits do not grow
 // over the stream; the backlog is the growth of the wait per window.
 //
-// What FormalRV says: one decode holds one decoder for decoder_latency_ns, the declared worst
+// What the compiler says: one decode holds one decoder for decoder_latency_ns, the declared worst
 // case, and the VM admits the stream when the overlapping holds fit `decoders`. Both views are
 // reported side by side.
 import { readFileSync } from "node:fs";
@@ -71,7 +71,7 @@ export function backlog({ d = 5, w = 4, p = 0.003, roundNs = 1100, decoders = 1,
     wait: stats(waits), response: stats(response),
     lateVsWorst: response.filter((x) => x > worstNs).length / response.length,
     backlogNsPerWindow: growthPerWindow, stable: growthPerWindow * jobs < 0.1 * windowNs,
-    // FormalRV's static view: each decode holds a decoder for the declared worst case, windows overlap
+    // The compiler's static view: each decode holds a decoder for the declared worst case, windows overlap
     // when worstNs > windowNs, so the VM needs ⌈logical · worstNs / windowNs⌉ decoders.
     vmDecoders: Math.ceil((logical * worstNs) / windowNs),
   };

@@ -32,10 +32,18 @@ export async function renderStudy(el, id) {
   }
   document.title = s.title + " · Examples · QuantumOS";
   const at = list.findIndex((x) => x.id === id), prev = list[at - 1], next = list[at + 1];
+  const rows = s.rows ?? [];
+  const runButtons = rows.map((r, i) => `<button type="button" data-run="${i}" aria-pressed="false">${esc(r.label)}</button>`).join("");
   el.innerHTML = `
     <p class="kicker"><a href="/examples">Examples</a> · ${esc(s.kicker)}</p>
     <h1>${esc(s.title)}</h1>
     <p class="lead">${code(s.summary)}</p>
+    <p><a class="btn design" href="/examples/${esc(id)}/design">Open the design: run it on a machine you choose</a></p>
+    ${rows.length ? `<h2>The machine, running it</h2>
+    <p>The hardware design below runs the program on the cycle-exact model of its RISC-Q control system: every pulse, move, readout and decode appears at the time the model executed it, and every board and core of the controller lights up when it plays. Drag to turn the view, scroll to zoom.</p>
+    <div class="runpick" role="group" aria-label="Run">${runButtons}</div>
+    <div id="twin" class="twin"></div>
+    <div id="run"></div>` : ""}
     <h2>How it is measured</h2>${s.method.map((p) => `<p>${code(p)}</p>`).join("")}
     ${s.sections.map((x) => `<h2>${esc(x.heading)}</h2>${x.text ? `<p>${code(x.text)}</p>` : ""}${x.table ? table(x.table) : ""}`).join("")}
     <h2>What it shows</h2><ul>${s.findings.map((f) => `<li>${code(f)}</li>`).join("")}</ul>
@@ -43,4 +51,32 @@ export async function renderStudy(el, id) {
     <h2>Reproduce it yourself</h2><pre class="code">${esc(s.command)}</pre>
     <p class="cite">Generated ${esc((s.generated ?? "").slice(0, 10))}.</p>
     <p class="pager">${prev ? `<a href="/examples/${esc(prev.id)}">← ${esc(prev.title)}</a>` : ""}${next ? `<a href="/examples/${esc(next.id)}">${esc(next.title)} →</a>` : ""}</p>`;
+  if (!rows.length) return;
+  const twin = el.querySelector("#twin"), detail = el.querySelector("#run");
+  let viewer;
+  const show = async (i) => {
+    const r = rows[i];
+    el.querySelectorAll(".runpick button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.run) === i)));
+    detail.innerHTML = runDetail(r);
+    viewer?.dispose();
+    viewer = undefined;
+    if (!r.track) { twin.innerHTML = `<p class="no">No track was recorded for this run.</p>`; return; }
+    const { mountTwin } = await import("/reproduce/twin3d.js");
+    const tr = r.track;
+    viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}${tr.controller ? ", " + tr.controller.cores.length + " control cores" : " (the runtime simulator's schedule; no control system ran it)"}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time. Part sizes are drawn for legibility; positions and times are the run's.` });
+  };
+  el.querySelectorAll(".runpick button").forEach((b) => b.addEventListener("click", () => show(Number(b.dataset.run))));
+  show(0);
+}
+
+/** One run's facts: its verdict, its columns, every kind of operation against its window, what was late. */
+function runDetail(r) {
+  const verdict = r.deadlock ? `<p class="dverdict bad">✗ The runtime deadlocked: the program never completes.</p>`
+    : r.conforms ? `<p class="dverdict ok">✓ Every operation ran inside its window on this machine.</p>` : `<p class="dverdict bad">✗ Some operations did not fit their windows on this machine.</p>`;
+  const cols = Object.entries(r.columns ?? {});
+  const kinds = Object.entries(r.byKind ?? {});
+  return `${verdict}
+    ${cols.length ? table({ head: ["", ""], rows: cols }) : ""}
+    ${kinds.length ? `<h3>Every kind of operation against its window</h3>${table({ head: ["Operation", "In window", "Longest hardware time (ns)", "Longest overrun (ns)"], rows: kinds.map(([k, v]) => [k, v.ok + " / " + v.count, String(v.maxHardwareNs ?? "–"), String(v.maxOverrunNs ?? 0)]) })}` : ""}
+    ${r.failures?.length ? `<h3>${r.deadlock ? "Operations waiting at the deadlock" : "First operations outside their window"}</h3>${table({ head: ["Operation", "Listing line", "Window (ns)", "Hardware (ns)", "Why"], rows: r.failures.map((f) => [f.kind, String(f.line ?? "–"), f.start !== undefined ? Math.round(f.start) + " – " + Math.round(f.end) : "–", f.hardwareNs ? Math.round(f.hardwareNs[0]) + " – " + Math.round(f.hardwareNs[1]) : "–", f.reason ?? ""]) })}` : ""}`;
 }

@@ -1,6 +1,6 @@
-// What FormalRV's superconducting audit machines would need from a RISC-Q control system, at the
+// What the compiler's superconducting audit machines would need from a RISC-Q control system, at the
 // rates this tree measured. Arithmetic on measured rates, not a simulation: every input is either an
-// audit's declared value (FormalRV/Audit/*, riscq/calib/table.mjs AUDITS) or a measurement here, and
+// audit's declared value (Audit/*, riscq/calib/table.mjs AUDITS) or a measurement here, and
 // the result says which.
 //
 // Measured (cycle-exact model, RTL-checked core and hub):

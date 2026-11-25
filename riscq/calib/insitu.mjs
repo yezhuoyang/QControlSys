@@ -1,7 +1,7 @@
 // In-situ calibration: what each system call costs inside real programs.
 //
 // For every program of the corpus (riscq/ftqvm/corpus.mjs) on every design point, the spec is
-// derived as usual (riscq/ftqvm/derive.mjs: FormalRV compiles, the VM admits, the listing runs
+// derived as usual (riscq/ftqvm/derive.mjs: the compiler lowers, the VM admits, the listing runs
 // time-triggered on the cycle-exact model, durations are raised to what the trace needed). From the
 // final, conforming run this keeps every operation's sample: the hardware time it needed (its
 // pulses, and for a measurement its bit in memory) against the time the listing declared, with the
@@ -14,12 +14,14 @@ import { resolve } from "node:path";
 import { deriveSpec } from "../ftqvm/derive.mjs";
 import { transmon, optical } from "../ftqvm/platforms.mjs";
 import { programs as corpusPrograms, DESIGNS } from "../ftqvm/corpus.mjs";
-import { formalrvRoot } from "../ftqvm/formalrv.mjs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-/** Logical circuits from FormalRV's own examples (its CORPUS_MANIFEST marks each "compile, system"). */
+const ALGO_DIR = fileURLToPath(new URL("../../validation/ftqvm/programs/algorithms/", import.meta.url));
+
+/** Logical circuits from the compiler's own examples (its CORPUS_MANIFEST marks each "compile, system"). */
 export const ALGORITHMS = ["Grover/Grover", "Lookup/Lookup", "MeasAdder/MeasAdder", "Cuccaro/cuccaro", "ModMult/modmult", "Shor/Shor"].map((p) => ({
-  id: p.split("/")[1].toLowerCase() + "-d3", qppm: join(formalrvRoot(), "FormalRV", "Examples", p + ".qppm"), specialize: {}, distance: 3, scale: "algorithm",
+  id: p.split("/")[1].toLowerCase() + "-d3", qppm: join(ALGO_DIR, p.split("/")[1] + ".qppm"), specialize: {}, distance: 3, scale: "algorithm",
 }));
 const programs = () => [...corpusPrograms(), ...ALGORITHMS];
 
@@ -54,7 +56,7 @@ export async function collect(program, platform, design) {
     machine: Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, { value: v.value, source: v.source }])),
     factory: last.spec.factories?.factory ?? null, contracts: last.contracts ?? null,
     samples, seconds: (Date.now() - t0) / 1000,
-    // The listing itself, for Executor B (riscq/os/des.mjs): FormalRV's expansion, as compiled.
+    // The listing itself, for Executor B (riscq/os/des.mjs): the compiler's expansion, as compiled.
     listing: { machine: Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, v.value])),
       ops: last.listing.ops.map(({ stack: _stack, ...op }) => op) },
   };

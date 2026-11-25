@@ -1,4 +1,4 @@
-// How to choose the one number a FormalRV field declares: a held-out test.
+// How to choose the one number a compiler field declares: a held-out test.
 //
 // For each design and field, the value is fitted on every program but one (the training set) by
 // a rule: the worst case (max), the 99th percentile, the median, or the worst case of the

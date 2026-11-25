@@ -15,7 +15,7 @@ const json = async (url, options) => {
 };
 const hex = (c) => "#" + c.toString(16).padStart(6, "0");
 
-function field(p, value) {
+function field(p, value, valueWord = "Paper value") {
   const id = "p-" + p.key, edited = String(value) !== String(p.value);
   const input = p.options
     ? `<select id="${id}" data-key="${esc(p.key)}">${p.options.map((o) => `<option value="${esc(o.value)}"${String(o.value) === String(value) ? " selected" : ""}>${esc(o.label)}</option>`).join("")}</select>`
@@ -23,7 +23,7 @@ function field(p, value) {
   return `<div class="dfield${edited ? " edited" : ""}" data-field="${esc(p.key)}">
     <label for="${id}">${esc(p.label)}${p.unit ? ` <span class="unit">(${esc(p.unit)})</span>` : ""}</label>
     <div class="dinput">${input}<span class="dchip">edited</span></div>
-    ${p.source ? `<p class="dsrc">Paper value ${esc(p.options ? p.options.find((o) => String(o.value) === String(p.value))?.label ?? p.value : p.value)}${p.unit ? " " + esc(p.unit) : ""}: ${esc(p.source)}</p>` : ""}
+    ${p.source ? `<p class="dsrc">${valueWord} ${esc(p.options ? p.options.find((o) => String(o.value) === String(p.value))?.label ?? p.value : p.value)}${p.unit ? " " + esc(p.unit) : ""}: ${esc(p.source)}</p>` : ""}
   </div>`;
 }
 
@@ -89,7 +89,7 @@ export async function renderDesign(el, id, { section = "reproduce" } = {}) {
     ${intro ? `<div class="note">${esc(intro)}</div>` : `<div class="note">The program stays fixed: it is the QSysASM listing compiled for the paper's twin. If an operation no longer fits its window, the compiler has to derive the specification again for the edited machine (<code>${esc(meta.command ?? "")}</code>, which needs a compiler checkout). The run then reports which operations overrun, and by how much.</div>`}
     <div class="design-grid">
       <form class="dform" autocomplete="off">
-        ${groups.map((g) => `<fieldset><legend>${esc(g)}</legend>${params.filter((p) => (p.group ?? "Parameters") === g).map((p) => field(p, values[p.key])).join("")}</fieldset>`).join("")}
+        ${groups.map((g) => `<fieldset><legend>${esc(g)}</legend>${params.filter((p) => (p.group ?? "Parameters") === g).map((p) => field(p, values[p.key], ex ? "Study's value" : "Paper value")).join("")}</fieldset>`).join("")}
         <div class="dactions">
           <button type="submit" class="btn">Run on this machine</button>
           <button type="button" class="btn alt" data-act="reset">${ex ? "The study's values" : "Paper's values"}</button>

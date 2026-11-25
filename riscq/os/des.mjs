@@ -1,6 +1,6 @@
-// QuantumOS runtime, executor B: a discrete-event simulator of a FormalRV listing on a machine.
+// QuantumOS runtime, executor B: a discrete-event simulator of a QSysASM listing on a machine.
 //
-// The listing is FormalRV's own expansion (riscq/ftqvm/formalrv.mjs expand: ops with uid, order,
+// The listing is the compiler's own expansion (riscq/ftqvm/ftcompiler.mjs expand: ops with uid, order,
 // kind, listed start and duration, qubits, record reads and writes). The executor runs it under a
 // service model and a policy, and reports what a static admission cannot: when each operation could
 // start, how long it waited and for which resource, queue lengths, utilization, deadline misses,
@@ -10,7 +10,7 @@
 //   dependencies   an op waits for the previous op on each of its qubits (program order) and for
 //                  the op that last wrote each record it reads
 //   resources      pools with a capacity. An op needs amounts of some pools while it runs. The
-//                  FormalRV services are pools: gates (max_parallel_gates), decoders, factories,
+//                  the compiler services are pools: gates (max_parallel_gates), decoders, factories,
 //                  and the three bandwidths as rates in items/µs, an op holding r(N, D) =
 //                  ⌈1000·N/D⌉ while it runs (the VM's rule). Qubits are a pool too: request_ancilla
 //                  takes `arg` qubits and holds them until the release_ancilla of the same
@@ -35,7 +35,7 @@ const qkey = (q) => q.register + "[" + q.index + "]";
 const GATE1 = new Set(["H", "S", "Sdg", "X", "Z"]), GATE2 = new Set(["CNOT", "CZ", "CY"]);
 
 /**
- * The FormalRV machine as a service model: each op lasts its listed duration (or the machine's
+ * The compiler's machine as a service model: each op lasts its listed duration (or the machine's
  * latency for its kind) and needs the VM's services. `latency(op)` may be replaced by a calibrated
  * sampler. Returns { pools, needs(op), latency(op, rng) }.
  */

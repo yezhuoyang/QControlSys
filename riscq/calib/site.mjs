@@ -4,7 +4,9 @@
 // value that must not be published (an audit machine's figures) never leaves the raw files.
 //
 //   node riscq/calib/site.mjs   → validation/calib/site/index.json and <id>.json
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
+import { gzipSync } from "node:zlib";
+import { PROGRAMS, DESIGN_IDS, STUDY_RUNS, exampleRun } from "./example-runs.mjs";
 
 const DIR = new URL("../../validation/calib/", import.meta.url);
 const OUT = new URL("site/", DIR);
@@ -80,9 +82,9 @@ function tableStudy() {
   const rows = t.rows.filter((r) => fields.includes(r.field)).sort((a, b) => a.platform.localeCompare(b.platform) || a.design.localeCompare(b.design) || fields.indexOf(a.field) - fields.indexOf(b.field));
   return {
     id: "system-calls", title: "Every system call on six hardware designs", kicker: "Calibration · in programs",
-    summary: "Eleven FormalRV programs (memories, Deutsch–Jozsa, Bell pairs, a Z⊗Z merge, GHZ, a checked measurement, T injection, a loop of merges, at distances 3 and 5) on two designs of each platform. For every system call, the time each operation actually needed on the cycle-exact model, against the one number the machine declares.",
+    summary: "Eleven logical programs (memories, Deutsch–Jozsa, Bell pairs, a Z⊗Z merge, GHZ, a checked measurement, T injection, a loop of merges, at distances 3 and 5) on two designs of each platform. For every system call, the time each operation actually needed on the cycle-exact model, against the one number the machine declares.",
     method: [
-      "For each program and design, FormalRV compiles the program against a machine specification, its resource VM admits the listing, and the listing runs time-triggered on the design. Every duration the hardware exceeded is raised and the loop repeats until the run conforms. The final run's operations are the samples.",
+      "For each program and design, the compiler lowers the program against a machine specification, its resource VM admits the listing, and the listing runs time-triggered on the design. Every duration the hardware exceeded is raised and the loop repeats until the run conforms. The final run's operations are the samples.",
       t.runs + " runs conform. " + (t.failed.length ? t.failed.map((f) => f.program + " on " + f.design + ": " + f.why).join("; ") + "." : ""),
     ],
     sections: [{ heading: "Needed against declared (ns)", table: { head: ["Platform", "Design", "Field", "Operations", "Declared", "Needed: min / median / 99th / max", "Slack at the median"],
@@ -159,6 +161,7 @@ function factoryStudy() {
     findings: [
       "Declaring one attempt as the factory's latency never keeps up. Declaring the mean keeps up only at low demand. Declaring the 99th percentile keeps up but needs 2 to 4 times the factories a queue needs.",
       "Strict priority protects urgent T gates and starves background requests as the load approaches 1.",
+      "In the runs above the runtime's schedule of T injection misses its windows by 4 ns: a factory's one-qubit gates follow a reset on the same qubits with no gap, and the hardware starts them a little later. The runtime simulator does not model that turnaround.",
     ],
     command: "node riscq/calib/factory.mjs",
   };
@@ -170,7 +173,7 @@ function contentionStudy() {
   const range = (xs) => { const v = xs.filter(Boolean).sort((a, b) => a - b); return v.length ? fmt(v[0], 2) + "–" + fmt(v.at(-1), 2) + " (median " + fmt(v[v.length >> 1], 2) + ")" : "–"; };
   return {
     id: "deadlock", title: "Deadlock and scheduling policy in a dynamic runtime", kicker: "Contention · request_ancilla and every service",
-    summary: "FormalRV's VM admits a program as a fixed timetable. QuantumOS's runtime simulator instead runs the same program as soon as its dependencies and resources allow, the way a dynamic operating system would. Over the whole corpus: when does that deadlock, and how much faster is it when it does not?",
+    summary: "The resource VM admits a program as a fixed timetable. QuantumOS's runtime simulator instead runs the same program as soon as its dependencies and resources allow, the way a dynamic operating system would. Over the whole corpus: when does that deadlock, and how much faster is it when it does not?",
     method: [
       "The simulator holds the VM's services as resource pools, with ancilla qubits held from request_ancilla to their release. Run time-triggered with the listed durations, it reproduces every admitted listing exactly (all " + c.length + "), a check of the simulator against the VM.",
       "Three dynamic policies: greedy (an operation that fits may pass one that waits), strict (no passing among ready operations), and ordered acquisition of the ancilla pool (granted in program order, which rules out a circular wait).",
@@ -196,7 +199,7 @@ function gateStudy() {
   return {
     id: "hardware-gate", title: "Does the hardware run the runtime's schedule?", kicker: "Contention · conformance gate",
     summary: "The runtime simulator's schedules are written back as timetables and run on the cycle-exact model of the same design. Every operation must finish inside the window the simulator gave it. A failure names something the simulator's resource model is missing.",
-    method: ["For every program and design of the corpus, the simulator's schedule with ordered acquisition and the declared durations is retimed, placed and run time-triggered. First with FormalRV's services only; then, for atoms and ions, with the hardware's movers and readout channels added to the simulator."],
+    method: ["For every program and design of the corpus, the simulator's schedule with ordered acquisition and the declared durations is retimed, placed and run time-triggered. First with the compiler's services only; then, for atoms and ions, with the hardware's movers and readout channels added to the simulator."],
     sections: [{ heading: "Schedules the cycle-exact model keeps", table: { head: ["Platform", "Simulator's resources", "Conform", "Why the others do not"], rows: [...rowsFor(spec, "the VM's services"), ...(h ? rowsFor(h.rows, "plus movers and readout channels").filter((r) => r[0] !== "Superconducting") : [])] } }],
     findings: [
       "On superconducting hardware the VM's services are enough: a dynamic schedule over them runs on the cycle-exact model.",
@@ -231,18 +234,64 @@ function scaleStudy() {
   };
 }
 
-export function build() {
+/**
+ * The listings the Examples run (validation/calib/site/runs/<program>.<design>.json): the compiler's
+ * admitted listing of each in-situ run, its distance, and for every field the number fitted on the
+ * other programs on the same design (max, p99, p50), for the "windows" choice.
+ */
+function writeRuns() {
+  const dir = new URL("insitu/", DIR), runsDir = new URL("runs/", OUT);
+  mkdirSync(runsDir, { recursive: true });
+  const all = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(new URL(f, dir), "utf8"))).filter((r) => r.listing && !r.error && r.conforms);
+  const FIELD = { H: "gate1q_ns", S: "gate1q_ns", Sdg: "gate1q_ns", X: "gate1q_ns", Z: "gate1q_ns", CNOT: "gate2q_ns", CZ: "gate2q_ns", CY: "gate2q_ns", measure: "measure_ns", request_ancilla: "reset_ns", route: "route_latency_ns", decode_syndrome: "decoder_latency_ns", pauli_frame_update: "pauli_frame_update_ns" };
+  const q = (v, p) => v[Math.min(v.length - 1, Math.floor(p * v.length))];
+  let n = 0;
+  for (const r of all) {
+    if (!PROGRAMS.includes(r.program) || !DESIGN_IDS.includes(r.design)) continue;
+    // Distance-5 programs only where their studies run them: they are the large listings.
+    if (/-d5$/.test(r.program) && r.design !== "sc-B") continue;
+    const by = {};
+    for (const o of all.filter((x) => x.design === r.design && x.program !== r.program)) for (const sm of o.samples) {
+      const f = FIELD[sm.kind];
+      if (f && sm.neededNs !== null) (by[f] ??= []).push(sm.neededNs);
+    }
+    const fitted = Object.fromEntries(["max", "p99", "p50"].map((rule) => [rule, Object.fromEntries(Object.entries(by).map(([f, v]) => {
+      v.sort((a, b) => a - b);
+      return [f, Math.max(2, Math.ceil((rule === "max" ? v.at(-1) : q(v, rule === "p99" ? 0.99 : 0.5)) / 2) * 2)];
+    }))]));
+    writeFileSync(new URL(r.program + "." + r.design + ".json.gz", runsDir), gzipSync(JSON.stringify({ program: r.program, platform: r.platform, design: r.design, distance: r.distance, listing: r.listing, fitted })));
+    n++;
+  }
+  return n;
+}
+
+export async function build({ runs = true } = {}) {
   const studies = [fabricStudy(), decoderStudy(), tableStudy(), methodsStudy(), backlogStudy(), factoryStudy(), contentionStudy(), gateStudy(), scaleStudy()];
   mkdirSync(OUT, { recursive: true });
-  for (const s of studies) writeFileSync(new URL(s.id + ".json", OUT), JSON.stringify({ ...s, note: COMMON_NOTE, generated: new Date().toISOString() }, null, 1) + "\n");
+  if (runs) console.log("stored listings:", writeRuns());
+  for (const s of studies) {
+    const file = new URL(s.id + ".json", OUT);
+    // The study's runs with their 3D tracks (riscq/calib/example-runs.mjs), or the ones stored before.
+    let rows = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).rows ?? [] : [];
+    if (runs && STUDY_RUNS[s.id]) {
+      rows = [];
+      for (const r of STUDY_RUNS[s.id]) {
+        const t0 = Date.now();
+        rows.push(await exampleRun({ ...r.params, label: r.label }));
+        const last = rows.at(-1);
+        console.log("  " + s.id + ": " + r.label + " · " + (last.conforms ? "conforms" : last.deadlock ? "deadlock" : "does not conform") + " · " + (Date.now() - t0) / 1000 + " s");
+      }
+    }
+    writeFileSync(file, JSON.stringify({ ...s, rows, note: COMMON_NOTE, generated: new Date().toISOString() }) + "\n");
+  }
   writeFileSync(new URL("index.json", OUT), JSON.stringify(studies.map(({ id, title, kicker, summary }) => ({ id, title, kicker, summary })), null, 1) + "\n");
   return studies;
 }
 
 if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replace(/^\//, "")) {
-  const s = build();
+  const s = await build({ runs: !process.argv.includes("--no-runs") });
   const text = readFileSync(new URL("index.json", OUT), "utf8") + s.map((x) => readFileSync(new URL(x.id + ".json", OUT), "utf8")).join("");
-  // Names a page must not carry: FormalRV's audit machines, and the words listed in a private, git-ignored
+  // Names a page must not carry: the compiler's audit machines, and the words listed in a private, git-ignored
   // file (one per line) when it is present.
   const privateFile = new URL("../../docs/ftqvm-site-banned.md", import.meta.url);
   const words = ["GE2021", "Gidney2025", "Beverland2022", "Pinnacle", "Jacinto2026", "Zhou2025", "CainXu2026", "audit",
