@@ -100,10 +100,11 @@ test("the H2 GHZ program runs on eight cores with every waveform, gate and measu
   const edges = result.frames.filter((f) => f.op === "edge");
   const bright = Object.values(outcomes).filter(Boolean).length;
   assert.equal(edges.length, bright * 2 * qccd.BRIGHT_PHOTONS);
-  // The transport cores' programs fit the 64 KiB RAM only because the channels are split
-  // over three cores.
-  assert.throws(() => assemble(qccd.machine(replay, { channelsPerCore: 16 }).spec,
-    qccd.lower(qccd.schedule(qccd.machine(replay, { channelsPerCore: 16 })), qccd.machine(replay, { channelsPerCore: 16 })), {}),
+  // The transport cores' programs fit the 64 KiB RAM only because the channels are split over three
+  // cores. With sixteen channels on one core, tr0's does not, even folded: its transport schedule has no
+  // repeating rounds to fold (riscq/firmware.mjs foldRuns), so the assembler still refuses it.
+  const m16 = qccd.machine(replay, { channelsPerCore: 16 });
+  assert.throws(() => assemble(m16.spec, qccd.lower(qccd.schedule(m16), m16), {}),
     /Core tr0: the program needs \d+ words and the RAM has 16064/);
 });
 

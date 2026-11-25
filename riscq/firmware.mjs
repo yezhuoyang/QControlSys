@@ -63,6 +63,10 @@ export class Firmware {
     this.coreIndex = coreIndex;
     this.asm = new Assembler();
     this.bits = new Map();
+    // On a folded core (compileCore `compact`), s2 and s11 advance with each round a loop replays: a bit's
+    // offset is taken from the shifted bases, and host writes go through s11.
+    this.bitShift = 0;
+    this.hostReg = null;
     // The bit table occupies the top of RAM, below a small stack reserve.
     this.bitBase = MAP.MEM_BASE + 4 * (this.core.memWords - 320);
   }
@@ -76,7 +80,7 @@ export class Firmware {
       if (this.bits.size >= 256) throw Error("Core " + this.core.name + " uses more than 256 classical bits.");
       this.bits.set(name, this.bits.size);
     }
-    return 4 * this.bits.get(name);
+    return 4 * this.bits.get(name) - this.bitShift;
   }
   /** Load the fixed base registers. */
   begin() {
@@ -239,6 +243,7 @@ export class Firmware {
     const a = this.asm;
     const offset = this.bit(name);
     a.sw(rs, "s2", offset);
+    if (this.hostReg) return a.sw(rs, this.hostReg, offset);
     a.lui("t0", MAP.HOSTWIN >>> 12);
     a.sw(rs, "t0", offset);
   }
@@ -410,19 +415,100 @@ export function issueOrder(ops, core, channelOf, cost = inlineCost) {
   return items;
 }
 
+/**
+ * Core cycles between the end of a round's code and the next round's first operation when a loop replays
+ * it: the loop counter, the time and bit bases advanced, the jump back and its misprediction. Measured on
+ * the core model that matches RISC-Q's RTL (tests/riscq-compact.test.mjs re-measures it); a round is
+ * folded only where the schedule leaves this much room at its end.
+ */
+export const FOLD_OVERHEAD = 40;
+/** Core cycles more for a folded fire's phase offset, loaded from the round's table rather than built. */
+export const FOLD_PHASE_LOAD = 8;
+
+/**
+ * The runs of a compact segment's issue list: `{ items, repeat, period, bitStride }`. A run of K items that
+ * recurs R times, each time `period` batches later (issue, start and window end alike) with every bit it
+ * stores or tests `bitStride` bytes further on, is one run of K items repeated R times; other items are
+ * runs of one. Only timed writes and result reads fold.
+ */
+export function foldRuns(items, fw, cost) {
+  const MAX_K = 256;
+  // Every bit the segment stores, in order, so that two rounds can be compared.
+  for (const { op } of items) if (op.read) fw.bit(op.bit);
+  const view = items.map((item) => {
+    const { op } = item;
+    const foldable = !op.count && !op.decode && !op.frame && !op.parity && !op.timed && (op.fire || op.freq || op.read);
+    if (!foldable) return null;
+    const bits = [op.read ? fw.bit(op.bit) : null, op.when !== undefined ? fw.bit(op.when) : null].filter((b) => b !== null);
+    // A phase offset may differ from round to round (the virtual-Z frame accumulates): its value is data.
+    const sig = JSON.stringify([item.channel, !!item.hold, op.fire ?? null, op.set ?? null, op.phaseOffset !== undefined, op.freq ?? null,
+      op.read ? op.read.channel : null, op.publish ?? null, op.when !== undefined, bits.length]);
+    const end = op.read ? op.read.until + READ_SETTLE : item.issue + cost(op);
+    return { sig, times: [item.issue, op.at, op.read ? op.read.until : op.at], bits, end };
+  });
+  const out = [];
+  let i = 0;
+  while (i < items.length) {
+    let best = null;
+    for (let K = 1; K <= MAX_K && i + 2 * K <= items.length; K++) {
+      const first = view[i], next = view[i + K];
+      if (!first || !next) continue;
+      const P = next.times[0] - first.times[0];
+      if (P <= 0) continue;
+      const firstBit = view.slice(i, i + K).find((v) => v?.bits.length);
+      const B = firstBit ? view[i + K + view.slice(i, i + K).indexOf(firstBit)]?.bits[0] - firstBit.bits[0] : 0;
+      if (!Number.isFinite(B) || B < 0) continue;
+      // The loop step between the round's last operation and the next round's first.
+      const last = view[i + K - 1];
+      if (!last || next.times[0] - last.end < FOLD_OVERHEAD) continue;
+      const matches = (r) => {
+        for (let j = 0; j < K; j++) {
+          const a = view[i + j], b = view[i + r * K + j];
+          if (!a || !b || a.sig !== b.sig) return false;
+          if (a.times.some((t, k) => b.times[k] - t !== r * P)) return false;
+          if (a.bits.some((x, k) => b.bits[k] - x !== r * B)) return false;
+        }
+        return true;
+      };
+      let R = 1;
+      while (i + (R + 1) * K <= items.length && matches(R)) R++;
+      const gain = (R - 1) * K;
+      if (R > 1 && gain > 2 && gain > (best?.gain ?? 0)) best = { K, P, B, R, gain };
+    }
+    if (best) {
+      // The phase offsets of the run's fires, round by round, in the order the loop body reads them.
+      const phases = [];
+      for (let r = 0; r < best.R; r++)
+        for (let j = 0; j < best.K; j++) {
+          const op = items[i + r * best.K + j].op;
+          if (op.fire && op.phaseOffset !== undefined) phases.push(pack16(op.phaseOffset));
+        }
+      out.push({ items: items.slice(i, i + best.K), repeat: best.R, period: best.P, bitStride: best.B, phases });
+      i += best.R * best.K;
+    } else {
+      out.push({ items: [items[i]], repeat: 1 });
+      i++;
+    }
+  }
+  return out;
+}
+
 /** A segment of plain timed writes is issued by the table loop. */
 function isPlain(ops) {
   return ops.length > 0 && ops.every((op) =>
     op.freq || (op.fire && !op.set?.length && op.phaseOffset === undefined && op.when === undefined));
 }
-export function segmentIssue(core, ops, channelOf) {
+export function segmentIssue(core, ops, channelOf, { compact = false } = {}) {
+  // A folded core runs inline code: a round it replays is one copy of that code inside a loop, which reads
+  // each fire's phase offset from the round's table (FOLD_PHASE_LOAD more cycles).
+  if (compact) return { plain: false, items: issueOrder(ops, core, channelOf, (op) => inlineCost(op) + (op.fire && op.phaseOffset !== undefined ? FOLD_PHASE_LOAD : 0)) };
   const plain = isPlain(ops);
   return { plain, items: issueOrder(ops, core, channelOf, plain ? () => TABLE_COST : inlineCost) };
 }
 /** Batches by which a segment must start later so that its earliest write is issued on time. */
-export function prerollOf(core, ops) {
+export function prerollOf(core, ops, { compact = false } = {}) {
   const channelOf = (ref) => (typeof ref === "number" ? ref : core.channels.findIndex((ch) => ch.name === ref));
-  const { items } = segmentIssue(core, ops, channelOf);
+  const { items } = segmentIssue(core, ops, channelOf, { compact });
   const earliest = items.reduce((m, item) => (item.hold ? m : Math.min(m, item.issue)), 0);
   return Math.max(0, -earliest - LEAD);
 }
@@ -452,13 +538,17 @@ export function prerollOf(core, ops) {
  * register address, data. Other segments are issued inline. A decode or a frame update runs
  * as soon as the core reaches it. It has no start time of its own.
  */
-export function compileCore(spec, coreIndex, plan) {
+export function compileCore(spec, coreIndex, plan, { compact = false } = {}) {
   const fw = new Firmware(spec, coreIndex);
   const a = fw.asm;
   const core = fw.core;
-  const tables = [], data = [];
+  const tables = [], data = [], remap = [];
   a.source("init");
   fw.begin();
+  if (compact) {
+    fw.hostReg = "s11";
+    a.li("s11", MAP.HOSTWIN);
+  }
   for (const ch of plan.channels ?? []) fw.initChannel(ch.channel, ch.slots ?? [], ch.freq);
   let writes = 0;
   for (const [segmentIndex, segment] of (plan.segments ?? []).entries()) {
@@ -479,7 +569,9 @@ export function compileCore(spec, coreIndex, plan) {
     for (const op of segment.ops)
       if (op.fire && op.fire.slot >= core.channels[fw.channel(op.fire.channel)].slots)
         throw Error("Fire of a missing pulse-table entry on " + core.name + ".");
-    const { plain, items } = segmentIssue(core, segment.ops, (ref) => fw.channel(ref));
+    const { plain, items } = segmentIssue(core, segment.ops, (ref) => fw.channel(ref), { compact });
+    // Times in the code are relative to s0, which a folded round's loop advances (see below).
+    let shift = 0;
     if (plain) {
       const [table, end, loop] = ["table", "tableEnd", "issue"].map((n) => a.fresh(n));
       tables.push({ table, end, items });
@@ -506,7 +598,27 @@ export function compileCore(spec, coreIndex, plan) {
       writes += items.length;
     } else {
       let waited = -Infinity;
-      for (const { op, issue, channel } of items) {
+      // On a core whose program does not fit its RAM (`compact`), rounds that repeat are one copy of their
+      // code in a counted loop that advances the time base s0 by the round's period and the bit bases s2,
+      // s11 by its bits, so the same instructions play every round (foldRuns).
+      const runs = compact ? foldRuns(items, fw, (op) => inlineCost(op) + (op.fire && op.phaseOffset !== undefined ? FOLD_PHASE_LOAD : 0))
+        : items.map((item) => ({ items: [item], repeat: 1 }));
+      if (compact) for (const { op, channel } of items) if (op.fire || op.freq) remap.push([channel, op.at, op.source ?? ""]);
+      for (const run of runs) {
+       const [roundStart, roundEnd] = run.repeat > 1 ? [a.fresh("round"), a.fresh("roundEnd")] : [];
+       if (run.repeat > 1) {
+        a.source("");
+        a.li("s7", run.repeat - 1);
+        if (run.phases.length) {
+          const table = a.fresh("phases");
+          data.push({ label: table, words: run.phases, source: "" });
+          a.la("s8", table);
+        }
+        a.label(roundStart);
+        waited = -Infinity;
+       }
+       for (const { op, issue: issueAt, channel } of run.items) {
+        const issue = issueAt - shift, at = op.at - shift;
         a.source(op.source ?? "segment" + segmentIndex);
         if (issue > waited && !op.decode && !op.frame && !op.parity) {
           fw.timeAt("t2", issue);
@@ -515,7 +627,7 @@ export function compileCore(spec, coreIndex, plan) {
         }
         // A classical operation marked `timed` starts at its own time, as a listing schedules it.
         if (op.timed && (op.decode || op.frame || op.parity)) {
-          fw.timeAt("t2", op.at);
+          fw.timeAt("t2", at);
           fw.waitUntil("t2");
         }
         let skip;
@@ -526,16 +638,21 @@ export function compileCore(spec, coreIndex, plan) {
         }
         if (op.fire) {
           for (const s of op.set ?? []) fw.setField(channel, op.fire.slot, s.field, s.code);
-          if (op.phaseOffset !== undefined) fw.setPhaseOffset(channel, op.phaseOffset);
-          fw.timeAt("t1", op.at);
+          if (op.phaseOffset !== undefined && run.repeat > 1) {
+            // This round's phase offset, the next word of the run's table.
+            a.lw("t1", "s8", 0);
+            a.addi("s8", "s8", 4);
+            fw.put(channel, MAP.RF_PHASE_OFFSET, "t1");
+          } else if (op.phaseOffset !== undefined) fw.setPhaseOffset(channel, op.phaseOffset);
+          fw.timeAt("t1", at);
           fw.setStart(channel, "t1");
           fw.fire(channel, op.fire.slot);
-          writes++;
+          writes += run.repeat;
         } else if (op.freq) {
-          fw.timeAt("t1", op.at);
+          fw.timeAt("t1", at);
           fw.setStart(channel, "t1");
           fw.setFreq(channel, op.freq.code);
-          writes++;
+          writes += run.repeat;
         } else if (op.read) {
           // The result latch holds the previous window until this one opens (riscq.h read_res).
           fw.readResult(op.read.channel, "a1");
@@ -544,8 +661,8 @@ export function compileCore(spec, coreIndex, plan) {
         } else if (op.count) {
           const counters = ["s3", "s4", "s5", "s6"].slice(0, op.count.lines.length);
           if (counters.length !== op.count.lines.length) throw Error("A count reads at most four lines.");
-          if (op.count.atEnd) fw.countEdgesAtEnd(op.count.channel, op.count.lines, op.count.until, counters);
-          else fw.countEdges(op.count.channel, op.count.lines, op.count.until, counters);
+          if (op.count.atEnd) fw.countEdgesAtEnd(op.count.channel, op.count.lines, op.count.until - shift, counters);
+          else fw.countEdges(op.count.channel, op.count.lines, op.count.until - shift, counters);
           counters.forEach((counter, i) => {
             a.sltiu("a1", counter, op.count.threshold); // a1 = (count < threshold)
             a.xori("a1", "a1", 1);
@@ -564,13 +681,38 @@ export function compileCore(spec, coreIndex, plan) {
           fw.parity(op.parity.inputs, op.parity.output);
         } else throw Error("Unknown firmware operation.");
         if (skip) a.label(skip);
+       }
+       if (run.repeat > 1) {
+        // The next round: one fewer to go, the time base a period on, the bit bases a round's bits on.
+        a.source("");
+        a.beq("s7", "zero", roundEnd);
+        a.addi("s7", "s7", -1);
+        a.li("t0", run.period);
+        a.add("s0", "s0", "t0");
+        if (run.bitStride) {
+          a.addi("s2", "s2", run.bitStride);
+          a.addi("s11", "s11", run.bitStride);
+        }
+        a.j(roundStart);
+        a.label(roundEnd);
+        shift += (run.repeat - 1) * run.period;
+        fw.bitShift += (run.repeat - 1) * run.bitStride;
+        waited = -Infinity;
+       }
       }
     }
     if (segment.span !== undefined) {
       // Hold the core until the segment's last window has closed.
       a.source("segment" + segmentIndex + "/end");
-      fw.timeAt("t2", segment.span);
+      fw.timeAt("t2", segment.span - shift);
       fw.waitUntil("t2");
+    }
+    // The next segment addresses its bits from the table's own base again.
+    if (fw.bitShift) {
+      a.source("");
+      a.li("s2", fw.bitBase);
+      a.li("s11", MAP.HOSTWIN);
+      fw.bitShift = 0;
     }
   }
   a.source("done");
@@ -598,5 +740,5 @@ export function compileCore(spec, coreIndex, plan) {
     throw Error("Core " + core.name + ": the program needs " + image.words.length + " words and the RAM has " +
       (core.memWords - 320) + " below the bit table.");
   return { words: image.words, sourceMap: image.sourceMap, bits: Object.fromEntries(fw.bits),
-    bitBase: fw.bitBase, stats: { instructions: image.words.length, writes } };
+    bitBase: fw.bitBase, stats: { instructions: image.words.length, writes }, ...(remap.length ? { remap } : {}) };
 }

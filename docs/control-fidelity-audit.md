@@ -193,3 +193,17 @@ What this means: a syndrome bit that crosses a board takes at least 616 ns more 
 - The 3D control view draws the RF-DACs and RF-ADCs each channel names, and their cables to the qubits. A readout DAC has eight lines.
 - "Edit this hardware" on a reproduced paper reruns the paper's own compiled program on the edited chip (`riscq/ftqvm/studio-capture.mjs` `designOverride`).
 - Still not editable by hand: the neutral-atom and trapped-ion controllers, which `riscq/ftqvm/optical.mjs` builds in code (S10).
+
+**Folded rounds.** A RISC-Q core's RAM is 64 KiB: the host maps each core into a 64 KiB window (`coreStride = 1 << 16` in RISC-Q's SocSpec). A long program's firmware therefore cannot hold one block of code per pulse. A core whose program does not fit is compiled again with its repeating rounds folded (`riscq/firmware.mjs` `foldRuns`, `riscq/compile.mjs` `assemble`):
+
+- A run of rounds that are identical up to a shift in time P and in bit slots B is one copy of the round's inline code inside a counted loop. Each pass advances the time base `s0` by P and the bit bases `s2` and `s11` by B.
+- Phase offsets, which the virtual-Z frame changes every round, are read from a per-round table.
+- A round is folded only where the schedule leaves room for the loop step at its end (`FOLD_OVERHEAD`).
+- The cores run the same instructions as unfolded firmware, so they keep inline speed.
+
+Results:
+
+- Google's d = 7 memory folded: 133,415 words fall to 31,537, and the largest core from 2,266 to 645. No faults, every operation in its window.
+- Google's d = 3 memory folded plays the same pulses at the same times, with the same phases, amplitudes and bits (`tests/riscq-compact.test.mjs`).
+- Programs that fit are compiled exactly as before.
+- A schedule with no repeating rounds, such as H2's transport on a single core, still does not fit, and the assembler says so.

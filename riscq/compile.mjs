@@ -18,7 +18,7 @@ import { compileCore, prerollOf } from "./firmware.mjs";
  * A measured bit is published to a shared group slot. A core that conditions on a bit it did
  * not measure reads the shared slot after the barrier of the segment that uses it.
  */
-export function plans(spec, lowered) {
+export function plans(spec, lowered, { compact = new Set() } = {}) {
   // A core with no action parks at once and joins no barrier.
   const active = new Set(lowered.actions.map((a) => a.core));
   const members = active.size;
@@ -59,8 +59,15 @@ export function plans(spec, lowered) {
   const backlog = lowered.segments.map((_, s) => [...shared.keys()].filter((bit) => producedIn.get(bit) === s - 1).length);
   // A burst of simultaneous writes takes the core many cycles to issue. Every core delays the
   // segment by the same preroll so that the earliest write still leaves on time.
-  const prerolls = lowered.segments.map((_, s) => Math.max(0, ...[...active].map((index) =>
-    prerollOf(spec.cores[index], lowered.actions.filter((a) => a.segment === s && a.core === index)))));
+  // Each core's actions per segment, grouped once (a medium program has millions of actions).
+  const bySegmentCore = new Map();
+  for (const a of lowered.actions) {
+    const key = a.segment + "/" + a.core;
+    (bySegmentCore.get(key) ?? bySegmentCore.set(key, []).get(key)).push(a);
+  }
+  const actionsOf = (s, index) => bySegmentCore.get(s + "/" + index) ?? [];
+  const prerolls = lowered.segments.map((_, s) => [...active].reduce((m, index) =>
+    Math.max(m, prerollOf(spec.cores[index], actionsOf(s, index), { compact: compact.has(index) })), 0));
   const shift = (op, by) => ({
     ...op, at: op.at + by,
     ...(op.read ? { read: { ...op.read, until: op.read.until + by } } : {}),
@@ -70,7 +77,7 @@ export function plans(spec, lowered) {
     if (!active.has(index)) return { channels: [], segments: [] };
     const fetched = new Set();
     const segments = lowered.segments.map((segment, s) => {
-      const mine = lowered.actions.filter((a) => a.segment === s && a.core === index);
+      const mine = actionsOf(s, index);
       const fetch = [];
       for (const a of mine)
         if (a.when !== undefined && owner.get(a.when) !== index && !fetched.has(a.when)) {
@@ -99,13 +106,54 @@ export function plans(spec, lowered) {
 
 /** Compile lowered actions to the document the Lean executable runs, with per-core statistics. */
 export function assemble(spec, lowered, options = {}) {
-  const corePlans = plans(spec, lowered);
-  const images = corePlans.map((plan, i) => compileCore(spec, i, plan));
+  let corePlans = plans(spec, lowered);
+  // A core whose program does not fit its RAM runs its segments on the compact interpreter
+  // (riscq/firmware.mjs): the plans are made again with its costs, which every core's preroll sees.
+  // `options.forceCompact`: every core on the compact interpreter (tests and measurements).
+  const tooBig = new Set(options.forceCompact ? spec.cores.map((_, i) => i) : []);
+  let images = options.forceCompact ? [] : corePlans.map((plan, i) => {
+    try {
+      return compileCore(spec, i, plan);
+    } catch (error) {
+      if (!/the program needs \d+ words/.test(error.message)) throw error;
+      tooBig.add(i);
+      return null;
+    }
+  });
+  if (tooBig.size) {
+    corePlans = plans(spec, lowered, { compact: tooBig });
+    images = corePlans.map((plan, i) => compileCore(spec, i, plan, { compact: tooBig.has(i) }));
+  }
   return {
-    document: program(spec, images, options),
+    document: program(spec, images, (({ forceCompact: _f, ...rest }) => rest)(options)),
     plans: corePlans,
-    images: images.map((image, i) => ({ core: spec.cores[i].name, ...image.stats, bits: image.bits, bitBase: image.bitBase })),
+    images: images.map((image, i) => ({ core: spec.cores[i].name, ...image.stats, bits: image.bits, bitBase: image.bitBase,
+      ...(image.remap ? { remap: image.remap } : {}) })),
+    compact: [...tooBig],
   };
+}
+
+/**
+ * A core on the compact interpreter plays a repeated round from one set of table words, so the run
+ * names every repetition's pulses after the first. Name each pulse after the operation whose channel
+ * and start it plays: the segment's time base is where the core's first pulse, named rightly, starts.
+ */
+export function remapSources(result, built) {
+  for (const image of built.images) {
+    if (!image.remap) continue;
+    const core = built.images.indexOf(image);
+    const pulses = result.summary.pulses.filter((p) => p.core === core).sort((x, y) => x.startTime - y.startTime);
+    if (!pulses.length) continue;
+    const first = image.remap.find(([ch, , src]) => ch === pulses[0].channel && src === pulses[0].source);
+    if (!first) continue;
+    const base = pulses[0].startTime - first[1];
+    const byKey = new Map(image.remap.map(([ch, at, src]) => [ch + ":" + at, src]));
+    for (const p of pulses) {
+      const src = byKey.get(p.channel + ":" + (p.startTime - base));
+      if (src !== undefined) p.source = src;
+    }
+  }
+  return result;
 }
 
 /** Measured bits by name, read from the words each core stored to the host result window. */

@@ -26,7 +26,7 @@
 // so in this run the frame core applies every update (its timing does not depend on the bit).
 // Not realized yet, and reported as such: request_magic.
 import { execute } from "../soc.mjs";
-import { assemble, measuredBits } from "../compile.mjs";
+import { assemble, measuredBits, remapSources } from "../compile.mjs";
 import * as superconducting from "../platforms/superconducting.mjs";
 import * as hardwareDesign from "../design.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
@@ -229,7 +229,7 @@ export function lowerListing(listing, placement, m, options = {}) {
  * Run a listing on a chip design and check it. options: { outcomes: { "c[0]": 1, … } }.
  * Returns { result, built, lowered, report }.
  */
-export async function runListing(listing, placement, design, { outcomes = {}, trace = "io", distance = placement.d, factoryRounds } = {}) {
+export async function runListing(listing, placement, design, { outcomes = {}, trace = "io", distance = placement.d, factoryRounds, forceCompact = false } = {}) {
   const m = hardwareDesign.machine(design);
   const { hardware, origin, unrealized, classical, decodes, factories, quantization } = lowerListing(listing, placement, m, { factoryRounds });
   const lowered = superconducting.lower(hardware, m);
@@ -239,9 +239,10 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
     const { uid: _u, id, ...rest } = c;
     lowered.actions.push({ segment: 0, core: m.decoderCore, timed: true, ...rest, source: id });
   }
-  const built = assemble(m.spec, lowered, { trace, maxEvents: 400_000, maxSteps: 20_000_000,
+  const built = assemble(m.spec, lowered, { trace, maxEvents: 400_000, maxSteps: 20_000_000, forceCompact,
     bindings: m.bindings, readouts: superconducting.readoutOracle(lowered, m, outcomes) });
-  const result = await execute(built.document);
+  // A core on the compact interpreter: name its repeated rounds' pulses after their operations.
+  const result = remapSources(await execute(built.document), built);
   const report = conformance(listing, { hardware, lowered, origin, unrealized, classical, quantization }, result, built, m);
   // Decodes: the decoder service, from the bits' stores in this run.
   const bitStoredNs = {};
