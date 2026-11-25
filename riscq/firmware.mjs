@@ -40,6 +40,16 @@ export function remoteReleaseLead(spec) {
   const perBoard = Math.max(...[...new Set(spec.cores.map((c) => c.board ?? 0))].map((b) => spec.cores.filter((c) => (c.board ?? 0) === b).length));
   return 1 + (boards - 2) + m.laneCross + (m.laneWord - 1) + 7 + perBoard;
 }
+/**
+ * The bound above holds for a release with no frame ahead of it on its lane. A lane carries one frame
+ * per `laneFrame` cycles, so each frame still queued there when the root sends the release delays it
+ * one frame time: `frames` is what riscq/compile.mjs counts, the shared bits the previous segment
+ * published (a decoder's result just before its barrier, as on RISC-Q's PutLane).
+ */
+export function laneBacklogLead(spec, frames = 0) {
+  if (!frames || new Set(spec.cores.map((c) => c.board ?? 0)).size < 2) return 0;
+  return frames * model(spec, spec.laneModel ?? {}).laneFrame;
+}
 export const SYNC_LEAD = LEAD + 32; // kept for older callers; compileCore uses syncLead(spec)
 /** Smallest distance from a fire's issue to its start that still lands on time, with margin. */
 export const MIN_ISSUE_LEAD = 64;
@@ -456,7 +466,7 @@ export function compileCore(spec, coreIndex, plan) {
     const setup = FETCH_COST * (segment.fetch?.length ?? 0);
     if (segment.sync) {
       fw.barrier(segment.sync.barrier, segment.sync.members, "a0");
-      a.li("t1", syncLead(spec) + setup);
+      a.li("t1", syncLead(spec) + laneBacklogLead(spec, segment.sync.laneBacklog) + setup);
     } else {
       fw.now("a0");
       a.li("t1", LEAD + SEGMENT_SETUP + setup);

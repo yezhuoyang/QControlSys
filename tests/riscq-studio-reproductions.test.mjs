@@ -15,7 +15,10 @@ test("every reproduction is in the studio's example list", async () => {
   for (const r of REPRODUCTIONS) assert.ok(ids.some((id) => id.startsWith("reproduction:" + r.id + ":")), r.id);
 });
 
-for (const id of ["reproduction:google-2025:d3", "reproduction:bluvstein-2024:d3Z", "reproduction:google-cultivation-2025:circuit=fig2-cultivation", "reproduction:caune-2024:circuit=circuit-stability-r5.stim"])
+for (const id of ["reproduction:google-2025:d3", "reproduction:bluvstein-2024:d3Z", "reproduction:google-cultivation-2025:circuit=fig2-cultivation", "reproduction:caune-2024:circuit=circuit-stability-r5.stim",
+  // A decoder result published just before a barrier that spans boards: its frame is on the lane ahead
+  // of the release, and the conditioned pulses after it still land on time (riscq/firmware.mjs laneBacklogLead).
+  "reproduction:besedin-2026:circuit=circuit.stim"])
   test(id + " opens in the studio as a fresh run", { timeout: 300_000 }, async () => {
     const b = await run({ example: id });
     assert.ok(isBundle(b));

@@ -49,6 +49,14 @@ export function plans(spec, lowered) {
   const needsShare = new Set(
     lowered.actions.filter((a) => a.when !== undefined && owner.get(a.when) !== a.core).map((a) => a.when));
   for (const bit of needsShare) if (!shared.has(bit)) share(bit);
+  // Frames that can still be on a board-to-board lane when a segment's barrier releases: the shared
+  // bits the previous segment published (each one put, crossing every lane once; an earlier segment's
+  // went ahead of the previous release). firmware.mjs adds a lane frame time per frame to the lead.
+  const producedIn = new Map();
+  for (const action of lowered.actions)
+    for (const bit of action.count ? action.bits : action.decode ? action.decode.outputs : action.read && action.bit !== undefined ? [action.bit] : [])
+      producedIn.set(bit, action.segment);
+  const backlog = lowered.segments.map((_, s) => [...shared.keys()].filter((bit) => producedIn.get(bit) === s - 1).length);
   // A burst of simultaneous writes takes the core many cycles to issue. Every core delays the
   // segment by the same preroll so that the earliest write still leaves on time.
   const prerolls = lowered.segments.map((_, s) => Math.max(0, ...[...active].map((index) =>
@@ -75,7 +83,7 @@ export function plans(spec, lowered) {
               decode: { ...op.decode, ...shared.get(op.decode.inputs[0]), width: op.decode.inputs.length } }
           : op.read && shared.has(op.bit) ? { ...op, publish: shared.get(op.bit) } : op, prerolls[s]));
       return {
-        sync: members > 1 ? { barrier: s % 16, members } : undefined,
+        sync: members > 1 ? { barrier: s % 16, members, laneBacklog: backlog[s] } : undefined,
         fetch,
         ops,
         span: segment.span === undefined ? undefined : segment.span + prerolls[s],
