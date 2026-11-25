@@ -18,16 +18,23 @@ async function json(url) {
   return res.json();
 }
 
+/** The list: one box per paper across the column, its run playing in miniature (studio/reproduce/journal.js). */
 export async function renderIndex(el) {
   try {
-    const list = await json("/reproduce/data/index.json");
-    el.innerHTML = list.map((r) => `
-      <a class="card" href="/reproduce/${esc(r.id)}">
-        <span class="kicker">${esc(r.platform)}</span> ${badge(r.status)}
-        <h3>${esc(r.title)}</h3>
-        <p>${esc(r.summary)}</p>
-        <p class="cite">${esc(r.paper.authors)} · ${esc(r.paper.venue)}</p>
-      </a>`).join("");
+    const [list, previews, examples] = await Promise.all([json("/reproduce/data/index.json"), json("/reproduce/data/previews.json").catch(() => ({})),
+      json("/api/riscq/examples").catch(() => [])]);
+    const { journalCard, mountCards } = await import("/reproduce/journal.js");
+    const items = list.map((r) => {
+      const p = previews[r.id], studio = examples.find((e) => e.id.startsWith("reproduction:" + r.id + ":"));
+      return {
+        id: r.id, href: "/reproduce/" + r.id, title: r.title, summary: r.summary, kicker: r.platform, paper: r.paper, status: r.status,
+        stats: [p?.sites && p.sites + " qubits on the twin", p?.runs && (p.conforming === p.runs ? "every run on schedule" : p.conforming + " of " + p.runs + " runs on schedule")].filter(Boolean),
+        links: [["Read the reproduction", "/reproduce/" + r.id], ["Design", "/reproduce/" + r.id + "/design"], ...(studio ? [["Studio", "/riscq-studio?" + new URLSearchParams({ example: studio.id })]] : [])],
+      };
+    });
+    el.classList.add("jlist");
+    el.innerHTML = items.map(journalCard).join("");
+    mountCards(el, items, previews);
   } catch (error) {
     el.textContent = "The list could not be loaded: " + error.message;
   }

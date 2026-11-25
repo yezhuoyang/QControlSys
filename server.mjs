@@ -10,7 +10,7 @@ import { terminalActivity } from "./machine/delivery.mjs";
 import { apparatus } from "./machine/apparatus.mjs";
 import { examples as machineExamples } from "./machine/examples.mjs";
 import { REPRODUCTIONS } from "./riscq/ftqvm/reproductions.mjs";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const executable = path.join(
@@ -224,6 +224,33 @@ function runDesign(id, params) {
   });
   designQueue = job.catch(() => {});
   return job;
+}
+
+/**
+ * The miniature of each card on /reproduce and /examples (studio/reproduce/journal.js): the first stored
+ * run with a track, as riscq/ftqvm/preview.mjs compacts it, and how many runs there are and conform.
+ * Positions and beats only, no text. Rebuilt when a data file changes.
+ */
+const previewCache = new Map();
+async function previews(section) {
+  const { previewOf } = await import("./riscq/ftqvm/preview.mjs");
+  const items = section === "reproduce"
+    ? REPRODUCTIONS.map((r) => ({ id: r.id, file: path.join(root, "validation", "ftqvm", "papers", r.id + ".json") }))
+    : JSON.parse(await readFile(path.join(root, "validation", "calib", "site", "index.json"), "utf8"))
+      .map((s) => ({ id: s.id, file: path.join(root, "validation", "calib", "site", s.id + ".json") }));
+  const out = {};
+  for (const { id, file } of items) {
+    if (!existsSync(file)) continue;
+    const stamp = statSync(file).mtimeMs, cached = previewCache.get(file);
+    if (cached?.stamp === stamp) { out[id] = cached.value; continue; }
+    const rows = JSON.parse(await readFile(file, "utf8")).rows ?? [];
+    const first = rows.find((r) => r.track);
+    const value = { preview: first ? previewOf(first.track) : null, runs: rows.length, conforming: rows.filter((r) => r.conforms === true).length,
+      sites: first?.track?.device?.sites?.length };
+    previewCache.set(file, { stamp, value });
+    out[id] = value;
+  }
+  return JSON.stringify(out);
 }
 
 /** The list of reproductions, with whether each has a run to show. */
@@ -574,6 +601,8 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(page));
       }
       if (url.pathname === "/reproduce/data/index.json") return reply(res, 200, "application/json", reproductionIndex());
+      if (url.pathname === "/reproduce/data/previews.json") return replyLarge(req, res, await previews("reproduce"));
+      if (url.pathname === "/examples/data/previews.json") return replyLarge(req, res, await previews("examples"));
       if (url.pathname === "/api/reproduce/params" && req.method === "GET") {
         try {
           return reply(res, 200, "application/json", JSON.stringify(await (async (d) => ({ params: await d.params(), intro: d.intro }))(await designOf(url.searchParams.get("id")))));

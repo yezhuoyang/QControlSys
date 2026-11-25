@@ -11,12 +11,24 @@ function table(t) {
     t.rows.map((r) => `<tr>${r.map((c) => `<td>${code(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
+/** The list: one box per study across the column, its first run playing in miniature (studio/reproduce/journal.js). */
 export async function renderIndex(el) {
   try {
-    const list = await json("/examples/data/index.json");
-    el.innerHTML = list.map((s, i) => `<a class="card" href="/examples/${esc(s.id)}">
-      <span class="badge done">${i + 1}</span> <span class="cite">${esc(s.kicker)}</span>
-      <h3>${esc(s.title)}</h3><p>${code(s.summary)}</p></a>`).join("");
+    const [list, previews] = await Promise.all([json("/examples/data/index.json"), json("/examples/data/previews.json").catch(() => ({}))]);
+    const { journalCard, mountCards } = await import("/reproduce/journal.js");
+    const items = list.map((s, i) => {
+      const p = previews[s.id];
+      return {
+        id: s.id, number: i + 1, href: "/examples/" + s.id, title: s.title, summary: s.summary, kicker: s.kicker,
+        caption: "The study's first run, in miniature: its opening operations as the machine's control system played them",
+        stats: [p?.sites && p.sites + " qubits", p?.runs && p.runs + " run" + (p.runs > 1 ? "s" : "") + " in 3D"].filter(Boolean),
+        links: [["Read the study", "/examples/" + s.id], ["Design", "/examples/" + s.id + "/design"]],
+      };
+    });
+    el.classList.remove("cards");
+    el.classList.add("jlist");
+    el.innerHTML = items.map(journalCard).join("");
+    mountCards(el, items, previews, { machine: "machine" });
   } catch (error) {
     el.textContent = "The examples could not be loaded: " + error.message;
   }
