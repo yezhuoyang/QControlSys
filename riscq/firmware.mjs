@@ -142,6 +142,33 @@ export class Firmware {
    * `lines[i]` is counted into `counters[i]`. One loop drains the channel's event queue, so
    * several lines are counted in the same window.
    */
+  /**
+   * Count rising edges like `countEdges`, but without polling: wait until the window has closed,
+   * then drain the events the channel queued during it (a dio channel queues its edges). The
+   * core does no work during the exposure, so a long window costs no instructions.
+   */
+  countEdgesAtEnd(channel, lines, untilOffset, counters) {
+    const a = this.asm;
+    const sink = sinkAddress(this.core, this.channel(channel)) - MAP.CTRL_TIME_CMP;
+    const [drain, done] = ["drain", "drained"].map((n) => a.fresh(n));
+    for (const counter of counters) a.li(counter, 0);
+    this.timeAt("t2", untilOffset);
+    this.waitUntil("t2");
+    a.lw("a1", "s1", sink + 0x18); // queued events
+    a.label(drain);
+    a.beq("a1", "zero", done);
+    a.lw("t1", "s1", sink);
+    a.addi("a1", "a1", -1);
+    a.srli("t2", "t1", 16);
+    a.and("t1", "t1", "t2");
+    lines.forEach((line, i) => {
+      a.srli("t2", "t1", line);
+      a.andi("t2", "t2", 1);
+      a.add(counters[i], counters[i], "t2");
+    });
+    a.j(drain);
+    a.label(done);
+  }
   countEdges(channel, lines, untilOffset, counters) {
     const a = this.asm;
     const sink = sinkAddress(this.core, this.channel(channel)) - MAP.CTRL_TIME_CMP;
@@ -205,6 +232,16 @@ export class Firmware {
     a.lw("a1", "s2", this.bit(name));
     a.xori("a1", "a1", mask);
     this.storeBit(name, "a1");
+  }
+  /** XOR of classical bits of this core's bit table into a new bit, stored and reported. Uses a0, a1. */
+  parity(inputs, output) {
+    const a = this.asm;
+    a.li("a0", 0);
+    for (const name of inputs) {
+      a.lw("a1", "s2", this.bit(name));
+      a.xor("a0", "a0", "a1");
+    }
+    this.storeBit(output, "a0");
   }
   /** Raise the completion flag and park. */
   done() {
@@ -377,10 +414,15 @@ export function compileCore(spec, coreIndex, plan) {
       let waited = -Infinity;
       for (const { op, issue, channel } of items) {
         a.source(op.source ?? "segment" + segmentIndex);
-        if (issue > waited && !op.decode && !op.frame) {
+        if (issue > waited && !op.decode && !op.frame && !op.parity) {
           fw.timeAt("t2", issue);
           fw.waitUntil("t2");
           waited = issue;
+        }
+        // A classical operation marked `timed` starts at its own time, as a listing schedules it.
+        if (op.timed && (op.decode || op.frame || op.parity)) {
+          fw.timeAt("t2", op.at);
+          fw.waitUntil("t2");
         }
         let skip;
         if (op.when !== undefined) {
@@ -408,7 +450,8 @@ export function compileCore(spec, coreIndex, plan) {
         } else if (op.count) {
           const counters = ["s3", "s4", "s5", "s6"].slice(0, op.count.lines.length);
           if (counters.length !== op.count.lines.length) throw Error("A count reads at most four lines.");
-          fw.countEdges(op.count.channel, op.count.lines, op.count.until, counters);
+          if (op.count.atEnd) fw.countEdgesAtEnd(op.count.channel, op.count.lines, op.count.until, counters);
+          else fw.countEdges(op.count.channel, op.count.lines, op.count.until, counters);
           counters.forEach((counter, i) => {
             a.sltiu("a1", counter, op.count.threshold); // a1 = (count < threshold)
             a.xori("a1", "a1", 1);
@@ -423,6 +466,8 @@ export function compileCore(spec, coreIndex, plan) {
           fw.decode(group, slot, width, label, outputs, op.publishes);
         } else if (op.frame) {
           fw.frameUpdate(op.frame.name, op.frame.mask);
+        } else if (op.parity) {
+          fw.parity(op.parity.inputs, op.parity.output);
         } else throw Error("Unknown firmware operation.");
         if (skip) a.label(skip);
       }

@@ -1,0 +1,4 @@
+machine { decoder_latency_ns: 10000 ns, factories: 1 total, gate1q_ns: 25 ns, gate2q_ns: 50 ns, measure_ns: 550 ns, reset_ns: 250 ns, route_latency_ns: 1000 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 25 ns, qubits: 9739 total, max_parallel_gates: 1000 total, decoders: 16 total, classical_data_bandwidth: 100000 bits/us, qubit_routing_bandwidth: 100000 qubits/us, ancilla_bandwidth: 100000 qubits/us }
+
+spec factory:
+  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }

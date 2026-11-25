@@ -1,0 +1,10 @@
+
+code surface d=3
+
+params  n
+
+program[q: 3, c: 4]:
+  measure Z data[0] Z data[1] -> c[0]
+  measure Z data[1] Z data[2] -> c[1]
+  measure X data[0] X data[1] X data[2] -> c[2]
+  measure Z data[2] -> c[3]

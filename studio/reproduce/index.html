@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reproduce · QuantumOS</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+  <link rel="stylesheet" href="/reproduce/reproduce.css">
+</head>
+<body>
+<main class="page wide"><article>
+  <p class="kicker">QuantumOS · Reproduce</p>
+  <h1>Published experiments, compiled with system calls onto digital twins</h1>
+  <p class="lead">Each experiment here is written as a FormalRV program, compiled by FormalRV's own compiler into timed system calls, and run on a digital twin of the machine the paper used. The twin executes every operation at its listed time in the Lean model of the control system, and the trace decides whether the machine kept the schedule.</p>
+  <div class="note"><b>How to read a page.</b> The paper's numbers are quoted with their source. Every number the twin uses names where it comes from: the paper, a cited paper when this one gives none, or a measurement in the twin's own trace. What is measured is a property of the model, not of the laboratory hardware. Each page ends with the command that regenerates it.</div>
+  <h2>The workflow</h2>
+  <ol class="steps">
+    <li><b>Program.</b> The experiment as a FormalRV program, using FormalRV's code declarations.</li>
+    <li><b>Twin.</b> The paper's device as a fixed machine: its qubits, couplers or zones, and its published durations.</li>
+    <li><b>Compile.</b> FormalRV compiles the program against a system specification of the twin; its resource VM must admit the listing. Every placed qubit must be a qubit of the device.</li>
+    <li><b>Run and derive.</b> The twin runs the listing time-triggered. Durations the hardware needed enter the next specification, until every operation fits its window.</li>
+  </ol>
+  <h2>Experiments</h2>
+  <div id="list" class="cards" aria-live="polite">Loading…</div>
+</article></main>
+<script type="module" src="/site-nav.js"></script>
+<script type="module">
+  import { renderIndex } from "/reproduce/reproduce.js";
+  renderIndex(document.getElementById("list"));
+</script>
+</body>
+</html>

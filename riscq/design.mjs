@@ -12,6 +12,8 @@
 //   wires     [{ id, from, to, medium, routeMm: [[x, y, z], …] }]   medium: see MEDIA
 //   qubits    [{ part, resonator, gate, ro, demod, freqHz, x90, x, readout }]
 //               x90, x: { amp, phaseRad, durNs, envelope, virtualZ?: [rad before, rad after] }
+//               reset?: { amp, durNs, envelope } an unconditional reset pulse on the gate channel
+//                       (its slot after x90 and x); the gate channel then needs 3 slots
 //               readout: { freqHz, amp, durNs, envelope, demodDelayNs, demodNs, demodPhaseRad }
 //   couplings [{ qubits: [i, j], freqHz, durNs, pulses: [{ qubit, channel, amp, phaseRad, envelope }], virtualZ: [{ qubit, phaseRad }] }]
 //   decoder   id of a core that decodes and keeps the Pauli frame (optional)
@@ -207,6 +209,10 @@ export function machine(design) {
     for (const gate of ["x90", "x"])
       bind(entry(q.gate, freqCode(q.freqHz, spec), { amp: ampCode(q[gate].amp), phase: phaseCode(q[gate].phaseRad ?? 0), dur: span(q[gate].durNs) }),
         q.part + "." + gate, q.part, drive, { kind: "drive", gate, qubit: i });
+    // An unconditional reset pulse, when the design calibrates one, is the gate channel's next slot.
+    if (q.reset)
+      bind(entry(q.gate, freqCode(q.freqHz, spec), { amp: ampCode(q.reset.amp), phase: phaseCode(q.reset.phaseRad ?? 0), dur: span(q.reset.durNs) }),
+        q.part + ".reset", q.part, drive, { kind: "reset", qubit: i });
     const r = q.readout;
     bind(entry(q.ro, freqCode(r.freqHz, spec), { amp: ampCode(r.amp), dur: span(r.durNs) }),
       q.part + ".readout", q.resonator, pathDelay(design, where(q.ro).converter, q.resonator), { kind: "readout-tone", qubit: i });
@@ -216,6 +222,7 @@ export function machine(design) {
       q.part + ".acquire", q.resonator, 0, { kind: "acquire", qubit: i });
     const seconds = (gate) => ({ time: q[gate].durNs * 1e-9, virtualZ: q[gate].virtualZ ?? [] });
     calibration.qubits.push({ qubit: i, freq: q.freqHz, X90: seconds("x90"), X: seconds("x"),
+      ...(q.reset ? { reset: { time: q.reset.durNs * 1e-9 } } : {}),
       readout: { freq: r.freqHz, time: r.durNs * 1e-9, demod: { delay: r.demodDelayNs * 1e-9, time: r.demodNs * 1e-9 } } });
   });
   const czChannels = new Map();

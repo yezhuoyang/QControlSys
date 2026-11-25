@@ -1,0 +1,319 @@
+{
+ "meta": {
+  "id": "ryan-anderson-2024",
+  "status": "reproduced (transversal) on the 56-qubit H2",
+  "platform": "Trapped ions",
+  "title": "Logical teleportation of a Steane-code qubit",
+  "paper": {
+   "authors": "C. Ryan-Anderson et al. (Quantinuum)",
+   "title": "High-fidelity teleportation of a logical qubit using transversal gates and lattice surgery",
+   "venue": "arXiv:2404.16728 (2024)",
+   "url": "https://arxiv.org/abs/2404.16728"
+  },
+  "summary": "Teleportation of a Steane-code [[7,1,3]] logical qubit on Quantinuum's H2, with up to 30 ions, by transversal gates and by lattice surgery.",
+  "program": "An encoded FormalRV program on FormalRV's own Steane [[7,1,3]] declaration (riscq/ftqvm/papers.mjs quantinuumTeleport): a Bell pair between two logical ancilla blocks (|+⟩_L, |0⟩_L and a `transversal CX`), one stabilizer round on each, a `transversal CX` from the source block, the source read in X and the first ancilla in Z, then Pauli-frame corrections on the target. FormalRV's staged back end compiles it with `pipeline-loops`.",
+  "twin": "Quantinuum H2 as QCCD Studio models it (arch/h2_racetrack.arch.json): a race track of 2 × 20 trap zones in one loop, no junctions, two ions per zone; MS 25 µs, one-qubit gate 5 µs and measurement 120 µs from the H2 paper (arXiv:2305.03828); split and merge 80 µs, 5 µs per shuttled zone and reset 50 µs from arXiv:2510.23519. Every two-qubit gate first carries its second ion around the loop to its partner's zone; `route` needs nothing. Run at H2's 32 qubits (2023) and at 56 qubits (2024, arXiv:2406.02501).",
+  "findings": [
+   "On the 32-qubit H2, FormalRV refuses the program: a request of 26 ancillas exceeds its live-qubit budget of 19. Its background maintenance reserves measure qubits for every live block, so this three-block teleportation needs more qubits than the up to 30 ions the paper ran it on.",
+   "On the 56-qubit H2 every operation ran inside its listed window: 39 ions placed, 611 operations, three iterations of the derivation.",
+   "FormalRV's routes license groups larger than an H2 zone holds (a Steane check routes its ancilla with four data ions; zones hold two), so on this twin transport moves into the two-qubit gate and `route` costs nothing. The derived two-qubit gate is then 295 µs: the worst trip half way round the track plus the MS gate. A gate whose pair already shares a zone needs 35 µs, the median gate 215 µs.",
+   "The Steane code's checks are decoded by the controller's lookup decoder in 98 to 280 ns, as Quantinuum decodes the Steane code with lookup tables."
+  ],
+  "limits": [
+   "Only the transversal teleportation is reproduced; the lattice-surgery variant is not yet written.",
+   "Transport is planned gate by gate. H2 moves its ions as one conveyor belt driven by three voltage signals; that synchronization is not modeled, nor is sympathetic cooling.",
+   "The 56-qubit run keeps the 40-zone track of QCCD Studio's 32-qubit model; the zone layout of the 56-qubit device is not modeled."
+  ],
+  "command": "node riscq/ftqvm/papers.mjs quantinuum"
+ },
+ "generated": "2026-11-25T00:42:59.440Z",
+ "design": {
+  "id": "quantinuum-h2",
+  "profile": {
+   "platform": "qccd",
+   "dspHz": 100000000,
+   "oneQubitNs": {
+    "value": 5000,
+    "source": "Moses et al., PRX 13, 041052 (2023), arXiv:2305.03828, as QCCD Studio's arch/h2_racetrack.arch.json cites it: one-qubit gate 5 µs"
+   },
+   "twoQubitNs": {
+    "value": 25000,
+    "source": "Moses et al., PRX 13, 041052 (2023), arXiv:2305.03828, as QCCD Studio's arch/h2_racetrack.arch.json cites it: MS gate 25 µs"
+   },
+   "measureNs": {
+    "value": 120000,
+    "source": "Moses et al., PRX 13, 041052 (2023), arXiv:2305.03828, as QCCD Studio's arch/h2_racetrack.arch.json cites it: measurement 120 µs"
+   },
+   "resetNs": {
+    "value": 50000,
+    "source": "arXiv:2510.23519 (QCCD Studio's qccdsim_jones table in arch/h2_racetrack.arch.json): reset 50 µs"
+   },
+   "splitNs": {
+    "value": 80000,
+    "source": "arXiv:2510.23519 (QCCD Studio's qccdsim_jones table in arch/h2_racetrack.arch.json): split 80 µs"
+   },
+   "mergeNs": {
+    "value": 80000,
+    "source": "arXiv:2510.23519 (QCCD Studio's qccdsim_jones table in arch/h2_racetrack.arch.json): merge 80 µs"
+   },
+   "shuttleNs": {
+    "value": 5000,
+    "source": "arXiv:2510.23519 (QCCD Studio's qccdsim_jones table in arch/h2_racetrack.arch.json): one segment of shuttling 5 µs"
+   },
+   "ringZones": {
+    "value": 40,
+    "source": "QCCD Studio arch/h2_racetrack.arch.json: racetrack generator, straight = 20 (2 × 20 trap zones)"
+   },
+   "zoneCapacity": {
+    "value": 2,
+    "source": "QCCD Studio arch/h2_racetrack.arch.json: trap zones hold 2 ions"
+   },
+   "qubits": {
+    "value": 32,
+    "source": "Moses et al., PRX 13, 041052 (2023), arXiv:2305.03828, as QCCD Studio's arch/h2_racetrack.arch.json cites it: 32 qubits (arch provenance)"
+   }
+  },
+  "perGateTransport": true,
+  "beams": 40,
+  "movers": 40,
+  "decoders": 4,
+  "coresPerDecoder": 1,
+  "title": "twin of Quantinuum H2 (QCCD Studio's racetrack): per-gate transport around a 40-zone loop"
+ },
+ "rows": [
+  {
+   "distance": 3,
+   "basis": "H2, 32 qubits",
+   "error": "staged compilation refused: a request of 26 ancillas exceeds the live-qubit budget 19 (0 already live)"
+  },
+  {
+   "distance": 3,
+   "basis": "H2, 56 qubits",
+   "qubits": 39,
+   "ops": 611,
+   "conforms": true,
+   "verdict": "RESOURCE_VALIDATED",
+   "gate2qNs": 295010,
+   "routeNs": 10,
+   "measureNs": 125170,
+   "decoderNs": 360,
+   "makespanNs": 80764752,
+   "twoQubitGates": 278,
+   "iterations": 3,
+   "stripped": [
+    "spec maintenance",
+    "patch"
+   ],
+   "failing": {},
+   "programText": "\ncodes:\n  Steane [[7,1,3]]:\n    stab    X[3]X[4]X[5]X[6]\n    stab    X[1]X[2]X[5]X[6]\n    stab    X[0]X[2]X[4]X[6]\n    stab    Z[3]Z[4]Z[5]Z[6]\n    stab    Z[1]Z[2]Z[5]Z[6]\n    stab    Z[0]Z[2]Z[4]Z[6]\n    logX[0] X[0]X[1]X[2]\n    logZ[0] Z[0]Z[1]Z[2]\n  merged1 = canonical_product base=Steane factors=1 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n  merged2 = canonical_product base=Steane factors=2 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n  merged3 = canonical_product base=Steane factors=3 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n\nprogram[LogicData: 1, c: 12, ancilla: 60] (Steane[1] LogicData, Steane[2] LogicalAncilla):\n  alloc LogicalAncilla[0,2)\n  prepare |+> -> LogicalAncilla[0,1)\n  prepare |0> -> LogicalAncilla[1,2)\n  transversal CX LogicalAncilla[0] LogicalAncilla[1]\n  extract LogicalAncilla[0][0] rounds=1 using ancilla[0,6) -> syndrome[0,6)\n  extract LogicalAncilla[1][0] rounds=1 using ancilla[6,12) -> syndrome[6,12)\n  decode rounds=1 syndrome[0,12)\n  transversal CX LogicData[0] LogicalAncilla[0]\n  measure X[LogicData[0][0]] -> c[0,3)\n  measure Z[LogicalAncilla[0][0]] -> c[3,6)\n  decode rounds=1 c[0,6)\n  frame on c[0,3) Z[LogicalAncilla[1][0]]\n  frame on c[3,6) X[LogicalAncilla[1][0]]\n",
+   "listingHead": "resource { gate1q: 7, gate2q: 50, measures: 18, allocs: 13, routes: 14, decodes: 5, magic: 0, frame_updates: 2, idle_extracts: 0, call_sites: 5, loops: 8, guards: 0, nodes: 259 }\nmachine { qubits: 56 total, decoders: 4 total, factories: 1 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 64 qubits/us, max_parallel_gates: 40 total, gate1q_ns: 5010 ns, gate2q_ns: 295010 ns, measure_ns: 125170 ns, reset_ns: 50010 ns, route_latency_ns: 10 ns, decoder_latency_ns: 360 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 820 ns }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 13 total, runtime: 7260490 ns, gates: 3 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 1 bits/us, qubit_routing_bandwidth: 500 qubits/us, ancilla_bandwidth: 6 qubits/us }\nspec surfaceRound:\n  resource { qubits: 13 total, runtime: 7260490 ns, gates: 3 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 1 bits/us, qubit_routing_bandwidth: 500 qubits/us, ancilla_bandwidth: 6 qubits/us }\nspec program:\n  resource { qubits_min: 0 total, qubits: 56 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec maintenance:\n  resource { block_qubits: 7 total, measure_qubits: 6 total, gates: 3 total, decoders: 1 total, classical_data_bandwidth: 1 bits/us, ancilla_bandwidth: 6 qubits/us, round: 7260490 ns }\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\ngadget surfaceRoundLogicalAncilla[data: 0, ancilla: abase + dbase + 13, c: 0, syndrome: cbase + 6](dbase, abase, cbase) spans 7260490 ns:\n  @0 ns  request_ancilla  count=1  ancilla[abase]\n  @50010 ns  H  ancilla[abase]\n  @55020 ns  route  ancilla[abase], ancilla[dbase + 3:dbase + 6]\n  @55030 ns  CNOT  ancilla[abase], ancilla[dbase + 3]\n  @350040 ns  CNOT  ancilla[abase], ancilla[dbase + 4]\n  @645050 ns  CNOT  ancilla[abase], ancilla[dbase + 5]\n  @940060 ns  CNOT  ancilla[abase], ancilla[dbase + 6]\n  @1235070 ns  measure  basis=X  ancilla[abase]  -> syndrome[cbase]\n  @1360240 ns  release_ancilla  count=1  ancilla[abase]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 1]\n  @50010 ns  H  ancilla[abase + 1]\n  @1235070 ns  route  ancilla[abase + 1], ancilla[dbase + 1:dbase + 2], ancilla[dbase + 5:dbase + 6]\n  @1235080 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 1]\n  @1530090 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 2]\n  @1825100 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 5]\n  @2120110 ns  CNOT  ancilla[abase + 1], ancilla[dbase + 6]\n  @2415120 ns  measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]\n  @2540290 ns  release_ancilla  count=1  ancilla[abase + 1]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 2]\n  @50010 ns  H  ancilla[abase + 2]\n  @2415120 ns  route  ancilla[abase + 2], ancilla[dbase], ancilla[dbase + 2], ancilla[dbase + 4], ancilla[dbase + 6]\n  @2415130 ns  CNOT  ancilla[abase + 2], ancilla[dbase]\n  @2710140 ns  CNOT  ancilla[abase + 2], ancilla[dbase + 2]\n  @3005150 ns  CNOT  ancilla[abase + 2], ancilla[dbase + 4]\n  @3300160 ns  CNOT  ancilla[abase + 2], ancilla[dbase + 6]\n  @3595170 ns  measure  basis=X  ancilla[abase + 2]  -> syndrome[cbase + 2]\n  @3720340 ns  release_ancilla  count=1  ancilla[abase + 2]",
+   "listingLines": 154,
+   "machineText": "machine { qubits: 56 total, factories: 1 total, max_parallel_gates: 40 total, decoders: 4 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 64 qubits/us, gate1q_ns: 5010 ns, gate2q_ns: 295010 ns, measure_ns: 125170 ns, reset_ns: 50010 ns, route_latency_ns: 10 ns, decoder_latency_ns: 360 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 820 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
+   "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 56 total, runtime_min: 0 ns, runtime: 1000000000 ns }\n",
+   "spec": {
+    "qubits": {
+     "value": 56,
+     "source": "derived",
+     "note": "the device's qubits (DeCross et al., arXiv:2406.02501 (2024): the 56-qubit H2)"
+    },
+    "factories": {
+     "value": 1,
+     "source": "derived",
+     "note": "one factory region"
+    },
+    "max_parallel_gates": {
+     "value": 40,
+     "source": "derived",
+     "note": "40 locally addressed beams"
+    },
+    "decoders": {
+     "value": 4,
+     "source": "derived",
+     "note": "4 decoder unit(s) of 1 cores"
+    },
+    "classical_data_bandwidth": {
+     "value": 100,
+     "source": "derived",
+     "note": "the board hub carries one put of one bit per batch at 100 MHz (riscq/limits.mjs)"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 4000,
+     "source": "derived",
+     "note": "40 electrode lanes at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+    },
+    "ancilla_bandwidth": {
+     "value": 64,
+     "source": "derived",
+     "note": "64 pumping beams at once"
+    },
+    "gate1q_ns": {
+     "value": 5010,
+     "source": "measured",
+     "note": "longest gate1q in the trace of iteration 0"
+    },
+    "gate2q_ns": {
+     "value": 295010,
+     "source": "measured",
+     "note": "longest gate2q in the trace of iteration 0"
+    },
+    "measure_ns": {
+     "value": 125170,
+     "source": "measured",
+     "note": "longest measure in the trace of iteration 0"
+    },
+    "reset_ns": {
+     "value": 50010,
+     "source": "measured",
+     "note": "longest reset in the trace of iteration 0"
+    },
+    "route_latency_ns": {
+     "value": 10,
+     "source": "measured",
+     "note": "longest route_latency in the trace of iteration 0"
+    },
+    "decoder_latency_ns": {
+     "value": 360,
+     "source": "measured",
+     "note": "longest decoder_latency in the trace of iteration 0"
+    },
+    "pauli_frame_update_ns": {
+     "value": 820,
+     "source": "measured",
+     "note": "longest pauli_frame_update in the trace of iteration 0"
+    },
+    "magic_state_latency_ns": {
+     "value": 135000,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 10 ns grid"
+    }
+   },
+   "factories": {
+    "factory": {
+     "output_qubits": 9,
+     "workspace_qubits": 8,
+     "latency": 135000,
+     "gates": 1,
+     "decoders": 1,
+     "classical_data_bandwidth": 8,
+     "qubit_routing_bandwidth": 2
+    }
+   },
+   "byKind": {
+    "request_ancilla": {
+     "count": 67,
+     "ok": 67,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 50000,
+     "maxBitOverrunNs": 0
+    },
+    "H": {
+     "count": 40,
+     "ok": 40,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 5000,
+     "maxBitOverrunNs": 0
+    },
+    "route": {
+     "count": 80,
+     "ok": 80,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "CNOT": {
+     "count": 278,
+     "ok": 278,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 295000,
+     "maxBitOverrunNs": 0
+    },
+    "measure": {
+     "count": 72,
+     "ok": 72,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 125000,
+     "maxBitOverrunNs": 0
+    },
+    "release_ancilla": {
+     "count": 67,
+     "ok": 67,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "count": 5,
+     "ok": 5,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 280,
+     "maxBitOverrunNs": 0
+    },
+    "pauli_frame_update": {
+     "count": 2,
+     "ok": 2,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 398,
+     "maxBitOverrunNs": 0
+    }
+   },
+   "slack": {
+    "request_ancilla": {
+     "count": 67,
+     "minNs": 50000,
+     "medianNs": 50004,
+     "maxNs": 50008,
+     "declaredNs": 50010
+    },
+    "H": {
+     "count": 40,
+     "minNs": 5000,
+     "medianNs": 5004,
+     "maxNs": 5009,
+     "declaredNs": 5010
+    },
+    "route": {
+     "count": 80,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 10
+    },
+    "CNOT": {
+     "count": 278,
+     "minNs": 35004,
+     "medianNs": 215008,
+     "maxNs": 295006,
+     "declaredNs": 295010
+    },
+    "measure": {
+     "count": 72,
+     "minNs": 120164,
+     "medianNs": 120168,
+     "maxNs": 125168,
+     "declaredNs": 125170
+    },
+    "release_ancilla": {
+     "count": 67,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 0
+    },
+    "decode_syndrome": {
+     "count": 5,
+     "minNs": 98,
+     "medianNs": 280,
+     "maxNs": 280,
+     "declaredNs": 360
+    },
+    "pauli_frame_update": {
+     "count": 2,
+     "minNs": 398,
+     "medianNs": 398,
+     "maxNs": 398,
+     "declaredNs": 820
+    }
+   }
+  }
+ ]
+}

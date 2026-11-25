@@ -1,0 +1,7 @@
+
+code surface d=5
+
+params  n
+
+program[q: 1, c: 1]:
+  measure Z data[0] -> c[0]

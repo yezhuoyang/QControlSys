@@ -347,6 +347,11 @@ export function lower(hardware, m) {
         const gate = locate(q, "gate");
         actions.push({ segment: s, core: gate.core, at, fire: { channel: gate.channel, slot: op.op === "x" ? 1 : 0 },
           phaseOffset: phaseCode(frame.get(q) ?? 0), source: op.id, ...when });
+      } else if (op.op === "reset") {
+        // The design's reset pulse: slot 2 of the gate channel, after x90 and x (riscq/design.mjs).
+        if (!m.calibration.qubits[q]?.reset) throw Error(op.source + " — qubit " + q + " has no calibrated reset pulse.");
+        const gate = locate(q, "gate");
+        actions.push({ segment: s, core: gate.core, at, fire: { channel: gate.channel, slot: 2 }, source: op.id, ...when });
       } else if (op.op === "cz") {
         const pair = m.pairs.find((p) => p.pair.every((x) => op.qubits.includes(x)));
         for (const x of op.qubits) {

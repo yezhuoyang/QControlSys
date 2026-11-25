@@ -8,6 +8,8 @@ import { deviceActivity } from "./machine/device.mjs";
 import { terminalActivity } from "./machine/delivery.mjs";
 import { apparatus } from "./machine/apparatus.mjs";
 import { examples as machineExamples } from "./machine/examples.mjs";
+import { REPRODUCTIONS } from "./riscq/ftqvm/reproductions.mjs";
+import { existsSync } from "node:fs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const executable = path.join(
@@ -149,6 +151,26 @@ function courseAsset(pathname) {
   if (rest.split("/").some((part) => part === ".." || !/^[A-Za-z0-9._-]*$/.test(part))) return undefined;
   const file = rest === "" || rest.endsWith("/") ? rest + "index.html" : path.extname(rest) ? rest : rest + ".html";
   return path.join("studio", "course", file);
+}
+
+/**
+ * Reproductions: /reproduce is the list, /reproduce/<id> a paper page (one template), the page's
+ * own files sit in studio/reproduce/, and /reproduce/data/<id>.json is that experiment's run
+ * (validation/ftqvm/papers/, written by riscq/ftqvm/papers.mjs).
+ */
+function reproduceAsset(pathname) {
+  if (pathname !== "/reproduce" && !pathname.startsWith("/reproduce/")) return undefined;
+  const rest = pathname.slice("/reproduce".length).replace(/^\//, "");
+  if (rest.split("/").some((part) => part === ".." || !/^[A-Za-z0-9._-]*$/.test(part))) return undefined;
+  if (rest === "") return path.join("studio", "reproduce", "index.html");
+  if (rest.startsWith("data/")) return path.join("validation", "ftqvm", "papers", rest.slice(5));
+  if (path.extname(rest)) return path.join("studio", "reproduce", rest);
+  return REPRODUCTIONS.some((r) => r.id === rest) ? path.join("studio", "reproduce", "paper.html") : undefined;
+}
+
+/** The list of reproductions, with whether each has a run to show. */
+function reproductionIndex() {
+  return JSON.stringify(REPRODUCTIONS.map((r) => ({ ...r, hasResults: existsSync(path.join(root, "validation", "ftqvm", "papers", r.id + ".json")) })));
 }
 
 function jsonProcess(command, args, input, options) {
@@ -485,7 +507,8 @@ if (
         ]);
         return reply(res, 200, "application/json", JSON.stringify(page));
       }
-      const asset = routes.get(url.pathname) ?? courseAsset(url.pathname);
+      if (url.pathname === "/reproduce/data/index.json") return reply(res, 200, "application/json", reproductionIndex());
+      const asset = routes.get(url.pathname) ?? courseAsset(url.pathname) ?? reproduceAsset(url.pathname);
       // HEAD is answered like GET; Node sends the headers without the body.
       const read = req.method === "GET" || req.method === "HEAD";
       if (!read || !asset) {

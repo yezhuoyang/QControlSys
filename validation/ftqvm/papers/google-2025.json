@@ -1,0 +1,725 @@
+{
+ "meta": {
+  "id": "google-2025",
+  "status": "reproduced",
+  "platform": "Superconducting transmons",
+  "title": "Surface-code memory below threshold",
+  "paper": {
+   "authors": "Google Quantum AI and collaborators",
+   "title": "Quantum error correction below the surface code threshold",
+   "venue": "Nature 638, 920 (2025)",
+   "url": "https://arxiv.org/abs/2408.13687"
+  },
+  "summary": "A distance-3, 5 and 7 rotated surface-code memory on the 105-qubit Willow processor, with a 1.1 µs error-correction cycle and real-time decoding.",
+  "program": "FormalRV's own surface-code declaration and an encoded program of R rounds of `extract`, then a `decode` (riscq/ftqvm/papers.mjs googleMemory). FormalRV's back end lowers it to physical gates, resets, routes, measurements and decodes.",
+  "twin": "The distance-7 patch of the paper's square grid: 49 data and 48 measure transmons, a tunable coupler between every diagonal pair, 25 ns XY rotations and 42 ns CZ from the paper, 500 ns readout and 160 ns reset from the group's 2023 paper. The control system is QuantumOS's RISC-Q model, the decoder Helios union-find compiled for its cores.",
+  "findings": [
+   "Every operation of the listing ran inside its listed window on the twin at d = 3, 5 and 7.",
+   "On the same gate durations, FormalRV's surface-code round takes 2.5 to 4.0 µs where the paper's cycle is 1.1 µs: FormalRV's round runs at most (d² − 1)/2 gates at once, while the device runs every check in parallel (four CZ layers, two H, measure and reset come to about 0.95 µs).",
+   "The decoder compiled for a 500 MHz RISC-V core is slower than the paper's software decoder at d = 5 (94 µs for 10 rounds against 63 µs): a property of the decoder's placement, not of the system call."
+  ],
+  "limits": [
+   "The data qubits are not read out at the end: FormalRV's encoded level has no transversal data readout in this form.",
+   "Helios's decoding graph holds d rounds; a longer decode runs in consecutive windows without overlap.",
+   "Qubit frequencies and pulse shapes are not published; the twin uses RISC-Q's pulse shapes with the paper's durations. 8 of the 105 qubits (leakage removal) are not placed."
+  ],
+  "command": "node riscq/ftqvm/papers.mjs google 10"
+ },
+ "generated": "2026-11-25T00:31:40.822Z",
+ "device": {
+  "id": "google-willow",
+  "title": "Google 105-qubit processor (Willow), distance-7 patch",
+  "basis": "Durations of gates from the paper; readout and reset from the group's 2023 paper. Geometry: the distance-7 patch on the square grid. Frequencies, pulse shapes and readout multiplexing are not published; the chip reuses RISC-Q's x6y3 pulse shapes with these durations. The control electronics are QuantumOS's RISC-Q model, not Google's.",
+  "durations": {
+   "x90Ns": {
+    "value": 25,
+    "source": "Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687, Methods: \"all XY rotations have 25 ns duration\""
+   },
+   "xNs": {
+    "value": 25,
+    "source": "Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687, Methods: \"all XY rotations have 25 ns duration\""
+   },
+   "czNs": {
+    "value": 42,
+    "source": "Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687, Methods: \"Our CZ gates are performed in 42 ns on the 105-qubit processor\""
+   },
+   "readoutNs": {
+    "value": 500,
+    "source": "Google Quantum AI, Nature 614, 676 (2023), arXiv:2207.06431, Fig. 1 (the 2025 paper gives no readout duration)"
+   },
+   "resetNs": {
+    "value": 160,
+    "source": "Google Quantum AI, arXiv:2207.06431, Fig. 1 (the 2025 paper gives no reset duration)"
+   }
+  },
+  "published": {
+   "cycleNs": {
+    "value": 1100,
+    "source": "Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687: \"the fast error correcting cycle time of 1.1 µs\""
+   },
+   "decoderLatencyNs": {
+    "value": 63000,
+    "source": "Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687: \"average decoder latency of 63 µs at distance-5\" (software decoder)"
+   },
+   "distances": [
+    3,
+    5,
+    7
+   ],
+   "cycles": {
+    "value": 250,
+    "source": "Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687: logical error per cycle fit \"up to 250 cycles\""
+   }
+  }
+ },
+ "rows": [
+  {
+   "distance": 3,
+   "rounds": 10,
+   "qubits": 97,
+   "ops": 601,
+   "conforms": true,
+   "verdict": "RESOURCE_VALIDATED",
+   "gate1qNs": 26,
+   "gate2qNs": 94,
+   "measureNs": 570,
+   "resetNs": 160,
+   "roundNs": 2458,
+   "roundHardwareNs": 2432,
+   "roundGates": 4,
+   "decoderNs": 34316,
+   "makespanNs": 58896,
+   "paper": {
+    "cycleNs": 1100,
+    "decoderLatencyNsAtD5": 63000
+   },
+   "programText": "\ncodes:\n  Surface [[9,1,3]]:\n    stab    X[1]X[2]\n    stab    X[0]X[1]X[3]X[4]\n    stab    X[4]X[5]X[7]X[8]\n    stab    X[6]X[7]\n    stab    Z[0]Z[3]\n    stab    Z[1]Z[2]Z[4]Z[5]\n    stab    Z[3]Z[4]Z[6]Z[7]\n    stab    Z[5]Z[8]\n    logX[0] X[0]X[3]X[6]\n    logZ[0] Z[0]Z[1]Z[2]\n  merged1 = canonical_product base=Surface factors=1 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n\nprogram[LogicData: 1, c: 0, ancilla: 80] (Surface[1] LogicData):\n  extract LogicData[0][0] rounds=10 using ancilla[0,80) -> syndrome[0,80)\n  decode rounds=10 syndrome[0,80)\n",
+   "listingHead": "resource { gate1q: 8, gate2q: 48, measures: 16, allocs: 16, routes: 16, decodes: 1, magic: 0, frame_updates: 0, idle_extracts: 0, call_sites: 1, loops: 1, guards: 0, nodes: 242 }\nmachine { qubits: 97 total, decoders: 1 total, factories: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us, max_parallel_gates: 97 total, gate1q_ns: 26 ns, gate2q_ns: 94 ns, measure_ns: 570 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 34316 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 26 ns }\nspec program:\n  resource { qubits_min: 0 total, qubits: 97 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 17 total, runtime: 2458 ns, gates: 4 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 56 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 97 total, runtime: 1000000000 ns, gates: 97 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us }\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\ngadget surfaceRound[data: dbase + 9, ancilla: abase + 8, c: 0, syndrome: cbase + 8](dbase, abase, cbase) spans 2458 ns:\n  @0 ns  request_ancilla  count=1  ancilla[abase]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 1]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 2]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 5]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 3]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 4]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 6]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 7]\n  @160 ns  H  ancilla[abase]\n  @160 ns  H  ancilla[abase + 1]\n  @160 ns  H  ancilla[abase + 2]\n  @160 ns  H  ancilla[abase + 3]\n  @186 ns  route  ancilla[abase], data[dbase + 1:dbase + 2]\n  @188 ns  CNOT  ancilla[abase], data[dbase + 1]\n  @282 ns  CNOT  ancilla[abase], data[dbase + 2]\n  @376 ns  route  ancilla[abase + 1], data[dbase:dbase + 1], data[dbase + 3:dbase + 4]\n  @376 ns  measure  basis=X  ancilla[abase]  -> syndrome[cbase]\n  @378 ns  CNOT  ancilla[abase + 1], data[dbase]\n  @472 ns  CNOT  ancilla[abase + 1], data[dbase + 1]\n  @566 ns  CNOT  ancilla[abase + 1], data[dbase + 3]\n  @660 ns  CNOT  ancilla[abase + 1], data[dbase + 4]\n  @754 ns  route  ancilla[abase + 2], data[dbase + 4:dbase + 5], data[dbase + 7:dbase + 8]\n  @754 ns  route  ancilla[abase + 4], data[dbase], data[dbase + 3]\n  @754 ns  measure  basis=X  ancilla[abase + 1]  -> syndrome[cbase + 1]\n  @756 ns  CNOT  ancilla[abase + 2], data[dbase + 4]\n  @756 ns  CNOT  data[dbase], ancilla[abase + 4]\n  @850 ns  CNOT  ancilla[abase + 2], data[dbase + 5]\n  @850 ns  CNOT  data[dbase + 3], ancilla[abase + 4]\n  @944 ns  CNOT  ancilla[abase + 2], data[dbase + 7]",
+   "listingLines": 140,
+   "machineText": "machine { qubits: 97 total, factories: 1 total, max_parallel_gates: 97 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us, gate1q_ns: 26 ns, gate2q_ns: 94 ns, measure_ns: 570 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 34316 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 26 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
+   "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 97 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 17 total, runtime: 2458 ns, gates: 4 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 4000 qubits/us, ancilla_bandwidth: 56 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 97 total, runtime: 1000000000 ns, gates: 97 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us }\n",
+   "spec": {
+    "qubits": {
+     "value": 97,
+     "source": "derived",
+     "note": "one transmon per placed site"
+    },
+    "factories": {
+     "value": 1,
+     "source": "provisional",
+     "note": "no factory realized yet"
+    },
+    "max_parallel_gates": {
+     "value": 97,
+     "source": "derived",
+     "note": "every transmon has its own drive and coupler channels"
+    },
+    "decoders": {
+     "value": 1,
+     "source": "derived",
+     "note": "1 decoder unit(s) of 4 core(s)"
+    },
+    "classical_data_bandwidth": {
+     "value": 500,
+     "source": "derived",
+     "note": "the board hub carries one put of one bit per batch at 500 MHz (riscq/limits.mjs)"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 48500,
+     "source": "derived",
+     "note": "every site in a route at once"
+    },
+    "ancilla_bandwidth": {
+     "value": 607,
+     "source": "derived",
+     "note": "every site reset at once"
+    },
+    "gate1q_ns": {
+     "value": 26,
+     "source": "measured",
+     "note": "longest gate1q in the trace of iteration 0"
+    },
+    "gate2q_ns": {
+     "value": 94,
+     "source": "measured",
+     "note": "longest gate2q in the trace of iteration 0"
+    },
+    "measure_ns": {
+     "value": 570,
+     "source": "measured",
+     "note": "longest measure in the trace of iteration 0"
+    },
+    "reset_ns": {
+     "value": 160,
+     "source": "measured",
+     "note": "longest reset in the trace of iteration 0"
+    },
+    "route_latency_ns": {
+     "value": 2,
+     "source": "measured",
+     "note": "longest route_latency in the trace of iteration 0"
+    },
+    "decoder_latency_ns": {
+     "value": 34316,
+     "source": "measured",
+     "note": "longest decoder_latency in the trace of iteration 0"
+    },
+    "pauli_frame_update_ns": {
+     "value": 26,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 2 ns grid"
+    },
+    "magic_state_latency_ns": {
+     "value": 135000,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 2 ns grid"
+    }
+   },
+   "factories": {
+    "factory": {
+     "output_qubits": 9,
+     "workspace_qubits": 8,
+     "latency": 135000,
+     "gates": 1,
+     "decoders": 1,
+     "classical_data_bandwidth": 8,
+     "qubit_routing_bandwidth": 2
+    }
+   },
+   "byKind": {
+    "request_ancilla": {
+     "count": 80,
+     "ok": 80,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 160,
+     "maxBitOverrunNs": 0
+    },
+    "H": {
+     "count": 40,
+     "ok": 40,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 26,
+     "maxBitOverrunNs": 0
+    },
+    "route": {
+     "count": 80,
+     "ok": 80,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "CNOT": {
+     "count": 240,
+     "ok": 240,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 94,
+     "maxBitOverrunNs": 0
+    },
+    "measure": {
+     "count": 80,
+     "ok": 80,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 526,
+     "maxBitOverrunNs": 0
+    },
+    "release_ancilla": {
+     "count": 80,
+     "ok": 80,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "count": 1,
+     "ok": 1,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 34316,
+     "maxBitOverrunNs": 0
+    }
+   },
+   "slack": {
+    "request_ancilla": {
+     "count": 80,
+     "minNs": 160,
+     "medianNs": 160,
+     "maxNs": 160,
+     "declaredNs": 160
+    },
+    "H": {
+     "count": 40,
+     "minNs": 26,
+     "medianNs": 26,
+     "maxNs": 26,
+     "declaredNs": 26
+    },
+    "route": {
+     "count": 80,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 2
+    },
+    "CNOT": {
+     "count": 240,
+     "minNs": 94,
+     "medianNs": 94,
+     "maxNs": 94,
+     "declaredNs": 94
+    },
+    "measure": {
+     "count": 80,
+     "minNs": 544,
+     "medianNs": 544,
+     "maxNs": 570,
+     "declaredNs": 570
+    },
+    "release_ancilla": {
+     "count": 80,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 0
+    },
+    "decode_syndrome": {
+     "count": 1,
+     "minNs": 34316,
+     "medianNs": 34316,
+     "maxNs": 34316,
+     "declaredNs": 34316
+    }
+   }
+  },
+  {
+   "distance": 5,
+   "rounds": 10,
+   "qubits": 97,
+   "ops": 1881,
+   "conforms": true,
+   "verdict": "RESOURCE_VALIDATED",
+   "gate1qNs": 26,
+   "gate2qNs": 94,
+   "measureNs": 570,
+   "resetNs": 160,
+   "roundNs": 3214,
+   "roundHardwareNs": 3188,
+   "roundGates": 12,
+   "decoderNs": 94146,
+   "makespanNs": 126286,
+   "paper": {
+    "cycleNs": 1100,
+    "decoderLatencyNsAtD5": 63000
+   },
+   "programText": "\ncodes:\n  Surface [[25,1,5]]:\n    stab    X[1]X[2]\n    stab    X[3]X[4]\n    stab    X[0]X[1]X[5]X[6]\n    stab    X[2]X[3]X[7]X[8]\n    stab    X[6]X[7]X[11]X[12]\n    stab    X[8]X[9]X[13]X[14]\n    stab    X[10]X[11]X[15]X[16]\n    stab    X[12]X[13]X[17]X[18]\n    stab    X[16]X[17]X[21]X[22]\n    stab    X[18]X[19]X[23]X[24]\n    stab    X[20]X[21]\n    stab    X[22]X[23]\n    stab    Z[0]Z[5]\n    stab    Z[1]Z[2]Z[6]Z[7]\n    stab    Z[3]Z[4]Z[8]Z[9]\n    stab    Z[5]Z[6]Z[10]Z[11]\n    stab    Z[7]Z[8]Z[12]Z[13]\n    stab    Z[9]Z[14]\n    stab    Z[10]Z[15]\n    stab    Z[11]Z[12]Z[16]Z[17]\n    stab    Z[13]Z[14]Z[18]Z[19]\n    stab    Z[15]Z[16]Z[20]Z[21]\n    stab    Z[17]Z[18]Z[22]Z[23]\n    stab    Z[19]Z[24]\n    logX[0] X[0]X[5]X[10]X[15]X[20]\n    logZ[0] Z[0]Z[1]Z[2]Z[3]Z[4]\n  merged1 = canonical_product base=Surface factors=1 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n\nprogram[LogicData: 1, c: 0, ancilla: 240] (Surface[1] LogicData):\n  extract LogicData[0][0] rounds=10 using ancilla[0,240) -> syndrome[0,240)\n  decode rounds=10 syndrome[0,240)\n",
+   "listingHead": "resource { gate1q: 24, gate2q: 160, measures: 48, allocs: 48, routes: 48, decodes: 1, magic: 0, frame_updates: 0, idle_extracts: 0, call_sites: 1, loops: 1, guards: 0, nodes: 754 }\nmachine { qubits: 97 total, decoders: 1 total, factories: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us, max_parallel_gates: 97 total, gate1q_ns: 26 ns, gate2q_ns: 94 ns, measure_ns: 570 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 94146 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 26 ns }\nspec program:\n  resource { qubits_min: 0 total, qubits: 97 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 49 total, runtime: 3214 ns, gates: 12 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 24 bits/us, qubit_routing_bandwidth: 11500 qubits/us, ancilla_bandwidth: 168 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 97 total, runtime: 1000000000 ns, gates: 97 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us }\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\ngadget surfaceRound[data: dbase + 25, ancilla: abase + 24, c: 0, syndrome: cbase + 24](dbase, abase, cbase) spans 3214 ns:\n  @0 ns  request_ancilla  count=1  ancilla[abase]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 1]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 2]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 3]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 4]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 5]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 6]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 7]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 13]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 14]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 12]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 8]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 9]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 15]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 16]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 17]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 19]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 20]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 10]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 11]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 18]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 21]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 22]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 23]\n  @160 ns  H  ancilla[abase]\n  @160 ns  H  ancilla[abase + 1]\n  @160 ns  H  ancilla[abase + 2]\n  @160 ns  H  ancilla[abase + 3]\n  @160 ns  H  ancilla[abase + 4]",
+   "listingLines": 396,
+   "machineText": "machine { qubits: 97 total, factories: 1 total, max_parallel_gates: 97 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us, gate1q_ns: 26 ns, gate2q_ns: 94 ns, measure_ns: 570 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 94146 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 26 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
+   "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 97 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 49 total, runtime: 3214 ns, gates: 12 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 24 bits/us, qubit_routing_bandwidth: 11500 qubits/us, ancilla_bandwidth: 168 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 97 total, runtime: 1000000000 ns, gates: 97 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us }\n",
+   "spec": {
+    "qubits": {
+     "value": 97,
+     "source": "derived",
+     "note": "one transmon per placed site"
+    },
+    "factories": {
+     "value": 1,
+     "source": "provisional",
+     "note": "no factory realized yet"
+    },
+    "max_parallel_gates": {
+     "value": 97,
+     "source": "derived",
+     "note": "every transmon has its own drive and coupler channels"
+    },
+    "decoders": {
+     "value": 1,
+     "source": "derived",
+     "note": "1 decoder unit(s) of 4 core(s)"
+    },
+    "classical_data_bandwidth": {
+     "value": 500,
+     "source": "derived",
+     "note": "the board hub carries one put of one bit per batch at 500 MHz (riscq/limits.mjs)"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 48500,
+     "source": "derived",
+     "note": "every site in a route at once"
+    },
+    "ancilla_bandwidth": {
+     "value": 607,
+     "source": "derived",
+     "note": "every site reset at once"
+    },
+    "gate1q_ns": {
+     "value": 26,
+     "source": "measured",
+     "note": "longest gate1q in the trace of iteration 0"
+    },
+    "gate2q_ns": {
+     "value": 94,
+     "source": "measured",
+     "note": "longest gate2q in the trace of iteration 0"
+    },
+    "measure_ns": {
+     "value": 570,
+     "source": "measured",
+     "note": "longest measure in the trace of iteration 0"
+    },
+    "reset_ns": {
+     "value": 160,
+     "source": "measured",
+     "note": "longest reset in the trace of iteration 0"
+    },
+    "route_latency_ns": {
+     "value": 2,
+     "source": "measured",
+     "note": "longest route_latency in the trace of iteration 0"
+    },
+    "decoder_latency_ns": {
+     "value": 94146,
+     "source": "measured",
+     "note": "longest decoder_latency in the trace of iteration 0"
+    },
+    "pauli_frame_update_ns": {
+     "value": 26,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 2 ns grid"
+    },
+    "magic_state_latency_ns": {
+     "value": 135000,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 2 ns grid"
+    }
+   },
+   "factories": {
+    "factory": {
+     "output_qubits": 9,
+     "workspace_qubits": 8,
+     "latency": 135000,
+     "gates": 1,
+     "decoders": 1,
+     "classical_data_bandwidth": 8,
+     "qubit_routing_bandwidth": 2
+    }
+   },
+   "byKind": {
+    "request_ancilla": {
+     "count": 240,
+     "ok": 240,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 160,
+     "maxBitOverrunNs": 0
+    },
+    "H": {
+     "count": 120,
+     "ok": 120,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 26,
+     "maxBitOverrunNs": 0
+    },
+    "route": {
+     "count": 240,
+     "ok": 240,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "CNOT": {
+     "count": 800,
+     "ok": 800,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 94,
+     "maxBitOverrunNs": 0
+    },
+    "measure": {
+     "count": 240,
+     "ok": 240,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 526,
+     "maxBitOverrunNs": 0
+    },
+    "release_ancilla": {
+     "count": 240,
+     "ok": 240,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "count": 1,
+     "ok": 1,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 94126,
+     "maxBitOverrunNs": 0
+    }
+   },
+   "slack": {
+    "request_ancilla": {
+     "count": 240,
+     "minNs": 160,
+     "medianNs": 160,
+     "maxNs": 160,
+     "declaredNs": 160
+    },
+    "H": {
+     "count": 120,
+     "minNs": 26,
+     "medianNs": 26,
+     "maxNs": 26,
+     "declaredNs": 26
+    },
+    "route": {
+     "count": 240,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 2
+    },
+    "CNOT": {
+     "count": 800,
+     "minNs": 94,
+     "medianNs": 94,
+     "maxNs": 94,
+     "declaredNs": 94
+    },
+    "measure": {
+     "count": 240,
+     "minNs": 544,
+     "medianNs": 544,
+     "maxNs": 570,
+     "declaredNs": 570
+    },
+    "release_ancilla": {
+     "count": 240,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 0
+    },
+    "decode_syndrome": {
+     "count": 1,
+     "minNs": 94126,
+     "medianNs": 94126,
+     "maxNs": 94126,
+     "declaredNs": 94146
+    }
+   }
+  },
+  {
+   "distance": 7,
+   "rounds": 10,
+   "qubits": 97,
+   "ops": 3841,
+   "conforms": true,
+   "verdict": "RESOURCE_VALIDATED",
+   "gate1qNs": 26,
+   "gate2qNs": 94,
+   "measureNs": 570,
+   "resetNs": 160,
+   "roundNs": 3970,
+   "roundHardwareNs": 3944,
+   "roundGates": 24,
+   "decoderNs": 274462,
+   "makespanNs": 314162,
+   "paper": {
+    "cycleNs": 1100,
+    "decoderLatencyNsAtD5": 63000
+   },
+   "programText": "\ncodes:\n  Surface [[49,1,7]]:\n    stab    X[1]X[2]\n    stab    X[3]X[4]\n    stab    X[5]X[6]\n    stab    X[0]X[1]X[7]X[8]\n    stab    X[2]X[3]X[9]X[10]\n    stab    X[4]X[5]X[11]X[12]\n    stab    X[8]X[9]X[15]X[16]\n    stab    X[10]X[11]X[17]X[18]\n    stab    X[12]X[13]X[19]X[20]\n    stab    X[14]X[15]X[21]X[22]\n    stab    X[16]X[17]X[23]X[24]\n    stab    X[18]X[19]X[25]X[26]\n    stab    X[22]X[23]X[29]X[30]\n    stab    X[24]X[25]X[31]X[32]\n    stab    X[26]X[27]X[33]X[34]\n    stab    X[28]X[29]X[35]X[36]\n    stab    X[30]X[31]X[37]X[38]\n    stab    X[32]X[33]X[39]X[40]\n    stab    X[36]X[37]X[43]X[44]\n    stab    X[38]X[39]X[45]X[46]\n    stab    X[40]X[41]X[47]X[48]\n    stab    X[42]X[43]\n    stab    X[44]X[45]\n    stab    X[46]X[47]\n    stab    Z[0]Z[7]\n    stab    Z[1]Z[2]Z[8]Z[9]\n    stab    Z[3]Z[4]Z[10]Z[11]\n    stab    Z[5]Z[6]Z[12]Z[13]\n    stab    Z[7]Z[8]Z[14]Z[15]\n    stab    Z[9]Z[10]Z[16]Z[17]\n    stab    Z[11]Z[12]Z[18]Z[19]\n    stab    Z[13]Z[20]\n    stab    Z[14]Z[21]\n    stab    Z[15]Z[16]Z[22]Z[23]\n    stab    Z[17]Z[18]Z[24]Z[25]\n    stab    Z[19]Z[20]Z[26]Z[27]\n    stab    Z[21]Z[22]Z[28]Z[29]\n    stab    Z[23]Z[24]Z[30]Z[31]\n    stab    Z[25]Z[26]Z[32]Z[33]\n    stab    Z[27]Z[34]\n    stab    Z[28]Z[35]\n    stab    Z[29]Z[30]Z[36]Z[37]\n    stab    Z[31]Z[32]Z[38]Z[39]\n    stab    Z[33]Z[34]Z[40]Z[41]\n    stab    Z[35]Z[36]Z[42]Z[43]\n    stab    Z[37]Z[38]Z[44]Z[45]\n    stab    Z[39]Z[40]Z[46]Z[47]\n    stab    Z[41]Z[48]\n    logX[0] X[0]X[7]X[14]X[21]X[28]X[35]X[42]\n    logZ[0] Z[0]Z[1]Z[2]Z[3]Z[4]Z[5]Z[6]\n  merged1 = canonical_product base=Surface factors=1 requires=commuting_factors(P) blocks=distinct(family,block) n=sum(n)+1 k=sum(k)-rank(P_mod_base_checks) distance=unclaimed ancillas=1 checks=(base_checks,P*X[a],X[a]) check_signs=decoded_outcomes check_scope=(P*X[a],X[a]) check_prepare=|+> check_read=X split=Z\n\nprogram[LogicData: 1, c: 0, ancilla: 480] (Surface[1] LogicData):\n  extract LogicData[0][0] rounds=10 using ancilla[0,480) -> syndrome[0,480)\n  decode rounds=10 syndrome[0,480)\n",
+   "listingHead": "resource { gate1q: 48, gate2q: 336, measures: 96, allocs: 96, routes: 96, decodes: 1, magic: 0, frame_updates: 0, idle_extracts: 0, call_sites: 1, loops: 1, guards: 0, nodes: 1538 }\nmachine { qubits: 97 total, decoders: 1 total, factories: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us, max_parallel_gates: 97 total, gate1q_ns: 26 ns, gate2q_ns: 94 ns, measure_ns: 570 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 274462 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 26 ns }\nspec program:\n  resource { qubits_min: 0 total, qubits: 97 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 97 total, runtime: 3970 ns, gates: 24 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 34 bits/us, qubit_routing_bandwidth: 16500 qubits/us, ancilla_bandwidth: 336 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 97 total, runtime: 1000000000 ns, gates: 97 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us }\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\ngadget surfaceRound[data: dbase + 49, ancilla: abase + 48, c: 0, syndrome: cbase + 48](dbase, abase, cbase) spans 3970 ns:\n  @0 ns  request_ancilla  count=1  ancilla[abase]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 1]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 2]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 3]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 4]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 5]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 6]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 7]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 8]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 9]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 10]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 11]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 25]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 26]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 27]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 24]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 12]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 13]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 14]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 28]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 29]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 30]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 31]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 15]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 16]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 17]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 33]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 34]\n  @0 ns  request_ancilla  count=1  ancilla[abase + 35]",
+   "listingLines": 788,
+   "machineText": "machine { qubits: 97 total, factories: 1 total, max_parallel_gates: 97 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us, gate1q_ns: 26 ns, gate2q_ns: 94 ns, measure_ns: 570 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 274462 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 26 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
+   "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 97 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 97 total, runtime: 3970 ns, gates: 24 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 34 bits/us, qubit_routing_bandwidth: 16500 qubits/us, ancilla_bandwidth: 336 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 97 total, runtime: 1000000000 ns, gates: 97 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 48500 qubits/us, ancilla_bandwidth: 607 qubits/us }\n",
+   "spec": {
+    "qubits": {
+     "value": 97,
+     "source": "derived",
+     "note": "one transmon per placed site"
+    },
+    "factories": {
+     "value": 1,
+     "source": "provisional",
+     "note": "no factory realized yet"
+    },
+    "max_parallel_gates": {
+     "value": 97,
+     "source": "derived",
+     "note": "every transmon has its own drive and coupler channels"
+    },
+    "decoders": {
+     "value": 1,
+     "source": "derived",
+     "note": "1 decoder unit(s) of 4 core(s)"
+    },
+    "classical_data_bandwidth": {
+     "value": 500,
+     "source": "derived",
+     "note": "the board hub carries one put of one bit per batch at 500 MHz (riscq/limits.mjs)"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 48500,
+     "source": "derived",
+     "note": "every site in a route at once"
+    },
+    "ancilla_bandwidth": {
+     "value": 607,
+     "source": "derived",
+     "note": "every site reset at once"
+    },
+    "gate1q_ns": {
+     "value": 26,
+     "source": "measured",
+     "note": "longest gate1q in the trace of iteration 0"
+    },
+    "gate2q_ns": {
+     "value": 94,
+     "source": "measured",
+     "note": "longest gate2q in the trace of iteration 0"
+    },
+    "measure_ns": {
+     "value": 570,
+     "source": "measured",
+     "note": "longest measure in the trace of iteration 0"
+    },
+    "reset_ns": {
+     "value": 160,
+     "source": "measured",
+     "note": "longest reset in the trace of iteration 0"
+    },
+    "route_latency_ns": {
+     "value": 2,
+     "source": "measured",
+     "note": "longest route_latency in the trace of iteration 0"
+    },
+    "decoder_latency_ns": {
+     "value": 274462,
+     "source": "measured",
+     "note": "longest decoder_latency in the trace of iteration 0"
+    },
+    "pauli_frame_update_ns": {
+     "value": 26,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 2 ns grid"
+    },
+    "magic_state_latency_ns": {
+     "value": 135000,
+     "source": "provisional",
+     "note": "base machine value, rounded up to the 2 ns grid"
+    }
+   },
+   "factories": {
+    "factory": {
+     "output_qubits": 9,
+     "workspace_qubits": 8,
+     "latency": 135000,
+     "gates": 1,
+     "decoders": 1,
+     "classical_data_bandwidth": 8,
+     "qubit_routing_bandwidth": 2
+    }
+   },
+   "byKind": {
+    "request_ancilla": {
+     "count": 480,
+     "ok": 480,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 160,
+     "maxBitOverrunNs": 0
+    },
+    "H": {
+     "count": 240,
+     "ok": 240,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 26,
+     "maxBitOverrunNs": 0
+    },
+    "route": {
+     "count": 480,
+     "ok": 480,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "CNOT": {
+     "count": 1680,
+     "ok": 1680,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 94,
+     "maxBitOverrunNs": 0
+    },
+    "measure": {
+     "count": 480,
+     "ok": 480,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 526,
+     "maxBitOverrunNs": 0
+    },
+    "release_ancilla": {
+     "count": 480,
+     "ok": 480,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 0,
+     "maxBitOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "count": 1,
+     "ok": 1,
+     "maxOverrunNs": 0,
+     "maxHardwareNs": 274442,
+     "maxBitOverrunNs": 0
+    }
+   },
+   "slack": {
+    "request_ancilla": {
+     "count": 480,
+     "minNs": 160,
+     "medianNs": 160,
+     "maxNs": 160,
+     "declaredNs": 160
+    },
+    "H": {
+     "count": 240,
+     "minNs": 26,
+     "medianNs": 26,
+     "maxNs": 26,
+     "declaredNs": 26
+    },
+    "route": {
+     "count": 480,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 2
+    },
+    "CNOT": {
+     "count": 1680,
+     "minNs": 94,
+     "medianNs": 94,
+     "maxNs": 94,
+     "declaredNs": 94
+    },
+    "measure": {
+     "count": 480,
+     "minNs": 544,
+     "medianNs": 544,
+     "maxNs": 570,
+     "declaredNs": 570
+    },
+    "release_ancilla": {
+     "count": 480,
+     "minNs": 0,
+     "medianNs": 0,
+     "maxNs": 0,
+     "declaredNs": 0
+    },
+    "decode_syndrome": {
+     "count": 1,
+     "minNs": 274442,
+     "medianNs": 274442,
+     "maxNs": 274442,
+     "declaredNs": 274462
+    }
+   }
+  }
+ ]
+}

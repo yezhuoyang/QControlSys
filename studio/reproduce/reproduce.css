@@ -1,0 +1,22 @@
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; margin: 12px 0 28px; }
+.card { display: block; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: #fff; color: inherit; }
+.card:hover { border-color: var(--accent); text-decoration: none; }
+.card h3 { margin: 6px 0 6px; font-size: 17px; }
+.card p { margin: 6px 0; font-size: 14px; color: var(--ink2); }
+.card .cite { font-size: 12.5px; color: var(--ink3); }
+.badge { display: inline-block; font: 600 11.5px/1 var(--sans); padding: 4px 8px; border-radius: 99px; background: #eef0fe; color: #3730a3; }
+.badge.done { background: #e3f6ea; color: #146c3a; }
+.badge.partial { background: #fff4dc; color: #8a5a00; }
+.badge.todo { background: #f1f1f1; color: #555; }
+.steps { padding-left: 20px; }
+.steps li { margin: 6px 0; }
+pre.code { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 12px 14px; overflow: auto; font: 12.5px/1.45 var(--mono); max-height: 420px; }
+.tbl { overflow-x: auto; }
+.tbl td.src, .tbl th.src { font-size: 12px; color: var(--ink3); max-width: 46ch; }
+.yes { color: #146c3a; font-weight: 600; }
+.no { color: #a8321c; font-weight: 600; }
+.runpick { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+.runpick button { font: 600 12.5px/1 var(--sans); padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+.runpick button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+details.block { border-top: 1px solid var(--line); padding: 8px 0; }
+details.block > summary { cursor: pointer; font-weight: 600; }
