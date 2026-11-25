@@ -141,21 +141,21 @@ export async function jobNs(job, outcomes = {}, periodNs = 2) {
     }
     return helioCache.get(key).decodeBatches * periodNs;
   }
-  // The lookup decoder's time is measured by riscq/limits.mjs `decodeFanIn` on the 8-transmon
-  // ring, so up to 8 bits; 9 and 10 bits use the line through the measured 1- and 8-bit times
-  // (the firmware's cost is linear in the bits it stores: one load, shift, mask and store each).
+  // The lookup decoder's time, measured at every size: up to 8 bits by riscq/limits.mjs
+  // `decodeFanIn` on the 8-transmon ring, 9 and 10 bits on a generated chip with that many
+  // transmons (riscq/decoders/lookup.mjs; it gives the ring's times at 1 to 8 bits too).
   const k = job.bits.length;
-  const measured = async (bits) => {
-    if (!lookupCache.has(bits)) {
+  if (!lookupCache.has(k)) {
+    if (k <= 8) {
       const { decodeFanIn } = await import("../limits.mjs");
-      lookupCache.set(bits, (await decodeFanIn(bits)).decodeNs);
-      dirty = true;
+      lookupCache.set(k, (await decodeFanIn(k)).decodeNs);
+    } else {
+      const { lookupDecode } = await import("../decoders/lookup.mjs");
+      lookupCache.set(k, (await lookupDecode(k)).decodeNs);
     }
-    return lookupCache.get(bits);
-  };
-  if (k <= 8) return measured(k);
-  const [one, eight] = [await measured(1), await measured(8)];
-  return Math.ceil(one + ((eight - one) * (k - 1)) / 7);
+    dirty = true;
+  }
+  return lookupCache.get(k);
 }
 
 /**

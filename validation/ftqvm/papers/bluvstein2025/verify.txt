@@ -1,0 +1,109 @@
+Verification run 2026-11-24 20:07 | stim 1.15.0 | pymatching 2.4.0 | numpy 2.4.4 | seed 20251124
+
+1. Published QEC circuit (anc/Stim_circuit_repeated_QEC_Xbasis.txt)
+  [PASS] original-noisy.stim is a byte-identical copy of the arXiv ancillary file
+  [PASS] circuit-qec.stim = original with exactly the noise lines removed (every other line verbatim, same order)
+  removed noise lines: {'PAULI_CHANNEL_1': 138, 'PAULI_CHANNEL_2': 16, 'X_ERROR': 10}
+  QUBIT_COORDS lines in the published file: 0 (nothing to preserve; coordinates inferred in schedule-qec.json)
+  SHIFT_COORDS lines in the published file: 0 (nothing to preserve; coordinates inferred in schedule-qec.json)
+  [PASS] TICK count preserved: 8 (published file has 8 TICKs: after data prep, double TICK between rounds, one before final readout)
+  [PASS] DETECTORs preserved: 96
+  [PASS] OBSERVABLE_INCLUDE preserved: 1 (rec[-15..-11] = data qubits 22-26, middle row: X_L)
+  [PASS] qubits: 49 (25 data + 24 ancilla); paper: "Stim circuit for four rounds of stabilizer measurement on a d=5 surface code" (SIGuide)
+  [PASS] measurements: 121 = 4 rounds x 24 ancillas + 25 data = number of physical atoms used (four fresh 24-atom ancilla blocks)
+  [PASS] detectors per round [12, 24, 24, 24, 12]; paper ED Fig. 6e: "the 24 individual detectors (12 for the first and last rounds)"; Methods: "96 detectors per shot across 5 rounds"; Fig. 2 Methods: "mean error of all deterministic detectors (96 per basis)"
+  [PASS] CZ layers: 16 = 4 rounds x 4 ("Each CZ layer corresponds to one time-step", Fig. 1 caption; 20 time-steps in 5 rounds)
+
+2. Noiseless determinism
+  [PASS] circuit-qec.stim: 1000 noiseless shots, all 96 detectors = 0
+  [PASS] circuit-qec.stim: 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] circuit-qec.stim: Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  absolute (non-normalised) parities of the noiseless reference: 0 of 96 detectors are 1, observable = 0 (Stim reports detection events relative to this reference; the global Y echoes only flip signs)
+  [PASS] original-noisy.stim with noise removed by Stim: 1000 noiseless shots, all 96 detectors = 0
+  [PASS] original-noisy.stim with noise removed by Stim: 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] original-noisy.stim with noise removed by Stim: Stim error analysis finds no non-deterministic (gauge) detectors/observables
+
+3. Template generator (gen_surface.py) vs the published circuit
+  [PASS] noiseless: generated circuit equals the published one instruction-by-instruction (223 instructions incl. TICKs; targets compared as sets within an instruction, CZ/PAULI_CHANNEL_2 as unordered pairs, M order exact, noise parameters to 5 significant digits)
+  [PASS] noisy: generated circuit equals the published one instruction-by-instruction (403 instructions incl. TICKs; targets compared as sets within an instruction, CZ/PAULI_CHANNEL_2 as unordered pairs, M order exact, noise parameters to 5 significant digits)
+  rules encoded: CZ layers a/b/c/d with partners (ra+.5,ca-.5)/(ra-.5,ca-.5)/(ra+.5,ca+.5)/(ra-.5,ca+.5); round orders abcd, acbd, dbca, dcba; SQRT_Y on data after CZ layers 1 and 3, global Y echo between layers 2 and 3 and at the end of each round; weight-2 boundary ancillas whose two gates are both in the first (second) half of a round get their basis change late (early) with an extra local Y echo.
+  CSS type of an ancilla at plaquette centre (ra,ca): X if (ra-ca) even (deterministic in round 1 of the X-basis experiment), else Z.
+
+4. Timing implied by the published noise model vs the hardware command strings
+  data-qubit idle channels (us), from p_Z = 1-(1-0.5e-6)^t: [1285.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 1285.0, 1285.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 1285.0, 1285.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 1285.0, 1285.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 235.0, 1285.0]
+  [PASS] total modelled idle per round = 4450.0 us (paper: "each QEC round was 4.45 ms")
+  [PASS] idle quanta: 235 us = 0.47 ms/2 (between CZ layers) and 1285 us = 2.57 ms/2 (ancilla-block exchange)
+  [PASS] Moving-AWG command durations: rounds 2-4 each 4450.0 us (schedule-qec.json)
+  round period from CZ-to-CZ anchors, per AWG: {'moving': [4450.0, 4450.0, 4450.0], 'rydberg_inferred_pulse': [4450.02, 4450.02, 4450.02], 'raman': [4449.164, 4449.164, 4449.164], 'raman_aod': [4449.75, 4449.8, 4449.79]}
+  [PASS] all four AWG streams give a 4450 +- 1 us round period
+  CZ anchor residuals after one constant offset per AWG (us): {'rydberg': 0.03, 'raman': 2.578, 'raman_aod': 1.418}
+
+5. Hardware schedule <-> Stim
+  [PASS] AOD shift order per round ['abcd', 'acbd', 'dbca', 'dcba'] == Stim CZ-layer order ['abcd', 'acbd', 'dbca', 'dcba'] ("N Z Z_r N_r", Methods)
+  [PASS] 16 Rydberg pulses in the Rydberg AWG string == 16 Stim CZ instructions
+  [PASS] for all 34 locally addressed Stim rotation lines, the union of lit Raman-AOD rows (decoded as row N = ra+0.5, edge suffixes l/r/nl/nr) equals the Stim target set exactly
+  [PASS] 8 global SC1_ECHO pulses map onto the 8 Stim "Y all-49" echo lines
+  [PASS] every one of the 134 Stim operation lines (gates, R, M, idle markers) is realized by >= 1 hardware step
+
+6. Detector error models and PyMatching (400000 shots per circuit)
+  [PASS] original-noisy.stim: detector_error_model(decompose_errors=True) OK: 1126 error mechanisms, 96 detectors (approximate_disjoint_errors=True is required by Stim for PAULI_CHANNEL_1/2)
+  [PASS] generated d=5 Z-basis 4-round memory: 1000 noiseless shots, all 96 detectors = 0
+  [PASS] generated d=5 Z-basis 4-round memory: 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] generated d=5 Z-basis 4-round memory: Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  [PASS] generated d=3 X-basis 4-round memory: 1000 noiseless shots, all 32 detectors = 0
+  [PASS] generated d=3 X-basis 4-round memory: 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] generated d=3 X-basis 4-round memory: Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  [PASS] generated d=3 Z-basis 4-round memory: 1000 noiseless shots, all 32 detectors = 0
+  [PASS] generated d=3 Z-basis 4-round memory: 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] generated d=3 Z-basis 4-round memory: Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  circuit                                                                   shots     p_L (4 rounds)           LEPR (%)  det.rate
+  d=5 X basis, published noisy circuit                                     400000   0.00778+-0.00014    0.1956+-0.0035    0.0625
+  d=5 Z basis, generated with the published template + error model         400000   0.00766+-0.00014    0.1925+-0.0035    0.0626
+  d=3 X basis, generated with the published template + error model         400000   0.03478+-0.00029    0.8931+-0.0076    0.0587
+  d=3 Z basis, generated with the published template + error model         400000   0.02949+-0.00027    0.7541+-0.0070    0.0588
+  basis-averaged LEPR: d=5 0.194%   d=3 0.824%   ratio d3/d5 = 4.24
+  paper (Fig. 2d, Methods "Hybrid"): "a final value for the reported LEPR of 0.62(3)% for d=5 and 1.33(4)% for d=3" (ML+MLE hybrid decoder with loss information, experimental data incl. atom loss, averaged over X and Z bases); ratio 2.14(13); "reduces toward 0.1% per round on shots with no qubit loss".
+  interpretation: Stim cannot model atom loss (about half of the experimental error budget; "roughly half of our errors being loss"), so a Pauli-only simulation decoded with PyMatching is expected to sit below 0.62% and near the paper's no-loss value; it is NOT a reproduction of the experimental number. The d=3 circuit here is a standalone 3x3 patch, not a quadrant of the d=5 layout as in the experiment.
+  [PASS] Pauli-only PyMatching LEPR(d=5) is below the experimental 0.62% (expected: no loss in the model)
+
+7. Lattice-surgery reconstruction (circuit-surgery.stim, circuit-surgery-xx.stim)
+  circuit-surgery.stim (ZZ): qubits 99, detectors 95, observables 1, measurements 148
+  [PASS] circuit-surgery.stim (ZZ): 1000 noiseless shots, all 95 detectors = 0
+  [PASS] circuit-surgery.stim (ZZ): 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] circuit-surgery.stim (ZZ): Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  circuit-surgery-xx.stim (XX): qubits 99, detectors 93, observables 1, measurements 148
+  [PASS] circuit-surgery-xx.stim (XX): 1000 noiseless shots, all 93 detectors = 0
+  [PASS] circuit-surgery-xx.stim (XX): 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] circuit-surgery-xx.stim (XX): Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  [PASS] noisy files differ from the noiseless ones only by noise channels
+  merged 5x10 lattice: 50 data, 49 checks per round (22 X-type, 27 Z-type); seam (x=4.5): 3 Z-type [(-0.5, 4.5), (1.5, 4.5), (3.5, 4.5)] + 2 X-type [(0.5, 4.5), (2.5, 4.5)]
+  [PASS] three seam Z checks: matches Methods "error detection on the middle three ancillas each having the same value in both rounds"
+  [PASS] ZZ detectors = 22 (round-1 X checks, deterministic from |+>|+>) + 49 (round 2 vs 1) + 24 (final Z data vs round 2; the 3 seam Z checks omitted as in the paper) = 95
+  [PASS] XX detectors = 22 + 49 + 22 (final X data vs round 2) = 93
+  noiseless: raw seam product (lattice-surgery outcome m) = 1 in 49.0% of shots (random, as expected); raw data parity of columns 4,5 XOR m = 1 in 1000 / 1000 shots
+  [PASS] Z_L1 Z_L2 measured by the seam is random and always agrees with Z_L1 Z_L2 read from the data (Bell pair with ZZ = (-1)^m, XX = +1)
+  [PASS] product of the three seam Z checks = Z on all of data columns 4 and 5 = Z_L1 Z_L2 (column representatives)
+  [PASS] ZZ noisy: detector_error_model(decompose_errors=True) OK (1019 mechanisms)
+  [PASS] XX noisy: detector_error_model(decompose_errors=True) OK (963 mechanisms)
+  [PASS] ZZ variant WITH the 3 final seam detectors: 1000 noiseless shots, all 98 detectors = 0
+  [PASS] ZZ variant WITH the 3 final seam detectors: 1000 noiseless shots, all 1 observable(s) = 0 (deterministic)
+  [PASS] ZZ variant WITH the 3 final seam detectors: Stim error analysis finds no non-deterministic (gauge) detectors/observables
+  [PASS] with the 3 final seam detectors, no undetectable error flips ZZ (the observable equals a product of detectors, so a decoder can never fail): this is why the paper decodes without them
+  shortest undetectable graphlike logical error, published d=5 QEC (X_L): 3 fault(s)
+  shortest undetectable graphlike logical error, surgery ZZ (paper detector set): 2 fault(s)
+  [PASS] surgery ZZ: time-like distance 2 = number of merged rounds (two measurement errors on one seam check flip Z_L1Z_L2 undetected) -- the reason the paper uses error detection on the seam ancillas ("to compensate for having <d rounds")
+  shortest undetectable graphlike logical error, surgery XX: 3 fault(s)
+  ZZ: (data Z_L1Z_L2) XOR (seam outcome)           p_L = 0.09854 +- 0.00047  (kept 400000 / 400000)
+  XX: X_L1 X_L2                                    p_L = 0.00923 +- 0.00015  (kept 400000 / 400000)
+  ZZ with seam-Z error detection                   p_L = 0.04364 +- 0.00036  (kept 325038 / 400000)
+  Bell-pair error (mean of XX and ZZ, Methods Fig. 3 definition) = 0.05389; with seam error detection on ZZ: 0.02644
+  paper: lattice-surgery error is shown only graphically (Fig. 3c,d); no number is quoted in the text, so no numeric comparison is made.
+  injected ancilla measurement error (Fig. 3c protocol: extra flip probability p on every ancilla measurement), PyMatching, 100000 shots each:
+       p_inj     ZZ error     XX error   Bell error
+       0.000      0.09690      0.00954      0.05322
+       0.010      0.12709      0.01028      0.06869
+       0.020      0.15433      0.01048      0.08240
+       0.040      0.20904      0.01158      0.11031
+  [PASS] ZZ (lattice-surgery) error grows faster with injected ancilla measurement error than the XX memory-like part (qualitative Fig. 3c statement)
+
+SUMMARY: ALL CHECKS PASSED

@@ -3,6 +3,7 @@
 // page come from the run (validation/ftqvm/papers/<id>.json, written by riscq/ftqvm/papers.mjs);
 // the text here only describes them.
 import { MAGIC_REPRODUCTIONS } from "./magic-reproductions.mjs";
+import { LOGICAL_REPRODUCTIONS } from "./logical-reproductions.mjs";
 
 export const REPRODUCTIONS = [
   {
@@ -84,6 +85,9 @@ export const REPRODUCTIONS = [
   },
   // Magic-state factories (riscq/ftqvm/magic.mjs): Google's cultivation and QuEra's distillation.
   ...MAGIC_REPRODUCTIONS,
+  // Logical qubits with the decoder in the control program (riscq/ftqvm/logical.mjs): lattice and
+  // qLDPC surgery, real-time decoding with feedback, colour codes, neutral atoms and ions.
+  ...LOGICAL_REPRODUCTIONS,
 ];
 
 export const byId = (id) => REPRODUCTIONS.find((r) => r.id === id);

@@ -137,7 +137,7 @@ export function willowDesign(device, { qubitsPerCore = 2 } = {}) {
 }
 
 /** The machine of a design, with the 45° entry added to every drive table. */
-function willowMachine(design) {
+export function willowMachine(design) {
   const m = hardwareDesign.machine(design);
   design.qubits.forEach((q, i) => {
     const at = m.locate(i, "gate");
@@ -160,17 +160,26 @@ const KIND = { pulse: "1Q pulse", frame: "virtual Z", cz: "CZ", measure: "measur
  * 2 ns grid (a 35 ns pulse takes 36 ns); virtual Z rotations take no time. Returns the listing
  * (one row per operation and qubit, FormalRV's listing shape) and its native instructions.
  */
-export function transmonSchedule(circuit, m, { theta = Math.PI / 4 } = {}) {
+export function transmonSchedule(circuit, m, { theta = Math.PI / 4, momentNs } = {}) {
+  // `momentNs`: a paper's own timeline, one duration per moment (ns). A moment then lasts that
+  // long on the controller's grid; its operations keep their own lengths, so a readout longer
+  // than its moment runs on under the next moments (pipelined readout).
   const period = m.period, ns = (s) => m.span(s) * period / 1000; // seconds → ns on the grid
   const q0 = m.calibration.qubits[0];
   const pulseNs = ns(q0.X90.time), czNs = ns(m.pairs[0].pulses[0].time), resetNs = ns(q0.reset.time);
+  // A π rotation plays the X table entry (slot 1), whose length is the calibration's X pulse; every
+  // other rotation plays the π/2 (or π/4) entry, which lasts as long as X90.
+  const piNs = ns(q0.X.time);
+  const lengthOf = (play) => (play.kind === "pulse" && Math.abs(play.angle) === Math.PI ? piNs : { pulse: pulseNs, cz: czNs, measure: readoutNs, reset: resetNs, frame: 0 }[play.kind] ?? 0);
   const readoutNs = ns(Math.max(q0.readout.time, q0.readout.demod.delay + q0.readout.demod.time));
   const ops = [], natives = [], origin = new Map(), moments = [];
   let t = 0, uid = 0, rec = 0, nid = 0;
   const native = (op, n) => { const id = "h" + nid++; origin.set(id, op.uid); natives.push({ ...n, id, source: "moment " + op.moment + " · " + op.text }); };
   circuit.moments.forEach((mo, k) => {
     const plays = mo.ops.map((op) => ({ op, play: mc.transmonPlay(op, { theta }) }));
-    const dur = Math.max(0, ...plays.map(({ play }) => ({ pulse: pulseNs, cz: czNs, measure: readoutNs, reset: resetNs })[play.kind] ?? 0));
+    const longest = Math.max(0, ...plays.map(({ play }) => (play.kind === "frame" || play.kind === "idle" ? 0 : lengthOf(play))));
+    const grid = (x) => Math.ceil((x * 1000) / period) * period / 1000;
+    const dur = momentNs && momentNs[k] != null ? grid(momentNs[k]) : longest;
     moments.push({ index: k, start: t, dur, ops: mo.ops.map((o) => ({ gate: o.gate, tag: o.tag, targets: o.targets })) });
     for (const { op, play } of plays) {
       if (play.kind === "idle") continue;
@@ -178,16 +187,20 @@ export function transmonSchedule(circuit, m, { theta = Math.PI / 4 } = {}) {
       for (let i = 0; i < op.targets.length; i += step) {
         const qs = op.targets.slice(i, i + step);
         const name = op.gate + (op.tag ? "[" + op.tag + "]" : "");
-        const own = { pulse: pulseNs, cz: czNs, measure: readoutNs, reset: resetNs, frame: 0 }[play.kind];
+        const own = lengthOf(play);
+        // A gate's window is its moment: on a paper's timeline a gate longer than its layer would
+        // run into the next layer's gates, so it is late. A readout (or reset) may run on under the
+        // next moments, as the papers pipeline them.
+        const window = momentNs && (play.kind === "pulse" || play.kind === "cz") ? Math.min(own, dur) : own;
         const row = { uid: uid++, kind: play.kind === "pulse" && Math.abs(play.angle) === Math.PI / 4 ? "T pulse" : KIND[play.kind], line: k + 1, moment: k,
-          text: name + " " + qs.join(" "), qubits: qs, start: t, duration: own, end: t + own };
+          text: name + " " + qs.join(" "), qubits: qs, start: t, duration: window, end: t + window };
         if (play.kind === "measure") row.writes = [{ register: "m", index: rec++ }];
         ops.push(row);
         const ps = t * 1000;
         if (play.kind === "frame") native(row, { op: "frame", qubits: qs, angle: play.angle, t: ps, dur: 0 });
         else if (play.kind === "pulse") {
           if (play.before) native(row, { op: "frame", qubits: qs, angle: play.before, t: ps, dur: 0 });
-          native(row, { op: "pulse", qubits: qs, angle: play.angle, axis: play.axis, t: ps, dur: pulseNs * 1000 });
+          native(row, { op: "pulse", qubits: qs, angle: play.angle, axis: play.axis, t: ps, dur: own * 1000 });
         } else if (play.kind === "cz") native(row, { op: "cz", qubits: qs, t: ps, dur: czNs * 1000 });
         else if (play.kind === "measure") native(row, { op: "measure", qubits: qs, t: ps, dur: readoutNs * 1000, result: "m[" + row.writes[0].index + "]" });
         else if (play.kind === "reset") native(row, { op: "reset", qubits: qs, t: ps, dur: resetNs * 1000 });
@@ -195,11 +208,11 @@ export function transmonSchedule(circuit, m, { theta = Math.PI / 4 } = {}) {
     }
     t += dur;
   });
-  return { listing: { ops, calls: [] }, natives, origin, moments, makespanNs: t, durations: { pulseNs, czNs, readoutNs, resetNs } };
+  return { listing: { ops, calls: [] }, natives, origin, moments, makespanNs: t, durations: { pulseNs, piNs, czNs, readoutNs, resetNs } };
 }
 
 /** Native instructions → RISC-Q channel actions (as platforms/superconducting.mjs lower, with the 45° entry). */
-function lowerTransmon(natives, m, spanNs) {
+export function lowerTransmon(natives, m, spanNs) {
   const period = m.period, frame = new Map(), actions = [], readouts = [];
   const batch = (ps) => { if (ps % period) throw Error("time " + ps + " ps is off the " + period + " ps grid"); return ps / period; };
   for (const op of [...natives].sort((x, y) => x.t - y.t || (x.op === "frame" ? -1 : 1) - (y.op === "frame" ? -1 : 1))) {
@@ -237,7 +250,7 @@ function lowerTransmon(natives, m, spanNs) {
  * measurement conforms when its pulses and window are kept and its bit is stored at all; how long
  * after the window the bit reached the controller's memory is kept as `bitAfterWindowNs`.
  */
-function bitLatency(report) {
+export function bitLatency(report) {
   for (const r of report.rows) {
     if (r.kind !== "measure") continue;
     r.bitAfterWindowNs = r.bitOverrunNs;
@@ -517,15 +530,18 @@ const baseMachine = join(REPO, "validation", "ftqvm", "base.machine");
  * contract whose latency is the factory circuit's on the twin. Returns the files, FormalRV's VM
  * verdict, the listing and the request_magic window.
  */
-export async function systemCall({ code, distance, factory, durations, capacities, gridNs, dir }) {
+export async function systemCall({ code, distance, factory, durations, capacities, gridNs, dir, program, optional = {} }) {
   mkdirSync(dir, { recursive: true });
-  const programText = `code ${code} d=${distance}\n\nparams  n\n\nprogram[q: 1, c: 2]:\n  prepare |T> -> ancilla[0]\n  measure Z data[0] Z ancilla[0] -> c[0]\n  measure X ancilla[0] -> c[1]\n  when c[1]:\n    frame Z data[0]\n`;
+  // `program`: the body of another FormalRV program (default: one T gate by magic-state
+  // injection); `optional`: optional machine fields (the decoder's measured fields).
+  const programText = `code ${code} d=${distance}\n\nparams  n\n\n` + (program ?? `program[q: 1, c: 2]:\n  prepare |T> -> ancilla[0]\n  measure Z data[0] Z ancilla[0] -> c[0]\n  measure X ancilla[0] -> c[1]\n  when c[1]:\n    frame Z data[0]\n`);
   const qppm = join(dir, "t-gate.qppm"), qec = join(dir, "t-gate.qec");
   writeFileSync(qppm, programText);
   await formalrv.prepareQec(qppm, qec, { code, distance, specialize: { n: 1 } });
   const baseText = readFileSync(baseMachine, "utf8");
   const base = specText.parseMachine(baseText);
-  const factories = { factory: factory.contract };
+  const factories = factory ? { factory: factory.contract } : specText.parseFactories(baseText);
+  capacities = { ...capacities, ...optional };
   const gadgets = await formalrv.discoverGadgets(qec, { dir, name: "discover",
     machine: specText.machineText({ machine: specFor(durations, capacities, base, { gridNs }).machine, factories }),
     sysspecFor: (names) => specText.sysspecText(specFor(durations, capacities, base, { gadgets: names, gridNs })) });
@@ -675,7 +691,7 @@ export async function googleRow(name, { shots = 0, p = 2.3e-3, edits = {}, qubit
  * operations in it and whether each ran inside its window on the twin, the interval the Lean
  * trace shows for them, and what `extra(k)` adds (the state after the moment).
  */
-function debugSteps(run, extra = () => ({})) {
+export function debugSteps(run, extra = () => ({})) {
   const rows = new Map(run.report.rows.map((r) => [r.uid, r]));
   const byMoment = new Map();
   for (const op of run.schedule.listing.ops) (byMoment.get(op.moment) ?? byMoment.set(op.moment, []).get(op.moment)).push(op);
@@ -944,12 +960,12 @@ function fields(table, values, group) {
  */
 export const MAGIC_DESIGNS = {
   "google-cultivation-2025": {
-    intro: "The program is the paper's own circuit, qubit for qubit, as its supplement links it: injection, cultivation and, for Figure 4, the graft into the distance-5 code. Change the gate, readout and reset durations or how many transmons one RISC-Q core drives, and run it again: every pulse is timed on the edited chip, played in the Lean model of the board, and checked against its window. Two transmons per core, for example, make the busiest qubits' pulses late.",
+    intro: "The program is the paper's own circuit, qubit for qubit, as its supplement links it: injection, cultivation and, for Figure 4, the graft into the distance-5 code. Change the gate, readout and reset durations or how many transmons one RISC-Q core drives, and run it again: every pulse is timed on the edited chip, played in the Lean model of the board, and checked against its window. Two transmons per core, for example, is refused: the firmware generator finds a channel whose writes the core cannot issue on time.",
     params() {
       const t = willowTwin(mc.googleCircuit("fig3-kickback")).durations;
       const values = {
         gate1qNs: t.x90Ns, czNs: t.czNs, readoutNs: t.readoutNs, resetNs: t.resetNs,
-        qubitsPerCore: v(1, "this twin: with two transmons per core, pulses of the busiest qubits start up to 28 ns late"),
+        qubitsPerCore: v(1, "this twin: with two transmons per core the firmware generator refuses the kickback circuit (a channel would have to be 33 writes ahead of a 32-entry queue)"),
       };
       return [
         { key: "circuit", label: "Circuit", value: "fig3-kickback", group: "Program", source: mc.GOOGLE_SOURCE,

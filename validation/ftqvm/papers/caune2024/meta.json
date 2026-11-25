@@ -1,0 +1,143 @@
+{
+  "citation": {
+    "title": "Demonstrating real-time and low-latency quantum error correction with superconducting qubits",
+    "authors": "L. Caune, L. Skoric, N. S. Blunt, A. Ruban, J. McDaniel, J. A. Valery, A. D. Patterson, A. V. Gramolin, J. Majaniemi, K. M. Barnes, T. Bialas, O. Bugdayci, O. Crawford, G. P. Geher, H. Krovi, E. Matekole, C. Topal, S. Poletto, M. Bryant, K. Snyder, N. I. Gillespie, G. Jones, K. Johar, E. T. Campbell, A. D. Hill",
+    "arxiv": "arXiv:2410.05202 (v1, 7 Oct 2024; no later arXiv version as of 2026-11-24)",
+    "journal": "Nature Communications 17, 7383 (2026), doi:10.1038/s41467-026-73331-6 (received 10 Feb 2026, accepted 8 May 2026, published 1 Jun 2026, CC BY 4.0)",
+    "data": "Zenodo doi:10.5281/zenodo.13961129 (record 15364358): HDF5 raw data with the Stim circuits, the executed Quil/assembly programs and calibration programs per run; LEP / timing tables",
+    "decoder_reference": "B. Barber et al., 'A real-time, scalable, fast and resource-efficient decoder for a quantum computer', Nature Electronics (2025), arXiv:2309.05558 (Collision Clustering FPGA decoder)",
+    "sources_read": ["arXiv v1 TeX main.tex + supplement.tex (src/)", "all 11 figure PDFs rendered to render/*.png", "Nat. Commun. article HTML (journal/article.txt) and Supplementary Information PDF (journal/si.pdf)", "Zenodo HDF5 text content (zenodo/*_runs.txt -> zenodo/extracted/)"],
+    "version_differences": [
+      "Journal adds: 'The measurement outcomes of the deterministic stabilizers in the first round of syndrome extraction do not form relevant detectors for the stability experiment. This means that for the stability experiment the number of decoding cycles is one fewer than the number of syndrome extraction rounds.' (Results)",
+      "Journal adds Table 1 (capabilities vs prior work), a stability-9 dataset (Supplementary Note 7) and the Data availability statement; the abstract wording changed ('sub-microsecond mean decoding time per round').",
+      "Journal Methods drops the arXiv v1 'Ankaa-2 device specifications' paragraph with the sublattice medians (93.3 % ancilla readout, 99.86 % 1q RB, 97.3 % CZ IRB, 104 ns CZ, 964 ns + 336 ns readout, T1 13.2 us, T2 10.6 us); those numbers below are cited to arXiv v1.",
+      "All headline numbers (28.1 %, 20.5 %, 17.6 %, 0.44-0.79 us, 9.6 = 6.5 + 3.1 us, 1.4 us, 156.25 MHz) are identical in both versions."
+    ]
+  },
+
+  "device": {
+    "name": "Rigetti Ankaa-2",
+    "qubits_total": {"value": 84, "quote": "The Ankaa-2 device is a superconducting circuit composed of 84 qubits and 149 tunable couplers, all of which are composed of statically capacitively coupled tunable transmons.", "section": "Methods: Ankaa-2 device specifications"},
+    "couplers_total": {"value": 149, "quote": "84 qubits and 149 tunable couplers", "section": "Methods: Ankaa-2 device specifications"},
+    "lattice": {"quote": "The device is arranged in a square array with 7 columns and 12 rows of qubits, with a tunable coupler between each neighboring qubit pair, two readout feed lines coupled to each column (in groups of 6), charge drive lines coupled to each individual qubit, and flux lines coupled to the SQUID loop within each individual transmon.", "section": "Methods: Ankaa-2 device specifications",
+      "indexing": "row-major, 7 per row: col = q mod 7, row = q div 7 (Fig. 1(b) shows Q28-Q32 / Q35-Q39 / Q42-Q46 / Q49-Q53 / Q56-Q60 as rows; confirmed by the readout_word_mapping and ro_rx frame groups in the Zenodo qpu_config)"},
+    "qubits_used": {
+      "quote_methods": "The selected sublattice used when executing the stability-8 experiments was composed of qubits 36, 37, 38, 43, 45, 50, 51, and 52. Qubits 36, 38, 50 and 52 were used as the ancilla qubits",
+      "quote_fig1": "the sublattice [Q36, Q37, Q38, Q43, Q44, Q45, Q50, Q51, Q52] corresponding to the stability experiment (shown in background ...) falls across six different readout TX/RX hardware regions",
+      "q44_resolution": "No discrepancy: Fig. 1(b) lists the 3x3 patch including its centre Q44 (the weight-4 X-check position, orange in Fig. 1(b)/2(a)); Methods lists the 8 qubits actually used. Fig. 2 caption: 'The black dot corresponds to the qubit not used in the 8-qubit stability experiment.' No program or Stim circuit on Zenodo touches Q44.",
+      "ancillas": {"Q36": {"col_row": [1, 5], "check": "Z37 Z43"}, "Q38": {"col_row": [3, 5], "check": "Z37 Z45"}, "Q50": {"col_row": [1, 7], "check": "Z43 Z51"}, "Q52": {"col_row": [3, 7], "check": "Z45 Z51"}},
+      "data": {"Q37": [2, 5], "Q43": [1, 6], "Q45": [3, 6], "Q51": [2, 7]},
+      "unused_centre": {"Q44": [2, 6]},
+      "authors_stim_index": {"0": "Q36", "1": "Q45", "2": "Q51", "3": "Q52", "4": "Q38", "5": "Q50", "6": "Q37", "7": "Q43"},
+      "authors_stim_coords_note": "Zenodo circuits use 45-degree rotated coordinates (u,v) = (2,2) + (dc - dr, -(dc + dr)) relative to Q44; verified for all 8 qubits"
+    },
+    "couplers_used": {
+      "source": "DEFCAL CZ blocks in the calibration program stored with each Zenodo run (FENCE lists include the coupler frame index, 84..232)",
+      "pairs": {"Q36-Q37": 150, "Q37-Q38": 151, "Q36-Q43": 156, "Q38-Q45": 158, "Q43-Q50": 169, "Q45-Q52": 171, "Q50-Q51": 176, "Q51-Q52": 177}
+    },
+    "calibration_medians_arxiv_v1": {
+      "quote": "Qubits 36, 38, 50 and 52 were used as the ancilla qubits, and had a median measurement fidelity of 93.3%. The median readout fidelity across the entire Ankaa-2 device was 94.7% at this time ... The single-qubit gates across the sublattice had a median isolated randomized benchmarking fidelity of 99.86%, and the CZs had a median interleaved randomized benchmarking fidelity of 97.3% ... The sublattice had a median T1 of 13.2 us and a median T2 of 10.6 us.",
+      "section": "arXiv v1 Methods: Ankaa-2 device specifications",
+      "values": {"ancilla_readout_fidelity": 0.933, "device_readout_fidelity": 0.947, "rb_1q": 0.9986, "irb_cz": 0.973, "T1_us": 13.2, "T2_us": 10.6}
+    }
+  },
+
+  "timings": {
+    "layer_e_f_i_single_qubit": {"value": 40, "unit": "ns", "quote": "Gate layers (e), (f) and (i) are executed in ~40 ns", "section": "Fig. 2 caption",
+      "program": "RX(+-pi/2) DEFCAL: drag_gaussian duration 4e-8 s (all 8 qubits); RX(pi) also 40 ns"},
+    "layer_g_cz": {"value": 176, "unit": "ns", "quote": "(g) in ~176 ns", "section": "Fig. 2 caption",
+      "program": "CZ 36-37 104, 38-45 108, 52-51 176, 50-43 104 ns -> layer = 176 ns (CZ 51-52)"},
+    "layer_h_cz": {"value": 112, "unit": "ns", "quote": "(h) in ~112 ns", "section": "Fig. 2 caption",
+      "program": "CZ 37-38 112, 45-52 68, 51-50 84, 43-36 104 ns -> layer = 112 ns (CZ 37-38)"},
+    "layer_j_measure": {"value": 948, "unit": "ns", "quote": "(j) in ~948 ns with an additional 336 ns ring down time", "section": "Fig. 2 caption",
+      "program": "ancilla readout pulses Q36 984, Q38 976, Q52 952, Q50 948 ns (data 500 ns); ring-down DELAYs Q36 192, Q38 336, Q52 168, Q50 144 ns. 948 ns is Q50's pulse, 336 ns is Q38's ring-down; the longest ancilla readout + ring-down is 976 + 336 = 1312 ns (Q38)."},
+    "ring_down": {"value": 336, "unit": "ns", "quote": "measurement pulse length was 964 ns with additional 336 ns ring down time", "section": "arXiv v1 Methods",
+      "program": "qpu_config ringdown_times (s): 36 1.92e-7, 37 1.92e-7, 38 3.36e-7, 43 6.24e-7, 44 2.4e-7, 45 3.84e-7, 50 1.44e-7, 51 1.44e-7, 52 1.68e-7"},
+    "measurement_pulse_median": {"value": 964, "unit": "ns", "quote": "measurement pulse length was 964 ns with additional 336 ns ring down time", "section": "arXiv v1 Methods",
+      "note": "= median of the four ancilla pulses (948, 952, 976, 984 ns); Fig. 2 quotes 948 ns, the shortest"},
+    "cz_median": {"value": 104, "unit": "ns", "quote": "The median two-qubit gate length was 104 ns", "section": "arXiv v1 Methods",
+      "program": "8 CZ pulses: 68, 84, 104, 104, 104, 108, 112, 176 ns (median 104); erf_square flux pulses with 8 ns pads and 8 ns rise on a qubit flux line plus the coupler"},
+    "qec_round": {"value": 1.7, "unit": "us", "quote": "A single QEC round therefore takes approximately 1.7 us.", "section": "Fig. 2 caption",
+      "derived": "40 + 176 + 112 + 40 + 1312 = 1680 ns from the program durations (first round adds layer (e), 40 ns)"},
+    "readout_to_decoder": {"value": 1.4, "unit": "us", "quote": "1.4 us is the time for the final readout results to reach the decoder", "section": "Control and communication latencies"},
+    "decoder_clock": {"value": 156.25, "unit": "MHz", "quote": "we opted to drive the FPGA decoder using the 156.25 MHz clock already present in the design to simplify the timing requirements", "section": "Methods"},
+    "sequencer_clock": {"value": 250, "unit": "MHz", "quote": "While the sequencer processor clock operates at 250 MHz", "section": "Methods"},
+    "decode_per_round_mean": {"value": [0.44, 0.79], "unit": "us", "quote": "our mean decoding time per round ranges from 0.44 us when decoding 5 rounds to 0.79 us when decoding 25 rounds", "section": "Decoding throughput"},
+    "full_decoding_response_time_9_rounds": {"value": 9.6, "unit": "us", "quote": "For a 9-decoding-round experiment, we find the full decoding response time to be 9.6 us, including 6.5 us decoding time and 3.1 us communication and control latencies.", "section": "Control and communication latencies"},
+    "control_logic": {"value": [1.0, 1.5], "unit": "us", "quote": "with the remaining 1-1.5 us (250-370 FPGA clock cycles) consisting of additional control system logic", "section": "Control and communication latencies"},
+    "shot_recycle_delay": {"value": 250, "unit": "us", "quote": null, "section": "not in paper; Zenodo qpu_config 'recycle_delay': 0.00025 and 'DELAY q 0.00025' at the start of every LEP program (passive reset between shots)"},
+    "wishbone_access_wait": {"value": 80, "unit": "ns", "quote": null, "section": "not in paper; program comment 'wait 80ns for the decoder to acknowledge a write/read' after every decoder access"},
+    "control_channel_delays": {"unit": "ns", "quote": null, "section": "not in paper; DEFFRAME CHANNEL-DELAY in the Zenodo calibration program", "charge_tx": 252, "readout_tx": 284, "readout_rx": [776, 796]},
+    "per_hop_latencies_Fig1_ns": {"A_readout_tx_to_rx": 500, "B_classify_serialize": 120, "C_rx_to_crossbar": [120, 160], "D_crossbar": 40, "E_crossbar_to_cards": [120, 160], "E_within_card_to_sequencer": [40, 90], "F_inter_chassis": [240, 260],
+      "quote": "Inter-unit latencies are denoted with worst-case values where measured.", "section": "Fig. 1(a) caption (each hop quoted in feedback.json)"}
+  },
+
+  "electronics": {
+    "chassis_and_fpga": {"quote": "The Rigetti control system is built around a configurable card cage chassis. Each physical card in a chassis has inputs or outputs targeting specific RF bands and features high-speed digital-to-analog (DAC) and analog-to-digital (ADC) converters that interface with a Kintex-7 FPGA.", "section": "Methods: Description of control system"},
+    "sequencers": {"quote": "The FPGA designs generate (or receive) control signals using one or more sequencers, each of which consist of a dedicated processor, waveform scheduler, and waveform generator. Experiments created in pyQuil are compiled into program binaries, consisting of waveforms and instructions in a proprietary assembly language, which are loaded into each relevant sequencer's memory by the control system before execution.", "section": "Methods: Description of control system"},
+    "io_ports": {"quote": "The assembly language allows for communication with external modules implemented in the FPGA design via instructions that interact with I/O ports. Additionally, the sequencer assembly language includes instructions which load classified results into a sequencer's memory so that it can be used by a program.", "section": "Methods: Description of control system"},
+    "low_latency_network": {"quote": "the control system features a low-latency network that distributes each qubit's most recently classified result when it is published to this network, as part of the readout capture pipeline.", "section": "Methods: Description of control system"},
+    "star_network": {"quote": "We selected one chassis to be the hub of a star network and connected all other relevant chassis to it, ensuring the lowest achievable results propagation time by limiting the inter-chassis communication to a single hop.", "section": "Methods: Real-time FPGA decoder integration"},
+    "control_hardware_map_from_zenodo": {
+      "note": "Not in the paper. From DEFFRAME HARDWARE-OBJECT entries of the stored calibration program. Six instruments match the paper's 'six different readout TX/RX hardware regions' (3 columns x 2 feed-line groups).",
+      "Q36": "tsunami01 (charge card 8, flux card 7, readout tx card 9 / rx card 0)", "Q37": "tsunami02", "Q38": "tsunami03",
+      "Q43": "tsunami08 (charge card 5)", "Q50": "tsunami08 (charge card 8 -- hosts the decoder: decoder_frame 'Transmon-50_charge_tx')",
+      "Q51": "tsunami09", "Q45": "tsunami10 (charge card 5)", "Q52": "tsunami10",
+      "readout_feedline_groups": "ro_rx frames group qubits by column and by rows 0-5 / 6-11, e.g. (1,8,15,22,29,36) on tsunami01 and (43,50,57,64,71,78) on tsunami08",
+      "hub_chassis": "not stated; the decoder's chassis (tsunami08) must be the hub per the Methods sentence 'Interactions with a decoder were handled by a gate drive sequencer on the hub chassis'"}
+  },
+
+  "decoding": {
+    "decoder": {"value": "Collision Clustering (FPGA), unweighted decoding graph", "quote": "The decoder we use is an FPGA implementation of a Collision Clustering decoder, which achieves the same logical fidelities as the Union Find algorithm. Modifications were made to the FPGA decoder of Ref. [barber] to allow for decoding the stability experiment and syndrome extraction circuits without mid-circuit reset operations.", "section": "Integrating an FPGA decoder in the Ankaa-2 control system",
+      "graph_quote": "The FPGA decoder decoding graph does not use edge weights.", "graph_section": "SI Sec. B"},
+    "real_time": {"quote": "The stabilizer measurement outcomes are automatically passed to the decoder during circuit execution. Once the decoder receives the allocated number of measurements, the measurements are converted to a syndrome and decoding is performed. The decoded result, along with data storing the decoder speed and status, is written to allocated registers.", "section": "Integrating an FPGA decoder in the Ankaa-2 control system",
+      "note": "Decoding starts after the last round (batch decode of the whole experiment), not as a streaming decoder: 'To support this, the FPGA decoder should be updated to be a streaming decoder' (Conclusion)."},
+    "bus": {"value": "32-bit WISHBONE via sequencer I/O ports, 250 MHz -> 156.25 MHz clock crossing", "quote": "We used a version of the FPGA decoder featuring a 32-bit WISHBONE interface for communication.", "section": "Methods"},
+    "decoder_location": {"quote": "we selected the FPGA design with the lowest resource utilization, the gate drive card design, which is responsible for generating microwave pulses to enact single-qubit gates", "section": "Methods", "zenodo": "Q50 charge-drive sequencer (Transmon-50_charge_tx), instrument tsunami08 card 8"},
+    "latencies": {"readout_to_decoder_us": 1.4, "decode_per_round_mean_us": [0.44, 0.79], "decode_9_rounds_us": 6.5, "communication_control_us": 3.1, "total_9_rounds_us": 9.6, "see": "feedback.json latency_budget"},
+    "offline_decoders": {"quote": "We use implementations in PyMatching 2 and BeliefMatching for the MWPM and belief-matching decoders, respectively. We use Stim to set up the circuits that represent our experiments and use these circuits to initialise the software decoders.", "section": "Methods: Software decoding"},
+    "offline_noise_model": {"quote": "Depolarisation of both qubits after each two-qubit gate with probability p. Depolarisation of each idle qubit and after each single-qubit gate, including measurement and reset operations, with probability p/10. Measurement flip with probability p.", "p": 0.03, "p_quote": "We decided to use p=0.03 based on the median two qubit gate fidelities on Ankaa-2.", "section": "SI Sec. B / Supplementary Note 2"},
+    "decoder_registers_from_program": {"note": "names/addresses from the executed assembly; meanings beyond the comments are our reading",
+      "0x1080": "control: write 0x1 reset, 0x4 start decoding (read-modify-write, mask 0xffffff00)", "0x1088": "DSR (status)", "0x1090": "DACTLR: experiment config 0x0{d}02026c, d = decoding rounds (mask 0x83)",
+      "0x1098": "DASR: 'homology' = decoded logical flip (LSB used for the branch)", "0x1108/0x1110": "MGUCTLR / MGUEVCTLR event-counter control", "0x1140-0x1160": "MGUEVCNTR_0..4 event counters (decoder timing metrics)", "0x1180-0x11a0": "event-type selectors 0x80-0x84", "0x1800 + 4k": "SYNG_0 syndrome-group words (raw measurement bits)",
+      "status_port": "I_DFDECODE_STATUS, core-0 field bits [8:5] (mask 0x1c0)"}
+  },
+
+  "results": {
+    "lep_fpga": {"quote": "The logical error probabilities decrease from (28.1 +- 0.1)% at 5 decoding rounds to (20.5 +- 0.1)% at 25 decoding rounds.", "section": "Logical error probability suppression", "zenodo_table": "zenodo/lep_fpga.txt (d = 5..25 odd)"},
+    "lep_soft_pairwise": {"quote": "This decoder achieves the lowest logical error probability, (17.6 +- 0.1)%", "section": "Logical error probability suppression"},
+    "repetitions": {"quote": "We repeat each experiment 10^5 times to obtain the probability of a logical error persisting at the end of the QEC routine.", "section": "Logical error probability suppression"},
+    "rounds": {"quote": "We perform stability-8 experiments on the Ankaa-2 device for varying numbers of QEC rounds, corresponding to 5 to 25 decoding rounds", "section": "Logical error probability suppression", "zenodo": "LEP runs have 4, 6, ..., 26 measurement rounds = 3, 5, ..., 25 decoding rounds"},
+    "throughput": {"quote": "These values remain below the 1 us threshold for data generation on a superconducting qubit device", "section": "Decoding throughput"},
+    "response_time": {"quote": "We also implement and time a fast-feedback experiment demonstrating a decoding response time of 9.6 us for a total of 9 measurement rounds.", "section": "Abstract"},
+    "defect_rates": {"quote": "Fig. 3(b) shows a slight increase in defect rates as further measurement rounds are performed, most likely due to a combination of leakage and heating effects.", "section": "Logical error probability suppression", "zenodo": "defect_rates_per_round.txt: 0.278-0.363, mean 0.321"}
+  },
+
+  "exactness": {
+    "exact_as_published": [
+      "Qubits, roles and checks (Methods; Fig. 1(b), 2(a)); Q44 unused.",
+      "Gate sequence of circuit-stability-r{5,9,25}.stim: identical gate DAG, detectors and observable to the authors' Zenodo Stim circuits main_meas06/10/26 and to the executed Quil programs (layers (e)-(j) of Fig. 2: RX(-pi/2) data, RX(+pi/2) ancillas, CZ layer g, CZ layer h, RX(-pi/2) ancillas, MEASURE; final round RX(-pi/2) on all 8, ancilla then data readout).",
+      "Detectors (m_r xor m_(r-2); m_2 alone) and observable (parity of the four first-round ancilla outcomes) are the authors' own, read from Zenodo; verified deterministic.",
+      "No resets; ancillas measured mid-circuit and re-used.",
+      "circuit-feedback-n9.stim: identical to the authors' ff_meas09.stim (fast-feedback schedule)",
+      "All pulse durations (CZ, RX, readout, ring-down) are the stored DEFCAL/DELAY values."
+    ],
+    "reconstructed_or_changed": [
+      "QUBIT_COORDS: Ankaa-2 lattice positions (col = q mod 7, row = q div 7) instead of the authors' rotated coordinates; DETECTOR coordinates likewise (col, row, decoding round).",
+      "Stim qubit index -> device qubit map: derived (measured-qubit lists stored per run vs the Stim M order; consistent with CZ adjacency and the rotated coordinates), not stated in text.",
+      "Dropped the published files' trailing 'SQRT_X ...; S ...' after the last measurement (no effect on any record; absent from the executed programs).",
+      "TICK placement: one TICK per FENCE-separated hardware layer of the program; the final data readout is a separate layer in the LEP program but simultaneous in the fast-feedback program.",
+      "Final data readout (exact as executed, interpretation ours): the data were prepared with RX(-pi/2) (LEP) / RX(+pi/2) (feedback) and are read out after the same rotation, i.e. each data qubit is measured in the Y basis it was prepared in. The parity of the four data bits is then deterministic (it is the weight-4 Y37 Y43 Y45 Y51 operator, which commutes with all four ZZ checks), but neither the authors' detectors nor their observable use it, and neither do ours.",
+      "The meaning of R in file names: R = decoding rounds (paper's x-axis), measurement rounds = R + 1.",
+      "Noise models in verify.py are ours (the SI model of the paper plus a device-informed and a defect-rate-matched variant); they are sanity checks, not a reproduction of the device."
+    ]
+  },
+
+  "checks": {
+    "noiseless_1000_shots": "all detectors and the observable zero for r5, r9, r25 and feedback-n9 (verify.txt section 1)",
+    "zenodo_equivalence": "20/20 published circuits (12 LEP, 8 fast-feedback) match in gate DAG, detector sets, observable set and noisy DEM (verify.txt section 2)",
+    "dem": "detector_error_model(decompose_errors=True) succeeds under the SI model p = 0.03; no hyperedges; n=8 graph has 28 nodes, boundary edges on layers {0,1,5,6}, time-spans {0,1,2} as in SI Fig. S2",
+    "lep_sanity": "PyMatching: SI p=0.03 9.1% -> 0.2%; device-informed 25.1% -> 7.0%; SI with p=0.08 matched to the measured 0.32 defect rate 34.6% -> 19.3%; paper FPGA 28.1% -> 20.5% (d = 5 -> 25)",
+    "counts": "measurements 4n+4, detectors 4d = 4(n-1); decoder configured with d (DACTLR top byte) in every program; fast-feedback N = measurement rounds (ro BIT[4N+5])"
+  }
+}

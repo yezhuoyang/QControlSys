@@ -1,0 +1,256 @@
+# Stability-8, Caune et al. (arXiv:2410.05202; Nat. Commun. 17, 7383 (2026)). Noiseless.
+# schedule=feedback, executed on 2024-07-17 (Zenodo fast_feedback_raw_data.h5).
+# syndrome-extraction (measurement) rounds n=9; decoding rounds (detector layers) d=n-1=8.
+# Stim index -> Ankaa-2 qubit: 0->Q36, 1->Q45, 2->Q51, 3->Q52, 4->Q38, 5->Q50, 6->Q37, 7->Q43
+# ancillas Q36,Q38,Q50,Q52 measure Z37Z43, Z37Z45, Z43Z51, Z45Z51; data Q37,Q43,Q45,Q51; Q44 (centre, X-check ancilla) unused.
+# QUBIT_COORDS(col,row): Ankaa-2 7-column square lattice, col = q mod 7, row = q div 7.
+# SQRT_X = RX(+pi/2), SQRT_X_DAG = RX(-pi/2) (up to global phase). No resets anywhere.
+QUBIT_COORDS(1, 5) 0  # Q36 ancilla
+QUBIT_COORDS(3, 6) 1  # Q45 data
+QUBIT_COORDS(2, 7) 2  # Q51 data
+QUBIT_COORDS(3, 7) 3  # Q52 ancilla
+QUBIT_COORDS(3, 5) 4  # Q38 ancilla
+QUBIT_COORDS(1, 7) 5  # Q50 ancilla
+QUBIT_COORDS(2, 5) 6  # Q37 data
+QUBIT_COORDS(1, 6) 7  # Q43 data
+# ======== syndrome-extraction round 1 / 9 ========
+# RX(+pi/2) on all 8, 40 ns
+SQRT_X 0 1 2 3 4 5 6 7
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# logical observable: product of the four ZZ checks in round 1 = parity of the four first-round ancilla outcomes (the four checks multiply to the identity)
+OBSERVABLE_INCLUDE(0) rec[-4] rec[-3] rec[-2] rec[-1]
+# ======== syndrome-extraction round 2 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 1: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 0) rec[-2]  # Q52, check Z45Z51
+DETECTOR(1, 7, 0) rec[-1]  # Q50, check Z43Z51
+DETECTOR(3, 5, 0) rec[-3]  # Q38, check Z37Z45
+DETECTOR(1, 5, 0) rec[-4]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 3 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 2: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 1) rec[-2] rec[-10]  # Q52, check Z45Z51
+DETECTOR(1, 7, 1) rec[-1] rec[-9]  # Q50, check Z43Z51
+DETECTOR(3, 5, 1) rec[-3] rec[-11]  # Q38, check Z37Z45
+DETECTOR(1, 5, 1) rec[-4] rec[-12]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 4 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 3: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 2) rec[-2] rec[-10]  # Q52, check Z45Z51
+DETECTOR(1, 7, 2) rec[-1] rec[-9]  # Q50, check Z43Z51
+DETECTOR(3, 5, 2) rec[-3] rec[-11]  # Q38, check Z37Z45
+DETECTOR(1, 5, 2) rec[-4] rec[-12]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 5 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 4: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 3) rec[-2] rec[-10]  # Q52, check Z45Z51
+DETECTOR(1, 7, 3) rec[-1] rec[-9]  # Q50, check Z43Z51
+DETECTOR(3, 5, 3) rec[-3] rec[-11]  # Q38, check Z37Z45
+DETECTOR(1, 5, 3) rec[-4] rec[-12]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 6 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 5: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 4) rec[-2] rec[-10]  # Q52, check Z45Z51
+DETECTOR(1, 7, 4) rec[-1] rec[-9]  # Q50, check Z43Z51
+DETECTOR(3, 5, 4) rec[-3] rec[-11]  # Q38, check Z37Z45
+DETECTOR(1, 5, 4) rec[-4] rec[-12]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 7 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 6: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 5) rec[-2] rec[-10]  # Q52, check Z45Z51
+DETECTOR(1, 7, 5) rec[-1] rec[-9]  # Q50, check Z43Z51
+DETECTOR(3, 5, 5) rec[-3] rec[-11]  # Q38, check Z37Z45
+DETECTOR(1, 5, 5) rec[-4] rec[-12]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 8 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 0 3 4 5
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns) then ring-down DELAY 192/336/168/144 ns; no reset
+M 0 4 3 5
+# decoding round 7: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 6) rec[-2] rec[-10]  # Q52, check Z45Z51
+DETECTOR(1, 7, 6) rec[-1] rec[-9]  # Q50, check Z43Z51
+DETECTOR(3, 5, 6) rec[-3] rec[-11]  # Q38, check Z37Z45
+DETECTOR(1, 5, 6) rec[-4] rec[-12]  # Q36, check Z37Z43
+# ======== syndrome-extraction round 9 / 9 ========
+TICK
+# RX(+pi/2) on ancillas, 40 ns
+SQRT_X 5 3 0 4
+TICK
+# CZ layer 1/4: CZ Q52-Q45 Q50-Q43, 104 ns (longest CZ in layer)
+CZ 3 1 5 7
+TICK
+# CZ layer 2/4: CZ Q38-Q37 Q52-Q51, 176 ns (longest CZ in layer)
+CZ 4 6 3 2
+TICK
+# CZ layer 3/4: CZ Q36-Q37 Q50-Q51, 104 ns (longest CZ in layer)
+CZ 0 6 5 2
+TICK
+# CZ layer 4/4: CZ Q36-Q43 Q38-Q45, 108 ns (longest CZ in layer)
+CZ 0 7 4 1
+TICK
+# final round: RX(+pi/2) on all 8, 40 ns
+SQRT_X 0 1 2 3 4 5 6 7
+TICK
+# Fig. 2(j): MEASURE Q36,Q38,Q52,Q50 (pulses 984/976/952/948 ns)
+M 0 4 3 5
+# final readout of the data qubits Q51,Q43,Q45,Q37 (500 ns pulses), simultaneous with the ancillas; not used by any detector or by the observable
+M 2 7 1 6
+# decoding round 8: detector = m_r xor m_(r-2) for each ancilla (round 2: m_2 alone)
+DETECTOR(3, 7, 7) rec[-6] rec[-14]  # Q52, check Z45Z51
+DETECTOR(1, 7, 7) rec[-5] rec[-13]  # Q50, check Z43Z51
+DETECTOR(3, 5, 7) rec[-7] rec[-15]  # Q38, check Z37Z45
+DETECTOR(1, 5, 7) rec[-8] rec[-16]  # Q36, check Z37Z43

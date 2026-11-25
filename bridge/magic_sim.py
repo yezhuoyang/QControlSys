@@ -31,7 +31,7 @@ import numpy as np
 import stim
 
 ONE_QUBIT = {"H", "H_YZ", "H_XY", "S", "S_DAG", "SQRT_X", "SQRT_X_DAG", "SQRT_Y", "SQRT_Y_DAG", "X", "Y", "Z", "C_XYZ", "C_ZYX"}
-TWO_QUBIT = {"CZ", "CX", "CY"}
+TWO_QUBIT = {"CZ", "CX", "CY", "SQRT_ZZ", "SQRT_ZZ_DAG"}
 
 
 def moments(circuit):
@@ -48,7 +48,17 @@ def moments(circuit):
 
 
 def targets(inst):
-    return [t.value for t in inst.targets_copy() if t.is_qubit_target]
+    """The qubits an instruction acts on. A two-qubit gate controlled by a sweep bit or a
+    measurement record (Stim's classically controlled Paulis, e.g. the random input bitstrings of
+    Google's circuits) acts on no qubit pair: only its qubit-qubit pairs are returned for it."""
+    ts = inst.targets_copy()
+    if inst.name in TWO_QUBIT:
+        out = []
+        for a, b in zip(ts[0::2], ts[1::2]):
+            if a.is_qubit_target and b.is_qubit_target:
+                out += [a.value, b.value]
+        return out
+    return [t.value for t in ts if t.is_qubit_target]
 
 
 def si1000(circuit, p):
@@ -63,7 +73,13 @@ def si1000(circuit, p):
         busy, resonator = set(), False
         for inst in ops:
             name, tag, qs = inst.name, inst.tag, targets(inst)
-            if name in ("M", "MZ", "MX", "MY"):
+            if name in ("MR", "MRZ"):
+                # A measurement followed by a reset of the same qubit (Stim's generated circuits).
+                resonator = True
+                out.append("X_ERROR", qs, 5 * p)
+                out.append(inst)
+                out.append("X_ERROR", qs, 2 * p)
+            elif name in ("M", "MZ", "MX", "MY"):
                 resonator = True
                 out.append("X_ERROR" if name in ("M", "MZ") else "Z_ERROR", qs, 5 * p)
                 out.append(inst)
@@ -73,7 +89,8 @@ def si1000(circuit, p):
                 out.append("X_ERROR" if name in ("R", "RZ") else "Z_ERROR", qs, 2 * p)
             elif name in TWO_QUBIT:
                 out.append(inst)
-                out.append("DEPOLARIZE2", qs, p)
+                if qs:
+                    out.append("DEPOLARIZE2", qs, p)
             elif name in ONE_QUBIT or (name == "I" and tag in ("T_gate", "T_dagger_gate", "echo", "conjugate")):
                 out.append(inst)
                 out.append("DEPOLARIZE1", qs, p / 10)
@@ -197,10 +214,200 @@ def frames(doc):
     return {"shots": shots, "train": train, "histogram": hist, "noisy_ops": len(noisy)}
 
 
+def uniform(circuit, noise, moments_ns=None):
+    """A paper's average error rates: DEPOLARIZE1(p1) after every one-qubit gate, DEPOLARIZE2(p2)
+    after every two-qubit gate, X_ERROR(pm) before every measurement (the readout error), and,
+    with pi, DEPOLARIZE1(pi) on every idle qubit per moment; or, with t1_s and tphi_s and the
+    moments' durations, the idle Pauli channel p = 1 - exp(-t/T) with T_X = T_Y = 4 T1 and
+    T_Z = T_phi on every idle qubit (as Besedin et al. simulate their device)."""
+    n = circuit.num_qubits
+    out = stim.Circuit()
+    for k, ops in enumerate(moments(circuit)):
+        if k:
+            out.append("TICK")
+        busy = set()
+        for inst in ops:
+            name, qs = inst.name, targets(inst)
+            if name in ("M", "MZ") and noise.get("classical_readout"):
+                # A readout error that flips the reported bit only (no reset: an X error would
+                # leave the qubit flipped for every later round).
+                out.append("M", qs, noise["pm"])
+            elif name in ("M", "MZ"):
+                out.append("X_ERROR", qs, noise["pm"]); out.append(inst)
+            elif name == "MX":
+                out.append("Z_ERROR", qs, noise["pm"]); out.append(inst)
+            elif name in ("R", "RZ") and noise.get("pr"):
+                out.append(inst); out.append("X_ERROR", qs, noise["pr"])
+            elif name in TWO_QUBIT:
+                out.append(inst)
+                if qs:
+                    out.append("DEPOLARIZE2", qs, noise["p2"])
+            elif name in ONE_QUBIT:
+                out.append(inst); out.append("DEPOLARIZE1", qs, noise["p1"])
+            else:
+                out.append(inst); continue
+            busy.update(qs)
+        real = any(i.name not in ("DETECTOR", "OBSERVABLE_INCLUDE", "QUBIT_COORDS") for i in ops)
+        idle = [q for q in range(n) if q not in busy]
+        if real and idle and noise.get("pi"):
+            out.append("DEPOLARIZE1", idle, noise["pi"])
+        if real and idle and noise.get("t1_s") and moments_ns and k < len(moments_ns) and moments_ns[k] > 0:
+            t = moments_ns[k] * 1e-9
+            if noise.get("idle") == "twirl":
+                # Pauli-twirled amplitude and phase damping over the moment (T1, T2).
+                pxy = (1 - math.exp(-t / noise["t1_s"])) / 4
+                pz = max(0.0, (1 - math.exp(-t / noise["t2_s"])) / 2 - pxy)
+            else:
+                pxy = 1 - math.exp(-t / (4 * noise["t1_s"]))
+                pz = 1 - math.exp(-t / noise["tphi_s"])
+            out.append("PAULI_CHANNEL_1", idle, [pxy, pxy, pz])
+    return out
+
+
+def noisy_of(doc):
+    """The circuit of a request with its noise: a Stim text with SI1000 added, or one of Stim's
+    generated circuits (with SI1000 at p, or with its own uniform depolarizing noise)."""
+    if "generated" in doc:
+        g = doc["generated"]
+        clean = stim.Circuit.generated(g["code_task"], distance=g["distance"], rounds=g["rounds"]).flattened()
+    else:
+        clean = stim.Circuit(doc["stim"]).flattened()
+    noise = doc.get("noise", {"model": "si1000", "p": 1e-3})
+    if noise["model"] == "uniform":
+        return clean, uniform(clean, noise, doc.get("moments_ns"))
+    if noise["model"] == "given":
+        # The paper's own noisy circuit: its noise as published, and the circuit without it.
+        return clean.without_noise(), clean
+    return clean, (si1000(clean, noise["p"]) if noise["model"] == "si1000" else clean)
+
+
+def reference_decoder(dem, hyper):
+    """The reference the compiled decoder is set against: PyMatching for a graphlike model;
+    Chromobius (the color-code decoder of Gidney and Jones) for a hypergraph one when its
+    detectors carry color-code annotations; else none."""
+    if not hyper:
+        import pymatching
+        m = pymatching.Matching.from_detector_error_model(dem)
+        return "pymatching", lambda d: m.decode_batch(d)
+    try:
+        import chromobius
+        dec = chromobius.compile_decoder_for_dem(dem)
+    except Exception:
+        return None
+    nobs = dem.num_observables
+    def predict(d):
+        packed = np.packbits(d.astype(np.uint8), axis=1, bitorder="little")
+        out = dec.predict_obs_flips_from_dets_bit_packed(packed)
+        return np.unpackbits(out, axis=1, bitorder="little", count=nobs).astype(bool)
+    return "chromobius", predict
+
+
+def graph(doc):
+    """The decoding graph of a circuit for the compiled union-find decoder (riscq/decoders/uf.mjs):
+    detectors and observables as XORs of measurement bits (with the noiseless reference parity),
+    the edges of its detector error model (decomposed into graphlike parts; parallel edges merged,
+    keeping the observables of the likelier), and sample shots with what PyMatching decides on
+    them, as the reference for the compiled decoder."""
+    import pymatching
+    clean, noisy = noisy_of(doc)
+    flat = noisy.flattened()
+    meas_count, det_meas, obs_meas = 0, [], {}
+    for inst in flat:
+        if inst.name in ("M", "MZ", "MX", "MY", "MR", "MRX", "MRY", "MRZ"):
+            meas_count += len([t for t in inst.targets_copy() if t.is_qubit_target])
+        elif inst.name == "MPP":
+            meas_count += sum(1 for t in inst.targets_copy() if not t.is_combiner)
+        elif inst.name == "DETECTOR":
+            det_meas.append([meas_count + t.value for t in inst.targets_copy()])
+        elif inst.name == "OBSERVABLE_INCLUDE":
+            k = int(inst.gate_args_copy()[0])
+            obs_meas.setdefault(k, []).extend(meas_count + t.value for t in inst.targets_copy())
+    ref = noisy.reference_sample()
+    det_ref = [int(sum(int(ref[m]) for m in ms) % 2) for ms in det_meas]
+    nobs = noisy.num_observables
+    obs_list = [obs_meas.get(k, []) for k in range(nobs)]
+    obs_ref = [int(sum(int(ref[m]) for m in ms) % 2) for ms in obs_list]
+    hyper = bool(doc.get("hyper"))
+    if not hyper:
+        try:
+            dem = noisy.detector_error_model(decompose_errors=True, approximate_disjoint_errors=True)
+        except ValueError:
+            hyper = True  # not graphlike (color codes, qLDPC codes): the cluster decoder takes the hyperedges
+    if hyper:
+        dem = noisy.detector_error_model(decompose_errors=False, approximate_disjoint_errors=True)
+    edges, errors = {}, {}
+    for inst in dem.flattened():
+        if inst.type != "error":
+            continue
+        p = inst.args_copy()[0]
+        if hyper:
+            dets = tuple(sorted(t.val for t in inst.targets_copy() if t.is_relative_detector_id()))
+            obs = sum(1 << t.val for t in inst.targets_copy() if t.is_logical_observable_id())
+            if not dets:
+                continue
+            if dets in errors:
+                q, o = errors[dets]
+                errors[dets] = (q * (1 - p) + p * (1 - q), o if q >= p else obs)
+            else:
+                errors[dets] = (p, obs)
+            continue
+        comp = [[]]
+        for t in inst.targets_copy():
+            if t.is_separator():
+                comp.append([])
+            else:
+                comp[-1].append(t)
+        for c in comp:
+            dets = sorted(t.val for t in c if t.is_relative_detector_id())
+            obs = sum(1 << t.val for t in c if t.is_logical_observable_id())
+            if len(dets) == 0 or len(dets) > 2:
+                continue
+            key = (dets[0], dets[1] if len(dets) == 2 else -1)
+            if key in edges:
+                q, o = edges[key]
+                edges[key] = (q * (1 - p) + p * (1 - q), o if q >= p else obs)
+            else:
+                edges[key] = (p, obs)
+    stats = doc.get("stats_shots", 0)
+    if stats:
+        # Many shots, kept in Python: the observable's flip rate raw, after PyMatching, and among
+        # shots where no detector fired (postselection), per observable.
+        det, obs = noisy.compile_detector_sampler(seed=doc.get("seed", 1) + 1).sample(stats, separate_observables=True)
+        keep = ~det.any(axis=1)
+        st = {"shots": stats, "kept": int(keep.sum()), "raw": obs.sum(axis=0).tolist(), "keptFlips": obs[keep].sum(axis=0).tolist()}
+        ref = reference_decoder(dem, hyper)
+        if ref:
+            st["pymatching"] = (ref[1](det) != obs).sum(axis=0).tolist()
+            st["reference"] = ref[0]
+    shots = doc.get("shots", 0)
+    out = {"circuit": str(clean), "measurements": noisy.num_measurements, "detectors": det_meas, "detRef": det_ref,
+           "observables": obs_list, "obsRef": obs_ref,
+           "edges": [[a, b, o, p] for (a, b), (p, o) in sorted(edges.items())]}
+    if stats:
+        out["stats"] = st
+    if hyper:
+        # Error mechanisms, most likely first: the cluster decoder pivots on them in this order.
+        out["errors"] = [[list(d), o, p] for d, (p, o) in sorted(errors.items(), key=lambda kv: -kv[1][0])]
+    if shots:
+        sampler = noisy.compile_sampler(seed=doc.get("seed", 1))
+        m = sampler.sample(shots)
+        dets, obs = noisy.compile_m2d_converter().convert(measurements=m, separate_observables=True)
+        ref = reference_decoder(dem, hyper)
+        pred = ref[1](dets) if ref else np.zeros((shots, max(1, nobs)), dtype=bool)
+        out["reference"] = ref[0] if ref else None
+        out["shots"] = ["".join("1" if b else "0" for b in row) for row in m]
+        out["actual"] = [int(sum(int(b) << k for k, b in enumerate(row))) for row in obs]
+        out["pymatching"] = [int(sum(int(b) << k for k, b in enumerate(row))) for row in pred]
+        out["defects"] = [int(row.sum()) for row in dets]
+    return out
+
+
 def main():
     doc = json.load(sys.stdin)
     mode = doc["mode"]
-    if mode == "sample":
+    if mode == "graph":
+        out = graph(doc)
+    elif mode == "sample":
         # One noiseless shot of the circuit: the bits a twin's readout oracle returns.
         shot = stim.Circuit(doc["stim"]).compile_sampler(seed=doc.get("seed", 1)).sample(1)[0]
         out = {"bits": [int(b) for b in shot]}

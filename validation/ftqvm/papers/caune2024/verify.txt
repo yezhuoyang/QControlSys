@@ -1,0 +1,62 @@
+stim 1.15.0 | pymatching 2.4.0 | numpy 2.4.4
+
+== 1. Noiseless determinism (1000 shots) and counts ==
+circuit-stability-r5 : measurement rounds n= 6, qubits 8, measurements  28 (=4n+4), detectors  20 (=4d), observables 1; 1000 shots: 0 detector bits set, 0 observable bits set -> PASS
+circuit-stability-r9 : measurement rounds n=10, qubits 8, measurements  44 (=4n+4), detectors  36 (=4d), observables 1; 1000 shots: 0 detector bits set, 0 observable bits set -> PASS
+circuit-stability-r25: measurement rounds n=26, qubits 8, measurements 108 (=4n+4), detectors 100 (=4d), observables 1; 1000 shots: 0 detector bits set, 0 observable bits set -> PASS
+circuit-feedback-n9    : measurement rounds n= 9, detectors 32 (=4*8); 1000 shots all zero -> PASS
+SI Fig. S2 caption "8 rounds of syndrome measurements (equivalent to 7 rounds of detectors)": n=8 gives 7 detector layers
+circuit-stability-r5.stim: final data readout (Y basis) -- single bits random (means [0.5, 0.5, 0.5, 0.49]), 4-bit parity values [0] (deterministic Y37Y43Y45Y51; unused by the paper's detectors/observable)
+circuit-feedback-n9.stim: final data readout (Y basis) -- single bits random (means [0.53, 0.5, 0.48, 0.51]), 4-bit parity values [0] (deterministic Y37Y43Y45Y51; unused by the paper's detectors/observable)
+
+== 2. Equivalence with the authors' Stim circuits on Zenodo ==
+ff_meas02.stim     n= 2 d= 1 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas03.stim     n= 3 d= 2 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas04.stim     n= 4 d= 3 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas05.stim     n= 5 d= 4 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas06.stim     n= 6 d= 5 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas07.stim     n= 7 d= 6 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas08.stim     n= 8 d= 7 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+ff_meas09.stim     n= 9 d= 8 schedule=feedback gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas04.stim   n= 4 d= 3 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas06.stim   n= 6 d= 5 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas08.stim   n= 8 d= 7 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas10.stim   n=10 d= 9 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas12.stim   n=12 d=11 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas14.stim   n=14 d=13 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas16.stim   n=16 d=15 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas18.stim   n=18 d=17 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas20.stim   n=20 d=19 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas22.stim   n=22 d=21 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas24.stim   n=24 d=23 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+main_meas26.stim   n=26 d=25 schedule=lep      gate DAG True  detectors True  observable True  DEM True  -> PASS
+
+== 3. Detector error models, SI noise model p = 0.03 ==
+r5  detector_error_model(decompose_errors=True): 88 error mechanisms over 20 detectors; largest undecomposed error touches 2 detectors (paper: no hyperedges)
+r9  detector_error_model(decompose_errors=True): 152 error mechanisms over 36 detectors; largest undecomposed error touches 2 detectors (paper: no hyperedges)
+r25 detector_error_model(decompose_errors=True): 408 error mechanisms over 100 detectors; largest undecomposed error touches 2 detectors (paper: no hyperedges)
+SI Fig. S2 graph (n=8): 28 nodes (figure: 28 = 4 x 7); boundary edges attach to detector layers [0, 1, 5, 6] (figure: two bottom and two top layers are "boundary-adjacent"); edge time-spans [0, 1, 2] (0 = space-like, 1 = time-like/diagonal hook, 2 = the no-reset edges "connecting layers two rounds apart") -> PASS
+
+== 4. Logical error probability vs decoding rounds (PyMatching), sanity check only ==
+measured mean defect rate, d=25 run (Zenodo, 100 values): 0.321 (range 0.278-0.363, rising with round)
+SI-model p grid -> simulated mean detector rate at d=25: 0.030:0.153, 0.035:0.174, 0.040:0.194, 0.045:0.212, 0.050:0.229, 0.055:0.248, 0.060:0.262, 0.065:0.278, 0.070:0.293, 0.075:0.305, 0.080:0.316, 0.085:0.329, 0.090:0.339, 0.095:0.349, 0.100:0.361
+p_fit = 0.080 (closest detector rate 0.316)
+20000 shots per point (the paper used 1e5 repetitions per point). Cells: LEP +- s.e. (mean detector rate).
+ d | (a) SI p=0.03             | (b) device-informed       | (c) SI p=p_fit=0.080       | paper FPGA (Zenodo) | paper MWPM (Zenodo)
+ 5 | 0.0906 +- 0.0020 (0.150) | 0.2514 +- 0.0031 (0.258) | 0.3461 +- 0.0034 (0.310) | 0.2814 +- 0.0014 | 0.2876 +- 0.0014
+ 7 | 0.0560 +- 0.0016 (0.150) | 0.2124 +- 0.0029 (0.262) | 0.3259 +- 0.0033 (0.312) | 0.2658 +- 0.0014 | 0.2675 +- 0.0014
+ 9 | 0.0379 +- 0.0014 (0.151) | 0.1802 +- 0.0027 (0.263) | 0.3040 +- 0.0033 (0.314) | 0.2484 +- 0.0014 | 0.2485 +- 0.0014
+11 | 0.0231 +- 0.0011 (0.151) | 0.1567 +- 0.0026 (0.263) | 0.2907 +- 0.0032 (0.316) | 0.2438 +- 0.0014 | 0.2421 +- 0.0014
+13 | 0.0169 +- 0.0009 (0.151) | 0.1427 +- 0.0025 (0.264) | 0.2726 +- 0.0031 (0.315) | 0.2424 +- 0.0014 | 0.2406 +- 0.0014
+15 | 0.0107 +- 0.0007 (0.152) | 0.1263 +- 0.0023 (0.264) | 0.2551 +- 0.0031 (0.316) | 0.2325 +- 0.0013 | 0.2295 +- 0.0013
+17 | 0.0071 +- 0.0006 (0.153) | 0.1119 +- 0.0022 (0.264) | 0.2374 +- 0.0030 (0.316) | 0.2332 +- 0.0013 | 0.2282 +- 0.0013
+19 | 0.0049 +- 0.0005 (0.153) | 0.0984 +- 0.0021 (0.264) | 0.2273 +- 0.0030 (0.317) | 0.2191 +- 0.0013 | 0.2175 +- 0.0013
+21 | 0.0036 +- 0.0004 (0.153) | 0.0883 +- 0.0020 (0.265) | 0.2147 +- 0.0029 (0.317) | 0.2118 +- 0.0013 | 0.2070 +- 0.0013
+23 | 0.0023 +- 0.0003 (0.152) | 0.0800 +- 0.0019 (0.265) | 0.2019 +- 0.0028 (0.317) | 0.2225 +- 0.0013 | 0.2182 +- 0.0013
+25 | 0.0020 +- 0.0003 (0.153) | 0.0701 +- 0.0018 (0.264) | 0.1926 +- 0.0028 (0.316) | 0.2053 +- 0.0013 | 0.2001 +- 0.0013
+paper text: (28.1 +- 0.1)% at 5 decoding rounds -> (20.5 +- 0.1)% at 25 (real-time FPGA decoder)
+simulation (a) SI p=0.03:         9.1% ->   0.2%   (LEP falls with d: True)
+simulation (b) device-informed:  25.1% ->   7.0%   (LEP falls with d: True)
+simulation (c) SI p=0.080:       34.6% ->  19.3%   (LEP falls with d: True)
+
+OVERALL: PASS

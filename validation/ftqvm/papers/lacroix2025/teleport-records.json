@@ -1,0 +1,8783 @@
+{
+ "circuit-teleport.stim": {
+  "input_state": "1",
+  "l2_readout_basis": "Z",
+  "detectors": [
+   {
+    "label": "init:blue1:Z",
+    "measurements": [
+     6
+    ],
+    "coords": [
+     1,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "init:red1:Z",
+    "measurements": [
+     7
+    ],
+    "coords": [
+     2,
+     3,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green1:Z",
+    "measurements": [
+     8
+    ],
+    "coords": [
+     3,
+     6,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:red2:Z",
+    "measurements": [
+     9
+    ],
+    "coords": [
+     5,
+     6,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green2:Z",
+    "measurements": [
+     10
+    ],
+    "coords": [
+     6,
+     3,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:blue2:Z",
+    "measurements": [
+     11
+    ],
+    "coords": [
+     7,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "merge1:blue1:X",
+    "measurements": [
+     0,
+     12
+    ],
+    "coords": [
+     1,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue1:Z",
+    "measurements": [
+     8,
+     20
+    ],
+    "coords": [
+     1,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge1:red1:X",
+    "measurements": [
+     1,
+     13
+    ],
+    "coords": [
+     2,
+     4,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red1:Z",
+    "measurements": [
+     21
+    ],
+    "coords": [
+     2,
+     3,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green1x:X",
+    "measurements": [
+     2,
+     14
+    ],
+    "coords": [
+     3,
+     5,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green1x:Z",
+    "measurements": [
+     6,
+     8,
+     22
+    ],
+    "coords": [
+     3,
+     6,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:hatL:Zpair",
+    "measurements": [
+     23
+    ],
+    "coords": [
+     4,
+     3,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:hatR:Zpair",
+    "measurements": [
+     24
+    ],
+    "coords": [
+     4,
+     7,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:red2x:X",
+    "measurements": [
+     3,
+     17
+    ],
+    "coords": [
+     5,
+     5,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red2x:Z",
+    "measurements": [
+     9,
+     11,
+     25
+    ],
+    "coords": [
+     5,
+     6,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green2:X",
+    "measurements": [
+     4,
+     18
+    ],
+    "coords": [
+     6,
+     4,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green2:Z",
+    "measurements": [
+     26
+    ],
+    "coords": [
+     6,
+     3,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:blue2:X",
+    "measurements": [
+     5,
+     19
+    ],
+    "coords": [
+     7,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue2:Z",
+    "measurements": [
+     9,
+     27
+    ],
+    "coords": [
+     7,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge2:blue1:X",
+    "measurements": [
+     12,
+     28
+    ],
+    "coords": [
+     1,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue1:Z",
+    "measurements": [
+     22,
+     36
+    ],
+    "coords": [
+     1,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge2:red1:X",
+    "measurements": [
+     13,
+     29
+    ],
+    "coords": [
+     2,
+     4,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red1:Z",
+    "measurements": [
+     37
+    ],
+    "coords": [
+     2,
+     3,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green1x:X",
+    "measurements": [
+     14,
+     30
+    ],
+    "coords": [
+     3,
+     5,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green1x:Z",
+    "measurements": [
+     20,
+     25,
+     38
+    ],
+    "coords": [
+     3,
+     6,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:hatL:X",
+    "measurements": [
+     15,
+     31
+    ],
+    "coords": [
+     4,
+     4,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatL:Zpair",
+    "measurements": [
+     39
+    ],
+    "coords": [
+     4,
+     3,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:hatR:X",
+    "measurements": [
+     16,
+     32
+    ],
+    "coords": [
+     4,
+     8,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatR:Zpair",
+    "measurements": [
+     40
+    ],
+    "coords": [
+     4,
+     7,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:red2x:X",
+    "measurements": [
+     17,
+     33
+    ],
+    "coords": [
+     5,
+     5,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red2x:Z",
+    "measurements": [
+     22,
+     27,
+     41
+    ],
+    "coords": [
+     5,
+     6,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green2:X",
+    "measurements": [
+     18,
+     34
+    ],
+    "coords": [
+     6,
+     4,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green2:Z",
+    "measurements": [
+     42
+    ],
+    "coords": [
+     6,
+     3,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:blue2:X",
+    "measurements": [
+     19,
+     35
+    ],
+    "coords": [
+     7,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue2:Z",
+    "measurements": [
+     25,
+     43
+    ],
+    "coords": [
+     7,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge3:blue1:X",
+    "measurements": [
+     28,
+     44
+    ],
+    "coords": [
+     1,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue1:Z",
+    "measurements": [
+     38,
+     53
+    ],
+    "coords": [
+     1,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:red1:X",
+    "measurements": [
+     29,
+     45
+    ],
+    "coords": [
+     2,
+     4,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red1:Z",
+    "measurements": [
+     54
+    ],
+    "coords": [
+     2,
+     3,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green1x:X",
+    "measurements": [
+     30,
+     46
+    ],
+    "coords": [
+     3,
+     5,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green1x:Z",
+    "measurements": [
+     36,
+     41,
+     55
+    ],
+    "coords": [
+     3,
+     6,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:hatL:X",
+    "measurements": [
+     31,
+     47
+    ],
+    "coords": [
+     4,
+     4,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatL:Zpair",
+    "measurements": [
+     56
+    ],
+    "coords": [
+     4,
+     3,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:hatR:X",
+    "measurements": [
+     32,
+     48
+    ],
+    "coords": [
+     4,
+     8,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatR:Zpair",
+    "measurements": [
+     57
+    ],
+    "coords": [
+     4,
+     7,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:red2x:X",
+    "measurements": [
+     33,
+     49
+    ],
+    "coords": [
+     5,
+     5,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red2x:Z",
+    "measurements": [
+     38,
+     43,
+     58
+    ],
+    "coords": [
+     5,
+     6,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green2:X",
+    "measurements": [
+     34,
+     50
+    ],
+    "coords": [
+     6,
+     4,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green2:Z",
+    "measurements": [
+     59
+    ],
+    "coords": [
+     6,
+     3,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:blue2:X",
+    "measurements": [
+     35,
+     51
+    ],
+    "coords": [
+     7,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue2:Z",
+    "measurements": [
+     41,
+     60
+    ],
+    "coords": [
+     7,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:bell:XX",
+    "measurements": [
+     52
+    ],
+    "coords": [
+     4,
+     5,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "split:blue1:X",
+    "measurements": [
+     44,
+     62
+    ],
+    "coords": [
+     1,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue1:Z",
+    "measurements": [
+     55,
+     68
+    ],
+    "coords": [
+     1,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "split:red1:X",
+    "measurements": [
+     45,
+     63
+    ],
+    "coords": [
+     2,
+     4,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red1:Z",
+    "measurements": [
+     69
+    ],
+    "coords": [
+     2,
+     3,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green1:X",
+    "measurements": [
+     46,
+     52,
+     64
+    ],
+    "coords": [
+     3,
+     5,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green1:Z",
+    "measurements": [
+     53,
+     58,
+     61,
+     70
+    ],
+    "coords": [
+     3,
+     6,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:red2:X",
+    "measurements": [
+     49,
+     52,
+     65
+    ],
+    "coords": [
+     5,
+     5,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red2:Z",
+    "measurements": [
+     55,
+     60,
+     61,
+     71
+    ],
+    "coords": [
+     5,
+     6,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green2:X",
+    "measurements": [
+     50,
+     66
+    ],
+    "coords": [
+     6,
+     4,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green2:Z",
+    "measurements": [
+     72
+    ],
+    "coords": [
+     6,
+     3,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:blue2:X",
+    "measurements": [
+     51,
+     67
+    ],
+    "coords": [
+     7,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue2:Z",
+    "measurements": [
+     58,
+     73
+    ],
+    "coords": [
+     7,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "final:blue1:Z",
+    "measurements": [
+     70,
+     74,
+     75,
+     76,
+     77
+    ],
+    "coords": [
+     1,
+     6,
+     5,
+     5
+    ]
+   },
+   {
+    "label": "final:red1:Z",
+    "measurements": [
+     75,
+     76,
+     78,
+     79
+    ],
+    "coords": [
+     2,
+     3,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green1:Z",
+    "measurements": [
+     68,
+     70,
+     76,
+     77,
+     79,
+     80
+    ],
+    "coords": [
+     3,
+     6,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:red2:Z",
+    "measurements": [
+     71,
+     73,
+     82,
+     83,
+     84,
+     85
+    ],
+    "coords": [
+     5,
+     6,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green2:Z",
+    "measurements": [
+     81,
+     82,
+     84,
+     86
+    ],
+    "coords": [
+     6,
+     3,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:blue2:Z",
+    "measurements": [
+     71,
+     84,
+     85,
+     86,
+     87
+    ],
+    "coords": [
+     7,
+     6,
+     5,
+     5
+    ]
+   }
+  ],
+  "observable_measurements": [
+   7,
+   8,
+   9,
+   10,
+   21,
+   22,
+   25,
+   26,
+   37,
+   38,
+   41,
+   42,
+   54,
+   55,
+   58,
+   59,
+   69,
+   70,
+   71,
+   72,
+   78,
+   79,
+   80,
+   81,
+   82,
+   83
+  ],
+  "m1_MXX_measurements": [
+   47,
+   48,
+   52
+  ],
+  "m2_ZL1_measurements": [
+   78,
+   79,
+   80
+  ],
+  "measurement_keys": [
+   [
+    "init",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     0,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     1,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     7,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     8,
+     5
+    ]
+   ]
+  ],
+  "status": {
+   "init|blue1|X": "random",
+   "init|blue1|Z": "det",
+   "init|red1|X": "random",
+   "init|red1|Z": "det",
+   "init|green1|X": "random",
+   "init|green1|Z": "det",
+   "init|red2|X": "random",
+   "init|red2|Z": "det",
+   "init|green2|X": "random",
+   "init|green2|Z": "det",
+   "init|blue2|X": "random",
+   "init|blue2|Z": "det",
+   "merge1|blue1|X": "det",
+   "merge1|blue1|Z": "det",
+   "merge1|red1|X": "det",
+   "merge1|red1|Z": "det",
+   "merge1|green1x|X": "det",
+   "merge1|green1x|Z": "det",
+   "merge1|hatL|X": "random",
+   "merge1|hatL|Zpair": "det",
+   "merge1|hatR|X": "random",
+   "merge1|hatR|Zpair": "det",
+   "merge1|red2x|X": "det",
+   "merge1|red2x|Z": "det",
+   "merge1|green2|X": "det",
+   "merge1|green2|Z": "det",
+   "merge1|blue2|X": "det",
+   "merge1|blue2|Z": "det",
+   "merge2|blue1|X": "det",
+   "merge2|blue1|Z": "det",
+   "merge2|red1|X": "det",
+   "merge2|red1|Z": "det",
+   "merge2|green1x|X": "det",
+   "merge2|green1x|Z": "det",
+   "merge2|hatL|X": "det",
+   "merge2|hatL|Zpair": "det",
+   "merge2|hatR|X": "det",
+   "merge2|hatR|Zpair": "det",
+   "merge2|red2x|X": "det",
+   "merge2|red2x|Z": "det",
+   "merge2|green2|X": "det",
+   "merge2|green2|Z": "det",
+   "merge2|blue2|X": "det",
+   "merge2|blue2|Z": "det",
+   "merge3|blue1|X": "det",
+   "merge3|blue1|Z": "det",
+   "merge3|red1|X": "det",
+   "merge3|red1|Z": "det",
+   "merge3|green1x|X": "det",
+   "merge3|green1x|Z": "det",
+   "merge3|hatL|X": "det",
+   "merge3|hatL|Zpair": "det",
+   "merge3|hatR|X": "det",
+   "merge3|hatR|Zpair": "det",
+   "merge3|red2x|X": "det",
+   "merge3|red2x|Z": "det",
+   "merge3|green2|X": "det",
+   "merge3|green2|Z": "det",
+   "merge3|blue2|X": "det",
+   "merge3|blue2|Z": "det",
+   "merge3|bellXX|X": "det",
+   "split|blue1|X": "det",
+   "split|blue1|Z": "det",
+   "split|red1|X": "det",
+   "split|red1|Z": "det",
+   "split|green1|X": "det",
+   "split|green1|Z": "det",
+   "split|red2|X": "det",
+   "split|red2|Z": "det",
+   "split|green2|X": "det",
+   "split|green2|Z": "det",
+   "split|blue2|X": "det",
+   "split|blue2|Z": "det",
+   "final|blue1|Z": "det",
+   "final|red1|Z": "det",
+   "final|green1|Z": "det",
+   "final|red2|Z": "det",
+   "final|green2|Z": "det",
+   "final|blue2|Z": "det"
+  }
+ },
+ "circuit-teleport-0.stim": {
+  "input_state": "0",
+  "l2_readout_basis": "Z",
+  "detectors": [
+   {
+    "label": "init:blue1:Z",
+    "measurements": [
+     6
+    ],
+    "coords": [
+     1,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "init:red1:Z",
+    "measurements": [
+     7
+    ],
+    "coords": [
+     2,
+     3,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green1:Z",
+    "measurements": [
+     8
+    ],
+    "coords": [
+     3,
+     6,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:red2:Z",
+    "measurements": [
+     9
+    ],
+    "coords": [
+     5,
+     6,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green2:Z",
+    "measurements": [
+     10
+    ],
+    "coords": [
+     6,
+     3,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:blue2:Z",
+    "measurements": [
+     11
+    ],
+    "coords": [
+     7,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "merge1:blue1:X",
+    "measurements": [
+     0,
+     12
+    ],
+    "coords": [
+     1,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue1:Z",
+    "measurements": [
+     8,
+     20
+    ],
+    "coords": [
+     1,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge1:red1:X",
+    "measurements": [
+     1,
+     13
+    ],
+    "coords": [
+     2,
+     4,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red1:Z",
+    "measurements": [
+     21
+    ],
+    "coords": [
+     2,
+     3,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green1x:X",
+    "measurements": [
+     2,
+     14
+    ],
+    "coords": [
+     3,
+     5,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green1x:Z",
+    "measurements": [
+     6,
+     8,
+     22
+    ],
+    "coords": [
+     3,
+     6,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:hatL:Zpair",
+    "measurements": [
+     23
+    ],
+    "coords": [
+     4,
+     3,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:hatR:Zpair",
+    "measurements": [
+     24
+    ],
+    "coords": [
+     4,
+     7,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:red2x:X",
+    "measurements": [
+     3,
+     17
+    ],
+    "coords": [
+     5,
+     5,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red2x:Z",
+    "measurements": [
+     9,
+     11,
+     25
+    ],
+    "coords": [
+     5,
+     6,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green2:X",
+    "measurements": [
+     4,
+     18
+    ],
+    "coords": [
+     6,
+     4,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green2:Z",
+    "measurements": [
+     26
+    ],
+    "coords": [
+     6,
+     3,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:blue2:X",
+    "measurements": [
+     5,
+     19
+    ],
+    "coords": [
+     7,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue2:Z",
+    "measurements": [
+     9,
+     27
+    ],
+    "coords": [
+     7,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge2:blue1:X",
+    "measurements": [
+     12,
+     28
+    ],
+    "coords": [
+     1,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue1:Z",
+    "measurements": [
+     22,
+     36
+    ],
+    "coords": [
+     1,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge2:red1:X",
+    "measurements": [
+     13,
+     29
+    ],
+    "coords": [
+     2,
+     4,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red1:Z",
+    "measurements": [
+     37
+    ],
+    "coords": [
+     2,
+     3,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green1x:X",
+    "measurements": [
+     14,
+     30
+    ],
+    "coords": [
+     3,
+     5,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green1x:Z",
+    "measurements": [
+     20,
+     25,
+     38
+    ],
+    "coords": [
+     3,
+     6,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:hatL:X",
+    "measurements": [
+     15,
+     31
+    ],
+    "coords": [
+     4,
+     4,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatL:Zpair",
+    "measurements": [
+     39
+    ],
+    "coords": [
+     4,
+     3,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:hatR:X",
+    "measurements": [
+     16,
+     32
+    ],
+    "coords": [
+     4,
+     8,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatR:Zpair",
+    "measurements": [
+     40
+    ],
+    "coords": [
+     4,
+     7,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:red2x:X",
+    "measurements": [
+     17,
+     33
+    ],
+    "coords": [
+     5,
+     5,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red2x:Z",
+    "measurements": [
+     22,
+     27,
+     41
+    ],
+    "coords": [
+     5,
+     6,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green2:X",
+    "measurements": [
+     18,
+     34
+    ],
+    "coords": [
+     6,
+     4,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green2:Z",
+    "measurements": [
+     42
+    ],
+    "coords": [
+     6,
+     3,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:blue2:X",
+    "measurements": [
+     19,
+     35
+    ],
+    "coords": [
+     7,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue2:Z",
+    "measurements": [
+     25,
+     43
+    ],
+    "coords": [
+     7,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge3:blue1:X",
+    "measurements": [
+     28,
+     44
+    ],
+    "coords": [
+     1,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue1:Z",
+    "measurements": [
+     38,
+     53
+    ],
+    "coords": [
+     1,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:red1:X",
+    "measurements": [
+     29,
+     45
+    ],
+    "coords": [
+     2,
+     4,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red1:Z",
+    "measurements": [
+     54
+    ],
+    "coords": [
+     2,
+     3,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green1x:X",
+    "measurements": [
+     30,
+     46
+    ],
+    "coords": [
+     3,
+     5,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green1x:Z",
+    "measurements": [
+     36,
+     41,
+     55
+    ],
+    "coords": [
+     3,
+     6,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:hatL:X",
+    "measurements": [
+     31,
+     47
+    ],
+    "coords": [
+     4,
+     4,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatL:Zpair",
+    "measurements": [
+     56
+    ],
+    "coords": [
+     4,
+     3,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:hatR:X",
+    "measurements": [
+     32,
+     48
+    ],
+    "coords": [
+     4,
+     8,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatR:Zpair",
+    "measurements": [
+     57
+    ],
+    "coords": [
+     4,
+     7,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:red2x:X",
+    "measurements": [
+     33,
+     49
+    ],
+    "coords": [
+     5,
+     5,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red2x:Z",
+    "measurements": [
+     38,
+     43,
+     58
+    ],
+    "coords": [
+     5,
+     6,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green2:X",
+    "measurements": [
+     34,
+     50
+    ],
+    "coords": [
+     6,
+     4,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green2:Z",
+    "measurements": [
+     59
+    ],
+    "coords": [
+     6,
+     3,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:blue2:X",
+    "measurements": [
+     35,
+     51
+    ],
+    "coords": [
+     7,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue2:Z",
+    "measurements": [
+     41,
+     60
+    ],
+    "coords": [
+     7,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:bell:XX",
+    "measurements": [
+     52
+    ],
+    "coords": [
+     4,
+     5,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "split:blue1:X",
+    "measurements": [
+     44,
+     62
+    ],
+    "coords": [
+     1,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue1:Z",
+    "measurements": [
+     55,
+     68
+    ],
+    "coords": [
+     1,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "split:red1:X",
+    "measurements": [
+     45,
+     63
+    ],
+    "coords": [
+     2,
+     4,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red1:Z",
+    "measurements": [
+     69
+    ],
+    "coords": [
+     2,
+     3,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green1:X",
+    "measurements": [
+     46,
+     52,
+     64
+    ],
+    "coords": [
+     3,
+     5,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green1:Z",
+    "measurements": [
+     53,
+     58,
+     61,
+     70
+    ],
+    "coords": [
+     3,
+     6,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:red2:X",
+    "measurements": [
+     49,
+     52,
+     65
+    ],
+    "coords": [
+     5,
+     5,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red2:Z",
+    "measurements": [
+     55,
+     60,
+     61,
+     71
+    ],
+    "coords": [
+     5,
+     6,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green2:X",
+    "measurements": [
+     50,
+     66
+    ],
+    "coords": [
+     6,
+     4,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green2:Z",
+    "measurements": [
+     72
+    ],
+    "coords": [
+     6,
+     3,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:blue2:X",
+    "measurements": [
+     51,
+     67
+    ],
+    "coords": [
+     7,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue2:Z",
+    "measurements": [
+     58,
+     73
+    ],
+    "coords": [
+     7,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "final:blue1:Z",
+    "measurements": [
+     70,
+     74,
+     75,
+     76,
+     77
+    ],
+    "coords": [
+     1,
+     6,
+     5,
+     5
+    ]
+   },
+   {
+    "label": "final:red1:Z",
+    "measurements": [
+     75,
+     76,
+     78,
+     79
+    ],
+    "coords": [
+     2,
+     3,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green1:Z",
+    "measurements": [
+     68,
+     70,
+     76,
+     77,
+     79,
+     80
+    ],
+    "coords": [
+     3,
+     6,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:red2:Z",
+    "measurements": [
+     71,
+     73,
+     82,
+     83,
+     84,
+     85
+    ],
+    "coords": [
+     5,
+     6,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green2:Z",
+    "measurements": [
+     81,
+     82,
+     84,
+     86
+    ],
+    "coords": [
+     6,
+     3,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:blue2:Z",
+    "measurements": [
+     71,
+     84,
+     85,
+     86,
+     87
+    ],
+    "coords": [
+     7,
+     6,
+     5,
+     5
+    ]
+   }
+  ],
+  "observable_measurements": [
+   7,
+   8,
+   9,
+   10,
+   21,
+   22,
+   25,
+   26,
+   37,
+   38,
+   41,
+   42,
+   54,
+   55,
+   58,
+   59,
+   69,
+   70,
+   71,
+   72,
+   78,
+   79,
+   80,
+   81,
+   82,
+   83
+  ],
+  "m1_MXX_measurements": [
+   47,
+   48,
+   52
+  ],
+  "m2_ZL1_measurements": [
+   78,
+   79,
+   80
+  ],
+  "measurement_keys": [
+   [
+    "init",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     0,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     1,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     7,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     8,
+     5
+    ]
+   ]
+  ],
+  "status": {
+   "init|blue1|X": "random",
+   "init|blue1|Z": "det",
+   "init|red1|X": "random",
+   "init|red1|Z": "det",
+   "init|green1|X": "random",
+   "init|green1|Z": "det",
+   "init|red2|X": "random",
+   "init|red2|Z": "det",
+   "init|green2|X": "random",
+   "init|green2|Z": "det",
+   "init|blue2|X": "random",
+   "init|blue2|Z": "det",
+   "merge1|blue1|X": "det",
+   "merge1|blue1|Z": "det",
+   "merge1|red1|X": "det",
+   "merge1|red1|Z": "det",
+   "merge1|green1x|X": "det",
+   "merge1|green1x|Z": "det",
+   "merge1|hatL|X": "random",
+   "merge1|hatL|Zpair": "det",
+   "merge1|hatR|X": "random",
+   "merge1|hatR|Zpair": "det",
+   "merge1|red2x|X": "det",
+   "merge1|red2x|Z": "det",
+   "merge1|green2|X": "det",
+   "merge1|green2|Z": "det",
+   "merge1|blue2|X": "det",
+   "merge1|blue2|Z": "det",
+   "merge2|blue1|X": "det",
+   "merge2|blue1|Z": "det",
+   "merge2|red1|X": "det",
+   "merge2|red1|Z": "det",
+   "merge2|green1x|X": "det",
+   "merge2|green1x|Z": "det",
+   "merge2|hatL|X": "det",
+   "merge2|hatL|Zpair": "det",
+   "merge2|hatR|X": "det",
+   "merge2|hatR|Zpair": "det",
+   "merge2|red2x|X": "det",
+   "merge2|red2x|Z": "det",
+   "merge2|green2|X": "det",
+   "merge2|green2|Z": "det",
+   "merge2|blue2|X": "det",
+   "merge2|blue2|Z": "det",
+   "merge3|blue1|X": "det",
+   "merge3|blue1|Z": "det",
+   "merge3|red1|X": "det",
+   "merge3|red1|Z": "det",
+   "merge3|green1x|X": "det",
+   "merge3|green1x|Z": "det",
+   "merge3|hatL|X": "det",
+   "merge3|hatL|Zpair": "det",
+   "merge3|hatR|X": "det",
+   "merge3|hatR|Zpair": "det",
+   "merge3|red2x|X": "det",
+   "merge3|red2x|Z": "det",
+   "merge3|green2|X": "det",
+   "merge3|green2|Z": "det",
+   "merge3|blue2|X": "det",
+   "merge3|blue2|Z": "det",
+   "merge3|bellXX|X": "det",
+   "split|blue1|X": "det",
+   "split|blue1|Z": "det",
+   "split|red1|X": "det",
+   "split|red1|Z": "det",
+   "split|green1|X": "det",
+   "split|green1|Z": "det",
+   "split|red2|X": "det",
+   "split|red2|Z": "det",
+   "split|green2|X": "det",
+   "split|green2|Z": "det",
+   "split|blue2|X": "det",
+   "split|blue2|Z": "det",
+   "final|blue1|Z": "det",
+   "final|red1|Z": "det",
+   "final|green1|Z": "det",
+   "final|red2|Z": "det",
+   "final|green2|Z": "det",
+   "final|blue2|Z": "det"
+  }
+ },
+ "circuit-teleport-1.stim": {
+  "input_state": "1",
+  "l2_readout_basis": "Z",
+  "detectors": [
+   {
+    "label": "init:blue1:Z",
+    "measurements": [
+     6
+    ],
+    "coords": [
+     1,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "init:red1:Z",
+    "measurements": [
+     7
+    ],
+    "coords": [
+     2,
+     3,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green1:Z",
+    "measurements": [
+     8
+    ],
+    "coords": [
+     3,
+     6,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:red2:Z",
+    "measurements": [
+     9
+    ],
+    "coords": [
+     5,
+     6,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green2:Z",
+    "measurements": [
+     10
+    ],
+    "coords": [
+     6,
+     3,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:blue2:Z",
+    "measurements": [
+     11
+    ],
+    "coords": [
+     7,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "merge1:blue1:X",
+    "measurements": [
+     0,
+     12
+    ],
+    "coords": [
+     1,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue1:Z",
+    "measurements": [
+     8,
+     20
+    ],
+    "coords": [
+     1,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge1:red1:X",
+    "measurements": [
+     1,
+     13
+    ],
+    "coords": [
+     2,
+     4,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red1:Z",
+    "measurements": [
+     21
+    ],
+    "coords": [
+     2,
+     3,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green1x:X",
+    "measurements": [
+     2,
+     14
+    ],
+    "coords": [
+     3,
+     5,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green1x:Z",
+    "measurements": [
+     6,
+     8,
+     22
+    ],
+    "coords": [
+     3,
+     6,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:hatL:Zpair",
+    "measurements": [
+     23
+    ],
+    "coords": [
+     4,
+     3,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:hatR:Zpair",
+    "measurements": [
+     24
+    ],
+    "coords": [
+     4,
+     7,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:red2x:X",
+    "measurements": [
+     3,
+     17
+    ],
+    "coords": [
+     5,
+     5,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red2x:Z",
+    "measurements": [
+     9,
+     11,
+     25
+    ],
+    "coords": [
+     5,
+     6,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green2:X",
+    "measurements": [
+     4,
+     18
+    ],
+    "coords": [
+     6,
+     4,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green2:Z",
+    "measurements": [
+     26
+    ],
+    "coords": [
+     6,
+     3,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:blue2:X",
+    "measurements": [
+     5,
+     19
+    ],
+    "coords": [
+     7,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue2:Z",
+    "measurements": [
+     9,
+     27
+    ],
+    "coords": [
+     7,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge2:blue1:X",
+    "measurements": [
+     12,
+     28
+    ],
+    "coords": [
+     1,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue1:Z",
+    "measurements": [
+     22,
+     36
+    ],
+    "coords": [
+     1,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge2:red1:X",
+    "measurements": [
+     13,
+     29
+    ],
+    "coords": [
+     2,
+     4,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red1:Z",
+    "measurements": [
+     37
+    ],
+    "coords": [
+     2,
+     3,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green1x:X",
+    "measurements": [
+     14,
+     30
+    ],
+    "coords": [
+     3,
+     5,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green1x:Z",
+    "measurements": [
+     20,
+     25,
+     38
+    ],
+    "coords": [
+     3,
+     6,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:hatL:X",
+    "measurements": [
+     15,
+     31
+    ],
+    "coords": [
+     4,
+     4,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatL:Zpair",
+    "measurements": [
+     39
+    ],
+    "coords": [
+     4,
+     3,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:hatR:X",
+    "measurements": [
+     16,
+     32
+    ],
+    "coords": [
+     4,
+     8,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatR:Zpair",
+    "measurements": [
+     40
+    ],
+    "coords": [
+     4,
+     7,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:red2x:X",
+    "measurements": [
+     17,
+     33
+    ],
+    "coords": [
+     5,
+     5,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red2x:Z",
+    "measurements": [
+     22,
+     27,
+     41
+    ],
+    "coords": [
+     5,
+     6,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green2:X",
+    "measurements": [
+     18,
+     34
+    ],
+    "coords": [
+     6,
+     4,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green2:Z",
+    "measurements": [
+     42
+    ],
+    "coords": [
+     6,
+     3,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:blue2:X",
+    "measurements": [
+     19,
+     35
+    ],
+    "coords": [
+     7,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue2:Z",
+    "measurements": [
+     25,
+     43
+    ],
+    "coords": [
+     7,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge3:blue1:X",
+    "measurements": [
+     28,
+     44
+    ],
+    "coords": [
+     1,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue1:Z",
+    "measurements": [
+     38,
+     53
+    ],
+    "coords": [
+     1,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:red1:X",
+    "measurements": [
+     29,
+     45
+    ],
+    "coords": [
+     2,
+     4,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red1:Z",
+    "measurements": [
+     54
+    ],
+    "coords": [
+     2,
+     3,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green1x:X",
+    "measurements": [
+     30,
+     46
+    ],
+    "coords": [
+     3,
+     5,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green1x:Z",
+    "measurements": [
+     36,
+     41,
+     55
+    ],
+    "coords": [
+     3,
+     6,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:hatL:X",
+    "measurements": [
+     31,
+     47
+    ],
+    "coords": [
+     4,
+     4,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatL:Zpair",
+    "measurements": [
+     56
+    ],
+    "coords": [
+     4,
+     3,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:hatR:X",
+    "measurements": [
+     32,
+     48
+    ],
+    "coords": [
+     4,
+     8,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatR:Zpair",
+    "measurements": [
+     57
+    ],
+    "coords": [
+     4,
+     7,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:red2x:X",
+    "measurements": [
+     33,
+     49
+    ],
+    "coords": [
+     5,
+     5,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red2x:Z",
+    "measurements": [
+     38,
+     43,
+     58
+    ],
+    "coords": [
+     5,
+     6,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green2:X",
+    "measurements": [
+     34,
+     50
+    ],
+    "coords": [
+     6,
+     4,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green2:Z",
+    "measurements": [
+     59
+    ],
+    "coords": [
+     6,
+     3,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:blue2:X",
+    "measurements": [
+     35,
+     51
+    ],
+    "coords": [
+     7,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue2:Z",
+    "measurements": [
+     41,
+     60
+    ],
+    "coords": [
+     7,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:bell:XX",
+    "measurements": [
+     52
+    ],
+    "coords": [
+     4,
+     5,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "split:blue1:X",
+    "measurements": [
+     44,
+     62
+    ],
+    "coords": [
+     1,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue1:Z",
+    "measurements": [
+     55,
+     68
+    ],
+    "coords": [
+     1,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "split:red1:X",
+    "measurements": [
+     45,
+     63
+    ],
+    "coords": [
+     2,
+     4,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red1:Z",
+    "measurements": [
+     69
+    ],
+    "coords": [
+     2,
+     3,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green1:X",
+    "measurements": [
+     46,
+     52,
+     64
+    ],
+    "coords": [
+     3,
+     5,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green1:Z",
+    "measurements": [
+     53,
+     58,
+     61,
+     70
+    ],
+    "coords": [
+     3,
+     6,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:red2:X",
+    "measurements": [
+     49,
+     52,
+     65
+    ],
+    "coords": [
+     5,
+     5,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red2:Z",
+    "measurements": [
+     55,
+     60,
+     61,
+     71
+    ],
+    "coords": [
+     5,
+     6,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green2:X",
+    "measurements": [
+     50,
+     66
+    ],
+    "coords": [
+     6,
+     4,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green2:Z",
+    "measurements": [
+     72
+    ],
+    "coords": [
+     6,
+     3,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:blue2:X",
+    "measurements": [
+     51,
+     67
+    ],
+    "coords": [
+     7,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue2:Z",
+    "measurements": [
+     58,
+     73
+    ],
+    "coords": [
+     7,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "final:blue1:Z",
+    "measurements": [
+     70,
+     74,
+     75,
+     76,
+     77
+    ],
+    "coords": [
+     1,
+     6,
+     5,
+     5
+    ]
+   },
+   {
+    "label": "final:red1:Z",
+    "measurements": [
+     75,
+     76,
+     78,
+     79
+    ],
+    "coords": [
+     2,
+     3,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green1:Z",
+    "measurements": [
+     68,
+     70,
+     76,
+     77,
+     79,
+     80
+    ],
+    "coords": [
+     3,
+     6,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:red2:Z",
+    "measurements": [
+     71,
+     73,
+     82,
+     83,
+     84,
+     85
+    ],
+    "coords": [
+     5,
+     6,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green2:Z",
+    "measurements": [
+     81,
+     82,
+     84,
+     86
+    ],
+    "coords": [
+     6,
+     3,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:blue2:Z",
+    "measurements": [
+     71,
+     84,
+     85,
+     86,
+     87
+    ],
+    "coords": [
+     7,
+     6,
+     5,
+     5
+    ]
+   }
+  ],
+  "observable_measurements": [
+   7,
+   8,
+   9,
+   10,
+   21,
+   22,
+   25,
+   26,
+   37,
+   38,
+   41,
+   42,
+   54,
+   55,
+   58,
+   59,
+   69,
+   70,
+   71,
+   72,
+   78,
+   79,
+   80,
+   81,
+   82,
+   83
+  ],
+  "m1_MXX_measurements": [
+   47,
+   48,
+   52
+  ],
+  "m2_ZL1_measurements": [
+   78,
+   79,
+   80
+  ],
+  "measurement_keys": [
+   [
+    "init",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     0,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     1,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     7,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     8,
+     5
+    ]
+   ]
+  ],
+  "status": {
+   "init|blue1|X": "random",
+   "init|blue1|Z": "det",
+   "init|red1|X": "random",
+   "init|red1|Z": "det",
+   "init|green1|X": "random",
+   "init|green1|Z": "det",
+   "init|red2|X": "random",
+   "init|red2|Z": "det",
+   "init|green2|X": "random",
+   "init|green2|Z": "det",
+   "init|blue2|X": "random",
+   "init|blue2|Z": "det",
+   "merge1|blue1|X": "det",
+   "merge1|blue1|Z": "det",
+   "merge1|red1|X": "det",
+   "merge1|red1|Z": "det",
+   "merge1|green1x|X": "det",
+   "merge1|green1x|Z": "det",
+   "merge1|hatL|X": "random",
+   "merge1|hatL|Zpair": "det",
+   "merge1|hatR|X": "random",
+   "merge1|hatR|Zpair": "det",
+   "merge1|red2x|X": "det",
+   "merge1|red2x|Z": "det",
+   "merge1|green2|X": "det",
+   "merge1|green2|Z": "det",
+   "merge1|blue2|X": "det",
+   "merge1|blue2|Z": "det",
+   "merge2|blue1|X": "det",
+   "merge2|blue1|Z": "det",
+   "merge2|red1|X": "det",
+   "merge2|red1|Z": "det",
+   "merge2|green1x|X": "det",
+   "merge2|green1x|Z": "det",
+   "merge2|hatL|X": "det",
+   "merge2|hatL|Zpair": "det",
+   "merge2|hatR|X": "det",
+   "merge2|hatR|Zpair": "det",
+   "merge2|red2x|X": "det",
+   "merge2|red2x|Z": "det",
+   "merge2|green2|X": "det",
+   "merge2|green2|Z": "det",
+   "merge2|blue2|X": "det",
+   "merge2|blue2|Z": "det",
+   "merge3|blue1|X": "det",
+   "merge3|blue1|Z": "det",
+   "merge3|red1|X": "det",
+   "merge3|red1|Z": "det",
+   "merge3|green1x|X": "det",
+   "merge3|green1x|Z": "det",
+   "merge3|hatL|X": "det",
+   "merge3|hatL|Zpair": "det",
+   "merge3|hatR|X": "det",
+   "merge3|hatR|Zpair": "det",
+   "merge3|red2x|X": "det",
+   "merge3|red2x|Z": "det",
+   "merge3|green2|X": "det",
+   "merge3|green2|Z": "det",
+   "merge3|blue2|X": "det",
+   "merge3|blue2|Z": "det",
+   "merge3|bellXX|X": "det",
+   "split|blue1|X": "det",
+   "split|blue1|Z": "det",
+   "split|red1|X": "det",
+   "split|red1|Z": "det",
+   "split|green1|X": "det",
+   "split|green1|Z": "det",
+   "split|red2|X": "det",
+   "split|red2|Z": "det",
+   "split|green2|X": "det",
+   "split|green2|Z": "det",
+   "split|blue2|X": "det",
+   "split|blue2|Z": "det",
+   "final|blue1|Z": "det",
+   "final|red1|Z": "det",
+   "final|green1|Z": "det",
+   "final|red2|Z": "det",
+   "final|green2|Z": "det",
+   "final|blue2|Z": "det"
+  }
+ },
+ "circuit-teleport-plus.stim": {
+  "input_state": "+",
+  "l2_readout_basis": "X",
+  "detectors": [
+   {
+    "label": "init:blue1:X",
+    "measurements": [
+     0
+    ],
+    "coords": [
+     1,
+     5,
+     0,
+     2
+    ]
+   },
+   {
+    "label": "init:red1:X",
+    "measurements": [
+     1
+    ],
+    "coords": [
+     2,
+     4,
+     0,
+     0
+    ]
+   },
+   {
+    "label": "init:green1:X",
+    "measurements": [
+     2
+    ],
+    "coords": [
+     3,
+     5,
+     0,
+     1
+    ]
+   },
+   {
+    "label": "init:red2:Z",
+    "measurements": [
+     9
+    ],
+    "coords": [
+     5,
+     6,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green2:Z",
+    "measurements": [
+     10
+    ],
+    "coords": [
+     6,
+     3,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:blue2:Z",
+    "measurements": [
+     11
+    ],
+    "coords": [
+     7,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "merge1:blue1:X",
+    "measurements": [
+     0,
+     12
+    ],
+    "coords": [
+     1,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue1:Z",
+    "measurements": [
+     8,
+     20
+    ],
+    "coords": [
+     1,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge1:red1:X",
+    "measurements": [
+     1,
+     13
+    ],
+    "coords": [
+     2,
+     4,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red1:Z",
+    "measurements": [
+     21
+    ],
+    "coords": [
+     2,
+     3,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green1x:X",
+    "measurements": [
+     2,
+     14
+    ],
+    "coords": [
+     3,
+     5,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green1x:Z",
+    "measurements": [
+     6,
+     8,
+     22
+    ],
+    "coords": [
+     3,
+     6,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:hatL:Zpair",
+    "measurements": [
+     23
+    ],
+    "coords": [
+     4,
+     3,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:hatR:Zpair",
+    "measurements": [
+     24
+    ],
+    "coords": [
+     4,
+     7,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:red2x:X",
+    "measurements": [
+     3,
+     17
+    ],
+    "coords": [
+     5,
+     5,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red2x:Z",
+    "measurements": [
+     9,
+     11,
+     25
+    ],
+    "coords": [
+     5,
+     6,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green2:X",
+    "measurements": [
+     4,
+     18
+    ],
+    "coords": [
+     6,
+     4,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green2:Z",
+    "measurements": [
+     26
+    ],
+    "coords": [
+     6,
+     3,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:blue2:X",
+    "measurements": [
+     5,
+     19
+    ],
+    "coords": [
+     7,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue2:Z",
+    "measurements": [
+     9,
+     27
+    ],
+    "coords": [
+     7,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge2:blue1:X",
+    "measurements": [
+     12,
+     28
+    ],
+    "coords": [
+     1,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue1:Z",
+    "measurements": [
+     22,
+     36
+    ],
+    "coords": [
+     1,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge2:red1:X",
+    "measurements": [
+     13,
+     29
+    ],
+    "coords": [
+     2,
+     4,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red1:Z",
+    "measurements": [
+     37
+    ],
+    "coords": [
+     2,
+     3,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green1x:X",
+    "measurements": [
+     14,
+     30
+    ],
+    "coords": [
+     3,
+     5,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green1x:Z",
+    "measurements": [
+     20,
+     25,
+     38
+    ],
+    "coords": [
+     3,
+     6,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:hatL:X",
+    "measurements": [
+     15,
+     31
+    ],
+    "coords": [
+     4,
+     4,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatL:Zpair",
+    "measurements": [
+     39
+    ],
+    "coords": [
+     4,
+     3,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:hatR:X",
+    "measurements": [
+     16,
+     32
+    ],
+    "coords": [
+     4,
+     8,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatR:Zpair",
+    "measurements": [
+     40
+    ],
+    "coords": [
+     4,
+     7,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:red2x:X",
+    "measurements": [
+     17,
+     33
+    ],
+    "coords": [
+     5,
+     5,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red2x:Z",
+    "measurements": [
+     22,
+     27,
+     41
+    ],
+    "coords": [
+     5,
+     6,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green2:X",
+    "measurements": [
+     18,
+     34
+    ],
+    "coords": [
+     6,
+     4,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green2:Z",
+    "measurements": [
+     42
+    ],
+    "coords": [
+     6,
+     3,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:blue2:X",
+    "measurements": [
+     19,
+     35
+    ],
+    "coords": [
+     7,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue2:Z",
+    "measurements": [
+     25,
+     43
+    ],
+    "coords": [
+     7,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge3:blue1:X",
+    "measurements": [
+     28,
+     44
+    ],
+    "coords": [
+     1,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue1:Z",
+    "measurements": [
+     38,
+     53
+    ],
+    "coords": [
+     1,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:red1:X",
+    "measurements": [
+     29,
+     45
+    ],
+    "coords": [
+     2,
+     4,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red1:Z",
+    "measurements": [
+     54
+    ],
+    "coords": [
+     2,
+     3,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green1x:X",
+    "measurements": [
+     30,
+     46
+    ],
+    "coords": [
+     3,
+     5,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green1x:Z",
+    "measurements": [
+     36,
+     41,
+     55
+    ],
+    "coords": [
+     3,
+     6,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:hatL:X",
+    "measurements": [
+     31,
+     47
+    ],
+    "coords": [
+     4,
+     4,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatL:Zpair",
+    "measurements": [
+     56
+    ],
+    "coords": [
+     4,
+     3,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:hatR:X",
+    "measurements": [
+     32,
+     48
+    ],
+    "coords": [
+     4,
+     8,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatR:Zpair",
+    "measurements": [
+     57
+    ],
+    "coords": [
+     4,
+     7,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:red2x:X",
+    "measurements": [
+     33,
+     49
+    ],
+    "coords": [
+     5,
+     5,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red2x:Z",
+    "measurements": [
+     38,
+     43,
+     58
+    ],
+    "coords": [
+     5,
+     6,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green2:X",
+    "measurements": [
+     34,
+     50
+    ],
+    "coords": [
+     6,
+     4,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green2:Z",
+    "measurements": [
+     59
+    ],
+    "coords": [
+     6,
+     3,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:blue2:X",
+    "measurements": [
+     35,
+     51
+    ],
+    "coords": [
+     7,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue2:Z",
+    "measurements": [
+     41,
+     60
+    ],
+    "coords": [
+     7,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:bell:XX",
+    "measurements": [
+     52
+    ],
+    "coords": [
+     4,
+     5,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "split:blue1:X",
+    "measurements": [
+     44,
+     62
+    ],
+    "coords": [
+     1,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue1:Z",
+    "measurements": [
+     55,
+     68
+    ],
+    "coords": [
+     1,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "split:red1:X",
+    "measurements": [
+     45,
+     63
+    ],
+    "coords": [
+     2,
+     4,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red1:Z",
+    "measurements": [
+     69
+    ],
+    "coords": [
+     2,
+     3,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green1:X",
+    "measurements": [
+     46,
+     52,
+     64
+    ],
+    "coords": [
+     3,
+     5,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green1:Z",
+    "measurements": [
+     53,
+     58,
+     61,
+     70
+    ],
+    "coords": [
+     3,
+     6,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:red2:X",
+    "measurements": [
+     49,
+     52,
+     65
+    ],
+    "coords": [
+     5,
+     5,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red2:Z",
+    "measurements": [
+     55,
+     60,
+     61,
+     71
+    ],
+    "coords": [
+     5,
+     6,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green2:X",
+    "measurements": [
+     50,
+     66
+    ],
+    "coords": [
+     6,
+     4,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green2:Z",
+    "measurements": [
+     72
+    ],
+    "coords": [
+     6,
+     3,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:blue2:X",
+    "measurements": [
+     51,
+     67
+    ],
+    "coords": [
+     7,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue2:Z",
+    "measurements": [
+     58,
+     73
+    ],
+    "coords": [
+     7,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "final:blue1:Z",
+    "measurements": [
+     70,
+     74,
+     75,
+     76,
+     77
+    ],
+    "coords": [
+     1,
+     6,
+     5,
+     5
+    ]
+   },
+   {
+    "label": "final:red1:Z",
+    "measurements": [
+     75,
+     76,
+     78,
+     79
+    ],
+    "coords": [
+     2,
+     3,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green1:Z",
+    "measurements": [
+     68,
+     70,
+     76,
+     77,
+     79,
+     80
+    ],
+    "coords": [
+     3,
+     6,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:red2:X",
+    "measurements": [
+     65,
+     82,
+     83,
+     84,
+     85
+    ],
+    "coords": [
+     5,
+     6,
+     5,
+     0
+    ]
+   },
+   {
+    "label": "final:green2:X",
+    "measurements": [
+     66,
+     81,
+     82,
+     84,
+     86
+    ],
+    "coords": [
+     6,
+     3,
+     5,
+     1
+    ]
+   },
+   {
+    "label": "final:blue2:X",
+    "measurements": [
+     67,
+     84,
+     85,
+     86,
+     87
+    ],
+    "coords": [
+     7,
+     6,
+     5,
+     2
+    ]
+   }
+  ],
+  "observable_measurements": [
+   47,
+   48,
+   52,
+   81,
+   82,
+   83
+  ],
+  "m1_MXX_measurements": [
+   47,
+   48,
+   52
+  ],
+  "m2_ZL1_measurements": [
+   78,
+   79,
+   80
+  ],
+  "measurement_keys": [
+   [
+    "init",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     0,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     1,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     7,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     8,
+     5
+    ]
+   ]
+  ],
+  "status": {
+   "init|blue1|X": "det",
+   "init|blue1|Z": "random",
+   "init|red1|X": "det",
+   "init|red1|Z": "random",
+   "init|green1|X": "det",
+   "init|green1|Z": "random",
+   "init|red2|X": "random",
+   "init|red2|Z": "det",
+   "init|green2|X": "random",
+   "init|green2|Z": "det",
+   "init|blue2|X": "random",
+   "init|blue2|Z": "det",
+   "merge1|blue1|X": "det",
+   "merge1|blue1|Z": "det",
+   "merge1|red1|X": "det",
+   "merge1|red1|Z": "det",
+   "merge1|green1x|X": "det",
+   "merge1|green1x|Z": "det",
+   "merge1|hatL|X": "random",
+   "merge1|hatL|Zpair": "det",
+   "merge1|hatR|X": "random",
+   "merge1|hatR|Zpair": "det",
+   "merge1|red2x|X": "det",
+   "merge1|red2x|Z": "det",
+   "merge1|green2|X": "det",
+   "merge1|green2|Z": "det",
+   "merge1|blue2|X": "det",
+   "merge1|blue2|Z": "det",
+   "merge2|blue1|X": "det",
+   "merge2|blue1|Z": "det",
+   "merge2|red1|X": "det",
+   "merge2|red1|Z": "det",
+   "merge2|green1x|X": "det",
+   "merge2|green1x|Z": "det",
+   "merge2|hatL|X": "det",
+   "merge2|hatL|Zpair": "det",
+   "merge2|hatR|X": "det",
+   "merge2|hatR|Zpair": "det",
+   "merge2|red2x|X": "det",
+   "merge2|red2x|Z": "det",
+   "merge2|green2|X": "det",
+   "merge2|green2|Z": "det",
+   "merge2|blue2|X": "det",
+   "merge2|blue2|Z": "det",
+   "merge3|blue1|X": "det",
+   "merge3|blue1|Z": "det",
+   "merge3|red1|X": "det",
+   "merge3|red1|Z": "det",
+   "merge3|green1x|X": "det",
+   "merge3|green1x|Z": "det",
+   "merge3|hatL|X": "det",
+   "merge3|hatL|Zpair": "det",
+   "merge3|hatR|X": "det",
+   "merge3|hatR|Zpair": "det",
+   "merge3|red2x|X": "det",
+   "merge3|red2x|Z": "det",
+   "merge3|green2|X": "det",
+   "merge3|green2|Z": "det",
+   "merge3|blue2|X": "det",
+   "merge3|blue2|Z": "det",
+   "merge3|bellXX|X": "det",
+   "split|blue1|X": "det",
+   "split|blue1|Z": "det",
+   "split|red1|X": "det",
+   "split|red1|Z": "det",
+   "split|green1|X": "det",
+   "split|green1|Z": "det",
+   "split|red2|X": "det",
+   "split|red2|Z": "det",
+   "split|green2|X": "det",
+   "split|green2|Z": "det",
+   "split|blue2|X": "det",
+   "split|blue2|Z": "det",
+   "final|blue1|Z": "det",
+   "final|red1|Z": "det",
+   "final|green1|Z": "det",
+   "final|red2|X": "det",
+   "final|green2|X": "det",
+   "final|blue2|X": "det"
+  }
+ },
+ "circuit-teleport-minus.stim": {
+  "input_state": "-",
+  "l2_readout_basis": "X",
+  "detectors": [
+   {
+    "label": "init:blue1:X",
+    "measurements": [
+     0
+    ],
+    "coords": [
+     1,
+     5,
+     0,
+     2
+    ]
+   },
+   {
+    "label": "init:red1:X",
+    "measurements": [
+     1
+    ],
+    "coords": [
+     2,
+     4,
+     0,
+     0
+    ]
+   },
+   {
+    "label": "init:green1:X",
+    "measurements": [
+     2
+    ],
+    "coords": [
+     3,
+     5,
+     0,
+     1
+    ]
+   },
+   {
+    "label": "init:red2:Z",
+    "measurements": [
+     9
+    ],
+    "coords": [
+     5,
+     6,
+     0,
+     3
+    ]
+   },
+   {
+    "label": "init:green2:Z",
+    "measurements": [
+     10
+    ],
+    "coords": [
+     6,
+     3,
+     0,
+     4
+    ]
+   },
+   {
+    "label": "init:blue2:Z",
+    "measurements": [
+     11
+    ],
+    "coords": [
+     7,
+     6,
+     0,
+     5
+    ]
+   },
+   {
+    "label": "merge1:blue1:X",
+    "measurements": [
+     0,
+     12
+    ],
+    "coords": [
+     1,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue1:Z",
+    "measurements": [
+     8,
+     20
+    ],
+    "coords": [
+     1,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge1:red1:X",
+    "measurements": [
+     1,
+     13
+    ],
+    "coords": [
+     2,
+     4,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red1:Z",
+    "measurements": [
+     21
+    ],
+    "coords": [
+     2,
+     3,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green1x:X",
+    "measurements": [
+     2,
+     14
+    ],
+    "coords": [
+     3,
+     5,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green1x:Z",
+    "measurements": [
+     6,
+     8,
+     22
+    ],
+    "coords": [
+     3,
+     6,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:hatL:Zpair",
+    "measurements": [
+     23
+    ],
+    "coords": [
+     4,
+     3,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:hatR:Zpair",
+    "measurements": [
+     24
+    ],
+    "coords": [
+     4,
+     7,
+     1,
+     -1
+    ]
+   },
+   {
+    "label": "merge1:red2x:X",
+    "measurements": [
+     3,
+     17
+    ],
+    "coords": [
+     5,
+     5,
+     1,
+     0
+    ]
+   },
+   {
+    "label": "merge1:red2x:Z",
+    "measurements": [
+     9,
+     11,
+     25
+    ],
+    "coords": [
+     5,
+     6,
+     1,
+     3
+    ]
+   },
+   {
+    "label": "merge1:green2:X",
+    "measurements": [
+     4,
+     18
+    ],
+    "coords": [
+     6,
+     4,
+     1,
+     1
+    ]
+   },
+   {
+    "label": "merge1:green2:Z",
+    "measurements": [
+     26
+    ],
+    "coords": [
+     6,
+     3,
+     1,
+     4
+    ]
+   },
+   {
+    "label": "merge1:blue2:X",
+    "measurements": [
+     5,
+     19
+    ],
+    "coords": [
+     7,
+     5,
+     1,
+     2
+    ]
+   },
+   {
+    "label": "merge1:blue2:Z",
+    "measurements": [
+     9,
+     27
+    ],
+    "coords": [
+     7,
+     6,
+     1,
+     5
+    ]
+   },
+   {
+    "label": "merge2:blue1:X",
+    "measurements": [
+     12,
+     28
+    ],
+    "coords": [
+     1,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue1:Z",
+    "measurements": [
+     22,
+     36
+    ],
+    "coords": [
+     1,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge2:red1:X",
+    "measurements": [
+     13,
+     29
+    ],
+    "coords": [
+     2,
+     4,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red1:Z",
+    "measurements": [
+     37
+    ],
+    "coords": [
+     2,
+     3,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green1x:X",
+    "measurements": [
+     14,
+     30
+    ],
+    "coords": [
+     3,
+     5,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green1x:Z",
+    "measurements": [
+     20,
+     25,
+     38
+    ],
+    "coords": [
+     3,
+     6,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:hatL:X",
+    "measurements": [
+     15,
+     31
+    ],
+    "coords": [
+     4,
+     4,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatL:Zpair",
+    "measurements": [
+     39
+    ],
+    "coords": [
+     4,
+     3,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:hatR:X",
+    "measurements": [
+     16,
+     32
+    ],
+    "coords": [
+     4,
+     8,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:hatR:Zpair",
+    "measurements": [
+     40
+    ],
+    "coords": [
+     4,
+     7,
+     2,
+     -1
+    ]
+   },
+   {
+    "label": "merge2:red2x:X",
+    "measurements": [
+     17,
+     33
+    ],
+    "coords": [
+     5,
+     5,
+     2,
+     0
+    ]
+   },
+   {
+    "label": "merge2:red2x:Z",
+    "measurements": [
+     22,
+     27,
+     41
+    ],
+    "coords": [
+     5,
+     6,
+     2,
+     3
+    ]
+   },
+   {
+    "label": "merge2:green2:X",
+    "measurements": [
+     18,
+     34
+    ],
+    "coords": [
+     6,
+     4,
+     2,
+     1
+    ]
+   },
+   {
+    "label": "merge2:green2:Z",
+    "measurements": [
+     42
+    ],
+    "coords": [
+     6,
+     3,
+     2,
+     4
+    ]
+   },
+   {
+    "label": "merge2:blue2:X",
+    "measurements": [
+     19,
+     35
+    ],
+    "coords": [
+     7,
+     5,
+     2,
+     2
+    ]
+   },
+   {
+    "label": "merge2:blue2:Z",
+    "measurements": [
+     25,
+     43
+    ],
+    "coords": [
+     7,
+     6,
+     2,
+     5
+    ]
+   },
+   {
+    "label": "merge3:blue1:X",
+    "measurements": [
+     28,
+     44
+    ],
+    "coords": [
+     1,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue1:Z",
+    "measurements": [
+     38,
+     53
+    ],
+    "coords": [
+     1,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:red1:X",
+    "measurements": [
+     29,
+     45
+    ],
+    "coords": [
+     2,
+     4,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red1:Z",
+    "measurements": [
+     54
+    ],
+    "coords": [
+     2,
+     3,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green1x:X",
+    "measurements": [
+     30,
+     46
+    ],
+    "coords": [
+     3,
+     5,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green1x:Z",
+    "measurements": [
+     36,
+     41,
+     55
+    ],
+    "coords": [
+     3,
+     6,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:hatL:X",
+    "measurements": [
+     31,
+     47
+    ],
+    "coords": [
+     4,
+     4,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatL:Zpair",
+    "measurements": [
+     56
+    ],
+    "coords": [
+     4,
+     3,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:hatR:X",
+    "measurements": [
+     32,
+     48
+    ],
+    "coords": [
+     4,
+     8,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:hatR:Zpair",
+    "measurements": [
+     57
+    ],
+    "coords": [
+     4,
+     7,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "merge3:red2x:X",
+    "measurements": [
+     33,
+     49
+    ],
+    "coords": [
+     5,
+     5,
+     3,
+     0
+    ]
+   },
+   {
+    "label": "merge3:red2x:Z",
+    "measurements": [
+     38,
+     43,
+     58
+    ],
+    "coords": [
+     5,
+     6,
+     3,
+     3
+    ]
+   },
+   {
+    "label": "merge3:green2:X",
+    "measurements": [
+     34,
+     50
+    ],
+    "coords": [
+     6,
+     4,
+     3,
+     1
+    ]
+   },
+   {
+    "label": "merge3:green2:Z",
+    "measurements": [
+     59
+    ],
+    "coords": [
+     6,
+     3,
+     3,
+     4
+    ]
+   },
+   {
+    "label": "merge3:blue2:X",
+    "measurements": [
+     35,
+     51
+    ],
+    "coords": [
+     7,
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "label": "merge3:blue2:Z",
+    "measurements": [
+     41,
+     60
+    ],
+    "coords": [
+     7,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "label": "merge3:bell:XX",
+    "measurements": [
+     52
+    ],
+    "coords": [
+     4,
+     5,
+     3,
+     -1
+    ]
+   },
+   {
+    "label": "split:blue1:X",
+    "measurements": [
+     44,
+     62
+    ],
+    "coords": [
+     1,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue1:Z",
+    "measurements": [
+     55,
+     68
+    ],
+    "coords": [
+     1,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "split:red1:X",
+    "measurements": [
+     45,
+     63
+    ],
+    "coords": [
+     2,
+     4,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red1:Z",
+    "measurements": [
+     69
+    ],
+    "coords": [
+     2,
+     3,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green1:X",
+    "measurements": [
+     46,
+     52,
+     64
+    ],
+    "coords": [
+     3,
+     5,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green1:Z",
+    "measurements": [
+     53,
+     58,
+     61,
+     70
+    ],
+    "coords": [
+     3,
+     6,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:red2:X",
+    "measurements": [
+     49,
+     52,
+     65
+    ],
+    "coords": [
+     5,
+     5,
+     4,
+     0
+    ]
+   },
+   {
+    "label": "split:red2:Z",
+    "measurements": [
+     55,
+     60,
+     61,
+     71
+    ],
+    "coords": [
+     5,
+     6,
+     4,
+     3
+    ]
+   },
+   {
+    "label": "split:green2:X",
+    "measurements": [
+     50,
+     66
+    ],
+    "coords": [
+     6,
+     4,
+     4,
+     1
+    ]
+   },
+   {
+    "label": "split:green2:Z",
+    "measurements": [
+     72
+    ],
+    "coords": [
+     6,
+     3,
+     4,
+     4
+    ]
+   },
+   {
+    "label": "split:blue2:X",
+    "measurements": [
+     51,
+     67
+    ],
+    "coords": [
+     7,
+     5,
+     4,
+     2
+    ]
+   },
+   {
+    "label": "split:blue2:Z",
+    "measurements": [
+     58,
+     73
+    ],
+    "coords": [
+     7,
+     6,
+     4,
+     5
+    ]
+   },
+   {
+    "label": "final:blue1:Z",
+    "measurements": [
+     70,
+     74,
+     75,
+     76,
+     77
+    ],
+    "coords": [
+     1,
+     6,
+     5,
+     5
+    ]
+   },
+   {
+    "label": "final:red1:Z",
+    "measurements": [
+     75,
+     76,
+     78,
+     79
+    ],
+    "coords": [
+     2,
+     3,
+     5,
+     3
+    ]
+   },
+   {
+    "label": "final:green1:Z",
+    "measurements": [
+     68,
+     70,
+     76,
+     77,
+     79,
+     80
+    ],
+    "coords": [
+     3,
+     6,
+     5,
+     4
+    ]
+   },
+   {
+    "label": "final:red2:X",
+    "measurements": [
+     65,
+     82,
+     83,
+     84,
+     85
+    ],
+    "coords": [
+     5,
+     6,
+     5,
+     0
+    ]
+   },
+   {
+    "label": "final:green2:X",
+    "measurements": [
+     66,
+     81,
+     82,
+     84,
+     86
+    ],
+    "coords": [
+     6,
+     3,
+     5,
+     1
+    ]
+   },
+   {
+    "label": "final:blue2:X",
+    "measurements": [
+     67,
+     84,
+     85,
+     86,
+     87
+    ],
+    "coords": [
+     7,
+     6,
+     5,
+     2
+    ]
+   }
+  ],
+  "observable_measurements": [
+   47,
+   48,
+   52,
+   81,
+   82,
+   83
+  ],
+  "m1_MXX_measurements": [
+   47,
+   48,
+   52
+  ],
+  "m2_ZL1_measurements": [
+   78,
+   79,
+   80
+  ],
+  "measurement_keys": [
+   [
+    "init",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "init",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "init",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "init",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge1",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge1",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge1",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge1",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge2",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge2",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge2",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge2",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     8
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     5
+    ]
+   ],
+   [
+    "merge3",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     7
+    ]
+   ],
+   [
+    "merge3",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "merge3",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "merge3",
+    [
+     4,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     4
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     5
+    ]
+   ],
+   [
+    "split",
+    [
+     1,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     2,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     3,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     5,
+     6
+    ]
+   ],
+   [
+    "split",
+    [
+     6,
+     3
+    ]
+   ],
+   [
+    "split",
+    [
+     7,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     0,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     1,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     2,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     3,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     3
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     5,
+     7
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     5
+    ]
+   ],
+   [
+    "final",
+    [
+     6,
+     6
+    ]
+   ],
+   [
+    "final",
+    [
+     7,
+     4
+    ]
+   ],
+   [
+    "final",
+    [
+     8,
+     5
+    ]
+   ]
+  ],
+  "status": {
+   "init|blue1|X": "det",
+   "init|blue1|Z": "random",
+   "init|red1|X": "det",
+   "init|red1|Z": "random",
+   "init|green1|X": "det",
+   "init|green1|Z": "random",
+   "init|red2|X": "random",
+   "init|red2|Z": "det",
+   "init|green2|X": "random",
+   "init|green2|Z": "det",
+   "init|blue2|X": "random",
+   "init|blue2|Z": "det",
+   "merge1|blue1|X": "det",
+   "merge1|blue1|Z": "det",
+   "merge1|red1|X": "det",
+   "merge1|red1|Z": "det",
+   "merge1|green1x|X": "det",
+   "merge1|green1x|Z": "det",
+   "merge1|hatL|X": "random",
+   "merge1|hatL|Zpair": "det",
+   "merge1|hatR|X": "random",
+   "merge1|hatR|Zpair": "det",
+   "merge1|red2x|X": "det",
+   "merge1|red2x|Z": "det",
+   "merge1|green2|X": "det",
+   "merge1|green2|Z": "det",
+   "merge1|blue2|X": "det",
+   "merge1|blue2|Z": "det",
+   "merge2|blue1|X": "det",
+   "merge2|blue1|Z": "det",
+   "merge2|red1|X": "det",
+   "merge2|red1|Z": "det",
+   "merge2|green1x|X": "det",
+   "merge2|green1x|Z": "det",
+   "merge2|hatL|X": "det",
+   "merge2|hatL|Zpair": "det",
+   "merge2|hatR|X": "det",
+   "merge2|hatR|Zpair": "det",
+   "merge2|red2x|X": "det",
+   "merge2|red2x|Z": "det",
+   "merge2|green2|X": "det",
+   "merge2|green2|Z": "det",
+   "merge2|blue2|X": "det",
+   "merge2|blue2|Z": "det",
+   "merge3|blue1|X": "det",
+   "merge3|blue1|Z": "det",
+   "merge3|red1|X": "det",
+   "merge3|red1|Z": "det",
+   "merge3|green1x|X": "det",
+   "merge3|green1x|Z": "det",
+   "merge3|hatL|X": "det",
+   "merge3|hatL|Zpair": "det",
+   "merge3|hatR|X": "det",
+   "merge3|hatR|Zpair": "det",
+   "merge3|red2x|X": "det",
+   "merge3|red2x|Z": "det",
+   "merge3|green2|X": "det",
+   "merge3|green2|Z": "det",
+   "merge3|blue2|X": "det",
+   "merge3|blue2|Z": "det",
+   "merge3|bellXX|X": "det",
+   "split|blue1|X": "det",
+   "split|blue1|Z": "det",
+   "split|red1|X": "det",
+   "split|red1|Z": "det",
+   "split|green1|X": "det",
+   "split|green1|Z": "det",
+   "split|red2|X": "det",
+   "split|red2|Z": "det",
+   "split|green2|X": "det",
+   "split|green2|Z": "det",
+   "split|blue2|X": "det",
+   "split|blue2|Z": "det",
+   "final|blue1|Z": "det",
+   "final|red1|Z": "det",
+   "final|green1|Z": "det",
+   "final|red2|X": "det",
+   "final|green2|X": "det",
+   "final|blue2|X": "det"
+  }
+ },
+ "_layout": {
+  "placement_offset_row_col": [
+   0,
+   3
+  ],
+  "figure_to_chip": {
+   "0,2": [
+    0,
+    5
+   ],
+   "1,1": [
+    1,
+    4
+   ],
+   "1,2": [
+    1,
+    5
+   ],
+   "1,3": [
+    1,
+    6
+   ],
+   "2,0": [
+    2,
+    3
+   ],
+   "2,1": [
+    2,
+    4
+   ],
+   "2,2": [
+    2,
+    5
+   ],
+   "2,3": [
+    2,
+    6
+   ],
+   "3,0": [
+    3,
+    3
+   ],
+   "3,1": [
+    3,
+    4
+   ],
+   "3,2": [
+    3,
+    5
+   ],
+   "3,3": [
+    3,
+    6
+   ],
+   "3,4": [
+    3,
+    7
+   ],
+   "4,0": [
+    4,
+    3
+   ],
+   "4,1": [
+    4,
+    4
+   ],
+   "4,2": [
+    4,
+    5
+   ],
+   "4,3": [
+    4,
+    6
+   ],
+   "4,4": [
+    4,
+    7
+   ],
+   "4,5": [
+    4,
+    8
+   ],
+   "5,0": [
+    5,
+    3
+   ],
+   "5,1": [
+    5,
+    4
+   ],
+   "5,2": [
+    5,
+    5
+   ],
+   "5,3": [
+    5,
+    6
+   ],
+   "5,4": [
+    5,
+    7
+   ],
+   "6,0": [
+    6,
+    3
+   ],
+   "6,1": [
+    6,
+    4
+   ],
+   "6,2": [
+    6,
+    5
+   ],
+   "6,3": [
+    6,
+    6
+   ],
+   "7,1": [
+    7,
+    4
+   ],
+   "7,2": [
+    7,
+    5
+   ],
+   "7,3": [
+    7,
+    6
+   ],
+   "8,2": [
+    8,
+    5
+   ]
+  },
+  "qubit_index_to_chip": [
+   [
+    0,
+    5
+   ],
+   [
+    1,
+    4
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    6
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ],
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    7
+   ],
+   [
+    4,
+    3
+   ],
+   [
+    4,
+    4
+   ],
+   [
+    4,
+    5
+   ],
+   [
+    4,
+    6
+   ],
+   [
+    4,
+    7
+   ],
+   [
+    4,
+    8
+   ],
+   [
+    5,
+    3
+   ],
+   [
+    5,
+    4
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    6
+   ],
+   [
+    5,
+    7
+   ],
+   [
+    6,
+    3
+   ],
+   [
+    6,
+    4
+   ],
+   [
+    6,
+    5
+   ],
+   [
+    6,
+    6
+   ],
+   [
+    7,
+    4
+   ],
+   [
+    7,
+    5
+   ],
+   [
+    7,
+    6
+   ],
+   [
+    8,
+    5
+   ]
+  ],
+  "roles": {
+   "L1_data": [
+    [
+     0,
+     5
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     2,
+     6
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     3,
+     7
+    ]
+   ],
+   "L2_data": [
+    [
+     5,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     5,
+     7
+    ],
+    [
+     6,
+     5
+    ],
+    [
+     6,
+     6
+    ],
+    [
+     7,
+     4
+    ],
+    [
+     8,
+     5
+    ]
+   ],
+   "interface_data": [
+    [
+     4,
+     5
+    ],
+    [
+     4,
+     6
+    ]
+   ],
+   "aux": {
+    "blue1": [
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ]
+    ],
+    "red1": [
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      3
+     ]
+    ],
+    "green1": [
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ]
+    ],
+    "hatL": [
+     [
+      4,
+      4
+     ],
+     [
+      4,
+      3
+     ]
+    ],
+    "hatR": [
+     [
+      4,
+      8
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "red2": [
+     [
+      5,
+      5
+     ],
+     [
+      5,
+      6
+     ]
+    ],
+    "green2": [
+     [
+      6,
+      4
+     ],
+     [
+      6,
+      3
+     ]
+    ],
+    "blue2": [
+     [
+      7,
+      5
+     ],
+     [
+      7,
+      6
+     ]
+    ]
+   },
+   "idle_in_init_and_split_cycles": [
+    [
+     4,
+     3
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     4,
+     8
+    ]
+   ]
+  }
+ }
+}

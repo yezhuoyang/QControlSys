@@ -136,7 +136,13 @@ export function transmonPlay(op, { theta = Math.PI / 4 } = {}) {
     case "H_YZ": return { kind: "pulse", before: PI, angle: PI / 2, axis: PI }; // H_YZ = Rx(-π/2)·Z
     case "S": return { kind: "frame", angle: PI / 2 };
     case "S_DAG": return { kind: "frame", angle: -PI / 2 };
+    case "Z": return { kind: "frame", angle: PI };
     case "X": return { kind: "pulse", angle: PI, axis: 0 };
+    case "Y": return { kind: "pulse", angle: PI, axis: PI / 2 };
+    case "SQRT_X": return { kind: "pulse", angle: PI / 2, axis: 0 };
+    case "SQRT_X_DAG": return { kind: "pulse", angle: PI / 2, axis: PI };
+    case "SQRT_Y": return { kind: "pulse", angle: PI / 2, axis: PI / 2 };
+    case "SQRT_Y_DAG": return { kind: "pulse", angle: PI / 2, axis: -PI / 2 };
     case "CZ": return { kind: "cz" };
     case "M": return { kind: "measure" };
     case "R": return { kind: "reset" };

@@ -1,0 +1,176 @@
+# verify.py -- Lacroix et al. 2025 color code circuits
+stim 1.15.0
+
+## A. noiseless determinism (1000 shots; memory circuits also 20 random sweep bitstrings x 50 shots)
+memory-d3-east-X-r03.stim          qubits=16 meas=  25 dets=  18 obs=1 sweep=7 all-zero=True
+memory-d3-east-X-r05.stim          qubits=16 meas=  37 dets=  30 obs=1 sweep=7 all-zero=True
+memory-d3-east-X-r09.stim          qubits=16 meas=  61 dets=  54 obs=1 sweep=7 all-zero=True
+memory-d3-east-Z-r03.stim          qubits=16 meas=  25 dets=  18 obs=1 sweep=7 all-zero=True
+memory-d3-east-Z-r05.stim          qubits=16 meas=  37 dets=  30 obs=1 sweep=7 all-zero=True
+memory-d3-east-Z-r09.stim          qubits=16 meas=  61 dets=  54 obs=1 sweep=7 all-zero=True
+memory-d3-north-X-r03.stim         qubits=15 meas=  25 dets=  18 obs=1 sweep=7 all-zero=True
+memory-d3-north-X-r05.stim         qubits=15 meas=  37 dets=  30 obs=1 sweep=7 all-zero=True
+memory-d3-north-X-r09.stim         qubits=15 meas=  61 dets=  54 obs=1 sweep=7 all-zero=True
+memory-d3-north-Z-r03.stim         qubits=15 meas=  25 dets=  18 obs=1 sweep=7 all-zero=True
+memory-d3-north-Z-r05.stim         qubits=15 meas=  37 dets=  30 obs=1 sweep=7 all-zero=True
+memory-d3-north-Z-r09.stim         qubits=15 meas=  61 dets=  54 obs=1 sweep=7 all-zero=True
+memory-d3-west-X-r03.stim          qubits=16 meas=  25 dets=  18 obs=1 sweep=7 all-zero=True
+memory-d3-west-X-r05.stim          qubits=16 meas=  37 dets=  30 obs=1 sweep=7 all-zero=True
+memory-d3-west-X-r09.stim          qubits=16 meas=  61 dets=  54 obs=1 sweep=7 all-zero=True
+memory-d3-west-Z-r03.stim          qubits=16 meas=  25 dets=  18 obs=1 sweep=7 all-zero=True
+memory-d3-west-Z-r05.stim          qubits=16 meas=  37 dets=  30 obs=1 sweep=7 all-zero=True
+memory-d3-west-Z-r09.stim          qubits=16 meas=  61 dets=  54 obs=1 sweep=7 all-zero=True
+memory-d5-X-r03.stim               qubits=41 meas=  73 dets=  54 obs=1 sweep=19 all-zero=True
+memory-d5-X-r05.stim               qubits=41 meas= 109 dets=  90 obs=1 sweep=19 all-zero=True
+memory-d5-X-r09.stim               qubits=41 meas= 181 dets= 162 obs=1 sweep=19 all-zero=True
+memory-d5-Z-r03.stim               qubits=41 meas=  73 dets=  54 obs=1 sweep=19 all-zero=True
+memory-d5-Z-r05.stim               qubits=41 meas= 109 dets=  90 obs=1 sweep=19 all-zero=True
+memory-d5-Z-r09.stim               qubits=41 meas= 181 dets= 162 obs=1 sweep=19 all-zero=True
+circuit-teleport-0.stim            qubits=32 meas=  88 dets=  71 obs=1 sweep=0 all-zero=True
+circuit-teleport-1.stim            qubits=32 meas=  88 dets=  71 obs=1 sweep=0 all-zero=True
+circuit-teleport-minus.stim        qubits=32 meas=  88 dets=  71 obs=1 sweep=0 all-zero=True
+circuit-teleport-plus.stim         qubits=32 meas=  88 dets=  71 obs=1 sweep=0 all-zero=True
+circuit-teleport.stim              qubits=32 meas=  88 dets=  71 obs=1 sweep=0 all-zero=True
+ALL NOISELESS DETECTORS/OBSERVABLES ZERO: True
+
+## B. structure vs paper statements
+memory-d3-east-X-r03.stim    data= 7 aux= 6 (+2 reset-only) cycles= 3 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-east-X-r05.stim    data= 7 aux= 6 (+2 reset-only) cycles= 5 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-east-X-r09.stim    data= 7 aux= 6 (+2 reset-only) cycles= 9 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-east-Z-r03.stim    data= 7 aux= 6 (+2 reset-only) cycles= 3 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-east-Z-r05.stim    data= 7 aux= 6 (+2 reset-only) cycles= 5 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-east-Z-r09.stim    data= 7 aux= 6 (+2 reset-only) cycles= 9 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-north-X-r03.stim   data= 7 aux= 6 (+2 reset-only) cycles= 3 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-north-X-r05.stim   data= 7 aux= 6 (+2 reset-only) cycles= 5 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-north-X-r09.stim   data= 7 aux= 6 (+2 reset-only) cycles= 9 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-north-Z-r03.stim   data= 7 aux= 6 (+2 reset-only) cycles= 3 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-north-Z-r05.stim   data= 7 aux= 6 (+2 reset-only) cycles= 5 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-north-Z-r09.stim   data= 7 aux= 6 (+2 reset-only) cycles= 9 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-west-X-r03.stim    data= 7 aux= 6 (+2 reset-only) cycles= 3 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-west-X-r05.stim    data= 7 aux= 6 (+2 reset-only) cycles= 5 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-west-X-r09.stim    data= 7 aux= 6 (+2 reset-only) cycles= 9 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-west-Z-r03.stim    data= 7 aux= 6 (+2 reset-only) cycles= 3 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-west-Z-r05.stim    data= 7 aux= 6 (+2 reset-only) cycles= 5 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d3-west-Z-r09.stim    data= 7 aux= 6 (+2 reset-only) cycles= 9 bulk cycle: CZ=30 in 10 layers, H layers=7, reset layers=2, meas=6; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d5-X-r03.stim         data=19 aux=18 (+4 reset-only) cycles= 3 bulk cycle: CZ=102 in 10 layers, H layers=7, reset layers=2, meas=18; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d5-X-r05.stim         data=19 aux=18 (+4 reset-only) cycles= 5 bulk cycle: CZ=102 in 10 layers, H layers=7, reset layers=2, meas=18; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d5-X-r09.stim         data=19 aux=18 (+4 reset-only) cycles= 9 bulk cycle: CZ=102 in 10 layers, H layers=7, reset layers=2, meas=18; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d5-Z-r03.stim         data=19 aux=18 (+4 reset-only) cycles= 3 bulk cycle: CZ=102 in 10 layers, H layers=7, reset layers=2, meas=18; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d5-Z-r05.stim         data=19 aux=18 (+4 reset-only) cycles= 5 bulk cycle: CZ=102 in 10 layers, H layers=7, reset layers=2, meas=18; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+memory-d5-Z-r09.stim         data=19 aux=18 (+4 reset-only) cycles= 9 bulk cycle: CZ=102 in 10 layers, H layers=7, reset layers=2, meas=18; est. cycle = 7x18+10x37+600+160+53 = 1309 ns
+paper: d=3 subsets use 13 qubits (7 data + 6 aux), d=5 uses 37 (19 data + 18 aux) [App. D.2, Sec. II];
+       8 CNOT layers + 'only two layers of two-qubit gates' from the readout-line transformation = 10 CZ layers [App. C.3];
+       'total error correction cycle duration ... approximately 1.3 us' [App. C.3]
+
+## C. Zenodo noisy circuits = ideal + SI1000(p=0.001)
+memory-d3-east-X-r03.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-east-X-r05.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-east-X-r09.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-east-Z-r03.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-east-Z-r05.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-east-Z-r09.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-north-X-r03.noisy_si1000.stim      regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-north-X-r05.noisy_si1000.stim      regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-north-X-r09.noisy_si1000.stim      regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-north-Z-r03.noisy_si1000.stim      regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-north-Z-r05.noisy_si1000.stim      regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-north-Z-r09.noisy_si1000.stim      regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-west-X-r03.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-west-X-r05.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-west-X-r09.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-west-Z-r03.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-west-Z-r05.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d3-west-Z-r09.noisy_si1000.stim       regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d5-X-r03.noisy_si1000.stim            regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d5-X-r05.noisy_si1000.stim            regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d5-X-r09.noisy_si1000.stim            regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d5-Z-r03.noisy_si1000.stim            regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d5-Z-r05.noisy_si1000.stim            regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+memory-d5-Z-r09.noisy_si1000.stim            regenerated==file: True  stripped==ideal: True  noise strengths: [0.0001, 0.001, 0.002, 0.005]
+ALL NOISY == SI1000(IDEAL) EXACTLY: True;  ALL STRIPPED == IDEAL: True
+
+## D. detector error models (decompose_errors=False)
+memory-d3-east-X-r03.noisy_si1000.stim       detectors=  18 error mechanisms=355
+memory-d3-east-X-r05.noisy_si1000.stim       detectors=  30 error mechanisms=695
+memory-d3-east-X-r09.noisy_si1000.stim       detectors=  54 error mechanisms=1375
+memory-d3-east-Z-r03.noisy_si1000.stim       detectors=  18 error mechanisms=362
+memory-d3-east-Z-r05.noisy_si1000.stim       detectors=  30 error mechanisms=702
+memory-d3-east-Z-r09.noisy_si1000.stim       detectors=  54 error mechanisms=1382
+memory-d3-north-X-r03.noisy_si1000.stim      detectors=  18 error mechanisms=355
+memory-d3-north-X-r05.noisy_si1000.stim      detectors=  30 error mechanisms=695
+memory-d3-north-X-r09.noisy_si1000.stim      detectors=  54 error mechanisms=1375
+memory-d3-north-Z-r03.noisy_si1000.stim      detectors=  18 error mechanisms=362
+memory-d3-north-Z-r05.noisy_si1000.stim      detectors=  30 error mechanisms=702
+memory-d3-north-Z-r09.noisy_si1000.stim      detectors=  54 error mechanisms=1382
+memory-d3-west-X-r03.noisy_si1000.stim       detectors=  18 error mechanisms=355
+memory-d3-west-X-r05.noisy_si1000.stim       detectors=  30 error mechanisms=695
+memory-d3-west-X-r09.noisy_si1000.stim       detectors=  54 error mechanisms=1375
+memory-d3-west-Z-r03.noisy_si1000.stim       detectors=  18 error mechanisms=362
+memory-d3-west-Z-r05.noisy_si1000.stim       detectors=  30 error mechanisms=702
+memory-d3-west-Z-r09.noisy_si1000.stim       detectors=  54 error mechanisms=1382
+memory-d5-X-r03.noisy_si1000.stim            detectors=  54 error mechanisms=1401
+memory-d5-X-r05.noisy_si1000.stim            detectors=  90 error mechanisms=2633
+memory-d5-X-r09.noisy_si1000.stim            detectors= 162 error mechanisms=5097
+memory-d5-Z-r03.noisy_si1000.stim            detectors=  54 error mechanisms=1405
+memory-d5-Z-r05.noisy_si1000.stim            detectors=  90 error mechanisms=2637
+memory-d5-Z-r09.noisy_si1000.stim            detectors= 162 error mechanisms=5101
+Zenodo chromobius_decoder_with_si1000_prior/error_model.dem (d5 Z r05): 2637 hyperedges (after merging decomposition suggestions); ours: 2637; common 2637; max relative prob. difference on common = 0.00e+00
+
+## E. Chromobius decoding of SIMULATED SI1000 p=1e-3 data (not the experimental data)
+memory-d3-east-X-r03.noisy_si1000.stim       logical errors 162/20000 = 0.0081
+memory-d3-east-X-r05.noisy_si1000.stim       logical errors 358/20000 = 0.0179
+memory-d3-east-X-r09.noisy_si1000.stim       logical errors 653/20000 = 0.0326
+memory-d3-east-Z-r03.noisy_si1000.stim       logical errors 162/20000 = 0.0081
+memory-d3-east-Z-r05.noisy_si1000.stim       logical errors 317/20000 = 0.0158
+memory-d3-east-Z-r09.noisy_si1000.stim       logical errors 552/20000 = 0.0276
+memory-d3-north-X-r03.noisy_si1000.stim      logical errors 156/20000 = 0.0078
+memory-d3-north-X-r05.noisy_si1000.stim      logical errors 339/20000 = 0.0169
+memory-d3-north-X-r09.noisy_si1000.stim      logical errors 636/20000 = 0.0318
+memory-d3-north-Z-r03.noisy_si1000.stim      logical errors 176/20000 = 0.0088
+memory-d3-north-Z-r05.noisy_si1000.stim      logical errors 329/20000 = 0.0164
+memory-d3-north-Z-r09.noisy_si1000.stim      logical errors 584/20000 = 0.0292
+memory-d3-west-X-r03.noisy_si1000.stim       logical errors 169/20000 = 0.0084
+memory-d3-west-X-r05.noisy_si1000.stim       logical errors 376/20000 = 0.0188
+memory-d3-west-X-r09.noisy_si1000.stim       logical errors 662/20000 = 0.0331
+memory-d3-west-Z-r03.noisy_si1000.stim       logical errors 170/20000 = 0.0085
+memory-d3-west-Z-r05.noisy_si1000.stim       logical errors 321/20000 = 0.0160
+memory-d3-west-Z-r09.noisy_si1000.stim       logical errors 557/20000 = 0.0278
+memory-d5-X-r03.noisy_si1000.stim            logical errors 176/20000 = 0.0088
+memory-d5-X-r05.noisy_si1000.stim            logical errors 342/20000 = 0.0171
+memory-d5-X-r09.noisy_si1000.stim            logical errors 654/20000 = 0.0327
+memory-d5-Z-r03.noisy_si1000.stim            logical errors 141/20000 = 0.0070
+memory-d5-Z-r05.noisy_si1000.stim            logical errors 276/20000 = 0.0138
+memory-d5-Z-r09.noisy_si1000.stim            logical errors 511/20000 = 0.0255
+
+## F. reconstructed lattice-surgery teleportation
+circuit-teleport-0.stim: input |0>, L2 read in Z
+  qubits=32 measurements=88 detectors=71 (rank 71; +observable rank 72); deterministic parity space dim = 72 -> detectors complete: True
+  cycles (init, merge x3, split) + final readout: CNOTs per cycle [60, 81, 80, 81, 60, 0], CNOT layers [8, 8, 8, 8, 8, 0], measurements [12, 16, 16, 18, 12, 14]
+  noiseless raw value of OBSERVABLE 0 parity over 1000 shots: [0] (expected logical bit 0); m1 (M_XX) outcomes seen: [0, 1] (random, as it must be)
+  SI1000 p=1e-3 DEM: 71 detectors, 1947 error mechanisms; shortest undetectable logical error found (args 3,3): 3; chromobius (sim): 746/20000 = 0.0373  [0.2s]
+circuit-teleport-1.stim: input |1>, L2 read in Z
+  qubits=32 measurements=88 detectors=71 (rank 71; +observable rank 72); deterministic parity space dim = 72 -> detectors complete: True
+  cycles (init, merge x3, split) + final readout: CNOTs per cycle [60, 81, 80, 81, 60, 0], CNOT layers [8, 8, 8, 8, 8, 0], measurements [12, 16, 16, 18, 12, 14]
+  noiseless raw value of OBSERVABLE 0 parity over 1000 shots: [1] (expected logical bit 1); m1 (M_XX) outcomes seen: [0, 1] (random, as it must be)
+  SI1000 p=1e-3 DEM: 71 detectors, 1947 error mechanisms; shortest undetectable logical error found (args 3,3): 3; chromobius (sim): 720/20000 = 0.0360  [0.2s]
+circuit-teleport-minus.stim: input |->, L2 read in X
+  qubits=32 measurements=88 detectors=71 (rank 71; +observable rank 72); deterministic parity space dim = 72 -> detectors complete: True
+  cycles (init, merge x3, split) + final readout: CNOTs per cycle [60, 81, 80, 81, 60, 0], CNOT layers [8, 8, 8, 8, 8, 0], measurements [12, 16, 16, 18, 12, 14]
+  noiseless raw value of OBSERVABLE 0 parity over 1000 shots: [1] (expected logical bit 1); m1 (M_XX) outcomes seen: [0, 1] (random, as it must be)
+  SI1000 p=1e-3 DEM: 71 detectors, 1947 error mechanisms; shortest undetectable logical error found (args 3,3): 3; chromobius (sim): 329/20000 = 0.0164  [0.2s]
+circuit-teleport-plus.stim: input |+>, L2 read in X
+  qubits=32 measurements=88 detectors=71 (rank 71; +observable rank 72); deterministic parity space dim = 72 -> detectors complete: True
+  cycles (init, merge x3, split) + final readout: CNOTs per cycle [60, 81, 80, 81, 60, 0], CNOT layers [8, 8, 8, 8, 8, 0], measurements [12, 16, 16, 18, 12, 14]
+  noiseless raw value of OBSERVABLE 0 parity over 1000 shots: [0] (expected logical bit 0); m1 (M_XX) outcomes seen: [0, 1] (random, as it must be)
+  SI1000 p=1e-3 DEM: 71 detectors, 1947 error mechanisms; shortest undetectable logical error found (args 3,3): 3; chromobius (sim): 300/20000 = 0.0150  [0.2s]
+circuit-teleport.stim: input |1>, L2 read in Z
+  qubits=32 measurements=88 detectors=71 (rank 71; +observable rank 72); deterministic parity space dim = 72 -> detectors complete: True
+  cycles (init, merge x3, split) + final readout: CNOTs per cycle [60, 81, 80, 81, 60, 0], CNOT layers [8, 8, 8, 8, 8, 0], measurements [12, 16, 16, 18, 12, 14]
+  noiseless raw value of OBSERVABLE 0 parity over 1000 shots: [1] (expected logical bit 1); m1 (M_XX) outcomes seen: [0, 1] (random, as it must be)
+  SI1000 p=1e-3 DEM: 71 detectors, 1947 error mechanisms; shortest undetectable logical error found (args 3,3): 3; chromobius (sim): 720/20000 = 0.0360  [0.2s]
+tile weights: {'blue1': 4, 'red1': 4, 'green1': 4, 'red2': 4, 'green2': 4, 'blue2': 4, 'green1x': 6, 'red2x': 6, 'hatL': 5, 'hatR': 3}
+paper: 'the green (red) boundary stabilizers of L1 (L2) are expanded from weight-four to weight-six' -> green1 4 -> green1x 6, red2 4 -> red2x 6; 'two new X-basis stabilizers' -> hatL (weight 5), hatR (weight 3), X only
+m1 measurement set derived by stim flow solving (merge cycle 3, X_L1 -> X_L2): [['merge3', [4, 4]], ['merge3', [4, 8]], ['merge3', [4, 5]]]
+paper: 'the parity measurement outcome m1 is determined from the product of the X-basis merge stabilizers and the Bell measurement outcome' -> hatL(4,4) and hatR(4,8) M_X plus interface (4,5) M_X
+
+(total time 19s)

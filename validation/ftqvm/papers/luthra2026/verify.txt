@@ -1,0 +1,129 @@
+== 1. QIR gate -> Stim gate map (equal up to global phase)
+  rz(1*pi/2) == S : True
+  rz(2*pi/2) == Z : True
+  rz(3*pi/2) == S_DAG : True
+  rx(1*pi/2) == SQRT_X : True
+  rx(2*pi/2) == X : True
+  rx(3*pi/2) == SQRT_X_DAG : True
+  rzz(1*pi/2) == SQRT_ZZ : True
+  rzz(3*pi/2) == SQRT_ZZ_DAG : True
+
+== 2. Stim files reproduce the submitted QIR instruction sequence exactly
+  XR1             QIR instr  629  stim instr  629  identical=True  qubits=27 meas=48 ticks=51 dets=34 obs=3
+  XR1-MinusMinus  QIR instr  624  stim instr  624  identical=True  qubits=27 meas=48 ticks=51 dets=34 obs=3
+  XR1-ZeroZero    QIR instr  624  stim instr  624  identical=True  qubits=27 meas=48 ticks=51 dets=34 obs=1
+  XR1-OneOne      QIR instr  629  stim instr  629  identical=True  qubits=27 meas=48 ticks=51 dets=34 obs=1
+  XR3             QIR instr 1079  stim instr 1079  identical=True  qubits=27 meas=76 ticks=85 dets=62 obs=3
+  SEQ             QIR instr  858  stim instr  858  identical=True  qubits=27 meas=66 ticks=68 dets=47 obs=2
+  SEQ-OneOne      QIR instr  863  stim instr  863  identical=True  qubits=27 meas=66 ticks=68 dets=47 obs=2
+  MEM             QIR instr  920  stim instr  920  identical=True  qubits=20 meas=60 ticks=88 dets=51 obs=2
+
+== 3. Code and gadget structure read off the program (qubit q_i = program qubit 5+i)
+  S_X0 ancilla  0 -> data [0, 2, 5, 6]  (GB l=5 a=1+x^2 b=1+x: [0, 2, 5, 6])  S_Z0 ancilla 15 -> data [0, 4, 5, 8]  ([0, 4, 5, 8])
+  S_X1 ancilla  1 -> data [1, 3, 6, 7]  (GB l=5 a=1+x^2 b=1+x: [1, 3, 6, 7])  S_Z1 ancilla 16 -> data [0, 1, 6, 9]  ([0, 1, 6, 9])
+  S_X2 ancilla  2 -> data [2, 4, 7, 8]  (GB l=5 a=1+x^2 b=1+x: [2, 4, 7, 8])  S_Z2 ancilla 17 -> data [1, 2, 5, 7]  ([1, 2, 5, 7])
+  S_X3 ancilla  3 -> data [0, 3, 8, 9]  (GB l=5 a=1+x^2 b=1+x: [0, 3, 8, 9])  S_Z3 ancilla 18 -> data [2, 3, 6, 8]  ([2, 3, 6, 8])
+  S_X4 ancilla  4 -> data [1, 4, 5, 9]  (GB l=5 a=1+x^2 b=1+x: [1, 4, 5, 9])  S_Z4 ancilla 19 -> data [3, 4, 7, 9]  ([3, 4, 7, 9])
+  rank H_X = rank H_Z = 4 -> k = 10 - 8 = 2;  logicals (paper Eq. 2-5):
+    X1=[2, 3, 7] commutes with all Z checks; overlaps with Z1,Z2: [1, 0]
+    X2=[1, 7, 9] commutes with all Z checks; overlaps with Z1,Z2: [0, 1]
+  X1 gadget couplings in XR1: kappa(20,21,22) [[17, 23, 24, 26], [18, 23, 24, 25], [19, 23, 25, 26]] ; gamma(23) [20, 21, 22] ; chi(24,25,26) [[7, 20, 21], [8, 21, 22], [12, 20, 22]]
+  Z2 gadget couplings in SEQ (second use of 20..26): nu(20,21,22)->X-check ancillas [[0], [1], [2]] ; eta(24,25,26)->data [[2], [3, 6], [7]] (union over the chi and eta uses)
+
+== 4. Noiseless: 1000 shots, every detector and observable must be 0 (relative to the reference sample)
+  XR1             detector 1s: 0  observable 1s: 0  ideal observable values [0, 0, 0]  (X1,G; X1,D; X2,D)
+  XR1-MinusMinus  detector 1s: 0  observable 1s: 0  ideal observable values [1, 1, 1]  (X1,G; X1,D; X2,D)
+  XR1-ZeroZero    detector 1s: 0  observable 1s: 0  ideal observable values [0]  (X1,G xor X1,D (agreement of gadget and transversal readout))
+  XR1-OneOne      detector 1s: 0  observable 1s: 0  ideal observable values [0]  (X1,G xor X1,D (agreement of gadget and transversal readout))
+  XR3             detector 1s: 0  observable 1s: 0  ideal observable values [0, 0, 0]  (X1,G; X1,D; X2,D)
+  SEQ             detector 1s: 0  observable 1s: 0  ideal observable values [0, 0]  (Z2,G; Z2,D)
+  SEQ-OneOne      detector 1s: 0  observable 1s: 0  ideal observable values [1, 1]  (Z2,G; Z2,D)
+  MEM             detector 1s: 0  observable 1s: 0  ideal observable values [0, 0]  (X1,D; X2,D)
+
+== 5. Detector error model with the rates of the paper's error-model table (tab:error-model, App. C) {'reset': 0.00047, 'meas': 0.00047, 'p1': 3.4e-05, 'p2': 0.001, 'idle': 1.7142857142857142e-05}
+   model: X_ERROR after R and before M; DEPOLARIZE1 after rx-type gates (rz is virtual on H2);
+   DEPOLARIZE2 after SQRT_ZZ; Z_ERROR(idle * ceil(n2q/4)) on every qubit per TICK containing n2q>0 2Q gates
+   (stands in for the paper's "per 2Q depth" idle with greedy packing into 4 gate zones).
+  XR1             DEM errors  572 detectors 34 observables 3 : decompose_errors=True OK
+  XR1-MinusMinus  DEM errors  572 detectors 34 observables 3 : decompose_errors=True OK
+  XR1-ZeroZero    DEM errors  572 detectors 34 observables 1 : decompose_errors=True OK
+  XR1-OneOne      DEM errors  572 detectors 34 observables 1 : decompose_errors=True OK
+  XR3             DEM errors 1214 detectors 62 observables 3 : decompose_errors=True OK
+  SEQ             DEM errors  816 detectors 47 observables 2 : decompose_errors=True OK
+  SEQ-OneOne      DEM errors  816 detectors 47 observables 2 : decompose_errors=True OK
+  MEM             DEM errors 1005 detectors 51 observables 2 : decompose_errors=True OK
+
+== 6. Simulated logical error rates (sanity check only; paper used Tesseract and its own idle model)
+  XR1             200000 shots, 193236 verified (lookup misses 1159, 1s):
+      X1,G raw 1.807% | PyMatching 1.050% | lookup 1.001%
+      X1,D raw 2.003% | PyMatching 0.036% | lookup 0.036%
+      X2,D raw 1.989% | PyMatching 0.050% | lookup 0.051%
+  XR1-MinusMinus  200000 shots, 193326 verified (lookup misses 1160, 2s):
+      X1,G raw 1.819% | PyMatching 1.091% | lookup 1.045%
+      X1,D raw 1.982% | PyMatching 0.035% | lookup 0.037%
+      X2,D raw 2.013% | PyMatching 0.048% | lookup 0.052%
+  XR3             200000 shots, 193236 verified (lookup misses 5034, 2s):
+      X1,G raw 1.828% | PyMatching 0.337% | lookup 0.116%
+      X1,D raw 3.761% | PyMatching 0.066% | lookup 0.065%
+      X2,D raw 3.618% | PyMatching 0.098% | lookup 0.102%
+  SEQ             200000 shots, 193114 verified (lookup misses 2552, 2s):
+      Z2,G raw 2.787% | PyMatching 1.010% | lookup 0.945%
+      Z2,D raw 2.916% | PyMatching 0.057% | lookup 0.051%
+  SEQ-OneOne      200000 shots, 193132 verified (lookup misses 2515, 2s):
+      Z2,G raw 2.783% | PyMatching 1.056% | lookup 0.983%
+      Z2,D raw 2.933% | PyMatching 0.054% | lookup 0.049%
+  MEM             200000 shots, 193336 verified (lookup misses 3122, 2s):
+      X1,D raw 3.313% | PyMatching 0.062% | lookup 0.059%
+      X2,D raw 3.412% | PyMatching 0.087% | lookup 0.084%
+  paper simulation: SEQ Z2,G 1.000 [0.986, 1.014]% (1e6 shots per state); paper weight-1 budget (tab:r1_budget) 6.00e-3 for XR1 X1,G.
+
+== 7. Hardware records (Zenodo *-output.json)
+   Format: Results[0].Shots = list of shots in time order; each shot is the 0/1 list in the order of the
+   QIR result_record_output calls (labels "k_a(k-1)r"), which is the original Stim measurement order.
+   output position p -> Stim measurement record layout.json[...]["output_position_to_record"][p].
+  XR1             shots  500  verified(trivial SE1 prep-basis boundary detectors)  487  paper  487  MATCH
+     shot 0: raw logical outcomes ['X1,G', 'X1,D', 'X2,D'] = [0, 0, 0] (ideal [0, 0, 0]), SE1 verified True
+     shot 1: raw logical outcomes ['X1,G', 'X1,D', 'X2,D'] = [0, 0, 0] (ideal [0, 0, 0]), SE1 verified True
+     shot 2: raw logical outcomes ['X1,G', 'X1,D', 'X2,D'] = [0, 0, 0] (ideal [0, 0, 0]), SE1 verified True
+  XR1-MinusMinus  shots  500  verified(trivial SE1 prep-basis boundary detectors)  484  paper  484  MATCH
+  XR1-ZeroZero    shots  250  verified(trivial SE1 prep-basis boundary detectors)  240  paper  240  MATCH
+  XR1-OneOne      shots  250  verified(trivial SE1 prep-basis boundary detectors)  245  paper  245  MATCH
+  XR3             shots 1000  verified(trivial SE1 prep-basis boundary detectors)  957  paper  957  MATCH
+  SEQ             shots  500  verified(trivial SE1 prep-basis boundary detectors)  492  paper  492  MATCH
+     shot 0: raw logical outcomes ['Z2,G', 'Z2,D'] = [0, 0] (ideal [0, 0]), SE1 verified True
+     shot 1: raw logical outcomes ['Z2,G', 'Z2,D'] = [0, 0] (ideal [0, 0]), SE1 verified True
+     shot 2: raw logical outcomes ['Z2,G', 'Z2,D'] = [0, 0] (ideal [0, 0]), SE1 verified True
+  SEQ-OneOne      shots  500  verified(trivial SE1 prep-basis boundary detectors)  486  paper  486  MATCH
+  MEM             shots  500  verified(trivial SE1 prep-basis boundary detectors)  483  paper  483  MATCH
+  XR3 rejected shot indices (0-based): [30, 84, 91, 111, 131, 136, 151, 177, 228, 291, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 380, 411, 431, 438, 547, 609, 646, 663, 752, 800, 826, 888, 908, 927]
+     paper: "19 of which are the consecutive shots 351--369"; here rejected within 351..369 (0-based): 19, (1-based) 18
+
+== 8. Hardware logical errors: raw and decoded (PyMatching + lookup table, not Tesseract) vs paper
+  XR1 X1,G vs prep (|++>,|-->), verified     raw 12/971 = 1.24% [0.68, 2.08] | pm 9/971 = 0.93% [0.46, 1.69] | lut 6/971 = 0.62% [0.26, 1.27] | paper (Tesseract) 7/971 = 0.72% [0.32, 1.41]
+  XR1 X1,D vs prep, verified                 raw 19/971 = 1.96% [1.22, 2.98] | pm 0/971 = 0.00% [0.00, 0.26] | lut 0/971 = 0.00% [0.00, 0.26] | paper (Tesseract) 0/971
+  XR1 X2,D vs prep, verified                 raw 18/971 = 1.85% [1.14, 2.85] | pm 0/971 = 0.00% [0.00, 0.26] | lut 0/971 = 0.00% [0.00, 0.26] | paper (Tesseract) 0/971
+  XR1 X1,G vs X1,D (|00>,|11>), verified     raw 15/485 = 3.09% [1.82, 4.92] | pm 7/485 = 1.44% [0.65, 2.81] | lut 9/485 = 1.86% [0.92, 3.36] | paper (Tesseract) 8/485 (5/240 + 3/245)
+  XR3 X1,G vs prep, verified                 raw 14/957 = 1.46% [0.84, 2.38] | pm 2/957 = 0.21% [0.04, 0.67] | lut 0/957 = 0.00% [0.00, 0.27] | paper (Tesseract) 0/957 (< 0.26%)
+  XR3 X1,G vs prep, all shots                raw 33/1000 = 3.30% [2.32, 4.55] | pm 11/1000 = 1.10% [0.59, 1.90] | lut 9/1000 = 0.90% [0.45, 1.64] | paper (Tesseract) 10/1000
+  XR3 X2,D vs prep, verified                 raw 34/957 = 3.55% [2.52, 4.87] | pm 3/957 = 0.31% [0.09, 0.83] | lut 2/957 = 0.21% [0.04, 0.67] | paper (Tesseract) 2/957 = 0.21% [0.04, 0.67]
+  SEQ Z2,G vs prep, verified                 raw 27/978 = 2.76% [1.87, 3.93] | pm 12/978 = 1.23% [0.67, 2.07] | lut 11/978 = 1.12% [0.60, 1.94] | paper (Tesseract) 11/978 = 1.12% [0.60, 1.94]
+  SEQ Z2,D vs prep, verified                 raw 26/978 = 2.66% [1.79, 3.81] | pm 0/978 = 0.00% [0.00, 0.26] | lut 0/978 = 0.00% [0.00, 0.26] | paper (Tesseract) 0/978
+  MEM X1,D + X2,D, verified                  raw 20/966 = 2.07% [1.31, 3.12] | pm 0/966 = 0.00% [0.00, 0.27] | lut 0/966 = 0.00% [0.00, 0.27] | paper (Tesseract) 0/966 (0/483 each)
+  XR3 X1,G without the 6 chi detectors, verified lut 9/957 = 0.94% [0.47, 1.71] (unseen syndromes 45) | paper (Tesseract) 7/957 = 0.73% [0.33, 1.43]
+
+== 9. Hardware detector rates vs paper tables tab:fusion and tab:max_rates
+  XR1 all      bulk detectors 20, max rate 34/1500 = 2.27% [1.60, 3.11] at L1 S_Z4
+  XR1 verified bulk detectors 20, max rate 30/1456 = 2.06% [1.42, 2.89] at L2 S_Z4
+  XR3 all      bulk detectors 40, max rate 38/1000 = 3.80% [2.75, 5.12] at L4 S_Z2
+  XR3 verified bulk detectors 40, max rate 27/957 = 2.82% [1.91, 4.02] at L3 S_Z2
+  SEQ all      bulk detectors 30, max rate 27/1000 = 2.70% [1.83, 3.85] at L3 S_X0
+  SEQ verified bulk detectors 30, max rate 26/978 = 2.66% [1.79, 3.81] at L3 S_X0
+  MEM all      bulk detectors 40, max rate 14/500 = 2.80% [1.61, 4.53] at L2 S_X3
+  MEM verified bulk detectors 40, max rate 14/483 = 2.90% [1.67, 4.69] at L2 S_X3
+  paper tab:max_rates: XR1 all (L1,S_Z4) 2.27 / verified (L2,S_Z4) 2.06; XR3 all (L4,S_Z2) 3.80 / verified (L3,S_Z2) 2.82;
+                  SEQ (L3,S_X0) 2.70 / 2.66; MEM (L2,S_X3) 2.80 / 2.90; #bulk = 20, 40, 30, 40
+  XR1 kappa trailing-layer deformed stabilisers (verified, n=1456): no fusion min 49.6%, with fusion max 2.06%
+  XR3 kappa trailing-layer deformed stabilisers (verified, n=957): no fusion min 47.1%, with fusion max 2.51%
+  SEQ kappa trailing-layer deformed stabilisers (verified, n=978): no fusion min 50.1%, with fusion max 1.94%
+  SEQ nu    trailing-layer deformed stabilisers (verified, n=978): no fusion min 48.1%, with fusion max 2.66%
+  paper tab:fusion: XR1 x1g 49.6 -> 2.06; XR3 x1g 47.1 -> 2.51; SEQ x1g 50.1 -> 1.94; SEQ z2g 48.1 -> 2.66

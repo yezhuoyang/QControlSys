@@ -1,0 +1,123 @@
+{
+  "experiment": "Full decoding response time (fast-feedback / logical-branching stepping stone), Caune et al., arXiv:2410.05202v1 Sec. 'Control and communication latencies', Fig. 4, SI Sec. D-E (Fig. S3, S4); Nat. Commun. 17, 7383 (2026) Fig. 4, Supplementary Notes 4-5",
+  "source_priority": "Paper text/figures quoted verbatim; 'program_evidence' fields come from the executed Quil/assembly programs stored by the authors in Zenodo fast_feedback_raw_data.h5 (doi:10.5281/zenodo.13961129, runs of 2024-07-17), extracted to zenodo/extracted/ff_meas0N_program.quil.",
+
+  "stability_part": {
+    "circuit": "circuit-feedback-n9.stim (9 measurement rounds = 8 decoding rounds); same four ZZ checks as the LEP runs but the executed schedule is RX(+pi/2) on all 8, four CZ layers {52-45,50-43},{38-37,52-51},{36-37,50-51},{36-43,38-45}, RX(+pi/2) on ancillas, MEASURE ancillas + ring-down DELAY; final round RX(+pi/2) on all 8 and MEASURE all 8 together",
+    "rounds_swept": {"value": [2, 3, 4, 5, 6, 7, 8, 9], "unit": "measurement (syndrome-extraction) rounds",
+      "quote": "Full decoding response time measurements as a function of number of rounds.", "section": "Fig. 4(b) caption",
+      "program_evidence": "Zenodo groups hold programs with ro BIT[4N+5] for N = 2..9: N mid-circuit/final ancilla readouts, 4 data readouts and 1 feedback readout; the decoder is configured with N-1 decoding rounds (DACTLR word 0x0{N-1}02026c)."},
+    "headline_rounds": {"value": 9, "unit": "measurement rounds",
+      "quote": "We also implement and time a fast-feedback experiment demonstrating a decoding response time of 9.6 us for a total of 9 measurement rounds.", "section": "Abstract (arXiv v1 and Nat. Commun.)",
+      "note": "The main text also calls this a '9-decoding-round experiment'; the program for the 9-round point has 9 syndrome-extraction rounds and configures the decoder for 8 decoding rounds, consistent with 'the number of decoding cycles is one fewer than the number of syndrome extraction rounds' (Nat. Commun. Results)."}
+  },
+
+  "conditional_operation": {
+    "when": {"value": "after the final (N-th) syndrome-extraction round, as soon as the decoder result is available",
+      "quote": "After the QEC experiment completes and the decoder has received the allocated number of measurement outcomes of the stability circuit, we start the real-time FPGA decoder and wait for the result. When the result is received, we conditionally apply an X gate on the qubit controlled by the gate sequencer on the same FPGA as the decoder.",
+      "section": "Control and communication latencies"},
+    "target_qubit": {"value": "Q50", "role": "ancilla of check Z43 Z51 (bottom-left corner of the 3x3 sublattice)",
+      "quote": "we conditionally apply an X gate on the qubit controlled by the gate sequencer on the same FPGA as the decoder",
+      "section": "Control and communication latencies",
+      "program_evidence": "qpu_config: \"decoder_frame_description\": \"; frame 50 \\\"Transmon-50_charge_tx\\\"\"; branch 1 is 'RX(pi) 50', branch 0 is 'DELAY 50 4e-8', followed by 'MEASURE 50 ro[4N+4]'. The paper itself never names the qubit."},
+    "gate": {"value": "X = RX(pi), 40 ns DRAG pulse on Transmon-50_charge_tx; else idle 40 ns",
+      "quote": "Applies an X gate conditionally on the decoding result and measures the qubit. The $X$ gate is applied if the result is $1$, otherwise the qubit is left to idle until measurement for a time equal to the gate's duration.",
+      "section": "SI Sec. D, item 6 'Execute fast-feedback operation'"},
+    "condition": {"value": "decoded logical-observable flip L (homology bit) == 1",
+      "quote": "The decoding result is a Boolean describing whether the decoder computed that the physical errors flipped the stability experiment's logical observable.",
+      "section": "SI Sec. D, item 5 'Decode'",
+      "program_evidence": "after polling the status register, the sequencer reads DASR (decoder address 0x1098, comment 'get homology data from the DASR register') and 'jumpeq @start-conditional-branch-0' on its least-significant bit. Zenodo record description: 'values 0 and 2 correspond to no logical error detected and 1 corresponds to logical error being detected by the decoder'."},
+    "readout_after": {"value": "Q50 measured after a fixed delay T after its final stability readout M1",
+      "quote": "The qubit is read out after a fixed delay, set longer than the worst recorded decoding time (approx. $N_{\\mathrm{rounds}}$ $\\mu s$ for an $N_{\\mathrm{rounds}}$ experiment).",
+      "section": "Control and communication latencies",
+      "program_evidence": "label @conditional-jump-push-max-wait-cycles pushes 50*N wait-loop iterations (100 for N=2 ... 450 for N=9) on every sequencer; the decoder frame subtracts the same amount ('subi 450') and instead polls the decoder status. Our reading (not stated in the paper): other sequencers, including Q50's readout, spin for that fixed count."}
+  },
+
+  "success_measure": {
+    "conditional_correctness": {"value": "P(M1 = M2 | L): expected high for L = 0 and low for L = 1",
+      "quote": "We expect that if the decoding result $L$ is $L=0$ then the first measurement $M_1$ is equal to the second measurement $M_2$; and if $L=1$ then the first measurement $M_1$ is opposite to the second measurement $M_2$. We can see that is indeed the case in Fig. S4(b), although the distribution has significant noise due to multiple microseconds of qubit idling between the measurements.",
+      "section": "SI Sec. E", "figure_values_read_off": "Fig. S4(b): P(M1=M2|L=0) falls from ~0.79 (2 rounds) to ~0.59 (9 rounds); P(M1=M2|L=1) ~0.30-0.44"},
+    "timing_by_control_system": {"quote": "Firstly, we record the FPGA clock cycles on the control system sequencer and the cycles on the decoder accelerator.", "section": "Control and communication latencies",
+      "program_evidence": "@store-time reads I_TIME after the last readout is stashed; @take-time-diff reads I_TIME again after the conditional branch and stores the difference in 'time'; the decoder's event counters MGUEVCNTR_0..4 are read back into decoder_result[3..7]."},
+    "timing_by_qubit_T1_clock": {"quote": "To check that there are no additional unaccounted delays, we also measure the full decoding response time by using the qubit T1 time as a clock.", "section": "Control and communication latencies",
+      "reference_data": {"T1_fit": "A = 0.87 +- 0.05; T1 = (13 +- 1) us; B = 0.08 +- 0.05 (SI Eq. 1, Fig. S4(d))",
+        "confusion_matrix_P(M|S)": [[0.967, 0.053], [0.033, 0.947]],
+        "post_measurement_Q(S|M)": [[0.990, 0.069], [0.010, 0.931]],
+        "estimator": "T_d ~= -T1 log <exp(-T_d/T1)>, bias O(theta/T1) <~ 3% for the Gamma-distributed response time (SI Sec. E)"}}
+  },
+
+  "latency_budget": {
+    "full_decoding_response_time": {"value": 9.6, "unit": "us", "rounds": "9 measurement rounds",
+      "quote": "For a $9$-decoding-round experiment, we find the full decoding response time to be $9.6$~\\unit{\\micro\\second}, including $6.5$~\\unit{\\micro\\second} decoding time and $3.1$~\\unit{\\micro\\second} communication and control latencies.",
+      "section": "Control and communication latencies", "zenodo_fig4b_csv_ns": 9556.256},
+    "definition": {"quote": "the \\textit{full decoding response time}, which is the time between the final data extraction round and the application of a logical conditional gate. This response time includes the decoding time as well as the communication and control latency times to send the data to and from the decoder.", "section": "Introduction"},
+    "decoding": {"value": 6.5, "unit": "us", "quote": "including $6.5$~\\unit{\\micro\\second} decoding time", "section": "Control and communication latencies", "zenodo_fig4b_csv_ns": 6522.2528, "std_ns": 1759.75},
+    "communication_and_control": {"value": 3.1, "unit": "us", "quote": "and $3.1$~\\unit{\\micro\\second} communication and control latencies", "section": "Control and communication latencies"},
+    "readout_to_decoder": {"value": 1.4, "unit": "us",
+      "quote": "In particular, $1.4$~\\unit{\\micro\\second} is the time for the final readout results to reach the decoder, with the remaining $1$-$1.5$~\\unit{\\micro\\second} ($250-370$ FPGA clock cycles) consisting of additional control system logic: collecting the measurements into packets to be sent to the decoder, sending them via the WISHBONE bus (see Methods), receiving results and performing the conditional logic",
+      "section": "Control and communication latencies",
+      "program_evidence": "qpu_config \"readout_propagation_duration\": 1.4e-06; program inserts 'DELAY q 1.4e-6' on all 8 qubits between the final MEASURE and stashing the final readout word"},
+    "control_system_logic": {"value": [1.0, 1.5], "unit": "us", "clock_cycles": [250, 370], "quote": "with the remaining $1$-$1.5$~\\unit{\\micro\\second} ($250-370$ FPGA clock cycles) consisting of additional control system logic", "section": "Control and communication latencies",
+      "note": "250-370 cycles over 1-1.5 us corresponds to the 250 MHz sequencer clock (4 ns), not the 156.25 MHz decoder clock"},
+    "packing": {"value": 0.4, "unit": "us", "quote": "reordering and packing classified measurements before sending them to the decoder can take up to ${\\sim} 400$~ns at $9$ rounds", "section": "Discussion"},
+    "decode_per_round_mean": {"value": [0.44, 0.79], "unit": "us per decoding round", "rounds": [5, 25],
+      "quote": "our mean decoding time per round ranges from $0.44$~\\unit{\\micro\\second} when decoding $5$ rounds to $0.79$~\\unit{\\micro\\second} when decoding $25$ rounds", "section": "Decoding throughput",
+      "zenodo_mean_decoding_time_us": {"3": 0.434086, "5": 0.438869, "7": 0.456644, "9": 0.483114, "11": 0.521466, "13": 0.560802, "15": 0.591925, "17": 0.646869, "19": 0.681552, "21": 0.701884, "23": 0.768708, "25": 0.796577}},
+    "flowchart_Fig_S3_us": {
+      "quote": "The execution time for each element is shown in microseconds. When this depends on the number of rounds in the experiment, the times for $2$ and $9$ measurement rounds are shown instead.",
+      "section": "SI Fig. S3 caption", "values_read_from_figure": {
+        "initialise_decoder": "1.4", "round_of_gates_and_measurements": "~1.7", "buffer_measurement_outcomes": "< 0.1",
+        "wait_for_readout_state_propagation": "1.4", "send_measurements_to_decoder": "0.2 - 0.5", "decode": "~0.7 - 6.5",
+        "apply_X_or_idle": "< 0.1", "measure": "~1.0"}},
+    "per_hop_latencies_Fig1": {"quote": "Inter-unit latencies are denoted with worst-case values where measured.", "section": "Fig. 1(a) caption",
+      "A_readout_tx_to_rx": {"value": 500, "unit": "ns", "quote": "A (in black): Delay between readout transmit and readout receive (approx. $500$~ns). This delay contributes to overall latency but not to inter-shot or inter-readout delay"},
+      "B_classify_and_serialize": {"value": 120, "unit": "ns", "quote": "B (in yellow): Time required for readout receiver to generate a classified result, convert to intra-unit message, and serialize to the low-latency results crossbar ($120$~ns)"},
+      "C_rx_to_crossbar": {"value": [120, 160], "unit": "ns", "quote": "C (in yellow): Time required for transmission from readout receiver to low-latency results crossbar ($120$--$160$~ns)"},
+      "D_crossbar_handling": {"value": 40, "unit": "ns", "quote": "D (in black): Time required to handle result message and prepare for broadcast ($40$~ns)"},
+      "E_crossbar_to_cards_and_sequencers": {"value": [[120, 160], [40, 90]], "unit": "ns", "quote": "E (in teal): Time required to transmit from low-latency results crossbar to internal controller option cards ($120$--$160$~ns), with additional time for readout-to-sequencer logic to send classified results to sequencers, within each card ($40$--$90$~ns)"},
+      "F_inter_chassis": {"value": [240, 260], "unit": "ns", "quote": "F (in black): Inter-node delay time for broadcasting between control system chassis ($240$--$260$~ns)"}},
+    "zenodo_fig4b_decoding_response_time_ns": {
+      "columns": "rounds, total (control_system_logic), std, decoding_time, std, delay_measured_by_qubit [us], std [us]",
+      "rows": [[2, 3200.704, 390.96, 655.008, 411.26, 4.030, 1.123], [3, 4099.68, 742.27, 1508.454, 745.71, 3.058, 1.108],
+               [4, 4835.296, 941.55, 2212.870, 941.91, 4.771, 1.145], [5, 5676.32, 1133.24, 3005.389, 1133.67, 4.081, 1.181],
+               [6, 6689.664, 1256.80, 3954.637, 1256.88, 6.234, 1.199], [7, 7692.096, 1492.24, 4742.323, 1492.20, 8.034, 1.168],
+               [8, 8610.208, 1567.29, 5575.974, 1567.24, 7.979, 1.347], [9, 9556.256, 1760.09, 6522.253, 1759.75, 7.767, 1.275]],
+      "note": "total minus decoding is 2.55-3.03 us for every N (readout propagation 1.4 us + 1.1-1.6 us logic)"}
+  },
+
+  "decoder_and_bus": {
+    "decoder": {"quote": "We achieve this by decoding with a scalable FPGA implementation of a Collision Clustering decoder \\cite{barber_real-time_2023}, integrated into Rigetti's \\ankaaTM superconducting device's control system", "section": "Introduction",
+      "reference": "B. Barber et al., 'A real-time, scalable, fast and resource-efficient decoder for a quantum computer', Nature Electronics (2025), arXiv:2309.05558",
+      "graph": "unweighted: 'The FPGA decoder decoding graph does not use edge weights.' (SI Sec. B)"},
+    "decoder_clock": {"value": 156.25, "unit": "MHz", "quote": "While the sequencer processor clock operates at $250$~MHz, we opted to drive the FPGA decoder using the $156.25$~MHz clock already present in the design to simplify the timing requirements.", "section": "Methods: Real-time FPGA decoder integration",
+      "program_evidence": "qpu_config decoder_clock_frequency 156250000.0, sequencer_clock_frequency 250000000.0"},
+    "decoder_verified_clock": {"value": 400, "unit": "MHz", "quote": "It has also been verified for operating at $400$~MHz frequency, allowing room for further speed improvements compared to those demonstrated here.", "section": "Integrating an FPGA decoder in the Ankaa-2 control system"},
+    "host_fpga_and_sequencer": {"quote": "When integrating the FPGA decoder and control system, we selected the FPGA design with the lowest resource utilization, the gate drive card design, which is responsible for generating microwave pulses to enact single-qubit gates.", "section": "Methods: Real-time FPGA decoder integration",
+      "fpga": "Kintex-7: 'features high-speed digital-to-analog (DAC) and analog-to-digital (ADC) converters that interface with a Kintex-7 FPGA' (Methods: Description of control system)",
+      "sequencer": "'one or more \\textit{sequencers}, each of which consist of a dedicated processor, waveform scheduler, and waveform generator' (Methods); the decoder sits on Q50's charge-drive (gate) sequencer (program frame 'Transmon-50_charge_tx')"},
+    "bus": {"value": "32-bit WISHBONE, driven by sequencer I/O ports, with clock-domain crossing 250 -> 156.25 MHz",
+      "quote": "We used a version of the FPGA decoder featuring a 32-bit WISHBONE interface for communication. We integrated the decoder into the design by adding I/O ports to the gate drive pulse sequencer that initiate READ and WRITE clock cycles over the WISHBONE interface. Via these I/O ports, a sequencer program was able to read from, and write to, any of the decoder's addresses in order to perform actions such as writing the syndrome register, starting the decoding process, and reading the decoder result. Signals from other ports on the decoder core, such as the decoder's status bitfield, were also made available to sequencer programs via an I/O port.",
+      "section": "Methods: Real-time FPGA decoder integration",
+      "program_evidence": "ports O_DFDECODE_DATA / O_DFDECODE_WR / O_DFDECODE_RD / I_DFDECODE_DATA / I_DFDECODE_STATUS; every access is followed by 'wait 80ns for the decoder to acknowledge a write/read' (push 5; call @wait-fixed-time)"},
+    "network": {"quote": "An experiment using an $8$-qubit system requires more than one control system chassis. We selected one chassis to be the hub of a star network and connected all other relevant chassis to it, ensuring the lowest achievable results propagation time by limiting the inter-chassis communication to a single hop. Interactions with a decoder were handled by a gate drive sequencer on the hub chassis, which had access to the classified results from the other chassis.", "section": "Methods: Real-time FPGA decoder integration"},
+    "results_distribution": {"quote": "the control system features a low-latency network that distributes each qubit's most recently classified result when it is published to this network, as part of the readout capture pipeline. Onboard-classified data propagates through the control system with a worst case latency time that is calculated beforehand and used when constructing programs to ensure valid results have been received.", "section": "Methods: Description of control system"},
+    "readout_regions": {"quote": "the sublattice [Q36, Q37, Q38, Q43, Q44, Q45, Q50, Q51, Q52] corresponding to the stability experiment ... falls across six different readout TX/RX hardware regions", "section": "Fig. 1(b) caption"}
+  },
+
+  "syndrome_streaming": {
+    "summary": "Not a continuous stream: classified bits are stashed round by round in the decoder sequencer's memory, packed into 32-bit words after the last round, written over WISHBONE, then decoding is started.",
+    "steps": [
+      {"step": "Initialise decoder", "quote": "Writes to the decoder experiment features (e.g. number of rounds) and decoding configurations (e.g. logical observable definition).", "section": "SI Sec. D item 1",
+       "program_evidence": "reset: read-modify-write 0x1 to 0x1080; config: 0x0{N-1}02026c (mask 0x83) to 0x1090 (DACTLR; the top byte equals the number of decoding rounds N-1); event-counter set-up writes to 0x1108, 0x1110, 0x1180-0x11a0. In the fast-feedback programs this precedes the circuit; in the LEP programs it follows it."},
+      {"step": "Perform round", "quote": "Executes a single QEC round of the stability-8 experiment. All rounds are identical besides the last in which the data qubits are also measured. Mid-circuit measurements are followed by ring-down delays (included in measurement times), which allow the resonators to decay back to their ground state before the start of the following round", "section": "SI Sec. D item 2"},
+      {"step": "Buffer measurement outcomes", "quote": "Stores the outcomes of the latest measurement round in the decoder sequencer's memory. Even though buffering takes less than $0.1$~\\unit{\\micro\\second}, a $1.4$~\\unit{\\micro\\second} delay must take place between measurement and buffering to allow for the measurements to propagate from the readout sequencers to the decoder sequencer. To address this, buffering is swapped with the following round, enabling the readout state to propagate in parallel with each QEC round and preventing the qubits idling mid-circuit. This instruction swapping is applied to all mid-circuit rounds, ensuring that only the last round experiences an actual readout state propagation delay.", "section": "SI Sec. D item 3",
+       "program_evidence": "@stash-readout-results-k after round k+2's MEASURE: 'fetch_rb' of readout-word bits 65 (Q50), 81 (Q52), 29 (Q38), 13 (Q36); final word also bits 21 (Q37), 80 (Q45), 64 (Q43), 73 (Q51); qpu_config readout_word_mapping gives bit = 8*(q mod 7) + (q div 7) for rows 0-5 and 56 + 8*(q mod 7) + (q div 7 - 6) for rows 6-11"},
+      {"step": "Send measurements to the decoder", "quote": "Collects, formats and writes all measurement outcomes to the decoder. This consists of pushing each round's buffer to the sequencer's data stack, combining them into a series of $32$-bit binary strings and writing them sequentially to the decoder.", "section": "SI Sec. D item 4",
+       "program_evidence": "@collect-measurements-to-synd packs the 4N+4 raw bits; @write-synd-group-to-decoder-k writes word k to 0x1800 + 4k (one word for N <= 6, two for N = 7..9). Raw measurement bits are sent; 'The decoder computes the syndrome from measurement outcomes' (SI item 5)."},
+      {"step": "Decode", "quote": "A write instruction to the decoder initiates decoding, followed by a polling of the decoder's status register, which stalls the program until decoding completes.", "section": "SI Sec. D item 5",
+       "program_evidence": "@start-decoding read-modify-writes 0x4 to 0x1080; @dfdecode-status-poll spins on I_DFDECODE_STATUS & 0x1c0 (core-0 status field)"},
+      {"step": "Execute fast-feedback operation", "quote": "Applies an $X$ gate conditionally on the decoding result and measures the qubit.", "section": "SI Sec. D item 6"}
+    ],
+    "compiler": {"quote": "We built a prototype compiler that receives a pyQuil \\cite{smith2016practical} program and adds the necessary instructions to perform real-time decoding and store the results (see Supplementary Information, Section D for more details). Our compiler can also merge two pyQuil programs into a logical branching experiment, where the second program is executed conditionally based on a real-time decoded measurement outcome obtained during the first program.", "section": "Integrating an FPGA decoder in the Ankaa-2 control system"}
+  }
+}

@@ -1,0 +1,1682 @@
+{
+ "citation": {
+  "authors": "N. Lacroix, A. Bourassa, F. J. H. Heras, L. M. Zhang, J. Bausch, A. W. Senior, T. Edlich, N. Shutty, V. Sivak, A. Bengtsson, M. McEwen, O. Higgott, D. Kafri, ..., C. Gidney, K. J. Satzinger (Google Quantum AI, Google DeepMind and collaborators)",
+  "title": "Scaling and logic in the color code on a superconducting quantum processor",
+  "journal": "Nature 645, 614-619 (2025)",
+  "arxiv": "arXiv:2412.14256 (v1, 18 Dec 2024; HTML + LaTeX source used here)",
+  "data_doi": "10.5281/zenodo.14238944",
+  "data_file": "google_superdense_color_code_d3_d5.zip (738,541,607 bytes; memory experiments only)",
+  "note": "Author list abbreviated; quotes below are from the arXiv v1 HTML, LaTeX math rendered as plain text (e.g. '$35\\text{\\,}\\mathrm{ns}$' -> '35 ns')."
+ },
+ "device": {
+  "name": "Willow (72 qubits)",
+  "quote": "We implement this logical qubit on the 72-qubit Willow processor first introduced in Ref. 3",
+  "section": "II Color codes with superconducting qubits",
+  "qubits_used_quote": "We use 37 qubits of a 72-qubit quantum processor to encode the distance-five logical qubit, and three 13-qubits subsets to encode the distance-three logical qubits.",
+  "qubits_used_section": "App. D.2 Color Code Location on Processor",
+  "coordinate_convention": "(row, col) as in the Zenodo QUBIT_COORDS and the axes of Fig. 8; grid = 72 qubits, row r spans cols lo..hi: {\"0\": [5, 5], \"1\": [4, 6], \"2\": [3, 7], \"3\": [2, 8], \"4\": [1, 9], \"5\": [0, 10], \"6\": [0, 10], \"7\": [1, 9], \"8\": [2, 8], \"9\": [3, 7], \"10\": [4, 6], \"11\": [5, 5]} (read from Fig. 8); nearest-neighbour square-grid couplers.",
+  "connectivity_quote": "This choice is particularly attractive for superconducting qubits because it only requires nearest-neighbor connectivity on a square grid of qubits.",
+  "readout_lines_quote": "The design of this processor favors the simultaneous readout of all qubits sharing a readout line to minimize measurement-induced dephasing.",
+  "memory_patches": {
+   "d3-east": {
+    "data_row_col": [
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      5,
+      4
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      6,
+      5
+     ],
+     [
+      6,
+      7
+     ]
+    ],
+    "aux_row_col": [
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      6,
+      4
+     ],
+     [
+      6,
+      6
+     ],
+     [
+      6,
+      8
+     ]
+    ],
+    "reset_only_row_col": [
+     [
+      7,
+      5
+     ],
+     [
+      7,
+      7
+     ]
+    ],
+    "listed_but_unused_row_col": [
+     [
+      5,
+      8
+     ]
+    ]
+   },
+   "d3-north": {
+    "data_row_col": [
+     [
+      0,
+      5
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      6
+     ]
+    ],
+    "aux_row_col": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      7
+     ]
+    ],
+    "reset_only_row_col": [
+     [
+      4,
+      4
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "listed_but_unused_row_col": []
+   },
+   "d3-west": {
+    "data_row_col": [
+     [
+      3,
+      4
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      5,
+      2
+     ],
+     [
+      5,
+      4
+     ],
+     [
+      6,
+      3
+     ],
+     [
+      6,
+      5
+     ]
+    ],
+    "aux_row_col": [
+     [
+      4,
+      4
+     ],
+     [
+      5,
+      3
+     ],
+     [
+      5,
+      5
+     ],
+     [
+      6,
+      2
+     ],
+     [
+      6,
+      4
+     ],
+     [
+      6,
+      6
+     ]
+    ],
+    "reset_only_row_col": [
+     [
+      7,
+      3
+     ],
+     [
+      7,
+      5
+     ]
+    ],
+    "listed_but_unused_row_col": [
+     [
+      5,
+      6
+     ]
+    ]
+   },
+   "d5": {
+    "data_row_col": [
+     [
+      0,
+      5
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      3
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      5,
+      2
+     ],
+     [
+      5,
+      4
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      5,
+      8
+     ],
+     [
+      6,
+      1
+     ],
+     [
+      6,
+      3
+     ],
+     [
+      6,
+      5
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      6,
+      9
+     ]
+    ],
+    "aux_row_col": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      8
+     ],
+     [
+      5,
+      1
+     ],
+     [
+      5,
+      3
+     ],
+     [
+      5,
+      5
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      6,
+      2
+     ],
+     [
+      6,
+      4
+     ],
+     [
+      6,
+      6
+     ],
+     [
+      6,
+      8
+     ]
+    ],
+    "reset_only_row_col": [
+     [
+      5,
+      9
+     ],
+     [
+      7,
+      3
+     ],
+     [
+      7,
+      5
+     ],
+     [
+      7,
+      7
+     ]
+    ],
+    "listed_but_unused_row_col": []
+   }
+  },
+  "memory_patch_note": "Roles derived from the Zenodo circuits: data = measured only at the end, aux = measured every cycle; reset-only qubits are reset each cycle but never gated or measured (purpose not stated in the paper); d3_east lists (5,8) in QUBIT_COORDS but never touches it.",
+  "teleport_layout": {
+   "placement_offset_row_col": [
+    0,
+    3
+   ],
+   "figure_to_chip": {
+    "0,2": [
+     0,
+     5
+    ],
+    "1,1": [
+     1,
+     4
+    ],
+    "1,2": [
+     1,
+     5
+    ],
+    "1,3": [
+     1,
+     6
+    ],
+    "2,0": [
+     2,
+     3
+    ],
+    "2,1": [
+     2,
+     4
+    ],
+    "2,2": [
+     2,
+     5
+    ],
+    "2,3": [
+     2,
+     6
+    ],
+    "3,0": [
+     3,
+     3
+    ],
+    "3,1": [
+     3,
+     4
+    ],
+    "3,2": [
+     3,
+     5
+    ],
+    "3,3": [
+     3,
+     6
+    ],
+    "3,4": [
+     3,
+     7
+    ],
+    "4,0": [
+     4,
+     3
+    ],
+    "4,1": [
+     4,
+     4
+    ],
+    "4,2": [
+     4,
+     5
+    ],
+    "4,3": [
+     4,
+     6
+    ],
+    "4,4": [
+     4,
+     7
+    ],
+    "4,5": [
+     4,
+     8
+    ],
+    "5,0": [
+     5,
+     3
+    ],
+    "5,1": [
+     5,
+     4
+    ],
+    "5,2": [
+     5,
+     5
+    ],
+    "5,3": [
+     5,
+     6
+    ],
+    "5,4": [
+     5,
+     7
+    ],
+    "6,0": [
+     6,
+     3
+    ],
+    "6,1": [
+     6,
+     4
+    ],
+    "6,2": [
+     6,
+     5
+    ],
+    "6,3": [
+     6,
+     6
+    ],
+    "7,1": [
+     7,
+     4
+    ],
+    "7,2": [
+     7,
+     5
+    ],
+    "7,3": [
+     7,
+     6
+    ],
+    "8,2": [
+     8,
+     5
+    ]
+   },
+   "qubit_index_to_chip": [
+    [
+     0,
+     5
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     1,
+     5
+    ],
+    [
+     1,
+     6
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     2,
+     4
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     2,
+     6
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     3,
+     5
+    ],
+    [
+     3,
+     6
+    ],
+    [
+     3,
+     7
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     4,
+     7
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     5,
+     5
+    ],
+    [
+     5,
+     6
+    ],
+    [
+     5,
+     7
+    ],
+    [
+     6,
+     3
+    ],
+    [
+     6,
+     4
+    ],
+    [
+     6,
+     5
+    ],
+    [
+     6,
+     6
+    ],
+    [
+     7,
+     4
+    ],
+    [
+     7,
+     5
+    ],
+    [
+     7,
+     6
+    ],
+    [
+     8,
+     5
+    ]
+   ],
+   "roles": {
+    "L1_data": [
+     [
+      0,
+      5
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      7
+     ]
+    ],
+    "L2_data": [
+     [
+      5,
+      3
+     ],
+     [
+      5,
+      4
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      6,
+      5
+     ],
+     [
+      6,
+      6
+     ],
+     [
+      7,
+      4
+     ],
+     [
+      8,
+      5
+     ]
+    ],
+    "interface_data": [
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "aux": {
+     "blue1": [
+      [
+       1,
+       5
+      ],
+      [
+       1,
+       6
+      ]
+     ],
+     "red1": [
+      [
+       2,
+       4
+      ],
+      [
+       2,
+       3
+      ]
+     ],
+     "green1": [
+      [
+       3,
+       5
+      ],
+      [
+       3,
+       6
+      ]
+     ],
+     "hatL": [
+      [
+       4,
+       4
+      ],
+      [
+       4,
+       3
+      ]
+     ],
+     "hatR": [
+      [
+       4,
+       8
+      ],
+      [
+       4,
+       7
+      ]
+     ],
+     "red2": [
+      [
+       5,
+       5
+      ],
+      [
+       5,
+       6
+      ]
+     ],
+     "green2": [
+      [
+       6,
+       4
+      ],
+      [
+       6,
+       3
+      ]
+     ],
+     "blue2": [
+      [
+       7,
+       5
+      ],
+      [
+       7,
+       6
+      ]
+     ]
+    },
+    "idle_in_init_and_split_cycles": [
+     [
+      4,
+      3
+     ],
+     [
+      4,
+      4
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      8
+     ]
+    ]
+   }
+  },
+  "teleport_layout_note": "Figure-to-chip placement is OUR choice (paper gives no chip coordinates for the teleportation experiment): same orientation as Fig. 5/15, translated to fit the 72-qubit grid, maximizing overlap with the paper's d=5 patch, then closest to chip centre."
+ },
+ "timings": {
+  "single_qubit_pi": {
+   "value": 35,
+   "unit": "ns",
+   "quote": "π-rotations and π/2-rotations have durations of 35 ns and 18 ns, respectively.",
+   "section": "App. B Device and Experimental Setup"
+  },
+  "single_qubit_pi_over_2": {
+   "value": 18,
+   "unit": "ns",
+   "quote": "π-rotations and π/2-rotations have durations of 35 ns and 18 ns, respectively.",
+   "section": "App. B Device and Experimental Setup"
+  },
+  "single_qubit_z": {
+   "value": 0,
+   "unit": "ns",
+   "quote": "We implement single-qubit gates using microwave DRAG pulses [7] for X rotations and virtual Z gates [8].",
+   "section": "App. B Device and Experimental Setup",
+   "note": "virtual Z = frame update, zero duration (standard meaning; the paper gives no number)"
+  },
+  "cz": {
+   "value": 37,
+   "unit": "ns",
+   "quote": "These CZ gates have a duration of 37 ns.",
+   "section": "App. B Device and Experimental Setup",
+   "mechanism_quote": "Controlled-Z (CZ) gates between neighboring qubits are realized by tuning the transition frequencies of the two qubits such that the |11> state is resonant with the |20> state, while also adjusting the frequency of a tunable coupler to control the coupling strength."
+  },
+  "readout": {
+   "value": 600,
+   "unit": "ns",
+   "quote": "The readout protocol, including cavity depletion time, lasts for 600 ns.",
+   "section": "App. B Device and Experimental Setup",
+   "note": "includes resonator depletion; frequency-multiplexed dispersive readout"
+  },
+  "reset": {
+   "value": 160,
+   "unit": "ns",
+   "quote": "Following readout, we perform a 160-ns multi-level reset as described in Ref. 6.",
+   "section": "App. B Device and Experimental Setup"
+  },
+  "dqlr": {
+   "value": 53,
+   "unit": "ns",
+   "quote": "For state preservation experiments, we also include a data qubit leakage removal (DQLR) procedure lasting 53 ns.",
+   "section": "App. B Device and Experimental Setup",
+   "note": "stated for state-preservation (memory) experiments only"
+  },
+  "qec_cycle": {
+   "value": 1.3,
+   "unit": "us",
+   "approximate": true,
+   "quote": "The total error correction cycle duration after decomposition and optimization is approximately 1.3 µs.",
+   "section": "App. C.3 Superdense Circuit Transformations",
+   "applies_to": "memory (state-preservation) circuits after the readout-line transformation"
+  },
+  "dynamical_decoupling": {
+   "value": null,
+   "unit": null,
+   "quote": "During the auxiliary qubit measurement and reset (steps 19 and 1), we apply an XY4 dynamical decoupling sequence [20] on all data qubits. After the auxiliary qubit resets, we also apply data-qubit leakage removal (DQLR) [21].",
+   "section": "App. D.1 Detailed Superdense Circuit",
+   "note": "pulse timing not given"
+  },
+  "derived_cycle_check": {
+   "value": 1309,
+   "unit": "ns",
+   "formula": "7 H layers x 18 ns + 10 CZ layers x 37 ns + 600 ns readout + 160 ns reset + 53 ns DQLR",
+   "derivation": "layer counts from the Zenodo memory circuits (verify.py B); assumes each H layer costs one pi/2 pulse (18 ns) and that the two R layers per cycle in the files are one 160 ns reset; DD/idle layers not separately timed",
+   "status": "OUR derivation, consistent with the quoted ~1.3 us; not a paper statement"
+  },
+  "derived_teleport_cycle_estimate": {
+   "value": 1218,
+   "unit": "ns",
+   "approximate": true,
+   "formula": "<= 9 H layers x 18 ns + 8 CZ layers x 37 ns + 600 ns + 160 ns (no DQLR: App. B states it for state preservation)",
+   "status": "OUR estimate for the CNOT circuit as drawn in Fig. 15 (8 CNOT layers per cycle, H+CZ compilation assumed); the paper states no duration for the teleportation cycles"
+  }
+ },
+ "electronics": {
+  "quote": "The device is installed at the bottom of a dilution refrigerator [4] and wired to custom room-temperature electronics for control.",
+  "section": "App. B Device and Experimental Setup",
+  "control_lines_quote": "We use a single control line per flux-tunable transmon [5] qubit to realize single-qubit gates and to tune the transition frequency to implement two-qubit gates and multi-level reset [6].",
+  "readout_quote": "Qubit states are read out dispersively by applying frequency-multiplexed microwave pulses."
+ },
+ "decoding": {
+  "mode": "offline (inferred; not stated as a word): the neural decoder is fine-tuned on experimental data, the MLE decoder is ~1000x slower than Chromobius, and Chromobius is called only a candidate for future real-time decoding; frame updates for teleportation are applied in post-processing",
+  "decoders_quote": "In this work, we explore three decoders for the color code: a möbius decoder (Chromobius) [2], a most-likely-error (MLE) decoder, and a neural-network decoder (AlphaQubit) [24].",
+  "decoders_section": "App. E Decoding",
+  "realtime_quote": "This makes Chromobius a promising candidate for real-time decoding in the near future.",
+  "realtime_section": "App. E.1.1",
+  "speed_quote": "After training, AlphaQubit can decode at an intermediate speed which is about 3 times slower than Chromobius, but 300 times faster than the MLE decoder.",
+  "speed_section": "App. E.1.3",
+  "mle_quote": "The most-likely error is found by mapping the decoding problem onto a mixed-integer program [28, 29, Supp. 1A] which is solved with the High Performance Optimization Software (HiGHS) package [30].",
+  "teleport_decoder_quote": "For state teleportation, a single instance of AlphaQubit processes the syndrome elements from both logical qubits in each cycle, along with additional syndrome elements corresponding to the stabilizers at the interface of the logical qubits during the merge cycles.",
+  "postprocessing_quote": "The parity measurement outcome m1 and L1’s Z-basis measurement outcome m2 are used in post-processing to apply a conditional Pauli frame update Z_L^m1 X_L^m2 to the state of L2",
+  "postprocessing_section": "VI State teleportation using lattice surgery",
+  "zenodo_pathways": [
+   "chromobius_decoder_with_si1000_prior",
+   "chromobius_decoder_with_rl_optimized_prior",
+   "simplex_decoder_with_si1000_prior",
+   "simplex_decoder_with_frequency_calibrated_prior",
+   "neural_network_decoder_even_odd",
+   "neural_network_decoder (dataset_3 only)"
+  ]
+ },
+ "results": [
+  {
+   "what": "Lambda_3/5 (AlphaQubit)",
+   "value": "1.56(4)",
+   "quote": "With a neural-network decoder (AlphaQubit) [24], we obtain Λ3/5=1.56(4) and ε5=0.0110(2).",
+   "section": "III Distance scaling"
+  },
+  {
+   "what": "eps_3 averaged d=3 logical error per cycle",
+   "value": "0.0171(3)",
+   "quote": "This is significantly lower than the logical error per cycle, ε̄3=0.0171(3), underscoring the efficiency of implementing transversal single-qubit gates.",
+   "section": "IV Logical Randomized Benchmarking"
+  },
+  {
+   "what": "MLE decoder",
+   "value": "Lambda 1.53(4), eps3 0.0176(3), eps5 0.0115(2)",
+   "quote": "Experimentally, we observe Λ3/5=1.53(4), ε̄3=0.0176(3) and ε̄5=0.0115(2), using the same MLE decoder.",
+   "section": "App. F"
+  },
+  {
+   "what": "simulated Lambda",
+   "value": "1.680(4)",
+   "quote": "The observed error suppression factor is in reasonable agreement with the simulated error suppression factor Λ3/5^sim=1.680(4).",
+   "section": "III Distance scaling"
+  },
+  {
+   "what": "detection probabilities",
+   "value": "0.149 (w6), 0.112 (w4)",
+   "quote": "As expected, weight-6 stabilizers exhibit a higher error detection probability (pd,6=0.149 when averaging over all cycles and stabilizers), compared to boundary weight-4 stabilizers (pd,4=0.112)",
+   "section": "III Distance scaling"
+  },
+  {
+   "what": "transversal Clifford error",
+   "value": "0.0027(3)",
+   "quote": "Using logical randomized benchmarking [38], we find that transversal Clifford gates add an error of only 0.0027(3), which is substantially less than the error of an idling error correction cycle.",
+   "section": "Abstract"
+  },
+  {
+   "what": "state injection",
+   "value": "infidelity 0.039(3) decoded, 0.009(4) post-selected (74.8 % kept)",
+   "quote": "obtaining an average infidelity of 0.039(3) using the Möbius decoder (Chromobius) [2] and 0.009(4) when post-selecting for runs without detectable errors (keeping on average 74.8 % of the runs)",
+   "section": "V Magic State Injection"
+  },
+  {
+   "what": "teleportation fidelity",
+   "value": "86.5(1) % to 90.7(1) %",
+   "quote": "Calculating fidelity with the ideal logical states yields fidelities between 86.5(1) % and 90.7(1) % when decoded with the neural-network decoder (Fig. 5k).",
+   "section": "VI State teleportation using lattice surgery"
+  },
+  {
+   "what": "teleportation channel bound",
+   "value": ">= 84.7(1) %",
+   "quote": "These measurements enable us to bound the average fidelity of the single-qubit teleportation channel, T, at F(T) ≥ 84.7(1) %",
+   "section": "VI State teleportation using lattice surgery"
+  },
+  {
+   "what": "teleportation protocol",
+   "quote": "We then perform the M_XX parity measurement, which involves a three-cycle lattice surgery merge operation, followed by a split operation over one cycle",
+   "section": "VI State teleportation using lattice surgery"
+  },
+  {
+   "what": "merge stabilizers",
+   "quote": "In the first merge cycle, two new X-basis stabilizers are added, indicated by the hatched tiles in Fig. 5d. In addition, the green (red) boundary stabilizers of L1 (L2) are expanded from weight-four to weight-six stabilizers in both bases, requiring the addition of two data qubits initially prepared in a Bell state.",
+   "section": "VI State teleportation using lattice surgery"
+  },
+  {
+   "what": "m1",
+   "quote": "The M_XX parity outcome is the product of the two interface X stabilizers and the additional data qubit read out in the X basis.",
+   "section": "App. I.1 State Teleportation Circuit Details"
+  },
+  {
+   "what": "surface code on same processor",
+   "value": "Lambda_sc 2.31(2)",
+   "quote": "At present, the surface code achieves better logical error suppression (on the same processor, Λsc3/5=2.31(2) [3])",
+   "section": "VII Discussion and outlook"
+  },
+  {
+   "what": "simulated threshold",
+   "value": "p_th ~ 0.005 (SI1000)",
+   "quote": "We observe that the threshold at which the logical error per cycle for the higher distances intersect is around pth≈0.005 (see Fig. 11).",
+   "section": "App. F"
+  },
+  {
+   "what": "shots",
+   "value": "50 000 per memory experiment",
+   "quote": "Each experiment is repeated 5 000 times for 10 different initialization bitstrings: five are randomly chosen and the remaining five are their binary complements, thereby ensuring equal representation of both eigenstates for odd-distance codes.",
+   "section": "App. D"
+  }
+ ],
+ "files": {
+  "memory_ideal_verbatim": {
+   "memory-d3-east-X-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_east/X/r03/circuit_ideal.stim",
+   "memory-d3-east-X-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_east/X/r05/circuit_ideal.stim",
+   "memory-d3-east-X-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_east/X/r09/circuit_ideal.stim",
+   "memory-d3-east-Z-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_east/Z/r03/circuit_ideal.stim",
+   "memory-d3-east-Z-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_east/Z/r05/circuit_ideal.stim",
+   "memory-d3-east-Z-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_east/Z/r09/circuit_ideal.stim",
+   "memory-d3-north-X-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_north/X/r03/circuit_ideal.stim",
+   "memory-d3-north-X-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_north/X/r05/circuit_ideal.stim",
+   "memory-d3-north-X-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_north/X/r09/circuit_ideal.stim",
+   "memory-d3-north-Z-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_north/Z/r03/circuit_ideal.stim",
+   "memory-d3-north-Z-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_north/Z/r05/circuit_ideal.stim",
+   "memory-d3-north-Z-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_north/Z/r09/circuit_ideal.stim",
+   "memory-d3-west-X-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_west/X/r03/circuit_ideal.stim",
+   "memory-d3-west-X-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_west/X/r05/circuit_ideal.stim",
+   "memory-d3-west-X-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_west/X/r09/circuit_ideal.stim",
+   "memory-d3-west-Z-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_west/Z/r03/circuit_ideal.stim",
+   "memory-d3-west-Z-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_west/Z/r05/circuit_ideal.stim",
+   "memory-d3-west-Z-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d3_west/Z/r09/circuit_ideal.stim",
+   "memory-d5-X-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d5/X/r03/circuit_ideal.stim",
+   "memory-d5-X-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d5/X/r05/circuit_ideal.stim",
+   "memory-d5-X-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d5/X/r09/circuit_ideal.stim",
+   "memory-d5-Z-r03.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d5/Z/r03/circuit_ideal.stim",
+   "memory-d5-Z-r05.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d5/Z/r05/circuit_ideal.stim",
+   "memory-d5-Z-r09.stim": "zenodo:10.5281/zenodo.14238944:google_superdense_color_code_d3_d5.zip!/google_superdense_color_code_d3_d5/dataset_0/d5/Z/r09/circuit_ideal.stim"
+  },
+  "zenodo_support_files_in_data/zenodo": [
+   "memory-d3-east-X-r03.metadata.json",
+   "memory-d3-east-X-r03.noisy_si1000.stim",
+   "memory-d3-east-X-r05.metadata.json",
+   "memory-d3-east-X-r05.noisy_si1000.stim",
+   "memory-d3-east-X-r09.metadata.json",
+   "memory-d3-east-X-r09.noisy_si1000.stim",
+   "memory-d3-east-Z-r03.metadata.json",
+   "memory-d3-east-Z-r03.noisy_si1000.stim",
+   "memory-d3-east-Z-r05.metadata.json",
+   "memory-d3-east-Z-r05.noisy_si1000.stim",
+   "memory-d3-east-Z-r09.metadata.json",
+   "memory-d3-east-Z-r09.noisy_si1000.stim",
+   "memory-d3-north-X-r03.metadata.json",
+   "memory-d3-north-X-r03.noisy_si1000.stim",
+   "memory-d3-north-X-r05.metadata.json",
+   "memory-d3-north-X-r05.noisy_si1000.stim",
+   "memory-d3-north-X-r09.metadata.json",
+   "memory-d3-north-X-r09.noisy_si1000.stim",
+   "memory-d3-north-Z-r03.metadata.json",
+   "memory-d3-north-Z-r03.noisy_si1000.stim",
+   "memory-d3-north-Z-r05.metadata.json",
+   "memory-d3-north-Z-r05.noisy_si1000.stim",
+   "memory-d3-north-Z-r09.metadata.json",
+   "memory-d3-north-Z-r09.noisy_si1000.stim",
+   "memory-d3-west-X-r03.metadata.json",
+   "memory-d3-west-X-r03.noisy_si1000.stim",
+   "memory-d3-west-X-r05.metadata.json",
+   "memory-d3-west-X-r05.noisy_si1000.stim",
+   "memory-d3-west-X-r09.metadata.json",
+   "memory-d3-west-X-r09.noisy_si1000.stim",
+   "memory-d3-west-Z-r03.metadata.json",
+   "memory-d3-west-Z-r03.noisy_si1000.stim",
+   "memory-d3-west-Z-r05.metadata.json",
+   "memory-d3-west-Z-r05.noisy_si1000.stim",
+   "memory-d3-west-Z-r09.metadata.json",
+   "memory-d3-west-Z-r09.noisy_si1000.stim",
+   "memory-d5-X-r03.metadata.json",
+   "memory-d5-X-r03.noisy_si1000.stim",
+   "memory-d5-X-r05.metadata.json",
+   "memory-d5-X-r05.noisy_si1000.stim",
+   "memory-d5-X-r09.metadata.json",
+   "memory-d5-X-r09.noisy_si1000.stim",
+   "memory-d5-Z-r03.metadata.json",
+   "memory-d5-Z-r03.noisy_si1000.stim",
+   "memory-d5-Z-r05.chromobius_si1000_prior.dem",
+   "memory-d5-Z-r05.metadata.json",
+   "memory-d5-Z-r05.noisy_si1000.stim",
+   "memory-d5-Z-r09.metadata.json",
+   "memory-d5-Z-r09.noisy_si1000.stim"
+  ],
+  "zenodo_round_counts_available": "r03 r05 r07 r09 r11 r13 r15 r17 r19 r20 r21 r23 r25 r27 r29 (no r01); patches d3_east, d3_north, d3_west, d5; bases X, Z; datasets 0-3 (all 240 .stim entries have identical CRC32 across datasets 0-3, so dataset_0 copies stand for all)",
+  "teleport": [
+   "circuit-teleport.stim (= |1_L> of Fig. 15, L2 read in Z)",
+   "circuit-teleport-0.stim",
+   "circuit-teleport-1.stim",
+   "circuit-teleport-plus.stim",
+   "circuit-teleport-minus.stim",
+   "build_teleport.py",
+   "teleport-records.json"
+  ]
+ },
+ "exactness": [
+  {
+   "item": "memory-*.stim",
+   "status": "EXACT: byte-for-byte copies of the authors' circuit_ideal.stim (dataset_0) from Zenodo"
+  },
+  {
+   "item": "data/zenodo/*.noisy_si1000.stim",
+   "status": "EXACT copies; verified = ideal + SI1000(p=1e-3) by regeneration (instruction-identical)"
+  },
+  {
+   "item": "teleport gate schedule",
+   "status": "RECONSTRUCTED from Fig. 15 panels 0-29 (every CNOT read off the vector PDF from the arXiv source); 8 CNOT layers per cycle, CNOT pairs and order as drawn"
+  },
+  {
+   "item": "teleport stabilizers",
+   "status": "RECONSTRUCTED from Fig. 5c-e / Fig. 15 tiles; consistent with all textual statements (weight-4 -> weight-6 for green L1/red L2; two X-only interface stabilizers of weight 5 and 3)"
+  },
+  {
+   "item": "teleport detectors/observables",
+   "status": "DERIVED with stim flow solving per cycle; deterministic (1000 noiseless shots) and complete (span the whole deterministic parity space)"
+  },
+  {
+   "item": "teleport chip coordinates",
+   "status": "ASSUMED placement on the 72-qubit grid (not given in the paper)"
+  },
+  {
+   "item": "teleport native compilation",
+   "status": "NOT reconstructed: circuit uses CX as drawn; the paper compiles CNOT to H+CZ and (for memory) applies readout-line role swaps (App. C.3) -- whether the teleportation run used those swaps is not stated"
+  },
+  {
+   "item": "teleport Y-basis tomography and Fig. 15's other details (DD, DQLR, frame-update signs)",
+   "status": "Y readout of L2 not emitted (its value is random for the four Pauli inputs, so it cannot be a stim observable); DD/DQLR not modelled; signs handled by stim reference frame"
+  },
+  {
+   "item": "timings",
+   "status": "QUOTED from App. B / App. C.3; derived cycle estimates marked as ours"
+  }
+ ],
+ "checks": {
+  "memory": {
+   "memory-d3-east-X-r03.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 355,
+    "chromobius_sim_logical_error": 0.0081
+   },
+   "memory-d3-east-X-r05.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 695,
+    "chromobius_sim_logical_error": 0.0179
+   },
+   "memory-d3-east-X-r09.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1375,
+    "chromobius_sim_logical_error": 0.03265
+   },
+   "memory-d3-east-Z-r03.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 362,
+    "chromobius_sim_logical_error": 0.0081
+   },
+   "memory-d3-east-Z-r05.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 702,
+    "chromobius_sim_logical_error": 0.01585
+   },
+   "memory-d3-east-Z-r09.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1382,
+    "chromobius_sim_logical_error": 0.0276
+   },
+   "memory-d3-north-X-r03.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 355,
+    "chromobius_sim_logical_error": 0.0078
+   },
+   "memory-d3-north-X-r05.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 695,
+    "chromobius_sim_logical_error": 0.01695
+   },
+   "memory-d3-north-X-r09.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1375,
+    "chromobius_sim_logical_error": 0.0318
+   },
+   "memory-d3-north-Z-r03.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 362,
+    "chromobius_sim_logical_error": 0.0088
+   },
+   "memory-d3-north-Z-r05.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 702,
+    "chromobius_sim_logical_error": 0.01645
+   },
+   "memory-d3-north-Z-r09.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1382,
+    "chromobius_sim_logical_error": 0.0292
+   },
+   "memory-d3-west-X-r03.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 355,
+    "chromobius_sim_logical_error": 0.00845
+   },
+   "memory-d3-west-X-r05.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 695,
+    "chromobius_sim_logical_error": 0.0188
+   },
+   "memory-d3-west-X-r09.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1375,
+    "chromobius_sim_logical_error": 0.0331
+   },
+   "memory-d3-west-Z-r03.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 362,
+    "chromobius_sim_logical_error": 0.0085
+   },
+   "memory-d3-west-Z-r05.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 702,
+    "chromobius_sim_logical_error": 0.01605
+   },
+   "memory-d3-west-Z-r09.stim": {
+    "data": 7,
+    "aux": 6,
+    "reset_only": 2,
+    "cz_per_cycle": 30,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 6,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1382,
+    "chromobius_sim_logical_error": 0.02785
+   },
+   "memory-d5-X-r03.stim": {
+    "data": 19,
+    "aux": 18,
+    "reset_only": 4,
+    "cz_per_cycle": 102,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 18,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1401,
+    "chromobius_sim_logical_error": 0.0088
+   },
+   "memory-d5-X-r05.stim": {
+    "data": 19,
+    "aux": 18,
+    "reset_only": 4,
+    "cz_per_cycle": 102,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 18,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 2633,
+    "chromobius_sim_logical_error": 0.0171
+   },
+   "memory-d5-X-r09.stim": {
+    "data": 19,
+    "aux": 18,
+    "reset_only": 4,
+    "cz_per_cycle": 102,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 18,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 5097,
+    "chromobius_sim_logical_error": 0.0327
+   },
+   "memory-d5-Z-r03.stim": {
+    "data": 19,
+    "aux": 18,
+    "reset_only": 4,
+    "cz_per_cycle": 102,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 18,
+    "cycles": 3,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 1405,
+    "chromobius_sim_logical_error": 0.00705
+   },
+   "memory-d5-Z-r05.stim": {
+    "data": 19,
+    "aux": 18,
+    "reset_only": 4,
+    "cz_per_cycle": 102,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 18,
+    "cycles": 5,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 2637,
+    "chromobius_sim_logical_error": 0.0138
+   },
+   "memory-d5-Z-r09.stim": {
+    "data": 19,
+    "aux": 18,
+    "reset_only": 4,
+    "cz_per_cycle": 102,
+    "cz_layers_per_cycle": 10,
+    "h_layers_per_cycle": 7,
+    "meas_per_cycle": 18,
+    "cycles": 9,
+    "cycle_estimate_ns": 1309,
+    "dem_errors": 5101,
+    "chromobius_sim_logical_error": 0.02555
+   }
+  },
+  "teleport": {
+   "circuit-teleport-0.stim": {
+    "qubits": 32,
+    "measurements": 88,
+    "detectors": 71,
+    "cycles": 5,
+    "cnot_per_cycle": [
+     60,
+     81,
+     80,
+     81,
+     60,
+     0
+    ],
+    "cnot_layers_per_cycle": [
+     8,
+     8,
+     8,
+     8,
+     8,
+     0
+    ],
+    "observable_value": [
+     0
+    ],
+    "m1_values_seen": [
+     0,
+     1
+    ],
+    "deterministic_parity_dim": 72,
+    "detector_rank": 71,
+    "detector_plus_obs_rank": 72,
+    "dem_detectors": 71,
+    "dem_errors": 1947,
+    "circuit_distance_upper_bound": 3,
+    "chromobius_sim": "746/20000 = 0.0373"
+   },
+   "circuit-teleport-1.stim": {
+    "qubits": 32,
+    "measurements": 88,
+    "detectors": 71,
+    "cycles": 5,
+    "cnot_per_cycle": [
+     60,
+     81,
+     80,
+     81,
+     60,
+     0
+    ],
+    "cnot_layers_per_cycle": [
+     8,
+     8,
+     8,
+     8,
+     8,
+     0
+    ],
+    "observable_value": [
+     1
+    ],
+    "m1_values_seen": [
+     0,
+     1
+    ],
+    "deterministic_parity_dim": 72,
+    "detector_rank": 71,
+    "detector_plus_obs_rank": 72,
+    "dem_detectors": 71,
+    "dem_errors": 1947,
+    "circuit_distance_upper_bound": 3,
+    "chromobius_sim": "720/20000 = 0.0360"
+   },
+   "circuit-teleport-minus.stim": {
+    "qubits": 32,
+    "measurements": 88,
+    "detectors": 71,
+    "cycles": 5,
+    "cnot_per_cycle": [
+     60,
+     81,
+     80,
+     81,
+     60,
+     0
+    ],
+    "cnot_layers_per_cycle": [
+     8,
+     8,
+     8,
+     8,
+     8,
+     0
+    ],
+    "observable_value": [
+     1
+    ],
+    "m1_values_seen": [
+     0,
+     1
+    ],
+    "deterministic_parity_dim": 72,
+    "detector_rank": 71,
+    "detector_plus_obs_rank": 72,
+    "dem_detectors": 71,
+    "dem_errors": 1947,
+    "circuit_distance_upper_bound": 3,
+    "chromobius_sim": "329/20000 = 0.0164"
+   },
+   "circuit-teleport-plus.stim": {
+    "qubits": 32,
+    "measurements": 88,
+    "detectors": 71,
+    "cycles": 5,
+    "cnot_per_cycle": [
+     60,
+     81,
+     80,
+     81,
+     60,
+     0
+    ],
+    "cnot_layers_per_cycle": [
+     8,
+     8,
+     8,
+     8,
+     8,
+     0
+    ],
+    "observable_value": [
+     0
+    ],
+    "m1_values_seen": [
+     0,
+     1
+    ],
+    "deterministic_parity_dim": 72,
+    "detector_rank": 71,
+    "detector_plus_obs_rank": 72,
+    "dem_detectors": 71,
+    "dem_errors": 1947,
+    "circuit_distance_upper_bound": 3,
+    "chromobius_sim": "300/20000 = 0.0150"
+   },
+   "circuit-teleport.stim": {
+    "qubits": 32,
+    "measurements": 88,
+    "detectors": 71,
+    "cycles": 5,
+    "cnot_per_cycle": [
+     60,
+     81,
+     80,
+     81,
+     60,
+     0
+    ],
+    "cnot_layers_per_cycle": [
+     8,
+     8,
+     8,
+     8,
+     8,
+     0
+    ],
+    "observable_value": [
+     1
+    ],
+    "m1_values_seen": [
+     0,
+     1
+    ],
+    "deterministic_parity_dim": 72,
+    "detector_rank": 71,
+    "detector_plus_obs_rank": 72,
+    "dem_detectors": 71,
+    "dem_errors": 1947,
+    "circuit_distance_upper_bound": 3,
+    "chromobius_sim": "720/20000 = 0.0360"
+   }
+  },
+  "noiseless": "all detectors and observables zero over 1000 shots for every circuit (verify.txt A)",
+  "noisy_vs_ideal": "all 24 Zenodo noisy circuits regenerate exactly from the ideal ones with SI1000 p=1e-3 (verify.txt C)",
+  "zenodo_dem": "our DEM of memory-d5-Z-r05 equals the authors' chromobius_si1000 error_model.dem hyperedge-for-hyperedge (verify.txt D)"
+ }
+}

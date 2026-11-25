@@ -1,0 +1,79 @@
+==============================================================================
+(a) detector error model with decompose_errors=True (paper-like noise)
+    p1=0.0009 p2=0.022 p_meas=0.015 T1=51us T2E=50us Tphi=98.1us
+  PASS circuit.stim                     DEM ok: 36 detectors, 464 error mechanisms
+  PASS circuit-bell-XX.stim             DEM ok: 32 detectors, 484 error mechanisms
+  PASS circuit-bell-YY.stim             DEM ok: 32 detectors, 484 error mechanisms
+  PASS circuit-inject-0-ZZ.stim         DEM ok: 36 detectors, 441 error mechanisms
+  PASS circuit-inject-1-ZZ.stim         DEM ok: 36 detectors, 441 error mechanisms
+  PASS circuit-inject-plus-XX.stim      DEM ok: 32 detectors, 467 error mechanisms
+  PASS circuit-inject-minus-XX.stim     DEM ok: 32 detectors, 467 error mechanisms
+  PASS circuit-inject-plusi-YZ.stim     DEM ok: 34 detectors, 466 error mechanisms
+  PASS circuit-inject-minusi-YZ.stim    DEM ok: 34 detectors, 466 error mechanisms
+==============================================================================
+(b) noiseless determinism (1000-shot detector sampler; 200 tableau shots for raw values)
+  PASS circuit.stim                     36 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit.stim                     physical records: detector parities constant, preselection all 0, raw observable parity [1]; paper-frame ideal ['Z_L1 Z_L2 = +1']
+  PASS circuit-bell-XX.stim             32 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit-bell-XX.stim             physical records: detector parities constant, preselection all 0, raw observable parity [0]; paper-frame ideal ['X_L1 X_L2 = +1']
+  PASS circuit-bell-YY.stim             32 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit-bell-YY.stim             physical records: detector parities constant, preselection all 0, raw observable parity [0]; paper-frame ideal ['Y_L1 Y_L2 = -1']
+  PASS circuit-inject-0-ZZ.stim         36 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit-inject-0-ZZ.stim         physical records: detector parities constant, preselection all 0, raw observable parity [1]; paper-frame ideal ['Z_L1 Z_L2 = +1']
+  PASS circuit-inject-1-ZZ.stim         36 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit-inject-1-ZZ.stim         physical records: detector parities constant, preselection all 0, raw observable parity [0]; paper-frame ideal ['Z_L1 Z_L2 = -1']
+  PASS circuit-inject-plus-XX.stim      32 detectors all 0, 2 observable(s) deterministic over 1000 shots
+  PASS circuit-inject-plus-XX.stim      physical records: detector parities constant, preselection all 0, raw observable parity [1, 1]; paper-frame ideal ['X_L1 = +1', 'X_L2 = +1']
+  PASS circuit-inject-minus-XX.stim     32 detectors all 0, 2 observable(s) deterministic over 1000 shots
+  PASS circuit-inject-minus-XX.stim     physical records: detector parities constant, preselection all 0, raw observable parity [0, 0]; paper-frame ideal ['X_L1 = -1', 'X_L2 = -1']
+  PASS circuit-inject-plusi-YZ.stim     34 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit-inject-plusi-YZ.stim     physical records: detector parities constant, preselection all 0, raw observable parity [0]; paper-frame ideal ['Y_L1 Z_L2 = +1']
+  PASS circuit-inject-minusi-YZ.stim    34 detectors all 0, 1 observable(s) deterministic over 1000 shots
+  PASS circuit-inject-minusi-YZ.stim    physical records: detector parities constant, preselection all 0, raw observable parity [1]; paper-frame ideal ['Y_L1 Z_L2 = -1']
+  Logical action (fanout alpha|+>+beta|-> -> alpha|++>+beta|-->) up to one constant frame:
+  PASS Z_L1Z_L2 flips between injected |0> and |1>
+  PASS injected |0> and all-|0> preparation give the same Z_L1Z_L2 record
+  PASS X_L1 and X_L2 each flip between injected |+> and |->
+  PASS Y_L1Z_L2 flips between injected |+i> and |-i>
+  PASS X_L1X_L2 record identical for |+> input and |0>_L input (= +1 for every input)
+  Constant known frame (Ry(pi) echoes on data: 5 on D1 D3 D4 D6 D7 D9, 3 on D5; no-reset
+  ancilla readout mapping): record parity -> paper value: ZZ 1->+1, XX 0->+1, YY 0->-1, X_L 1->+1, Y_L1Z_L2 0->+1
+==============================================================================
+(c) structural counts vs. the paper
+  cycle sequence: XZXZXZXZZ
+   X-cycle at layer   3: 12 CZ (per CZ step [3, 3, 3, 3])
+   Z-cycle at layer  10: 12 CZ (per CZ step [3, 3, 3, 3])
+   X-cycle at layer  17: 12 CZ (per CZ step [3, 3, 3, 3])
+   Z-cycle at layer  24: 12 CZ (per CZ step [3, 3, 3, 3])
+   X-cycle at layer  31: 12 CZ (per CZ step [3, 3, 3, 3])
+   Z-cycle at layer  38: 12 CZ (per CZ step [3, 3, 3, 3])
+   X-cycle at layer  45: 12 CZ (per CZ step [3, 3, 3, 3])
+   Z-cycle at layer  53:  8 CZ (per CZ step [2, 2, 2, 2])
+   Z-cycle at layer  61:  8 CZ (per CZ step [2, 2, 2, 2])
+  PASS 17 qubits ('17 flux-tunable transmon qubits')
+  PASS X first, m+1 = 4 X cycles interleaved with m = 3 Z cycles, then n = 2 Z cycles
+  PASS 12 CZ per X cycle (2 weight-4 + 2 weight-2 checks)
+  PASS 12 CZ per surface-code Z cycle, 8 per repetition-code Z cycle (CZs with D2 D5 D8 'not executed')
+  PASS 4 CZ steps per cycle (steps 2,3,5,6 of the 8-step sequence); 3 parallel CZs per step before the split, 2 after
+  PASS measurements: 17 preselection + 16 X-ancilla + 20 Z-ancilla + 3 mid-circuit (D2 D5 D8) + 6 final = 62
+  PASS Z detectors = 24 ('four times six nodes' of the Z matching graph; source data sigma_0..sigma_5)
+  PASS X detectors = 12 (App. Fig. F1: X1..X4 x cycles N = 1..3)
+  PASS only the initial ground state; no reset after any readout
+  derived duration from first pulse to end of final readout: 8.53 us (4 X + 5 Z cycles on the 1.66 us grid; derived, not stated)
+  totals: 100 CZ, 62 measurements, 68 TICK layers
+==============================================================================
+(d) fault distance and pymatching sanity estimate
+  circuit.stim             min undetectable logical fault weight = 3 (graphlike 3)
+  circuit-bell-XX.stim     min undetectable logical fault weight = 1 (graphlike 1)
+  circuit-bell-YY.stim     min undetectable logical fault weight = 1 (graphlike 1)
+  PASS Z_L1Z_L2 distance 3 ('smallest undetectable fault weight causing a logical error is three')
+  PASS X_L1X_L2 unprotected after the split (no X stabilizers measured), distance 1
+  Z-graph edges joining repetition code 1 (Z1,Z2) and code 2 (Z3,Z4): split round 9, later rounds 0
+  PASS no edges between the two repetition codes after the split round (paper: no correlations between sigma^Z1,Z2 and sigma^Z3,Z4; source data has infinite weights there)
+  200000 shots, noise as in (a); paper values are leakage-rejected experiment (sim = paper's own stim model)
+  circuit.stim           raw +0.216 (paper +0.189, paper-sim +0.243) | decoded +0.561 (paper +0.730, paper-sim +0.626) | postselected +0.999 keep 1.7% (paper +0.998 keep 5.5%)
+  circuit-bell-XX.stim   raw +0.220 (paper +0.255, paper-sim +0.322) | decoded +0.220 (paper n/a, paper-sim n/a) | postselected +0.539 keep 2.0% (paper +0.560 keep 6.3%)
+  circuit-bell-YY.stim   raw -0.073 (paper -0.082, paper-sim -0.126) | decoded -0.135 (paper -0.199, paper-sim -0.228) | postselected -0.530 keep 2.0% (paper -0.550 keep 6.3%)
+  Bell fidelity (1+<XX>-<YY>+<ZZ>)/4: raw 0.377 (paper 0.382), decoded 0.479 (paper 0.546)
+==============================================================================
+ALL CHECKS PASSED

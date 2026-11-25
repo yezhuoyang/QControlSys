@@ -1,0 +1,2598 @@
+{
+ "citation": {
+  "authors": [
+   "Ilya Besedin",
+   "Michael Kerschbaum",
+   "Jonathan Knoll",
+   "Ian Hesner",
+   "Lukas Bödeker",
+   "Luis Colmenarez",
+   "Luca Hofele",
+   "Nathan Lacroix",
+   "Christoph Hellings",
+   "François Swiadek",
+   "Alexander Flasby",
+   "Mohsen Bahrami Panah",
+   "Dante Colao Zanuz",
+   "Markus Müller",
+   "Andreas Wallraff"
+  ],
+  "title": "Lattice surgery realized on two distance-three repetition codes with superconducting qubits",
+  "arxiv_title": "Realizing Lattice Surgery on Two Distance-Three Repetition Codes with Superconducting Qubits",
+  "venue": "Nature Physics 22, 189-194 (2026)",
+  "arxiv": "2501.04612 (v1, 8 Jan 2025; only version)",
+  "doi": "10.1038/s41567-025-03090-6",
+  "data_doi": "10.3929/ethz-c-000783470",
+  "date": "2026 (journal); arXiv 2025-01-08",
+  "sources_read": [
+   "arXiv TeX source (e-print tarball, v1): main.tex, parts/*.tex, figs/*.png",
+   "ETH Research Collection record 20.500.11850/783470: BesedinKerschbaum2025_LatticeSurgery.tar (figure source-data CSVs only)"
+  ],
+  "note": "The published version renumbers figures (data record fig_2a = arXiv Fig. 3a Bell observables); all numbers used here appear identically in the arXiv TeX and the source-data CSVs."
+ },
+ "device": {
+  "qubits": 17,
+  "qubit_type": "flux-tunable transmons",
+  "layout": "distance-3 rotated surface code: 9 data qubits D1-D9 on a 3x3 grid, 4 X-type (X1-X4) and 4 Z-type (Z1-Z4) auxiliary qubits, one per stabilizer; weight-2 X checks X1 (D2 D3) and X4 (D7 D8), weight-2 Z checks Z1 (D1 D4) and Z4 (D6 D9); individual charge (drive) and flux lines, readout resonator + Purcell filter per qubit on shared feedlines (frequency-multiplexed readout).",
+  "quote": "This device consists of 17 flux-tunable transmon qubits with a connectivity designed for implementing a distance-three surface code",
+  "stabilizers": {
+   "X1": [
+    "D2",
+    "D3"
+   ],
+   "X2": [
+    "D1",
+    "D2",
+    "D4",
+    "D5"
+   ],
+   "X3": [
+    "D5",
+    "D6",
+    "D8",
+    "D9"
+   ],
+   "X4": [
+    "D7",
+    "D8"
+   ],
+   "Z1": [
+    "D1",
+    "D4"
+   ],
+   "Z2": [
+    "D4",
+    "D5",
+    "D7",
+    "D8"
+   ],
+   "Z3": [
+    "D2",
+    "D3",
+    "D5",
+    "D6"
+   ],
+   "Z4": [
+    "D6",
+    "D9"
+   ]
+  },
+  "coordinates_source": "QUBIT_COORDS = chip grid (column, row) read from the labelled false-colour micrograph Fig. 1e (x right, y down). Equivalent schematic coordinates of Fig. 1a / App. Fig. A are given per qubit; chip = rotate schematic by 45 deg: col = (x - y)/2 + 2, row = (x + y)/2 - 1.",
+  "grid_pitch_mm": {
+   "x": 1.854,
+   "y": 1.821,
+   "evidence": "measured on figs/fig_1.png (3000 px wide): qubit-marker centres 196.5 px apart (columns) / ~193 px (rows), 1 mm scale bar = 106 px. Photo-derived, +-3%; not stated in text."
+  },
+  "qubit_name_map": {
+   "Z1": {
+    "stim_index": 0,
+    "chip_grid": [
+     1,
+     0
+    ],
+    "chip_mm": [
+     1.85,
+     0.0
+    ],
+    "schematic": [
+     0,
+     2
+    ],
+    "role": "Z auxiliary"
+   },
+   "Z2": {
+    "stim_index": 1,
+    "chip_grid": [
+     1,
+     2
+    ],
+    "chip_mm": [
+     1.85,
+     3.64
+    ],
+    "schematic": [
+     2,
+     4
+    ],
+    "role": "Z auxiliary"
+   },
+   "Z3": {
+    "stim_index": 2,
+    "chip_grid": [
+     3,
+     2
+    ],
+    "chip_mm": [
+     5.56,
+     3.64
+    ],
+    "schematic": [
+     4,
+     2
+    ],
+    "role": "Z auxiliary"
+   },
+   "Z4": {
+    "stim_index": 3,
+    "chip_grid": [
+     3,
+     4
+    ],
+    "chip_mm": [
+     5.56,
+     7.28
+    ],
+    "schematic": [
+     6,
+     4
+    ],
+    "role": "Z auxiliary"
+   },
+   "D1": {
+    "stim_index": 4,
+    "chip_grid": [
+     2,
+     0
+    ],
+    "chip_mm": [
+     3.71,
+     0.0
+    ],
+    "schematic": [
+     1,
+     1
+    ],
+    "role": "data"
+   },
+   "D2": {
+    "stim_index": 5,
+    "chip_grid": [
+     3,
+     1
+    ],
+    "chip_mm": [
+     5.56,
+     1.82
+    ],
+    "schematic": [
+     3,
+     1
+    ],
+    "role": "data"
+   },
+   "D3": {
+    "stim_index": 6,
+    "chip_grid": [
+     4,
+     2
+    ],
+    "chip_mm": [
+     7.42,
+     3.64
+    ],
+    "schematic": [
+     5,
+     1
+    ],
+    "role": "data"
+   },
+   "D4": {
+    "stim_index": 7,
+    "chip_grid": [
+     1,
+     1
+    ],
+    "chip_mm": [
+     1.85,
+     1.82
+    ],
+    "schematic": [
+     1,
+     3
+    ],
+    "role": "data"
+   },
+   "D5": {
+    "stim_index": 8,
+    "chip_grid": [
+     2,
+     2
+    ],
+    "chip_mm": [
+     3.71,
+     3.64
+    ],
+    "schematic": [
+     3,
+     3
+    ],
+    "role": "data"
+   },
+   "D6": {
+    "stim_index": 9,
+    "chip_grid": [
+     3,
+     3
+    ],
+    "chip_mm": [
+     5.56,
+     5.46
+    ],
+    "schematic": [
+     5,
+     3
+    ],
+    "role": "data"
+   },
+   "D7": {
+    "stim_index": 10,
+    "chip_grid": [
+     0,
+     2
+    ],
+    "chip_mm": [
+     0.0,
+     3.64
+    ],
+    "schematic": [
+     1,
+     5
+    ],
+    "role": "data"
+   },
+   "D8": {
+    "stim_index": 11,
+    "chip_grid": [
+     1,
+     3
+    ],
+    "chip_mm": [
+     1.85,
+     5.46
+    ],
+    "schematic": [
+     3,
+     5
+    ],
+    "role": "data"
+   },
+   "D9": {
+    "stim_index": 12,
+    "chip_grid": [
+     2,
+     4
+    ],
+    "chip_mm": [
+     3.71,
+     7.28
+    ],
+    "schematic": [
+     5,
+     5
+    ],
+    "role": "data"
+   },
+   "X1": {
+    "stim_index": 13,
+    "chip_grid": [
+     4,
+     1
+    ],
+    "chip_mm": [
+     7.42,
+     1.82
+    ],
+    "schematic": [
+     4,
+     0
+    ],
+    "role": "X auxiliary"
+   },
+   "X2": {
+    "stim_index": 14,
+    "chip_grid": [
+     2,
+     1
+    ],
+    "chip_mm": [
+     3.71,
+     1.82
+    ],
+    "schematic": [
+     2,
+     2
+    ],
+    "role": "X auxiliary"
+   },
+   "X3": {
+    "stim_index": 15,
+    "chip_grid": [
+     2,
+     3
+    ],
+    "chip_mm": [
+     3.71,
+     5.46
+    ],
+    "schematic": [
+     4,
+     4
+    ],
+    "role": "X auxiliary"
+   },
+   "X4": {
+    "stim_index": 16,
+    "chip_grid": [
+     0,
+     3
+    ],
+    "chip_mm": [
+     0.0,
+     5.46
+    ],
+    "schematic": [
+     2,
+     6
+    ],
+    "role": "X auxiliary"
+   }
+  },
+  "bias_points": {
+   "value": "data qubits at lower, auxiliary qubits at upper flux-insensitive point (X3 at its lower point)",
+   "quote": "we nominally apply an integer flux in units of the flux quantum to the asymmetric superconducting quantum interference devices (SQUIDs) of the auxiliary qubits, and half-integer flux to the SQUIDs of the data qubits",
+   "section": "Methods, Idling and Single-Qubit Gates"
+  }
+ },
+ "timings": [
+  {
+   "name": "single-qubit gate (DRAG pulse)",
+   "value": 48,
+   "unit": "ns",
+   "quote": "For single-qubit gates, we apply 48 ns derivative removal by adiabatic gate (DRAG) microwave pulses",
+   "section": "Methods, Idling and Single-Qubit Gates"
+  },
+  {
+   "name": "CZ gate (average)",
+   "value": 101.5,
+   "unit": "ns",
+   "quote": "The average duration of the CZ gate is 101.5 ns.",
+   "section": "Methods, Two-Qubit Gates"
+  },
+  {
+   "name": "CZ buffers",
+   "value": 20,
+   "unit": "ns (each, before and after)",
+   "quote": "Additional 20 ns buffers are added at the beginning and the end of the net-zero pulse.",
+   "section": "Methods, Two-Qubit Gates"
+  },
+  {
+   "name": "readout pulse duration",
+   "value": [
+    175,
+    300
+   ],
+   "unit": "ns (range over the 17 qubits)",
+   "quote": "resulting in durations ranging from 175 to 300 ns across the 17 qubits",
+   "section": "Methods, Qutrit Readout and Leakage Rejection"
+  },
+  {
+   "name": "cycle period (same stabilizer type)",
+   "value": 1.66,
+   "unit": "us",
+   "quote": "The duration between the start of successive stabilizer measurement cycles of the same type is 1.66 us.",
+   "section": "Methods, Gate Sequence of Lattice Split Operation (also App. Performance: 'The cycle duration is 1.66 us.')"
+  },
+  {
+   "name": "steps per stabilizer measurement",
+   "value": 8,
+   "unit": "time steps",
+   "quote": "The gate sequence for a stabilizer measurement consists of eight time steps, in which all gates within the same step are executed in parallel.",
+   "section": "Methods, Gate Sequence of Lattice Split Operation"
+  },
+  {
+   "name": "pipelining",
+   "value": "readout of one type overlaps the start of the other type",
+   "quote": "During surface-code cycles, we employ a pipelined gate scheduling: a new stabilizer measurement begins before the readout step of the other stabilizer type completes.",
+   "section": "Methods, Gate Sequence of Lattice Split Operation"
+  },
+  {
+   "name": "data readout timing",
+   "value": "parallel with auxiliary readout",
+   "quote": "Data qubit readout, both mid-circuit during the code deformation, and the final measurement, is performed in parallel with the auxiliary-qubit readout.",
+   "section": "Methods, Gate Sequence of Lattice Split Operation"
+  },
+  {
+   "name": "no reset",
+   "value": "auxiliary and data qubits are never reset after readout",
+   "quote": "We do not reset qubits after their readout",
+   "section": "Lattice surgery on a distance-three surface code"
+  },
+  {
+   "name": "T1",
+   "value": [
+    24,
+    78
+   ],
+   "unit": "us",
+   "quote": "we measure energy relaxation times T1 between 24 and 78 us and coherence times T2E ranging from 12.4 to 138.9 us",
+   "section": "Methods, Idling and Single-Qubit Gates"
+  },
+  {
+   "name": "T2 echo",
+   "value": [
+    12.4,
+    138.9
+   ],
+   "unit": "us",
+   "quote": "(same sentence as T1)",
+   "section": "Methods, Idling and Single-Qubit Gates"
+  }
+ ],
+ "derived_schedule": {
+  "status": "DERIVED, not stated: the paper gives step contents, pulse lengths and the 1.66 us period, but no per-step start times or step lengths.",
+  "rules": {
+   "1q layer": "48 ns",
+   "CZ layer": "141.5 ns = 101.5 ns average CZ + 2 x 20 ns buffers (individual CZ lengths not published)",
+   "gate block of one stabilizer type": "3 x 48 + 4 x 141.5 = 710 ns",
+   "pipelined layer (readout of type A + step 1 of type B)": "48 + 120 ns, the 120 ns closing the 1.66 us period: (1660 - 2 x 710)/2",
+   "split readout layer (X ancillas + D2 D5 D8)": "120 ns",
+   "post-split Z readout layer": "1660 - 710 = 950 ns (assumes the 1.66 us grid is kept with X gates not executed)",
+   "final readout": "300 ns (longest stated readout)"
+  },
+  "total_us_first_pulse_to_end": 8.528,
+  "layers": [
+   {
+    "layer": 0,
+    "kind": "init",
+    "start_ns": 0.0,
+    "duration_ns": 0.0,
+    "ops": [
+     {
+      "gate": "R",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4",
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9",
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 1,
+    "kind": "pre",
+    "start_ns": 0.0,
+    "duration_ns": 300.0,
+    "ops": [
+     {
+      "gate": "M",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4",
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9",
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 2,
+    "kind": "prep",
+    "start_ns": 300.0,
+    "duration_ns": 48.0,
+    "ops": []
+   },
+   {
+    "layer": 3,
+    "kind": "1q",
+    "start_ns": 348.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     },
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 4,
+    "kind": "cz",
+    "start_ns": 396.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D1",
+        "X2"
+       ],
+       [
+        "D5",
+        "X3"
+       ],
+       [
+        "D7",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 5,
+    "kind": "cz",
+    "start_ns": 537.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X2"
+       ],
+       [
+        "D6",
+        "X3"
+       ],
+       [
+        "D8",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 6,
+    "kind": "1q",
+    "start_ns": 679.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 7,
+    "kind": "cz",
+    "start_ns": 727.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D3",
+        "X1"
+       ],
+       [
+        "D5",
+        "X2"
+       ],
+       [
+        "D9",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 8,
+    "kind": "cz",
+    "start_ns": 868.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X1"
+       ],
+       [
+        "D4",
+        "X2"
+       ],
+       [
+        "D8",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 9,
+    "kind": "1q",
+    "start_ns": 1010.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9",
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 10,
+    "kind": "pipe",
+    "start_ns": 1058.0,
+    "duration_ns": 168.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     },
+     {
+      "gate": "M",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 11,
+    "kind": "cz",
+    "start_ns": 1226.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D4"
+       ],
+       [
+        "Z3",
+        "D2"
+       ],
+       [
+        "Z4",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 12,
+    "kind": "cz",
+    "start_ns": 1367.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D1"
+       ],
+       [
+        "Z2",
+        "D5"
+       ],
+       [
+        "Z3",
+        "D3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 13,
+    "kind": "1q",
+    "start_ns": 1509.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 14,
+    "kind": "cz",
+    "start_ns": 1557.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D4"
+       ],
+       [
+        "Z2",
+        "D8"
+       ],
+       [
+        "Z3",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 15,
+    "kind": "cz",
+    "start_ns": 1698.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D7"
+       ],
+       [
+        "Z3",
+        "D5"
+       ],
+       [
+        "Z4",
+        "D9"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 16,
+    "kind": "1q",
+    "start_ns": 1840.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 17,
+    "kind": "pipe",
+    "start_ns": 1888.0,
+    "duration_ns": 168.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     },
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     },
+     {
+      "gate": "M",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 18,
+    "kind": "cz",
+    "start_ns": 2056.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D1",
+        "X2"
+       ],
+       [
+        "D5",
+        "X3"
+       ],
+       [
+        "D7",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 19,
+    "kind": "cz",
+    "start_ns": 2197.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X2"
+       ],
+       [
+        "D6",
+        "X3"
+       ],
+       [
+        "D8",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 20,
+    "kind": "1q",
+    "start_ns": 2339.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 21,
+    "kind": "cz",
+    "start_ns": 2387.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D3",
+        "X1"
+       ],
+       [
+        "D5",
+        "X2"
+       ],
+       [
+        "D9",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 22,
+    "kind": "cz",
+    "start_ns": 2528.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X1"
+       ],
+       [
+        "D4",
+        "X2"
+       ],
+       [
+        "D8",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 23,
+    "kind": "1q",
+    "start_ns": 2670.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9",
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 24,
+    "kind": "pipe",
+    "start_ns": 2718.0,
+    "duration_ns": 168.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     },
+     {
+      "gate": "M",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 25,
+    "kind": "cz",
+    "start_ns": 2886.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D4"
+       ],
+       [
+        "Z3",
+        "D2"
+       ],
+       [
+        "Z4",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 26,
+    "kind": "cz",
+    "start_ns": 3027.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D1"
+       ],
+       [
+        "Z2",
+        "D5"
+       ],
+       [
+        "Z3",
+        "D3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 27,
+    "kind": "1q",
+    "start_ns": 3169.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 28,
+    "kind": "cz",
+    "start_ns": 3217.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D4"
+       ],
+       [
+        "Z2",
+        "D8"
+       ],
+       [
+        "Z3",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 29,
+    "kind": "cz",
+    "start_ns": 3358.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D7"
+       ],
+       [
+        "Z3",
+        "D5"
+       ],
+       [
+        "Z4",
+        "D9"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 30,
+    "kind": "1q",
+    "start_ns": 3500.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 31,
+    "kind": "pipe",
+    "start_ns": 3548.0,
+    "duration_ns": 168.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     },
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     },
+     {
+      "gate": "M",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 32,
+    "kind": "cz",
+    "start_ns": 3716.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D1",
+        "X2"
+       ],
+       [
+        "D5",
+        "X3"
+       ],
+       [
+        "D7",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 33,
+    "kind": "cz",
+    "start_ns": 3857.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X2"
+       ],
+       [
+        "D6",
+        "X3"
+       ],
+       [
+        "D8",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 34,
+    "kind": "1q",
+    "start_ns": 3999.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 35,
+    "kind": "cz",
+    "start_ns": 4047.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D3",
+        "X1"
+       ],
+       [
+        "D5",
+        "X2"
+       ],
+       [
+        "D9",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 36,
+    "kind": "cz",
+    "start_ns": 4188.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X1"
+       ],
+       [
+        "D4",
+        "X2"
+       ],
+       [
+        "D8",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 37,
+    "kind": "1q",
+    "start_ns": 4330.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9",
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 38,
+    "kind": "pipe",
+    "start_ns": 4378.0,
+    "duration_ns": 168.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     },
+     {
+      "gate": "M",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 39,
+    "kind": "cz",
+    "start_ns": 4546.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D4"
+       ],
+       [
+        "Z3",
+        "D2"
+       ],
+       [
+        "Z4",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 40,
+    "kind": "cz",
+    "start_ns": 4687.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D1"
+       ],
+       [
+        "Z2",
+        "D5"
+       ],
+       [
+        "Z3",
+        "D3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 41,
+    "kind": "1q",
+    "start_ns": 4829.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 42,
+    "kind": "cz",
+    "start_ns": 4877.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D4"
+       ],
+       [
+        "Z2",
+        "D8"
+       ],
+       [
+        "Z3",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 43,
+    "kind": "cz",
+    "start_ns": 5018.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D7"
+       ],
+       [
+        "Z3",
+        "D5"
+       ],
+       [
+        "Z4",
+        "D9"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 44,
+    "kind": "1q",
+    "start_ns": 5160.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 45,
+    "kind": "pipe",
+    "start_ns": 5208.0,
+    "duration_ns": 168.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     },
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     },
+     {
+      "gate": "M",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 46,
+    "kind": "cz",
+    "start_ns": 5376.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D1",
+        "X2"
+       ],
+       [
+        "D5",
+        "X3"
+       ],
+       [
+        "D7",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 47,
+    "kind": "cz",
+    "start_ns": 5517.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X2"
+       ],
+       [
+        "D6",
+        "X3"
+       ],
+       [
+        "D8",
+        "X4"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 48,
+    "kind": "1q",
+    "start_ns": 5659.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 49,
+    "kind": "cz",
+    "start_ns": 5707.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D3",
+        "X1"
+       ],
+       [
+        "D5",
+        "X2"
+       ],
+       [
+        "D9",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 50,
+    "kind": "cz",
+    "start_ns": 5848.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "D2",
+        "X1"
+       ],
+       [
+        "D4",
+        "X2"
+       ],
+       [
+        "D8",
+        "X3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 51,
+    "kind": "1q",
+    "start_ns": 5990.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "D1",
+       "D2",
+       "D3",
+       "D4",
+       "D5",
+       "D6",
+       "D7",
+       "D8",
+       "D9",
+       "X1",
+       "X2",
+       "X3",
+       "X4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 52,
+    "kind": "split",
+    "start_ns": 6038.0,
+    "duration_ns": 120.0,
+    "ops": [
+     {
+      "gate": "M",
+      "qubits": [
+       "X1",
+       "X2",
+       "X3",
+       "X4",
+       "D2",
+       "D5",
+       "D8"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 53,
+    "kind": "1q",
+    "start_ns": 6158.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 54,
+    "kind": "cz",
+    "start_ns": 6206.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D4"
+       ],
+       [
+        "Z4",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 55,
+    "kind": "cz",
+    "start_ns": 6347.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D1"
+       ],
+       [
+        "Z3",
+        "D3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 56,
+    "kind": "1q",
+    "start_ns": 6489.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D3",
+       "D4",
+       "D6",
+       "D7",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 57,
+    "kind": "cz",
+    "start_ns": 6537.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D4"
+       ],
+       [
+        "Z3",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 58,
+    "kind": "cz",
+    "start_ns": 6678.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D7"
+       ],
+       [
+        "Z4",
+        "D9"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 59,
+    "kind": "1q",
+    "start_ns": 6820.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 60,
+    "kind": "zro",
+    "start_ns": 6868.0,
+    "duration_ns": 950.0,
+    "ops": [
+     {
+      "gate": "M",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 61,
+    "kind": "1q",
+    "start_ns": 7818.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 62,
+    "kind": "cz",
+    "start_ns": 7866.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D4"
+       ],
+       [
+        "Z4",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 63,
+    "kind": "cz",
+    "start_ns": 8007.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D1"
+       ],
+       [
+        "Z3",
+        "D3"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 64,
+    "kind": "1q",
+    "start_ns": 8149.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "Y",
+      "qubits": [
+       "D1",
+       "D3",
+       "D4",
+       "D6",
+       "D7",
+       "D9"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 65,
+    "kind": "cz",
+    "start_ns": 8197.0,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z1",
+        "D4"
+       ],
+       [
+        "Z3",
+        "D6"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 66,
+    "kind": "cz",
+    "start_ns": 8338.5,
+    "duration_ns": 141.5,
+    "ops": [
+     {
+      "gate": "CZ",
+      "pairs": [
+       [
+        "Z2",
+        "D7"
+       ],
+       [
+        "Z4",
+        "D9"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 67,
+    "kind": "1q",
+    "start_ns": 8480.0,
+    "duration_ns": 48.0,
+    "ops": [
+     {
+      "gate": "SQRT_Y_DAG",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4"
+      ]
+     }
+    ]
+   },
+   {
+    "layer": 68,
+    "kind": "final",
+    "start_ns": 8528.0,
+    "duration_ns": 300.0,
+    "ops": [
+     {
+      "gate": "M",
+      "qubits": [
+       "Z1",
+       "Z2",
+       "Z3",
+       "Z4",
+       "D1",
+       "D3",
+       "D4",
+       "D6",
+       "D7",
+       "D9"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "gate_semantics": {
+  "single_qubit": "Paper legend 'Single-qubit Y rotation (-pi/2, pi, pi/2)', encoded by box shading in Fig. 3a (TeX figs/fig_3a.png), read by pixel analysis: grey-left/white-right = -pi/2, all grey = pi, white-left/grey-right = +pi/2. Mapped to Stim with Ry(t)=exp(-i t Y/2): +pi/2 -> SQRT_Y, -pi/2 -> SQRT_Y_DAG, pi -> Y.",
+  "X_cycle": "step1 Ry(-pi/2) on D1-D9 and Ry(+pi/2) on X1-X4; steps 2,3 CZ; step4 Ry(pi) echo on D1-D9; steps 5,6 CZ; step7 Ry(-pi/2) on D1-D9 and X1-X4; step8 readout",
+  "Z_cycle": "step1 Ry(+pi/2) on Z1-Z4; steps 2,3 CZ; step4 Ry(pi) echo on active data; steps 5,6 CZ; step7 Ry(-pi/2) on Z1-Z4; step8 readout",
+  "X_CZ_steps": [
+   [
+    [
+     "D1",
+     "X2"
+    ],
+    [
+     "D5",
+     "X3"
+    ],
+    [
+     "D7",
+     "X4"
+    ]
+   ],
+   [
+    [
+     "D2",
+     "X2"
+    ],
+    [
+     "D6",
+     "X3"
+    ],
+    [
+     "D8",
+     "X4"
+    ]
+   ],
+   [
+    [
+     "D3",
+     "X1"
+    ],
+    [
+     "D5",
+     "X2"
+    ],
+    [
+     "D9",
+     "X3"
+    ]
+   ],
+   [
+    [
+     "D2",
+     "X1"
+    ],
+    [
+     "D4",
+     "X2"
+    ],
+    [
+     "D8",
+     "X3"
+    ]
+   ]
+  ],
+  "Z_CZ_steps": [
+   [
+    [
+     "Z2",
+     "D4"
+    ],
+    [
+     "Z3",
+     "D2"
+    ],
+    [
+     "Z4",
+     "D6"
+    ]
+   ],
+   [
+    [
+     "Z1",
+     "D1"
+    ],
+    [
+     "Z2",
+     "D5"
+    ],
+    [
+     "Z3",
+     "D3"
+    ]
+   ],
+   [
+    [
+     "Z1",
+     "D4"
+    ],
+    [
+     "Z2",
+     "D8"
+    ],
+    [
+     "Z3",
+     "D6"
+    ]
+   ],
+   [
+    [
+     "Z2",
+     "D7"
+    ],
+    [
+     "Z3",
+     "D5"
+    ],
+    [
+     "Z4",
+     "D9"
+    ]
+   ]
+  ],
+  "quote": "The first and seventh steps are pi/2 rotations on the auxiliary qubits. For X-type stabilizers, pi/2 pulses are also applied to the data qubits. The second, third, fifth and sixth steps contain two-qubit gates.",
+  "section": "Methods, Gate Sequence of Lattice Split Operation"
+ },
+ "electronics": {
+  "statement": "not stated (the paper describes on-chip charge/flux lines and frequency-multiplexed readout on shared feedlines, but no room-temperature control electronics, sequencer or feedback hardware)",
+  "quote": "The qubits are controlled via individual charge lines (shown in pink) for single-qubit gates and flux lines (green) for two-qubit gates."
+ },
+ "decoding": {
+  "mode": "offline (post-processing); no real-time decoding, no feed-forward: Pauli-frame updates are virtual",
+  "decoder": "minimum-weight perfect matching (blossom, pymatching); edge weights from syndrome correlation analysis of the experimental data (Spitz 2018); separate Z (bit-flip) and X (phase-flip) graphs",
+  "latency": "not applicable / not stated (offline)",
+  "quote": "we address using the blossom algorithm, implemented in the pymatching package",
+  "quote_frame": "The virtual gates are performed by flipping the logical qubit observable outcomes in post-processing.",
+  "section": "App. Error Correction for Tomographic Readouts; Lattice surgery on a distance-three surface code",
+  "leakage": "runs with any leaked (|2>) readout are discarded; preselection discards runs with any qubit excited at the start"
+ },
+ "protocol": {
+  "m": 3,
+  "n": 2,
+  "quote": "After m+1=4 cycles of X-type stabilizer measurements interleaved with m=3 cycles of Z-type stabilizer measurements, we read out the middle column of data qubits (D2, D5, D8) in the Z basis, and stop any subsequent X-type stabilizer measurements.",
+  "quote_post": "After the split, we execute n=2 cycles of Z-type stabilizer measurements of the bit-flip codes.",
+  "pauli_frame": "X_L1 -> X_L1 s^X2_4 s^X4_4; X_L2 -> X_L2 s^X1_4 s^X3_4; Z_L1 = Z_D4; Z_L2 = Z_D6 z_D5 (App. Pauli Frame Update)",
+  "split_syndromes": "sigma^Z2 = s4 s3 z_D5 z_D8, sigma^Z3 = s4 s3 z_D2 z_D5 (App. Pauli Frame Update)",
+  "shots": {
+   "value": 57456,
+   "quote": "Rejecting leakage events (see Methods Section), we retain 76.8% of the 57 456 experimental runs."
+  }
+ },
+ "results": [
+  {
+   "name": "Z_L1 Z_L2 raw / decoded",
+   "value": [
+    0.189,
+    0.73
+   ],
+   "quote": "the expectation value of the Z_L1 Z_L2 observable increases from its raw value of 0.189(5) to 0.730(3)"
+  },
+  {
+   "name": "Y_L1 Y_L2 raw / decoded",
+   "value": [
+    -0.082,
+    -0.199
+   ],
+   "quote": "decreases for Y_L1 Y_L2 from -0.082(5) to -0.199(5)"
+  },
+  {
+   "name": "Bell fidelity raw / decoded",
+   "value": [
+    0.382,
+    0.546
+   ],
+   "quote": "we improve the Bell state fidelity from F_raw=0.382(2) to F_dec=0.546(2)"
+  },
+  {
+   "name": "Z_L1 Z_L2 postselected",
+   "value": 0.998,
+   "quote": "the postselected expectation value improves significantly to 0.998(1)"
+  },
+  {
+   "name": "X_L1 X_L2 raw / postselected",
+   "value": [
+    0.255,
+    0.56
+   ],
+   "quote": "the X_L1 X_L2 observable shows only a small increase from 0.255(5) to 0.56(2)"
+  },
+  {
+   "name": "postselection retention",
+   "value": {
+    "XX,YY": 0.063,
+    "ZZ": 0.055
+   },
+   "quote": "The fraction of retained experimental runs after postselection is 6.3% for the X_L1 X_L2 and Y_L1 Y_L2 observables, and 5.5% for the Z_L1 Z_L2 observable."
+  },
+  {
+   "name": "Bell fidelity postselected",
+   "value": 0.78,
+   "quote": "The Bell state fidelity for the postselected dataset is 0.780(6)"
+  },
+  {
+   "name": "distance-1 comparison Z_L1 Z_L2",
+   "value": 0.591,
+   "quote": "0.591(8) for the non-error-corrected variant"
+  },
+  {
+   "name": "process fidelity raw / decoded / postselected",
+   "value": [
+    0.31,
+    0.442,
+    0.78
+   ],
+   "quote": "The resulting process fidelity for the raw outcome is 0.310(12). Decoding improves the process fidelity to 0.442(12). Postselection yields a process fidelity of 0.78(3), while retaining only 3.3% of the experimental runs."
+  },
+  {
+   "name": "arbitrary-state ZZ contrast decoded / postselected",
+   "value": [
+    0.646,
+    0.97
+   ],
+   "quote": "The highest contrast of 0.646(5) for the error-corrected observable and 0.97(2) for the postselected observable is obtained for Z_L1 Z_L2"
+  },
+  {
+   "name": "gate errors (RB / IRB)",
+   "value": {
+    "1q": 0.0009,
+    "2q": 0.022
+   },
+   "quote": "we measure average single-qubit and two-qubit gate errors of (0.09+-0.05)% and (2.2+-1.7)%."
+  },
+  {
+   "name": "readout assignment fidelity",
+   "value": {
+    "two-state": 0.985,
+    "three-state": 0.975
+   },
+   "quote": "The average two-state and three-state readout assignment fidelity is 98.5% and 97.5%, respectively."
+  },
+  {
+   "name": "paper's own stim simulation (source data fig_2a.csv)",
+   "value": {
+    "ZZ raw/dec/post": [
+     0.2426,
+     0.6258,
+     1.0
+    ],
+    "XX raw/post": [
+     0.3218,
+     0.5744
+    ],
+    "YY raw/dec/post": [
+     -0.1256,
+     -0.2282,
+     -0.6156
+    ]
+   },
+   "quote": "(source-data CSV columns raw_simulation, decoded_simulation, postselect_simulation)"
+  }
+ ],
+ "files": {
+  "circuit.stim": "main experiment: |0>_L, split, Z-basis readout; observable 0 = Z_L1 Z_L2 (frame updated)",
+  "circuit-bell-XX.stim": "same, final X-basis readout; observable 0 = X_L1 X_L2",
+  "circuit-bell-YY.stim": "same, D4 D6 in Y, others in X; observable 0 = Y_L1 Y_L2",
+  "circuit-inject-0-ZZ.stim / -1-ZZ": "state injection (Fig. 4a pattern) of |0>/|1> into D5; observable Z_L1 Z_L2",
+  "circuit-inject-plus-XX.stim / -minus-XX": "injection of |+>/|->; observables X_L1 and X_L2",
+  "circuit-inject-plusi-YZ.stim / -minusi-YZ": "injection of |+i>/|-i>; observable Y_L1 Z_L2",
+  "generate.py": "generator (single source of the schedule)",
+  "verify.py": "checks",
+  "verify.txt": "check output",
+  "make_meta.py": "writes this file",
+  "src/": "downloaded arXiv source, figure crops, ETH data record"
+ },
+ "exactness": [
+  {
+   "part": "qubit names, stabilizer supports, logical operators, Pauli-frame updates, split-syndrome definitions",
+   "status": "exact (text + App. Fig. A + App. Pauli Frame Update)"
+  },
+  {
+   "part": "cycle order X,(Z,X)x3, split, Z,Z; m=3, n=2; readout of D2 D5 D8 in Z with the 4th X readout; final data readout with the last Z readout",
+   "status": "exact (text and Fig. 3a)"
+  },
+  {
+   "part": "CZ partners and their order in steps 2,3,5,6 for both stabilizer types, and which CZs are dropped after the split",
+   "status": "reconstructed from Fig. 3a (TeX figs/fig_3a.png) at full resolution; every partner set reproduces the stabilizer supports; resulting Z_L1Z_L2 circuit distance 3 matches the paper's statement that the smallest undetectable logical fault has weight three"
+  },
+  {
+   "part": "rotation angles (-pi/2, pi, +pi/2) of every single-qubit pulse",
+   "status": "reconstructed from Fig. 3a box shading by pixel analysis against the legend; the sign convention of 'Y rotation' and its mapping to SQRT_Y vs SQRT_Y_DAG is assumed (Ry(t)=exp(-itY/2)). A different convention changes only constant outcome signs, not detectors or distances."
+  },
+  {
+   "part": "TICK layering",
+   "status": "8-step structure exact; the pipelined readout is placed in the same layer as step 1 of the next stabilizer type, as drawn in Fig. 3a; the split readout and the post-split Z readouts are standalone layers as drawn. Real readout (175-300 ns) overlaps more than one 48 ns step; layer durations are derived (derived_schedule)."
+  },
+  {
+   "part": "preselection readout",
+   "status": "included as M on all 17 qubits after R (Fig. 3a 'Presel.'); hardware postselects on all-0, so it is not used in detectors (detector partners at rounds 1, 2 are this postselected 0)"
+  },
+  {
+   "part": "detectors",
+   "status": "paper's syndrome definition sigma_N = s_N s_N-1 with s from no-reset raw outcomes, i.e. m_k xor m_k-2; 24 Z detectors (sigma_0..sigma_5, matches source-data decoder graph) + 12 X detectors (cycles 2-4, matches App. Fig. F1). The paper's indexing of the split syndrome (sigma_4 with s_4 s_3, 1-based s) vs source data (sigma_0..sigma_5) is internally inconsistent; the physics is the same."
+  },
+  {
+   "part": "observable signs",
+   "status": "Stim observables are frame-updated parities. In the raw measurement record of the noiseless circuit Z_L1Z_L2 has parity 1 for the +1 state, because of the Ry(pi) echoes (5 on D4 and D6, 3 on D5) and the no-reset ancilla mapping; the paper reports the value after this known constant frame (see verify.txt (b))."
+  },
+  {
+   "part": "injection variants",
+   "status": "initial-state pattern exact (Fig. 4a: D1 D4 D6 D9 |0>, D2 D3 D7 D8 |+>, D5 |psi>); the preparation pulses are not given (only 'single-qubit gates'), minimal choices used: |+>=SQRT_Y, |->=SQRT_Y_DAG, |1>=Y, |+i>=SQRT_X_DAG, |-i>=SQRT_X. Only Stim-representable cardinal states; the paper's 45-degree states are non-Clifford. Detectors exclude the non-deterministic first-round weight-4 checks, as in the paper."
+  },
+  {
+   "part": "QUBIT_COORDS",
+   "status": "chip grid read from the labelled micrograph Fig. 1e (exact topology, photo-derived pitch ~1.85 mm)"
+  },
+  {
+   "part": "noise model in verify.py",
+   "status": "sanity only: device-average errors from the text, idle channel of App. Simulation with representative T1=51 us, T2E=50 us; per-qubit / per-pair values are not published with qubit labels (source data fig_1f.csv lists unlabelled values)"
+  }
+ ],
+ "checks": {
+  "circuit.stim": {
+   "dem_errors": 464,
+   "raw_observable_parity": [
+    1
+   ],
+   "ideal_paper_frame": [
+    "Z_L1 Z_L2 = +1"
+   ],
+   "random_measurements": 19,
+   "circuit_distance": 3,
+   "estimate": {
+    "shots": 200000,
+    "raw": 0.2161,
+    "decoded": 0.5609,
+    "postselected": 0.9988,
+    "kept_fraction": 0.017
+   }
+  },
+  "circuit-bell-XX.stim": {
+   "dem_errors": 484,
+   "raw_observable_parity": [
+    0
+   ],
+   "ideal_paper_frame": [
+    "X_L1 X_L2 = +1"
+   ],
+   "random_measurements": 19,
+   "circuit_distance": 1,
+   "estimate": {
+    "shots": 200000,
+    "raw": 0.2199,
+    "decoded": 0.2199,
+    "postselected": 0.5392,
+    "kept_fraction": 0.0196
+   }
+  },
+  "circuit-bell-YY.stim": {
+   "dem_errors": 484,
+   "raw_observable_parity": [
+    0
+   ],
+   "ideal_paper_frame": [
+    "Y_L1 Y_L2 = -1"
+   ],
+   "random_measurements": 19,
+   "circuit_distance": 1,
+   "estimate": {
+    "shots": 200000,
+    "raw": -0.0732,
+    "decoded": -0.1352,
+    "postselected": -0.5301,
+    "kept_fraction": 0.0196
+   }
+  },
+  "circuit-inject-0-ZZ.stim": {
+   "dem_errors": 441,
+   "raw_observable_parity": [
+    1
+   ],
+   "ideal_paper_frame": [
+    "Z_L1 Z_L2 = +1"
+   ],
+   "random_measurements": 21
+  },
+  "circuit-inject-1-ZZ.stim": {
+   "dem_errors": 441,
+   "raw_observable_parity": [
+    0
+   ],
+   "ideal_paper_frame": [
+    "Z_L1 Z_L2 = -1"
+   ],
+   "random_measurements": 21
+  },
+  "circuit-inject-plus-XX.stim": {
+   "dem_errors": 467,
+   "raw_observable_parity": [
+    1,
+    1
+   ],
+   "ideal_paper_frame": [
+    "X_L1 = +1",
+    "X_L2 = +1"
+   ],
+   "random_measurements": 21
+  },
+  "circuit-inject-minus-XX.stim": {
+   "dem_errors": 467,
+   "raw_observable_parity": [
+    0,
+    0
+   ],
+   "ideal_paper_frame": [
+    "X_L1 = -1",
+    "X_L2 = -1"
+   ],
+   "random_measurements": 21
+  },
+  "circuit-inject-plusi-YZ.stim": {
+   "dem_errors": 466,
+   "raw_observable_parity": [
+    0
+   ],
+   "ideal_paper_frame": [
+    "Y_L1 Z_L2 = +1"
+   ],
+   "random_measurements": 21
+  },
+  "circuit-inject-minusi-YZ.stim": {
+   "dem_errors": 466,
+   "raw_observable_parity": [
+    1
+   ],
+   "ideal_paper_frame": [
+    "Y_L1 Z_L2 = -1"
+   ],
+   "random_measurements": 21
+  },
+  "counts": {
+   "qubits": 17,
+   "cycles": "XZXZXZXZZ",
+   "cz_total": 100,
+   "measurements": 62,
+   "detectors_z": 24,
+   "detectors_x": 12,
+   "cz_per_cycle": [
+    [
+     "X",
+     12
+    ],
+    [
+     "Z",
+     12
+    ],
+    [
+     "X",
+     12
+    ],
+    [
+     "Z",
+     12
+    ],
+    [
+     "X",
+     12
+    ],
+    [
+     "Z",
+     12
+    ],
+    [
+     "X",
+     12
+    ],
+    [
+     "Z",
+     8
+    ],
+    [
+     "Z",
+     8
+    ]
+   ],
+   "ticks": 68,
+   "derived_duration_us": 8.528
+  },
+  "cross_code_edges": {
+   "split round": 9,
+   "later": 0
+  },
+  "bell_fidelity_estimate": {
+   "raw": 0.3773,
+   "decoded": 0.479
+  }
+ }
+}

@@ -1,0 +1,195 @@
+{
+  "id": "luthra2026",
+  "citation": {
+    "authors": ["Surabhi Luthra", "Alex Owens"],
+    "affiliations": ["Department of Physics & Astronomy, University College London", "National Quantum Computing Centre, Harwell Campus"],
+    "title": "Individually Addressed Logical Pauli Measurements by QLDPC Surgery on a Trapped Ion Quantum Computer",
+    "arxiv": "2610.39067",
+    "version": "v1, submitted 28 Oct 2026",
+    "url": "https://arxiv.org/abs/2610.39067",
+    "doi": "10.48550/arXiv.2610.39067",
+    "license": "CC BY 4.0",
+    "data": {
+      "doi": "10.5281/zenodo.23165109",
+      "api": "https://zenodo.org/api/records/23165109",
+      "title": "Experimental Data for \"Individually Addressed Logical Pauli Measurements by QLDPC Surgery on a Trapped Ion Quantum Computer\"",
+      "files_used": "all 16 files (8 programs *-input.json, 8 shot records *-output.json), stored in data/; md5 checksums match the Zenodo record (data/zenodo-record.json)"
+    },
+    "text_source_note": "Quotes from the paper are taken from the arXiv TeX source (https://arxiv.org/src/2610.39067) with LaTeX markup removed."
+  },
+  "device": {
+    "name": "Quantinuum H2-2 (System Model H2)",
+    "qubits": {"value": 56, "quote": "Experiments were performed on the Quantinuum H2-2 trapped ion processor, which provides 56 qubits with all-to-all connectivity, mid-circuit measurement and reset.", "source": "arXiv:2610.39067 Sec. III.B Hardware"},
+    "qubits_used": {"value": {"gadget_circuits": 27, "memory": 20}, "quote": "Our gadget experiments utilised 27 qubits of which there were 10 data qubits, 10 ancilla qubits to perform stabiliser checks, and 7 qubits for the gadget (3 gadget qubits, 4 gadget checks), while our memory experiments required 20 qubits.", "source": "arXiv:2610.39067 Sec. III.B; confirmed by required_num_qubits=27/20 in the QIR"},
+    "gate_zones": [
+      {"value": 4, "quote": "By using a greedy scheduling of the 4 gate zones for the R=3 circuit we estimate a single shot to require ~500 ms", "source": "arXiv:2610.39067 Sec. IV.A.2"},
+      {"value": 4, "quote": "Quantum charge-coupled device (QCCD) architecture with 4 gate zones in a trap consisting of two connected linear sections", "source": "Quantinuum H2 Product Data Sheet v4.00 (17 Sep 2025), Features, p.3, https://docs.quantinuum.com/systems/_static/assets/data_sheets/Quantinuum%20H2%20Product%20Data%20Sheet.pdf"},
+      {"value": 4, "quote": "System Model H2 has 56 physical qubits (ions) that move, individually or in pairs, between four interaction zones where all quantum operations (initialization, measurement, single-, and two-qubit gates) are performed using lasers.", "source": "H2 Product Data Sheet v4.00, System Operation, p.4"},
+      {"value": 8, "note": "physical gate zones, of which 4 (DG) do quantum operations", "quote": "Random qubit access utilizes all 8 gate zones as swapping regions. ... State Preparation and Measurement (SPAM) is only possible in the 4 gate zones.", "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/h2.html (QCCD Operation)"},
+      {"value": "4 of 8", "quote": "H2 is currently configured with 4 active gate zones, the two-qubit (2Q) gates are executed in 7 batches of 4 parallel gates.", "source": "DeCross et al., arXiv:2406.02501, Fig. 1 caption"}
+    ],
+    "gate_zones_note": "The task brief said '44 gate zones'; the paper and Quantinuum both say 4 (active) gate zones.",
+    "parallel_2q": {"value": 4, "quote": "Parallel two-qubit operations 4", "source": "H2 Product Data Sheet v4.00, Table 1"},
+    "connectivity": {"value": "all-to-all via ion transport", "quote": "By rearranging the physical location of the qubits, a two-qubit gate can be performed on any arbitrary pair, giving the system all-to-all connectivity.", "source": "H2 Product Data Sheet v4.00, p.4"},
+    "geometry": [
+      {"quote": "System Model H2 is a transport-based quantum processor with a linear race-track geometry.", "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/h2.html"},
+      {"quote": "In total, the trap has 376 electrodes connected to 268 independent voltage sources and 1 RF drive.", "source": "Moses et al., PRX 13, 041052 (2023), arXiv:2305.03828 Sec. II.1"},
+      {"quote": "but only the DG zones are used for quantum operations", "source": "Moses et al., arXiv:2305.03828"},
+      {"value": 750, "unit": "um", "what": "gate-zone spacing", "quote": "the spacing between gate zones remains the same (750 μm).", "source": "Moses et al., arXiv:2305.03828 Sec. II.1 (quote via research pass, not re-fetched)"}
+    ],
+    "species": {"quote": "System Model H2 encodes the computational space into the 2S1/2 spin manifold of a 171Yb+ ion. (138Ba+) is used as the sympathetic cooling ion.", "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/h2.html (Qubit Species)"},
+    "transport_primitives": [
+      {"quote": "include split/combine, linear shifts, and physical swaps", "source": "Moses et al., arXiv:2305.03828 Sec. II.5"},
+      {"quote": "linear transport, split/combine, and physical swap", "source": "DeCross et al., arXiv:2406.02501 Sec. II"}
+    ],
+    "native_gates": {
+      "quote": "Rxy(θ,φ) = exp(-iθ/2 (cos φ X + sin φ Y)) OpType.PhasedX; Rz(λ) = exp(-iλ/2 Z) OpType.Rz; ZZ() = exp(-iπ/4 Z⊗Z) OpType.ZZMax; Rzz(θ) = exp(-iθ/2 Z⊗Z) OpType.ZZPhase; Rxxyyzz(α,β,γ) OpType.TK2",
+      "rz_virtual_quote": "The parameterized rotation around the z-axis, Rz(λ), is performed virtually within the software.",
+      "units_note": "TKET angles are in half-turns (ZZPhase(0.5) = Rzz(π/2) = ZZMax); QIR angles are radians.",
+      "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/h2.html (Native Gate Set table)"
+    },
+    "error_rates_used_by_paper": {
+      "quote": "Reset Error: X error post Z-basis reset (9.4e-4)/2; 1Q Gate Error: 1Q Depolarising 3.4e-5; 2Q Gate Error: 2Q Depolarising 1.0e-3; Measurement Error: X error pre Z-basis reset (9.4e-4)/2; Idling Error: Z error on all qubits, aggregated per round (1.2e-4)/7 per 2Q depth",
+      "source": "arXiv:2610.39067 Appendix C, table tab:error-model (based on H2-2 performance validation, accessed 2026-09-14)"
+    },
+    "error_rates_public_h2_2": {
+      "values": {"1q_gate_error": 3.9e-05, "1q_leakage": 1.2e-05, "2q_gate_error": 8.3e-04, "2q_leakage": 1.4e-04, "memory_error_per_depth1_time": 1.8e-04, "measurement_crosstalk": 1.3e-05, "spam_0": 6.7e-04, "spam_1": 1.9e-03},
+      "quote": "H2-2 Infidelity Uncertainty 1-Qubit Gate Error 3.9e-05 ... 2-Qubit Gate Error 8.3e-04 6.6e-05 2-Qubit Gate Leakage Error 1.4e-04 ... Memory Error per Depth-1 Circuit Time 1.8e-04 ... SPAM Error (0) 6.7e-04 ... SPAM Error (1) 1.9e-03",
+      "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/performance_validation.html (fetched 2026-11-24; values may differ from the paper's 2026-09-14 access)"
+    },
+    "error_rates_datasheet": {
+      "typical": {"1q": 3e-5, "2q": 1e-3, "spam": 1e-3, "memory_per_depth1": 2e-4, "mcm_crosstalk": 5e-6},
+      "max": {"1q": 2e-4, "2q": 2e-3, "spam": 5e-3, "memory_per_depth1": 2e-3, "mcm_crosstalk": 2e-4},
+      "source": "H2 Product Data Sheet v4.00, Table 1"
+    },
+    "run_dates": {"quote": "H2-2 ... June 12--July 31 2026", "source": "arXiv:2610.39067 bibliography entry QuantinuumH2 (access period; individual job timestamps are not in the Zenodo files)"}
+  },
+  "timings": {
+    "one_qubit_gate": {"value": null, "unit": "us", "quote": "not stated for H2 in the paper, data sheet, docs, Moses et al. or DeCross et al.", "source": "not stated",
+      "fallback_not_H2": {"value": 5, "unit": "us", "quote": "SQ π/2 time 5 (Table III: Qubit manipulation times, Duration (μs))", "source": "Pino et al., Nature 592, 209 (2021), arXiv:2003.01293 Table III — 2020 H1 precursor system, not H2"}},
+    "two_qubit_gate": {"value": null, "unit": "us", "quote": "not stated for H2", "source": "not stated",
+      "fallback_not_H2": {"value": 25, "unit": "us", "quote": "TQ gate 25 (Table III, Duration (μs))", "source": "Pino et al. 2021, arXiv:2003.01293 Table III — not H2"}},
+    "measurement": {"value": null, "unit": "us", "quote": "not stated for H2", "source": "not stated",
+      "fallback_not_H2": {"value": [120, 60], "unit": "us", "quote": "Qubit measurement (high-fidelity) 120; Qubit measurement (low crosstalk) 60", "source": "Pino et al. 2021, arXiv:2003.01293 Table III — not H2"}},
+    "reset": {"value": null, "unit": "us", "quote": "not stated for H2 (reset is optical pumping: 'qubits are prepared in the |0⟩ state via optical pumping', Moses et al. Sec. II.2)", "source": "not stated",
+      "fallback_not_H2": {"value": 10, "unit": "us", "quote": "Qubit initialization 10", "source": "Pino et al. 2021, arXiv:2003.01293 Table III — not H2"}},
+    "transport_shuttle": {"value": null, "unit": "us", "quote": "The fraction of total circuit time taken up by transport varies from circuit to circuit but is 60% on average", "source": "Moses et al., arXiv:2305.03828 Sec. II.5 (H2, 32-qubit configuration); per-primitive H2 durations not stated",
+      "fallback_not_H2": {"value": {"intrazone_shift": 58, "interzone_shift": 283, "split_combine": 128, "swap": 200}, "unit": "us", "quote": "Intrazone shift 58 ... Interzone shift 283 ... Split/combine 128 ... Swap 200 (Table II, μs)", "source": "Pino et al. 2021, arXiv:2003.01293 Table II — not H2"}},
+    "cooling": {"value": null, "unit": "us", "quote": "Before 2Q gating operations, we apply resolved sideband cooling to the 138Ba+ ions in the DG zones", "source": "Moses et al., arXiv:2305.03828 Sec. II.5 (method only, no H2 duration)",
+      "fallback_not_H2": {"value": {"doppler": 550, "axial_radial_sideband": 850, "axial_sideband": 650}, "unit": "us", "source": "Pino et al. 2021, arXiv:2003.01293 Table III — not H2"}},
+    "leakage_repump": {"value": 1, "unit": "ms", "quote": "Each repump cycle is ~1ms and performed during pre-2Q cooling.", "source": "https://docs.quantinuum.com/systems/trainings/h2/getting_started/leakage_repump.html; the paper enabled it: 'In all circuits we have enabled hardware leakage repump' and lacks 'the number of pulses in the leakage repump scheme'"},
+    "state_prep_initial_cooling_per_shot": {"value": 17, "unit": "ms", "quote": "the overhead for state preparation and initial cooling of about 17 ms/shot for a 32-qubit circuit", "source": "Moses et al., arXiv:2305.03828 Table 1 caption (32-qubit H2)"},
+    "depth1_circuit_time": [
+      {"value": 80, "unit": "ms", "quote": "increased from 53 ms at N=32 to 80 ms at N=56", "source": "DeCross et al., arXiv:2406.02501 Sec. II"},
+      {"value": 70, "unit": "ms", "quote": "reduced the depth-1 time to around 70 ms", "source": "DeCross et al., arXiv:2406.02501 Sec. II"}
+    ],
+    "per_shot_XR3": {"value": 500, "unit": "ms", "quote": "By using a greedy scheduling of the 4 gate zones for the R=3 circuit we estimate a single shot to require ~500 ms and the excursion in performance to represent ~10 s.", "source": "arXiv:2610.39067 Sec. IV.A.2 (an estimate by the authors, not a measured time)"},
+    "per_shot_other_derived": {"value": {"XR1": 282, "SEQ": 395, "MEM": 403, "XR3": 500}, "unit": "ms",
+      "quote": "DERIVED HERE, not from any source: 500 ms x (greedy 4-zone 2Q batches of the circuit / 62 batches of XR3); batches = XR1 35, XR3 62, SEQ 49, MEM 50 (138, 248, 196, 200 rzz gates)",
+      "source": "this directory (build from the QIR); uncertain by at least the spread between the paper's ~500 ms and DeCross depth-1 time/7 batches ≈ 10-11 ms per batch (→ ~0.65 s for XR3)"},
+    "circuit_timings_paper_statement": {"quote": "We note that having only black box access to the device means we lack certain low level compilation details: the number of pulses in the leakage repump scheme, circuit timings, ion routing and the batching of qubits into the gate and readout zones.", "source": "arXiv:2610.39067 Sec. III.B"}
+  },
+  "electronics": {
+    "paper": [
+      {"quote": "This is sent to Azure with the following parameters specified: no-opt and no-reduce to disable further TKET or compiler optimisations and leakage_repump_enable to actively suppress leakage.", "source": "arXiv:2610.39067 Appendix B"},
+      {"quote": "In principle real-time decoding is possible on H2 using a custom built decoder, though we leave this for future work as the circuits here require no adaptive branching.", "source": "arXiv:2610.39067 Sec. III.C"},
+      {"quote": "black box access ... we lack ... circuit timings, ion routing and the batching of qubits into the gate and readout zones", "source": "arXiv:2610.39067 Sec. III.B"}
+    ],
+    "public_h2": [
+      {"quote": "Although the laser pulses that implement both 1- and 2-qubit gates are conditional, the transport operations used to rearrange the physical location of the qubits are not.", "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/h2.html"},
+      {"quote": "The control system (ARM cortex processor) supports boolean and integer arithmetic. Floating point arithmetic is not supported.", "source": "https://docs.quantinuum.com/systems/user_guide/hardware_user_guide/h2.html (Real-time Classical Computation; quote via research pass)"},
+      {"quote": "using four 2Q laser beam pairs to operate four gate zones", "source": "Moses et al., arXiv:2305.03828 Sec. II.3"},
+      {"quote": "A photomultiplier tube array allows independent detection in all eight gate zones simultaneously", "source": "Moses et al., arXiv:2305.03828 Sec. II.4 (quote via research pass)"}
+    ],
+    "not_stated": "AOM/AWG/DAC/FPGA models, feed-forward latency, measurement and gate durations for H2-2"
+  },
+  "program": {
+    "pipeline_quote": "We first create each circuit in Stim with a gate set of {Measure, Reset, H, X, CNOT}. We then use the PyTKET library to rebase and optimise the circuit to be compatible with Quantinuum H2 hardware. The circuit compiled to the H2-2 device consists of {Measure, Reset, Rx, Rz, ZZPhase(0.5)} operations with rotations of multiples of π/2 angles, hence this is still a Clifford circuit. The circuit is optimised using TKET optimisation level 2. Finally, we use Q# to convert to Quantum Intermediate Representation (QIR).",
+    "pipeline_source": "arXiv:2610.39067 Appendix B",
+    "input_format": "LLVM-IR text (QIR adaptive profile) saved with a .json extension; a single basic block, no branching; calls __quantum__qis__{reset,rz,rx,rzz,m}__body and __quantum__rt__result_record_output",
+    "output_format": "microsoft.quantum-results.v2 JSON; Results[0].Shots is the time-ordered list of shots; each shot lists bits in the order of the result_record_output calls (labels k_a(k-1)r) = the original Stim measurement order. Results[0].Histogram aggregates identical shots.",
+    "gate_map": [
+      {"qir": "rz(π/2)", "h2_native": "Rz(π/2) (virtual), TKET Rz(0.5)", "stim": "S"},
+      {"qir": "rz(3π/2)", "h2_native": "Rz(3π/2) (virtual)", "stim": "S_DAG"},
+      {"qir": "rx(π/2)", "h2_native": "Rxy(π/2, 0) = PhasedX(0.5, 0) (a.k.a. U1q)", "stim": "SQRT_X"},
+      {"qir": "rx(π)", "h2_native": "Rxy(π, 0)", "stim": "X"},
+      {"qir": "rx(3π/2)", "h2_native": "Rxy(3π/2, 0) (≡ Rxy(π/2, π) up to phase)", "stim": "SQRT_X_DAG"},
+      {"qir": "rzz(π/2)", "h2_native": "ZZMax = ZZPhase(0.5) = Rzz(π/2) = exp(-iπ/4 Z⊗Z)", "stim": "SQRT_ZZ"},
+      {"qir": "reset", "h2_native": "Reset (optical pumping to |0>)", "stim": "R"},
+      {"qir": "m(q, r)", "h2_native": "Measure (Z basis, qubit left in the measured state)", "stim": "M"}
+    ],
+    "angles_present": "only multiples of π/2: rz ∈ {π/2, 3π/2}, rx ∈ {π/2, π, 3π/2}, rzz ∈ {π/2}",
+    "qubit_roles": {
+      "0-4": "ancilla of X stabiliser S_X,j (j = qubit)",
+      "5-14": "data qubit q_i (i = qubit - 5); left block q0-q4, right block q5-q9",
+      "15-19": "ancilla of Z stabiliser S_Z,j (j = qubit - 15)",
+      "20,21,22": "kappa_2, kappa_3, kappa_4 (X1 gadget qubits); reused as nu_0, nu_1, nu_2 (Z2 gadget, SEQ)",
+      "23": "gamma_0 gauge check (X1 gadget); reused as lambda (Z2 gadget X-type gauge check, SEQ)",
+      "24,25,26": "chi_2, chi_3, chi_7 (X1 gadget checks); reused as eta_2, eta_6, eta_7 (Z2 gadget checks, SEQ)"
+    },
+    "code": "[[10,2,3]] generalised bicycle, l=5, a(x)=1+x^2, b(x)=1+x, H_X=[A|B], H_Z=[B^T|A^T]; X1=X(q2,q3,q7), X2=X(q1,q7,q9), Z1=Z(q2,q4,q5), Z2=Z(q2,q6,q7)",
+    "gate_counts": {
+      "XR1": {"R": 47, "rz": 238, "rx": 158, "rzz": 138, "M": 48},
+      "XR3": {"R": 75, "rz": 410, "rx": 270, "rzz": 248, "M": 76},
+      "SEQ": {"R": 66, "rz": 321, "rx": 209, "rzz": 196, "M": 66},
+      "MEM": {"R": 65, "rz": 370, "rx": 225, "rzz": 200, "M": 60}
+    }
+  },
+  "circuits": {
+    "circuit-XR1.stim": "XR1-Prep-Plus-Plus (500 shots)", "circuit-XR1-MinusMinus.stim": "XR1-Prep-Minus-Minus (500)",
+    "circuit-XR1-ZeroZero.stim": "XR1-Prep-Zero-Zero (250)", "circuit-XR1-OneOne.stim": "XR1-Prep-One-One (250)",
+    "circuit-XR3.stim": "XR3-Prep-Plus-Plus (1000)", "circuit-SEQ.stim": "SEQ-Prep-Zero-Zero (500)",
+    "circuit-SEQ-OneOne.stim": "SEQ-Prep-One-One (500)", "circuit-MEM.stim": "MEM-Prep-Plus-Plus (500)",
+    "detector_counts": {"XR1": 34, "XR3": 62, "SEQ": 47, "MEM": 51},
+    "observables": {
+      "XR1, XR1-MinusMinus, XR3": ["L0 X1,G = chi_2 chi_3 chi_7 of merged cycle 1", "L1 X1,D = X(q2 q3 q7) final data", "L2 X2,D = X(q1 q7 q9) final data"],
+      "XR1-ZeroZero, XR1-OneOne": ["L0 X1,G xor X1,D (X1,G alone is random for Z-basis preparations)"],
+      "SEQ, SEQ-OneOne": ["L0 Z2,G = eta_2 eta_6 eta_7 * m(kappa_2)", "L1 Z2,D = Z(q2 q6 q7) final data * m(kappa_2)"],
+      "MEM": ["L0 X1,D", "L1 X2,D"]
+    },
+    "layout_file": "layout.json: per circuit, output position -> Stim record index, per-round roles, every detector/observable as output positions with a label"
+  },
+  "decoding": {
+    "method": "offline Tesseract (most-likely-error, search-based) on the Stim detector error model, short-beam configuration",
+    "quote": "Decoding is performed offline with the Tesseract most-likely-error decoder acting on the detector error model generated by Stim. ... Specifically, we configure the decoder to the short beam parameters as described in Ref. [Beni2025Tesseract].",
+    "decoder_ref": "Aghababaie Beni, Higgott, Shutty, 'Tesseract: A Search-Based Decoder for Quantum Error Correction', arXiv:2503.10988",
+    "statistics_quote": "Logical error rates are bounded in equal-tailed 95% Jeffreys credible intervals.",
+    "verification_quote": "A logical state of the two encoded qubits is prepared then verified on trivial outcome of the initial bare code syndrome extraction round (SE1).",
+    "source": "arXiv:2610.39067 Sec. III.C and III.A",
+    "here": "Tesseract is not installed in this environment (not installed, to leave the environment unchanged); verify.py uses PyMatching (decompose_errors=True works for all DEMs) and a sampled lookup-table decoder as a sanity check."
+  },
+  "results": {
+    "XR1_X1G": {"value": "0.72 [0.32, 1.41] %", "quote": "A single-round surgery measurement using seven gadget qubits measures the X1 operator with a 0.72 [0.32, 1.41]% (95% credible interval) error rate and agrees with subsequent transversal measurement with 1.03 [0.60, 1.65]% error.", "source": "abstract; appendix table tab:results-x1r1: 7/971 verified"},
+    "XR3_X1G": {"value": "< 0.26 %", "quote": "For the XR3 gadget circuit, only |++>_L was prepared, with 0 errors in 957 verification passing shots consistent with simulation and upper bounding the error rate at 0.26% in a 95% credible interval.", "source": "Sec. IV.A.2"},
+    "XR3_unverified": {"quote": "We note that the XR3 error rate depends entirely on the verification step, without verification there are 10 errors in 1000 shots.", "source": "Sec. IV.A.2"},
+    "XR3_spectator": {"value": "0.21 [0.04, 0.67] %", "quote": "disagrees in 2/957 verified shots for the three round circuit (error rate 0.21 [0.04, 0.67]%)", "source": "Sec. IV.B.2"},
+    "XR3_no_chi_detectors": {"quote": "Decoding without the chi detectors results in 7/957 errors (error rate 0.73 [0.33, 1.43]%)", "source": "Sec. IV.A.2"},
+    "SEQ_Z2G": {"value": "1.12 [0.60, 1.94] %", "quote": "Averaging over preparation in |00>_L and |11>_L the Z2 gadget measurement disagrees with preparation in 11/978 verified shots, with error rate 1.12 [0.60, 1.94]%.", "source": "Sec. IV.B.2"},
+    "SEQ_sim": {"quote": "with logical error rate 1.000 [0.986, 1.014]%", "source": "Sec. IV.B.2 (simulation, 1e6 shots per preparation)"},
+    "MEM": {"value": "0/966", "source": "Appendix D table tab:results-mem"},
+    "circuit_distance_quote": "For the single-gadget experiment, the circuit distance associated with the X1 gadget-measurement outcome is d_c=1 for R=1 and d_c=3 for R=3.",
+    "XR1_budget_quote": "The odd-parity (XOR) product of this gives a value of 6.00 x 10^-3.",
+    "detector_count_quote": "decoding the entire 3 round 62 detector syndrome"
+  },
+  "exactness": [
+    "EXACT: gate sequence, gate angles, qubit indices, reset/measure positions — the Stim instruction list equals the QIR instruction list one-for-one (checked in verify.py §2).",
+    "EXACT up to global phase: rz/rx/rzz(kπ/2) ↔ Stim S/Z/S_DAG, SQRT_X/X/SQRT_X_DAG, SQRT_ZZ (checked numerically, verify.py §1).",
+    "EXACT: measurement record index = QIR %Result id (results are allocated in program order; asserted); output-array position → record index from the result_record_output calls.",
+    "DERIVED: TICK placement (sequential packing of program order; the QIR has no layers). TICKs carry no timing.",
+    "DERIVED: QUBIT_COORDS(q, 0) = program index on a line; H2 has no fixed qubit geometry (ions are transported).",
+    "RECONSTRUCTED from the paper's definitions: detectors and observables. Bulk/boundary/fusion detector rates reproduce the paper's tables tab:fusion and tab:max_rates exactly, and SE1 verification reproduces every post-verification shot count.",
+    "INFERRED: the 5-body 'product of all S_Z (S_X) in SE1' detector, added so the detector set spans all deterministic parities and the XR3 count equals the paper's 62.",
+    "CHOICE: X1,G uses the chi outcomes of merged cycle 1 (paper Fig. timeline (App. A, fig:gadget_3_round) marks R=1 as the non-destructive measurement); with chi repetition detectors any cycle is equivalent.",
+    "NOT EXACT/UNKNOWN: the original pre-TKET Stim circuits are not published (Zenodo has only QIR + results); hardware transport, timing and zone assignment are not public."
+  ],
+  "checks": {
+    "noiseless": "1000 shots per circuit: all detectors and observables 0; detector_error_model() succeeds (all deterministic)",
+    "dem": "decompose_errors=True succeeds for all 8 circuits with the paper's tab:error-model noise model",
+    "verification_counts": "trivial-SE1 shot counts 487, 484, 240, 245, 957, 492, 486, 483 — identical to the paper (appendix D tables tab:results-*)",
+    "xr3_window": "rejected shots include all 19 consecutive 0-based shots 351-369, as in the paper",
+    "detector_rates": "max bulk detector rate and location equal tab:max_rates for all 8 entries (e.g. XR3 all L4 S_Z2 3.80%, MEM L2 S_X3 2.80/2.90%); trailing-layer fusion rates equal tab:fusion (49.6->2.06, 47.1->2.51, 50.1->1.94, 48.1->2.66)",
+    "decoded_hardware": "lookup-table decoder: XR1 X1,G 6/971 (paper 7/971), XR3 X1,G 0/957 (paper 0/957), XR3 all 9/1000 (paper 10/1000), XR3 X2,D 2/957 (paper 2/957), SEQ Z2,G 11/978 (paper 11/978), destructive and MEM 0 errors (paper 0); XR3 without the 6 chi detectors 9/957 (paper 7/957); PyMatching is worse on XR3 (2/957) as expected for a matching decoder on this qLDPC DEM",
+    "simulated": "tab:error-model noise, PyMatching/lookup: XR1 X1,G ≈ 1.0-1.1%, XR3 X1,G ≈ 0.1-0.3%, SEQ Z2,G ≈ 0.95-1.06% (paper sim 1.000%)",
+    "details": "verify.txt"
+  }
+}
