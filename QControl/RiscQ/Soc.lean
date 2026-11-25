@@ -461,8 +461,9 @@ structure World where
   cores : Array CoreState
   /-- One hub per board; board 0 is the barrier root. -/
   hubs : Array HubState := #[{}]
-  /-- Per lane (`from * 16 + to`): the earliest cycle the next frame can arrive (one frame time apart). -/
-  laneFree : Array Nat := Array.replicate 256 0
+  /-- Per lane (`from * boards + to`, sized when the run starts): the earliest cycle the next frame can
+      arrive (one frame time apart). -/
+  laneFree : Array Nat := #[]
   /-- Pending events, least (cycle, seq) first: the order a sorted list kept them in. -/
   agenda : Heap Item := {}
   /-- (ready cycle, core) of every core when it was last set; an entry counts only while it matches the
@@ -663,7 +664,7 @@ private def sendLane (p : Program) (w : World) (t src dst : Nat) (beat : Beat) :
   let frame := p.model.laneFrame?.getD 160
   let word := max 1 (p.model.laneWord?.getD 8)
   let phase := p.model.lanePhase?.getD 0
-  let k := src * 16 + dst
+  let k := src * p.boards + dst
   let earliest := max (t + cross) (w.laneFree.getD k 0)
   let r := earliest + (phase + word - earliest % word) % word
   let w := { w with laneFree := w.laneFree.set! k (r + frame) }
@@ -1350,7 +1351,7 @@ def initial (p : Program) : World :=
        channels := c.channels.map fun ch ↦ { buffer := { table := Array.replicate ch.slots {} } } } : CoreState)
   -- Every core starts ready at cycle 0.
   let ready := (List.range cores.size).foldl (fun (h : Heap (Nat × Nat)) i ↦ h.push readyBefore (0, i)) {}
-  let w : World := { cores, ready }
+  let w : World := { cores, ready, laneFree := Array.replicate (p.boards * p.boards) 0 }
   p.dioInputs.foldl (fun w e ↦ w.schedule e.atBatch "" none none (.dioIn e.core e.channel e.levels)) w
 
 /-- The next core to act: the least (ready cycle, index) entry that still matches its core. Entries left
