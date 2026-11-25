@@ -203,6 +203,8 @@ async function machineRun({ id, title, idea, source: text, n, outcomes = {} }) {
       statements: s.ops.map((o) => ({ uid: o.uid, kind: o.kind, line: o.line, text: o.text, start: o.start, end: o.end, qubits: o.qubits.map(key) })),
       rows: iterations.at(-1).rows, decodes: run.decodes, cores, natives, pulses, stores, firmware,
       periodNs: PERIOD_NS(run.m), couplers,
+      // The 3D twin's track (riscq/ftqvm/track.mjs): the chip, its control system, and every operation and pulse of this run.
+      track: run.report.track,
       sites: run.placement.sites.map((x, k) => ({ id: x.id, kind: x.kind, rc: x.rc, address: x.address ?? siteKey.get(k) ?? null })),
     },
   };

@@ -255,7 +255,10 @@ export async function render(root, toc) {
   html += `<p>One round of the 3-qubit bit-flip code: two parity checks, a decode and a frame update, followed all the way down to the
   instructions RISC-Q's cores execute.</p>`;
   html += h3("watch-machine", "Watch the machine run");
-  html += `<p>Three programs, each scheduled by the OS and run on its own generated chip in the cycle-exact model. Play the run, or
+  html += `<p>Three programs, each scheduled by the OS and run on its own generated chip in the cycle-exact model. On top, the real
+  hardware in 3D, as on the <a href="/reproduce">Reproduce</a> pages: the transmon chip, the coax from each converter, and the RISC-Q
+  board with its cores; every operation glows over the interval the trace shows for it, and each core lights while it plays a pulse.
+  Below it, the same moment as a diagram, on the same clock. Play the run, or
   drag the time: the core whose pulse is playing lights its wire and its transmon (blue drive, violet coupler, orange readout),
   a CZ lights its coupler, a measured bit travels from its core through the board hub to the decoder core, and the frame core
   writes the Pauli frame. The left list highlights the statements whose window contains the moment; the right list shows the

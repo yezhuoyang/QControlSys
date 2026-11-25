@@ -73,6 +73,11 @@ const STYLE = `
 .mp-fw div.on { background: #fff3c4; } .mp-fw div span { color: var(--ink3); text-align: right; }
 .mp-note { font-size: 13px; color: var(--ink2); margin: 6px 0 0; min-height: 20px; }
 .mp-frame { font: 12px var(--mono); color: var(--ink2); }
+.mp-3d { border-radius: 10px; overflow: hidden; background: #0b1020; min-height: 440px; }
+.mp-3d .twin-stage { height: 460px; }
+.mp-views { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 6px 0 10px; font-size: 12.5px; }
+.mp-views button { border: 1px solid var(--line); background: #f7f8fc; border-radius: 14px; padding: 3px 10px; font: 12.5px var(--sans); cursor: pointer; }
+.mp-views button[aria-pressed=true] { background: var(--navy); color: #fff; border-color: var(--navy); }
 `;
 function injectStyle() {
   if (document.getElementById("schedule-anim-style")) return;
@@ -318,7 +323,12 @@ export function mountMachine(root, runs) {
   const st = { run: 0, t: 0, playing: false, last: 0, speed: 1, core: null };
   root.className = "mp";
   root.innerHTML = `<div class="mp-tabs">${runs.map((r, i) => `<button data-r="${i}" aria-pressed="${i === 0}">${esc(r.title)}</button>`).join("")}</div>
-    <p class="stp-lesson mp-idea"></p><div class="mp-chip"></div>
+    <p class="stp-lesson mp-idea"></p>
+    <h6>The hardware in 3D: the chip, its coax, the converters and the RISC-Q board, as the trace drives them</h6>
+    <div class="mp-3d"></div>
+    <div class="mp-views"><button data-v="all" aria-pressed="true">Whole machine</button><button data-v="device">Chip</button><button data-v="control">Control system</button>
+      <span class="muted">Drag to turn, scroll to zoom, hover a part to name it.</span></div>
+    <h6>The same moment as a diagram</h6><div class="mp-chip"></div>
     <div class="mp-play"><button data-a="play">▶</button><button data-a="back" title="Back 20 ns">−20 ns</button><button data-a="fwd" title="Forward 20 ns">+20 ns</button>
       <input type="range" min="0" step="2" value="0" aria-label="Time"><span class="clock"></span>
       <select data-a="speed" title="Playback speed"><option value="0.25">¼ µs per s</option><option value="0.5" selected>½ µs per s</option><option value="1">1 µs per s</option></select></div>
@@ -349,8 +359,25 @@ export function mountMachine(root, runs) {
     corePos.set(frameCore, [W - 150, 60]);
     decCores.forEach((n, k) => corePos.set(n, [W - 150, 200 + k * 54]));
     st.geo = { sx, sy, W, H, corePos, hub, siteIdx, frameCore, decCores };
+    mountTwin3d(F);
     $(".mp-list").innerHTML = F.text.split("\n").filter((l) => /^@/.test(l)).map((l, k) => `<div data-k="${k}">${esc(l)}</div>`).join("");
     draw(); renderFw();
+  }
+
+  // The 3D twin (studio/reproduce/twin3d.js), driven by this player's clock: external mode, no controls of its own.
+  async function mountTwin3d(F) {
+    st.twin?.dispose();
+    st.twin = null;
+    const box = $(".mp-3d");
+    if (!F.track) { box.innerHTML = '<p class="muted">No 3D track was recorded for this run.</p>'; return; }
+    try {
+      const { mountTwin } = await import("/reproduce/twin3d.js");
+      st.twin = mountTwin(box, F.track, { external: true });
+      st.twin.setView(st.view ?? "all");
+      st.twin.setTime(st.t);
+    } catch (error) {
+      box.innerHTML = `<p class="muted">The 3D view could not start here (${esc(error.message)}); the diagram below shows the same run.</p>`;
+    }
   }
 
   function renderFw() {
@@ -371,6 +398,7 @@ export function mountMachine(root, runs) {
 
   function draw() {
     const R = runs[st.run], F = R.final, g = st.geo, t = st.t;
+    st.twin?.setTime(t);
     $(".mp-play .clock").textContent = "t = " + num(t) + " ns";
     $(".mp-play input").value = String(t);
     const active = F.pulses.filter((p) => p.opens <= t && t < p.closes);
@@ -462,6 +490,8 @@ export function mountMachine(root, runs) {
     requestAnimationFrame(frame);
   }
   root.addEventListener("click", (e) => {
+    const v = e.target.closest("[data-v]");
+    if (v) { st.view = v.dataset.v; st.twin?.setView(st.view); root.querySelectorAll(".mp-views button").forEach((b) => b.setAttribute("aria-pressed", String(b === v))); return; }
     const core = e.target.closest("[data-core]");
     if (core) { st.core = core.dataset.core; renderFw(); draw(); return; }
     const b = e.target.closest("button");
