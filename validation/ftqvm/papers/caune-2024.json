@@ -28,7 +28,7 @@
   ],
   "command": "node riscq/ftqvm/logical.mjs caune-2024 400 200000"
  },
- "generated": "2026-11-25T08:51:43.398Z",
+ "generated": "2026-11-25T09:05:49.261Z",
  "device": {
   "id": "caune-2024",
   "title": "Rigetti Ankaa-2, the 8 qubits of the stability-8 patch",

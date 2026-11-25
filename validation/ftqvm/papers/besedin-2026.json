@@ -28,7 +28,7 @@
   ],
   "command": "node riscq/ftqvm/logical.mjs besedin-2026 400 200000"
  },
- "generated": "2026-11-25T08:51:39.365Z",
+ "generated": "2026-11-25T09:05:45.660Z",
  "device": {
   "id": "besedin-2026",
   "title": "ETH Zurich 17-transmon surface-code device",

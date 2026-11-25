@@ -110,7 +110,9 @@ export function build(graph, mode, { spec = benchSpec(), core = 0 } = {}) {
   const compile = (g) => {
     const files = { "uf_decoder.c": readFileSync(SOURCE, "utf8"), "uf_graph.h": header(g, mode) };
     const runtime = ["start.S", "muldiv.c", "riscq.h"].map((f) => readFileSync(join(runtimeDir, f), "utf8"));
-    const key = createHash("sha256").update(JSON.stringify([files, runtime, mapHeader(spec, core), linkerScript(spec, core), spec.cores[core].withMul])).digest("hex").slice(0, 24);
+    // Line endings do not change what clang compiles, but they differ between a Windows checkout
+    // (CRLF) and the server's (LF): the key is taken over the text with LF line endings.
+    const key = createHash("sha256").update(JSON.stringify([files, runtime, mapHeader(spec, core), linkerScript(spec, core), spec.cores[core].withMul]).replace(/\\r\\n/g, "\\n")).digest("hex").slice(0, 24);
     const file = join(IMAGES, key + ".json");
     if (existsSync(file)) { const x = JSON.parse(readFileSync(file, "utf8")); if (x.overflow) throw Error(x.overflow); return { elf: new Uint8Array(Buffer.from(x.elf, "base64")), command: x.command }; }
     try {

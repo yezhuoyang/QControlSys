@@ -28,7 +28,7 @@
   ],
   "command": "node riscq/ftqvm/logical.mjs bluvstein-2025 400 200000"
  },
- "generated": "2026-11-25T08:52:17.812Z",
+ "generated": "2026-11-25T09:06:09.927Z",
  "device": {
   "id": "bluvstein-2025",
   "title": "Harvard/QuEra neutral-atom processor (448 Rb-87 atoms, zoned)",

@@ -28,7 +28,7 @@
   ],
   "command": "node riscq/ftqvm/logical.mjs luthra-2026 400 200000"
  },
- "generated": "2026-11-25T08:52:22.390Z",
+ "generated": "2026-11-25T09:06:12.427Z",
  "device": {
   "id": "luthra-2026",
   "title": "Quantinuum H2 (QCCD race track), the 27 ions of the program",

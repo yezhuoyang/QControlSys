@@ -29,7 +29,7 @@
   ],
   "command": "node riscq/ftqvm/logical.mjs lacroix-2025 400 200000"
  },
- "generated": "2026-11-25T08:52:15.820Z",
+ "generated": "2026-11-25T09:06:08.766Z",
  "device": {
   "id": "lacroix-2025",
   "title": "Google Willow, the colour-code patches",
