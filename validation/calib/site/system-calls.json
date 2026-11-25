@@ -1,0 +1,414 @@
+{
+ "id": "system-calls",
+ "title": "Every system call on six hardware designs",
+ "kicker": "Calibration · in programs",
+ "summary": "Eleven FormalRV programs (memories, Deutsch–Jozsa, Bell pairs, a Z⊗Z merge, GHZ, a checked measurement, T injection, a loop of merges, at distances 3 and 5) on two designs of each platform. For every system call, the time each operation actually needed on the cycle-exact model, against the one number the machine declares.",
+ "method": [
+  "For each program and design, FormalRV compiles the program against a machine specification, its resource VM admits the listing, and the listing runs time-triggered on the design. Every duration the hardware exceeded is raised and the loop repeats until the run conforms. The final run's operations are the samples.",
+  "65 runs conform. measurement-d3 on ions-qccd: listing line 143: zone of the route's hub is full (12 ions, capacity 12; the route gathers 13; others there: )."
+ ],
+ "sections": [
+  {
+   "heading": "Needed against declared (ns)",
+   "table": {
+    "head": [
+     "Platform",
+     "Design",
+     "Field",
+     "Operations",
+     "Declared",
+     "Needed: min / median / 99th / max",
+     "Slack at the median"
+    ],
+    "rows": [
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "gate1q_ns",
+      "1,297",
+      "8,000",
+      "8,000 / 8,000 / 8,000 / 8,000",
+      "0"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "gate2q_ns",
+      "7,681",
+      "16,270",
+      "270 / 16,270 / 16,270 / 16,270",
+      "0"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "measure_ns",
+      "2,413",
+      "508,070",
+      "500,066 / 508,066 / 508,066 / 508,066",
+      "4"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "reset_ns",
+      "2,280",
+      "100,000",
+      "100,000 / 100,000 / 100,000 / 100,000",
+      "0"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "route_latency_ns",
+      "2,390",
+      "187,570",
+      "73,340 / 92,766 / 161,114 / 187,568",
+      "94,804"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "decoder_latency_ns",
+      "66",
+      "190,480",
+      "154 / 35,678 / 190,480 / 190,480",
+      "154,802"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-moving",
+      "pauli_frame_update_ns",
+      "9",
+      "330",
+      "182 / 182 / 322 / 322",
+      "148"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "gate1q_ns",
+      "1,297",
+      "8,000",
+      "8,000 / 8,000 / 8,000 / 8,000",
+      "0"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "gate2q_ns",
+      "7,681",
+      "16,270",
+      "270 / 16,270 / 16,270 / 16,270",
+      "0"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "measure_ns",
+      "2,413",
+      "508,070",
+      "500,066 / 508,066 / 508,066 / 508,066",
+      "4"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "reset_ns",
+      "2,280",
+      "100,000",
+      "100,000 / 100,000 / 100,000 / 100,000",
+      "0"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "route_latency_ns",
+      "2,390",
+      "117,440",
+      "0 / 0 / 95,016 / 117,440",
+      "117,440"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "decoder_latency_ns",
+      "66",
+      "190,480",
+      "154 / 35,678 / 190,480 / 190,480",
+      "154,802"
+     ],
+     [
+      "Neutral atoms",
+      "atoms-static",
+      "pauli_frame_update_ns",
+      "9",
+      "330",
+      "182 / 182 / 322 / 322",
+      "148"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "gate1q_ns",
+      "1,297",
+      "5,000",
+      "5,000 / 5,000 / 5,000 / 5,000",
+      "0"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "gate2q_ns",
+      "7,681",
+      "35,000",
+      "25,000 / 35,000 / 35,000 / 35,000",
+      "0"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "measure_ns",
+      "2,413",
+      "125,070",
+      "120,066 / 125,066 / 125,066 / 125,066",
+      "4"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "reset_ns",
+      "2,280",
+      "10,000",
+      "10,000 / 10,000 / 10,000 / 10,000",
+      "0"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "route_latency_ns",
+      "2,390",
+      "1,500,200",
+      "0 / 0 / 1,372,600 / 1,500,200",
+      "1,500,200"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "decoder_latency_ns",
+      "66",
+      "190,630",
+      "154 / 35,678 / 190,480 / 190,480",
+      "154,952"
+     ],
+     [
+      "Trapped ions",
+      "ions-modules",
+      "pauli_frame_update_ns",
+      "9",
+      "330",
+      "182 / 182 / 322 / 322",
+      "148"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "gate1q_ns",
+      "1,254",
+      "5,000",
+      "5,000 / 5,000 / 5,000 / 5,000",
+      "0"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "gate2q_ns",
+      "7,426",
+      "35,000",
+      "25,000 / 35,000 / 35,000 / 35,000",
+      "0"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "measure_ns",
+      "2,334",
+      "125,070",
+      "120,066 / 125,066 / 125,066 / 125,066",
+      "4"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "reset_ns",
+      "2,206",
+      "10,000",
+      "10,000 / 10,000 / 10,000 / 10,000",
+      "0"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "route_latency_ns",
+      "2,312",
+      "1,500,200",
+      "869,800 / 1,053,600 / 1,308,800 / 1,500,200",
+      "446,600"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "decoder_latency_ns",
+      "64",
+      "190,630",
+      "154 / 35,678 / 190,480 / 190,480",
+      "154,952"
+     ],
+     [
+      "Trapped ions",
+      "ions-qccd",
+      "pauli_frame_update_ns",
+      "8",
+      "330",
+      "182 / 182 / 322 / 322",
+      "148"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "gate1q_ns",
+      "1,297",
+      "36",
+      "36 / 36 / 36 / 36",
+      "0"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "gate2q_ns",
+      "7,681",
+      "472",
+      "400 / 472 / 472 / 472",
+      "0"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "measure_ns",
+      "2,413",
+      "1,440",
+      "1,044 / 1,236 / 1,440 / 1,440",
+      "204"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "reset_ns",
+      "2,280",
+      "160",
+      "160 / 160 / 160 / 160",
+      "0"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "route_latency_ns",
+      "2,390",
+      "2",
+      "0 / 0 / 0 / 0",
+      "2"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "decoder_latency_ns",
+      "66",
+      "2,015,286",
+      "154 / 71,356 / 761,920 / 761,920",
+      "1,943,930"
+     ],
+     [
+      "Superconducting",
+      "sc-A",
+      "pauli_frame_update_ns",
+      "9",
+      "322",
+      "182 / 182 / 322 / 322",
+      "140"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "gate1q_ns",
+      "1,297",
+      "36",
+      "36 / 36 / 36 / 36",
+      "0"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "gate2q_ns",
+      "7,681",
+      "472",
+      "400 / 472 / 472 / 472",
+      "0"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "measure_ns",
+      "2,413",
+      "1,440",
+      "1,044 / 1,236 / 1,440 / 1,440",
+      "204"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "reset_ns",
+      "2,280",
+      "160",
+      "160 / 160 / 160 / 160",
+      "0"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "route_latency_ns",
+      "2,390",
+      "2",
+      "0 / 0 / 0 / 0",
+      "2"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "decoder_latency_ns",
+      "66",
+      "191,410",
+      "154 / 35,678 / 190,520 / 190,520",
+      "155,732"
+     ],
+     [
+      "Superconducting",
+      "sc-B",
+      "pauli_frame_update_ns",
+      "9",
+      "322",
+      "182 / 182 / 322 / 322",
+      "140"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "Routes on atoms need 73 to 183 µs and on ions 0.87 to 1.25 ms; the declared route latency must be the longest, so the median route carries 90 µs (atoms) and 0.2 ms (ions) the hardware does not use.",
+  "Readout lengths differ per transmon (1.0 to 1.4 µs on the generated chip's calibration): the declared measurement is the longest.",
+  "The decoder's median decode is a fifth of its worst; the worst is what a single latency must say."
+ ],
+ "command": "node riscq/calib/insitu.mjs && node riscq/calib/table.mjs",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.416Z"
+}

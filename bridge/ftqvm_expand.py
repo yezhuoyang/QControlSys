@@ -5,13 +5,16 @@ the FormalRV checkout (a sibling folder `FormalRV`, or the directory named by FO
 prints what `parse_source` and `expand` produce. QuantumOS never re-implements the listing's
 semantics; it executes what FormalRV says the listing is.
 
-Usage: python bridge/ftqvm_expand.py LISTING.sysprog [--max-ops N]
+Usage: python bridge/ftqvm_expand.py LISTING.sysprog [--max-ops N] [--guards taken]
 Output: {"source": {...}, "machine": {...}, "specs": {...}, "ops": [...], "calls": [...]}
 Errors are printed as {"error": {"code", "message", "line"}} with exit status 1.
 
 Units: every time is an integer number of nanoseconds, as in the listing.
-`ftq_vm.sysprog` is FormalRV's Python VM, a test oracle there; it refuses runtime guards
-(`when`), which the small programs used here do not contain.
+`ftq_vm.sysprog` is FormalRV's Python VM, a test oracle there; by default it refuses runtime guards
+(`when`). With `--guards taken` (or QUANTUMOS_GUARDS=taken) its own guard hook (`_expand`'s
+`choose_guard`) takes every guarded body, as the VM reserves resources for it, and each op written
+inside a guard carries `guard`: the guard's text and line, so a runtime can drop it when the measured
+bits say the guard is false.
 """
 import json
 import re
@@ -42,6 +45,7 @@ def main(argv):
     path, max_ops = argv[0], 1_000_000
     if "--max-ops" in argv:
         max_ops = int(argv[argv.index("--max-ops") + 1])
+    guards = argv[argv.index("--guards") + 1] if "--guards" in argv else os.environ.get("QUANTUMOS_GUARDS", "")
     root = formalrv_root()
     sys.path.insert(0, str(root))
     from ftq_vm import sysprog  # FormalRV, unchanged
@@ -81,14 +85,25 @@ def main(argv):
         # The statement of every line, as the expander numbered them: Pauli tags such as
         # `CZ ancilla[1], Z data[0]` and frame Paulis are read from it.
         lines = kept
-        ops, calls = sysprog.expand(source, max_ops)
+        guarded = {}  # line of a statement inside a guard -> the guard (text, line)
+        if guards == "taken":
+            def mark(node, guard):
+                for child in node.children:
+                    guarded.setdefault(child.line, guard)
+                    mark(child, guard)
+            def take(node, env, offset, stack):
+                mark(node, {"text": node.text, "line": node.line})
+                return True
+            ops, calls = sysprog._expand(source, max_ops, choose_guard=take)
+        else:
+            ops, calls = sysprog.expand(source, max_ops)
     except sysprog.VMError as error:
         info = getattr(error, "info", {})
         print(json.dumps({"error": {"code": info.get("code"), "message": str(error),
                                     "line": info.get("line", 0)}}, default=str))
         return 1
     out = {
-        "source": {"path": str(Path(path).resolve()), "sha256": source.sha256, "stripped": stripped,
+        "source": {"path": str(Path(path).resolve()), "sha256": source.sha256, "stripped": stripped, "guards": guards or "refused",
                    "params": list(source.params), "witness": dict(source.witness),
                    "formalrv": str(root)},
         "machine": source.machine,
@@ -102,6 +117,7 @@ def main(argv):
             "arg": op.arg, "inputNs": op.input_ns, "line": op.line,
             "text": lines[op.line - 1].split("#", 1)[0].strip() if 0 < op.line <= len(lines) else "",
             "stack": [str(s) for s in op.stack],
+            **({"guard": guarded[op.line]} if op.line in guarded else {}),
         } for op in ops],
         "calls": [{"uid": c.uid, "name": c.name, "start": c.start, "end": c.end,
                    "line": c.line, "ops": [op.uid for op in c.ops]} for c in calls],

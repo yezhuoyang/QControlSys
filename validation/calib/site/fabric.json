@@ -1,0 +1,185 @@
+{
+ "id": "fabric",
+ "title": "The classical fabric of a RISC-Q system",
+ "kicker": "Calibration · every platform",
+ "summary": "How long a measured bit takes to reach another core, how fast boards synchronize, and how many bits per microsecond a board and a lane between boards carry. Every system call that moves a classical bit pays these costs.",
+ "method": [
+  "Small firmware programs run on one to eight ZCU216-class boards at RISC-Q's 500 MHz clock: one core publishes a bit, every core meets at a barrier, cores publish bits back to back. Times come from the trace of each run.",
+  "A board's hub joins its cores. Between boards, RISC-Q's lane carries one 72-bit frame per published bit. With three or more boards, board 0 forwards between lanes, an extension of RISC-Q's two-board design. The lane's word-clock phase is arbitrary at power-up, so every lane-dependent probe is swept over all eight phases; the spread is a few cycles."
+ ],
+ "sections": [
+  {
+   "heading": "Latency",
+   "table": {
+    "head": [
+     "Service",
+     "Cycles (min–max over phases)",
+     "Time"
+    ],
+    "rows": [
+     [
+      "Publish → own board's cores",
+      "29",
+      "58 ns"
+     ],
+     [
+      "Publish → another board",
+      "346–353",
+      "0.70 µs"
+     ],
+     [
+      "Publish → a third board (through board 0)",
+      "666–673",
+      "1.34 µs"
+     ],
+     [
+      "Barrier, one board",
+      "32",
+      "0.064 µs"
+     ],
+     [
+      "Barrier, 2 boards, last arrival on board 0 / elsewhere",
+      "424 / 830",
+      "0.85 / 1.66 µs"
+     ],
+     [
+      "Barrier, 4 boards, last arrival on board 0 / elsewhere",
+      "432 / 830",
+      "0.86 / 1.66 µs"
+     ],
+     [
+      "Barrier, 8 boards, last arrival on board 0 / elsewhere",
+      "448 / 838",
+      "0.90 / 1.68 µs"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "Cable delay between boards",
+   "text": "The lane delay L (transceiver and cable, in 16 ns word clocks) is not part of RISC-Q's RTL; its simulation uses 3. Both costs grow exactly linearly: a publish takes 324 + 8L cycles to another board, a barrier whose last arrival is remote 784 + 16L.",
+   "table": {
+    "head": [
+     "L (word clocks)",
+     "Publish to another board (cycles)",
+     "Barrier, last arrival remote (cycles)"
+    ],
+    "rows": [
+     [
+      "3",
+      "348",
+      "832"
+     ],
+     [
+      "6",
+      "372",
+      "880"
+     ],
+     [
+      "12",
+      "420",
+      "976"
+     ],
+     [
+      "24",
+      "516",
+      "1,168"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "Throughput",
+   "table": {
+    "head": [
+     "Path",
+     "Sustained",
+     "Notes"
+    ],
+    "rows": [
+     [
+      "Hub (one board)",
+      "500 bits/µs",
+      "8 cores publishing back to back: 35 of 384 bits dropped (8-deep source queues)"
+     ],
+     [
+      "Lane (between two boards)",
+      "3.1 bits/µs",
+      "one frame per 160 cycles; the last of 349 bits arrives 112 µs after it was published"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "Classical operations on a core",
+   "table": {
+    "head": [
+     "Operation",
+     "Core cycles"
+    ],
+    "rows": [
+     [
+      "frame",
+      "23"
+     ],
+     [
+      "publish",
+      "7"
+     ],
+     [
+      "parity (1 bit)",
+      "23"
+     ],
+     [
+      "parity (2 bits)",
+      "31"
+     ],
+     [
+      "parity (4 bits)",
+      "47"
+     ],
+     [
+      "parity (8 bits)",
+      "79"
+     ],
+     [
+      "parity (16 bits)",
+      "143"
+     ],
+     [
+      "parity (32 bits)",
+      "271"
+     ],
+     [
+      "decode (1 bit)",
+      "41"
+     ],
+     [
+      "decode (2 bits)",
+      "41"
+     ],
+     [
+      "decode (4 bits)",
+      "41"
+     ],
+     [
+      "decode (8 bits)",
+      "41"
+     ],
+     [
+      "decode (10 bits)",
+      "41"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "A machine-wide classical bandwidth is two numbers 160 times apart: 500 bits/µs inside a board, 3.1 bits/µs across a lane. Syndrome bits have to stay on the board that measures them, or travel packed into words.",
+  "Publishing has no back-pressure: a burst larger than the hub's 8-deep queues loses bits. Firmware must pace its publishes, so the pacing belongs to the cost of a measurement.",
+  "Classical traffic delays synchronization: a bit published just before a barrier's release frame occupies the lane and delays the release on the far board by a frame (found in a Besedin et al. reproduction on two boards)."
+ ],
+ "command": "node riscq/calib/fabric.mjs",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.413Z"
+}

@@ -100,7 +100,7 @@ class Heap {
  * Returns { makespanNs, ops: [{ uid, kind, ready, start, end, listedStart, listedEnd, waitNs, waitedFor }],
  * byKind, pools: { name: { capacity, peak, busyIntegral } }, deadlock, starved, misses }.
  */
-export function simulate(listing, { model, mode = "dependency", acquisition = "atomic", policy = "fifo", strict = false, seed = 1, starvationBypass = 1000, trace = false } = {}) {
+export function simulate(listing, { model, mode = "dependency", acquisition = "atomic", policy = "fifo", strict = false, orderedPools = [], seed = 1, starvationBypass = 1000, trace = false } = {}) {
   const ops = [...listing.ops].sort((a, b) => a.order - b.order || a.start - b.start);
   const random = rng(seed);
   const n = ops.length, idx = new Map(ops.map((o, i) => [o.uid, i]));
@@ -124,6 +124,19 @@ export function simulate(listing, { model, mode = "dependency", acquisition = "a
   const succs = Array.from({ length: n }, () => []);
   preds.forEach((ps, i) => ps.forEach((p) => succs[p].push(i)));
   const pending = preds.map((ps) => ps.size);
+  // Ordered acquisition: a pool in `orderedPools` is granted in program order. An op may take it
+  // only when every earlier op that needs it has taken it. Dependencies point backwards in program
+  // order, so no circular wait can form on such a pool.
+  const queueOf = new Map(orderedPools.map((name) => [name, ops.map((op, i) => i).filter((i) => model.needs(ops[i], Math.max(1, ops[i].duration)).some(([p, a]) => p === name && a > 0))]));
+  const head = new Map(orderedPools.map((name) => [name, 0]));
+  const taken = new Set();
+  const turn = (i, name) => {
+    const q = queueOf.get(name);
+    let h = head.get(name);
+    while (h < q.length && taken.has(q[h] + ":" + name)) h++;
+    head.set(name, h);
+    return q[h] === i;
+  };
 
   const pools = Object.fromEntries(Object.entries(model.pools).map(([k, c]) => [k, { capacity: c, used: 0, peak: 0, busyIntegral: 0, last: 0 }]));
   const book = (name, amount, t) => { const p = pools[name]; p.busyIntegral += p.used * (t - p.last); p.last = t; p.used += amount; p.peak = Math.max(p.peak, p.used); };
@@ -139,15 +152,17 @@ export function simulate(listing, { model, mode = "dependency", acquisition = "a
     const op = ops[i], s = state[i];
     s.ready = mode === "triggered" ? Math.max(t, op.start) : t;
     s.dur = Math.max(0, Math.round(model.latency(op, random)));
-    s.needs = model.needs(op, Math.max(1, s.dur)).filter(([name, a]) => a > 0 && pools[name] && pools[name].capacity !== undefined);
+    // Rates are reserved as the VM reserves them, from the declared duration (r(N, D) of the listing),
+    // and held for as long as the op actually lasts.
+    s.needs = model.needs(op, Math.max(1, op.duration)).filter(([name, a]) => a > 0 && pools[name] && pools[name].capacity !== undefined);
     // A release frees what its request holds: the qubits of the request.
     for (const [name, a] of s.needs) if (a > pools[name].capacity) { s.impossible = name; }
     ready.push(i);
   };
-  const fits = (s, from = 0) => s.needs.slice(from).every(([name, a]) => pools[name].used + a <= pools[name].capacity);
+  const fits = (s, from = 0, i = -1) => s.needs.slice(from).every(([name, a]) => pools[name].used + a <= pools[name].capacity && (!queueOf.has(name) || turn(i, name)));
   const start = (i, t) => {
     const s = state[i], op = ops[i];
-    for (const [name, a] of s.needs.slice(s.held.length)) { book(name, a, t); s.held.push([name, a]); }
+    for (const [name, a] of s.needs.slice(s.held.length)) { book(name, a, t); s.held.push([name, a]); taken.add(i + ":" + name); }
     s.start = t; s.end = t + s.dur;
     events.push(s.end, i);
     if (log) log.push([t, "start", op.uid]);
@@ -179,9 +194,9 @@ export function simulate(listing, { model, mode = "dependency", acquisition = "a
         }
         if (s.held.length === s.needs.length) { ready.splice(ready.indexOf(i), 1); start(i, now); started = true; }
         else { s.waitedFor ??= s.needs[s.held.length][0]; s.bypassed++; if (strict) break; }
-      } else if (fits(s)) { ready.splice(ready.indexOf(i), 1); start(i, now); started = true; }
+      } else if (fits(s, 0, i)) { ready.splice(ready.indexOf(i), 1); start(i, now); started = true; }
       else {
-        s.waitedFor ??= s.needs.find(([name, a]) => pools[name].used + a > pools[name].capacity)?.[0] ?? null;
+        s.waitedFor ??= s.needs.find(([name, a]) => pools[name].used + a > pools[name].capacity || (queueOf.has(name) && !turn(i, name)))?.[0] ?? null;
         s.bypassed++;
         if (strict) break;
       }
@@ -215,7 +230,7 @@ export function simulate(listing, { model, mode = "dependency", acquisition = "a
     makespanNs, listedMakespanNs: Math.max(...ops.map((o) => o.end)), completed: finished.length, total: n,
     ops: out, byKind,
     pools: Object.fromEntries(Object.entries(pools).map(([k, p]) => [k, { capacity: p.capacity, peak: p.peak, utilization: now ? p.busyIntegral / (now * p.capacity) : 0 }])),
-    deadlock, starved: out.filter((o) => o.bypassed >= starvationBypass).map((o) => ({ uid: o.uid, kind: o.kind, bypassed: o.bypassed, waitNs: o.waitNs })),
+    deadlock, impossible: out.filter((o, i) => state[i].impossible).map((o, i) => ({ uid: o.uid, kind: o.kind })), starved: out.filter((o) => o.bypassed >= starvationBypass).map((o) => ({ uid: o.uid, kind: o.kind, bypassed: o.bypassed, waitNs: o.waitNs })),
     misses: finished.filter((o) => o.end > o.listedEnd).length, log,
   };
 }

@@ -13,7 +13,15 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deriveSpec } from "../ftqvm/derive.mjs";
 import { transmon, optical } from "../ftqvm/platforms.mjs";
-import { programs, DESIGNS } from "../ftqvm/corpus.mjs";
+import { programs as corpusPrograms, DESIGNS } from "../ftqvm/corpus.mjs";
+import { formalrvRoot } from "../ftqvm/formalrv.mjs";
+import { join } from "node:path";
+
+/** Logical circuits from FormalRV's own examples (its CORPUS_MANIFEST marks each "compile, system"). */
+export const ALGORITHMS = ["Grover/Grover", "Lookup/Lookup", "MeasAdder/MeasAdder", "Cuccaro/cuccaro", "ModMult/modmult", "Shor/Shor"].map((p) => ({
+  id: p.split("/")[1].toLowerCase() + "-d3", qppm: join(formalrvRoot(), "FormalRV", "Examples", p + ".qppm"), specialize: {}, distance: 3, scale: "algorithm",
+}));
+const programs = () => [...corpusPrograms(), ...ALGORITHMS];
 
 const ADAPTERS = { superconducting: transmon, neutral: (o) => optical(o.id), qccd: (o) => optical(o.id) };
 const OUT = new URL("../../validation/calib/insitu/", import.meta.url);
@@ -27,7 +35,8 @@ export function needed(row) {
 /** One program on one design: the derived spec and every operation's sample. */
 export async function collect(program, platform, design) {
   const t0 = Date.now();
-  const { iterations } = await deriveSpec({ platform: ADAPTERS[platform](design.options), qppm: program.qppm, specialize: program.specialize, distance: program.distance, baseMachine: resolve("validation/ftqvm/base.machine") });
+  // A program's runtime contract is only an upper bound; slow platforms need more than the default 1 s.
+  const { iterations } = await deriveSpec({ platform: ADAPTERS[platform](design.options), qppm: program.qppm, specialize: program.specialize ?? {}, distance: program.distance, baseMachine: resolve("validation/ftqvm/base.machine"), runtimeNs: program.runtimeNs ?? 1e12 });
   const last = iterations.at(-1);
   const byUid = new Map(last.listing.ops.map((o) => [o.uid, o]));
   const samples = last.report.rows.map((r) => {
@@ -45,6 +54,9 @@ export async function collect(program, platform, design) {
     machine: Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, { value: v.value, source: v.source }])),
     factory: last.spec.factories?.factory ?? null, contracts: last.contracts ?? null,
     samples, seconds: (Date.now() - t0) / 1000,
+    // The listing itself, for Executor B (riscq/os/des.mjs): FormalRV's expansion, as compiled.
+    listing: { machine: Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, v.value])),
+      ops: last.listing.ops.map(({ stack: _stack, ...op }) => op) },
   };
 }
 

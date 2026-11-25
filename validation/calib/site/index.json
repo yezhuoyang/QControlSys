@@ -1,0 +1,56 @@
+[
+ {
+  "id": "fabric",
+  "title": "The classical fabric of a RISC-Q system",
+  "kicker": "Calibration · every platform",
+  "summary": "How long a measured bit takes to reach another core, how fast boards synchronize, and how many bits per microsecond a board and a lane between boards carry. Every system call that moves a classical bit pays these costs."
+ },
+ {
+  "id": "decoder",
+  "title": "decode_syndrome: a compiled decoder, calibrated",
+  "kicker": "Calibration · the decoder system call",
+  "summary": "The decoder is a C program compiled for a RISC-Q core: union-find with peeling on each circuit's own detector graph (and cluster decoding with GF(2) elimination when the error model is a hypergraph). Its decode times are measured on noisy syndromes and become the system call's latency, its throughput and its decoding window."
+ },
+ {
+  "id": "system-calls",
+  "title": "Every system call on six hardware designs",
+  "kicker": "Calibration · in programs",
+  "summary": "Eleven FormalRV programs (memories, Deutsch–Jozsa, Bell pairs, a Z⊗Z merge, GHZ, a checked measurement, T injection, a loop of merges, at distances 3 and 5) on two designs of each platform. For every system call, the time each operation actually needed on the cycle-exact model, against the one number the machine declares."
+ },
+ {
+  "id": "choosing-the-number",
+  "title": "Choosing the one number a system call declares",
+  "kicker": "Calibration · method",
+  "summary": "A machine specification gives each system call one latency. Fitted on some programs, does it hold for a program it has not seen? A leave-one-program-out test over the corpus, for four ways of choosing the number."
+ },
+ {
+  "id": "decoder-backlog",
+  "title": "Decoder backlog: how many decoder cores",
+  "kicker": "Contention · decode_syndrome",
+  "summary": "Each logical qubit produces a decoding job every few syndrome rounds. If the decoder is slower than the rounds, jobs queue and the backlog grows without bound. How many RISC-Q decoder cores keep up, against a count that reserves a decoder for the worst case of every decode."
+ },
+ {
+  "id": "factories",
+  "title": "Magic-state factories under demand",
+  "kicker": "Contention · request_magic",
+  "summary": "A magic-state factory keeps only some of its attempts (postselection), so its output time is random. How many factories a stream of T gates needs, what a single factory latency misses, and who starves when requests have priorities."
+ },
+ {
+  "id": "deadlock",
+  "title": "Deadlock and scheduling policy in a dynamic runtime",
+  "kicker": "Contention · request_ancilla and every service",
+  "summary": "FormalRV's VM admits a program as a fixed timetable. QuantumOS's runtime simulator instead runs the same program as soon as its dependencies and resources allow, the way a dynamic operating system would. Over the whole corpus: when does that deadlock, and how much faster is it when it does not?"
+ },
+ {
+  "id": "hardware-gate",
+  "title": "Does the hardware run the runtime's schedule?",
+  "kicker": "Contention · conformance gate",
+  "summary": "The runtime simulator's schedules are written back as timetables and run on the cycle-exact model of the same design. Every operation must finish inside the window the simulator gave it. A failure names something the simulator's resource model is missing."
+ },
+ {
+  "id": "scale",
+  "title": "Control hardware at scale",
+  "kicker": "Scale · surface-code patches",
+  "summary": "What one rotated surface-code patch at large distance asks of a RISC-Q control system with one core per transmon, at the rates measured in the other examples."
+ }
+]

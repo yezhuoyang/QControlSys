@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example · QuantumOS</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+  <link rel="stylesheet" href="/reproduce/reproduce.css">
+  <link rel="stylesheet" href="/examples/examples.css">
+</head>
+<body>
+<main class="page wide"><article id="study" aria-live="polite">Loading…</article></main>
+<script type="module" src="/site-nav.js"></script>
+<script type="module">
+  import { renderStudy } from "/examples/examples.js";
+  renderStudy(document.getElementById("study"), location.pathname.split("/").filter(Boolean)[1]);
+</script>
+</body>
+</html>

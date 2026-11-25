@@ -1,0 +1,123 @@
+{
+ "id": "choosing-the-number",
+ "title": "Choosing the one number a system call declares",
+ "kicker": "Calibration · method",
+ "summary": "A machine specification gives each system call one latency. Fitted on some programs, does it hold for a program it has not seen? A leave-one-program-out test over the corpus, for four ways of choosing the number.",
+ "method": [
+  "For each design and field, the number is fitted on every program but one and judged on the held-out program's operations: an operation that needed more than the number would be late, so its program would not conform."
+ ],
+ "sections": [
+  {
+   "heading": "Held-out programs",
+   "table": {
+    "head": [
+     "Rule",
+     "Held-out programs whose every operation fits",
+     "Operations that fit"
+    ],
+    "rows": [
+     [
+      "worst case",
+      "97.6%",
+      "99.99%"
+     ],
+     [
+      "99th percentile",
+      "94.6%",
+      "99.91%"
+     ],
+     [
+      "90th percentile",
+      "80.7%",
+      "98.85%"
+     ],
+     [
+      "median",
+      "75.5%",
+      "96.10%"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "Where even the worst case of the other programs fails",
+   "table": {
+    "head": [
+     "Design",
+     "Field",
+     "Held-out programs that conform",
+     "Largest overrun (ns)"
+    ],
+    "rows": [
+     [
+      "atoms-moving",
+      "route_latency_ns",
+      "91%",
+      "4,914"
+     ],
+     [
+      "atoms-moving",
+      "pauli_frame_update_ns",
+      "83%",
+      "140"
+     ],
+     [
+      "atoms-static",
+      "route_latency_ns",
+      "91%",
+      "6,106"
+     ],
+     [
+      "atoms-static",
+      "pauli_frame_update_ns",
+      "83%",
+      "140"
+     ],
+     [
+      "ions-modules",
+      "route_latency_ns",
+      "91%",
+      "63,800"
+     ],
+     [
+      "ions-modules",
+      "pauli_frame_update_ns",
+      "83%",
+      "140"
+     ],
+     [
+      "ions-qccd",
+      "route_latency_ns",
+      "90%",
+      "63,800"
+     ],
+     [
+      "ions-qccd",
+      "pauli_frame_update_ns",
+      "80%",
+      "140"
+     ],
+     [
+      "sc-A",
+      "pauli_frame_update_ns",
+      "83%",
+      "140"
+     ],
+     [
+      "sc-B",
+      "pauli_frame_update_ns",
+      "83%",
+      "140"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "Even the worst case seen on other programs is not portable for routes on atoms and ions: a new program brings a longer route. A route latency needs a model of distance, or the worst route the layout allows.",
+  "Percentiles cover almost every operation but almost never a whole program: one late operation is enough to break a time-triggered schedule."
+ ],
+ "command": "node riscq/calib/methods.mjs",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.416Z"
+}

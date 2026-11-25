@@ -1,0 +1,287 @@
+{
+ "id": "decoder",
+ "title": "decode_syndrome: a compiled decoder, calibrated",
+ "kicker": "Calibration · the decoder system call",
+ "summary": "The decoder is a C program compiled for a RISC-Q core: union-find with peeling on each circuit's own detector graph (and cluster decoding with GF(2) elimination when the error model is a hypergraph). Its decode times are measured on noisy syndromes and become the system call's latency, its throughput and its decoding window.",
+ "method": [
+  "Rotated surface-code memories (d = 3 and 5, 1 to 4 rounds, three noise strengths, SI1000) are sampled with Stim; each shot is decoded by the compiled decoder in the Lean model of a RISC-Q core and compared with PyMatching.",
+  "The same decoder images were run on RISC-Q's RTL in Verilator: on a Luthra & Owens circuit and a Caune et al. circuit every instruction committed on the same cycle as in the Lean model (74,989 and 132,446 instructions, 12 decodes each); on a distance-5 colour code (hypergraph) the 28 host writes of 4 decodes, 1.38 to 1.55 million cycles each, landed on the same cycles."
+ ],
+ "sections": [
+  {
+   "heading": "Decode times on noisy syndromes (µs)",
+   "table": {
+    "head": [
+     "d",
+     "Rounds",
+     "p",
+     "Detectors",
+     "Median",
+     "99th pct.",
+     "Longest",
+     "Same correction as PyMatching"
+    ],
+    "rows": [
+     [
+      3,
+      1,
+      0.001,
+      8,
+      "1.5",
+      "20.9",
+      "22.0",
+      "200 / 200"
+     ],
+     [
+      3,
+      1,
+      0.0023,
+      8,
+      "1.5",
+      "16.6",
+      "22.4",
+      "199 / 200"
+     ],
+     [
+      3,
+      1,
+      0.003,
+      8,
+      "1.5",
+      "16.6",
+      "22.1",
+      "200 / 200"
+     ],
+     [
+      3,
+      2,
+      0.001,
+      16,
+      "2.7",
+      "27.7",
+      "28.5",
+      "200 / 200"
+     ],
+     [
+      3,
+      2,
+      0.0023,
+      16,
+      "2.8",
+      "36.2",
+      "40.1",
+      "198 / 200"
+     ],
+     [
+      3,
+      2,
+      0.003,
+      16,
+      "14.4",
+      "35.9",
+      "37.1",
+      "196 / 200"
+     ],
+     [
+      3,
+      3,
+      0.001,
+      24,
+      "4.0",
+      "36.5",
+      "43.4",
+      "200 / 200"
+     ],
+     [
+      3,
+      3,
+      0.0023,
+      24,
+      "20.6",
+      "50.0",
+      "54.0",
+      "198 / 200"
+     ],
+     [
+      3,
+      3,
+      0.003,
+      24,
+      "20.7",
+      "49.8",
+      "51.0",
+      "197 / 200"
+     ],
+     [
+      5,
+      1,
+      0.001,
+      24,
+      "4.2",
+      "37.0",
+      "43.1",
+      "200 / 200"
+     ],
+     [
+      5,
+      1,
+      0.0023,
+      24,
+      "4.2",
+      "47.2",
+      "59.1",
+      "200 / 200"
+     ],
+     [
+      5,
+      1,
+      0.003,
+      24,
+      "20.6",
+      "60.2",
+      "71.1",
+      "200 / 200"
+     ],
+     [
+      5,
+      2,
+      0.001,
+      48,
+      "8.1",
+      "62.9",
+      "70.8",
+      "200 / 200"
+     ],
+     [
+      5,
+      2,
+      0.0023,
+      48,
+      "44.3",
+      "102.5",
+      "135.6",
+      "200 / 200"
+     ],
+     [
+      5,
+      2,
+      0.003,
+      48,
+      "49.2",
+      "116.0",
+      "118.8",
+      "199 / 200"
+     ],
+     [
+      5,
+      3,
+      0.001,
+      72,
+      "51.5",
+      "94.6",
+      "99.5",
+      "200 / 200"
+     ],
+     [
+      5,
+      3,
+      0.0023,
+      72,
+      "68.8",
+      "138.0",
+      "155.9",
+      "198 / 200"
+     ],
+     [
+      5,
+      3,
+      0.003,
+      72,
+      "74.5",
+      "138.2",
+      "141.0",
+      "198 / 200"
+     ],
+     [
+      5,
+      4,
+      0.001,
+      96,
+      "72.0",
+      "129.7",
+      "131.5",
+      "199 / 200"
+     ],
+     [
+      5,
+      4,
+      0.0023,
+      96,
+      "96.2",
+      "167.9",
+      "203.5",
+      "198 / 200"
+     ],
+     [
+      5,
+      4,
+      0.003,
+      96,
+      "105.2",
+      "177.7",
+      "189.3",
+      "196 / 200"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "What the system call declares",
+   "table": {
+    "head": [
+     "Field",
+     "Value",
+     "How"
+    ],
+    "rows": [
+     [
+      "decoder_latency_ns",
+      "203934",
+      "the longest decode of every workload, bits in (392 ns) + compute"
+     ],
+     [
+      "decoder_latency_model",
+      "0 + 1988*n",
+      "a + b·n above every (input bits, latency) of every workload"
+     ],
+     [
+      "decoder_bandwidth",
+      "1",
+      "input bits per µs of the slowest decode (d = 5, 2 rounds, p = 0.0023)"
+     ],
+     [
+      "decoder_window_rounds",
+      "4",
+      "rounds of one block a decode takes: the board hub shares 128 bits (riscq/compile.mjs); per distance d = 3: 14, d = 5: 4"
+     ],
+     [
+      "classical_memory",
+      "524288",
+      "the decoder core's RAM; the largest compiled image takes 3417 of its 16384 words"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "In a control program",
+   "text": "On a distance-3 memory on 17 transmons, in the same Lean run as the pulses: the bits reach the decoder 392 ns after the last readout window closes, the decode takes 25.2 µs, its result reaches another core 476 ns later, and the conditioned pulse starts 26.1 µs after the readout."
+  }
+ ],
+ "findings": [
+  "One RISC-Q core decodes a syndrome bit in about 0.75 µs at the median (1.4 µs at worst) at d = 5: tens of microseconds per window, far from the nanoseconds of dedicated decoder logic.",
+  "A single latency must be the worst case: at d = 5 and 4 rounds the median decode is half the longest."
+ ],
+ "command": "node riscq/decoders/calibrate.mjs 200",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.415Z"
+}

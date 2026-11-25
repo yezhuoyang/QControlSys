@@ -1,0 +1,2168 @@
+{
+ "generated": "2026-11-25T14:45:39.323Z",
+ "rows": [
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1222,
+   "late": 23,
+   "byKind": {
+    "route": {
+     "late": 23,
+     "maxOverrunNs": 20800
+    }
+   },
+   "desMakespanNs": 11149660,
+   "listedMakespanNs": 45221040,
+   "speedup": 4.05582233000827,
+   "firstLate": [
+    {
+     "uid": 237,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1096,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 307,
+     "kind": "route",
+     "line": 35
+    },
+    {
+     "uid": 186,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 11268,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 366,
+     "kind": "route",
+     "line": 34
+    },
+    {
+     "uid": 377,
+     "kind": "route",
+     "line": 45
+    }
+   ],
+   "seconds": 1.547
+  },
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1222,
+   "late": 40,
+   "byKind": {
+    "measure": {
+     "late": 23,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 12,
+     "maxOverrunNs": 11934
+    },
+    "decode_syndrome": {
+     "late": 5,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 8114520,
+   "listedMakespanNs": 38333880,
+   "speedup": 4.724109374306798,
+   "firstLate": [
+    {
+     "uid": 407,
+     "kind": "measure",
+     "line": 162
+    },
+    {
+     "uid": 264,
+     "kind": "measure",
+     "line": 52,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 268,
+     "kind": "measure",
+     "line": 56
+    },
+    {
+     "uid": 277,
+     "kind": "measure",
+     "line": 65
+    },
+    {
+     "uid": 136,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 8292,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.423
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1222,
+   "late": 17,
+   "byKind": {
+    "route": {
+     "late": 17,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 70305890,
+   "listedMakespanNs": 153568470,
+   "speedup": 2.1842902493660206,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 210,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 390,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 391,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 169,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.805
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1222,
+   "late": 14,
+   "byKind": {
+    "route": {
+     "late": 14,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 70305890,
+   "listedMakespanNs": 153568470,
+   "speedup": 2.1842902493660206,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 210,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 390,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 391,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 169,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.932
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 222,
+   "late": 5,
+   "byKind": {
+    "route": {
+     "late": 5,
+     "maxOverrunNs": 10208
+    }
+   },
+   "desMakespanNs": 3782360,
+   "listedMakespanNs": 9464200,
+   "speedup": 2.50219439714887,
+   "firstLate": [
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 6152,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 10208,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 198,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 6246,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 56,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.489
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 222,
+   "late": 1,
+   "byKind": {
+    "route": {
+     "late": 1,
+     "maxOverrunNs": 3908
+    }
+   },
+   "desMakespanNs": 3039710,
+   "listedMakespanNs": 8424490,
+   "speedup": 2.7714782002230476,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 3908,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.452
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 222,
+   "late": 2,
+   "byKind": {
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 63800
+    }
+   },
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642730,
+   "speedup": 1.2371338892706574,
+   "firstLate": [
+    {
+     "uid": 142,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 178,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.66
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": true,
+   "ops": 222,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642730,
+   "speedup": 1.2371338892706574,
+   "firstLate": [],
+   "seconds": 0.838
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2364,
+   "late": 29,
+   "byKind": {
+    "measure": {
+     "late": 10,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 14,
+     "maxOverrunNs": 26626
+    },
+    "decode_syndrome": {
+     "late": 5,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 21190600,
+   "listedMakespanNs": 87631920,
+   "speedup": 4.13541475937444,
+   "firstLate": [
+    {
+     "uid": 421,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 428,
+     "kind": "measure",
+     "line": 36,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 438,
+     "kind": "measure",
+     "line": 46,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 486,
+     "kind": "route",
+     "line": 34
+    },
+    {
+     "uid": 585,
+     "kind": "decode_syndrome",
+     "line": 164,
+     "overrunNs": null
+    }
+   ],
+   "seconds": 3.137
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2364,
+   "late": 58,
+   "byKind": {
+    "measure": {
+     "late": 44,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 8,
+     "maxOverrunNs": null
+    },
+    "route": {
+     "late": 6,
+     "maxOverrunNs": 8066
+    }
+   },
+   "desMakespanNs": 14498850,
+   "listedMakespanNs": 72201360,
+   "speedup": 4.979799087513837,
+   "firstLate": [
+    {
+     "uid": 421,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 428,
+     "kind": "measure",
+     "line": 36,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 434,
+     "kind": "measure",
+     "line": 42
+    },
+    {
+     "uid": 438,
+     "kind": "measure",
+     "line": 46,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 444,
+     "kind": "measure",
+     "line": 52,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.603
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2364,
+   "late": 109,
+   "byKind": {
+    "route": {
+     "late": 109,
+     "maxOverrunNs": 446600
+    }
+   },
+   "desMakespanNs": 94734240,
+   "listedMakespanNs": 276625600,
+   "speedup": 2.9200170920250166,
+   "firstLate": [
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 150,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 151,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 331,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 180,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 6.212
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2364,
+   "late": 3,
+   "byKind": {
+    "route": {
+     "late": 3,
+     "maxOverrunNs": 127600
+    }
+   },
+   "desMakespanNs": 118021240,
+   "listedMakespanNs": 341701600,
+   "speedup": 2.895255125263893,
+   "firstLate": [
+    {
+     "uid": 1626,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1797,
+     "kind": "route",
+     "line": 243,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1801,
+     "kind": "route",
+     "line": 236,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 8.562
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1752,
+   "late": 151,
+   "byKind": {
+    "route": {
+     "late": 117,
+     "maxOverrunNs": 67780
+    },
+    "measure": {
+     "late": 24,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 10,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 11258990,
+   "listedMakespanNs": 65402280,
+   "speedup": 5.808894048222798,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 9770,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 6246,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 2996,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 297,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 6152,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 318,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.502
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1752,
+   "late": 106,
+   "byKind": {
+    "route": {
+     "late": 62,
+     "maxOverrunNs": 32010
+    },
+    "measure": {
+     "late": 34,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 10,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 8694690,
+   "listedMakespanNs": 56341950,
+   "speedup": 6.480041266566146,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 4730,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 292,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 309,
+     "kind": "measure",
+     "line": 46,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 352,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 328,
+     "kind": "measure",
+     "line": 65
+    }
+   ],
+   "seconds": 1.874
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1752,
+   "late": 53,
+   "byKind": {
+    "route": {
+     "late": 53,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 62925650,
+   "listedMakespanNs": 246440430,
+   "speedup": 3.9163748010548955,
+   "firstLate": [
+    {
+     "uid": 322,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 358,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 141,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 142,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 595,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.666
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1752,
+   "late": 40,
+   "byKind": {
+    "route": {
+     "late": 40,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 62925650,
+   "listedMakespanNs": 246440430,
+   "speedup": 3.9163748010548955,
+   "firstLate": [
+    {
+     "uid": 118,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 141,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 171,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 178,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 610,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 4.557
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 606,
+   "late": 2,
+   "byKind": {
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 7934
+    }
+   },
+   "desMakespanNs": 7416840,
+   "listedMakespanNs": 22336370,
+   "speedup": 3.01157501038178,
+   "firstLate": [
+    {
+     "uid": 322,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 7934,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 432,
+     "kind": "route",
+     "line": 25
+    }
+   ],
+   "seconds": 0.823
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 606,
+   "late": 4,
+   "byKind": {
+    "measure": {
+     "late": 3,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 5622450,
+   "listedMakespanNs": 18759740,
+   "speedup": 3.336577470675595,
+   "firstLate": [
+    {
+     "uid": 436,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 464,
+     "kind": "measure",
+     "line": 57
+    },
+    {
+     "uid": 496,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 600,
+     "kind": "decode_syndrome",
+     "line": 167,
+     "overrunNs": null
+    }
+   ],
+   "seconds": 0.903
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 606,
+   "late": 10,
+   "byKind": {
+    "route": {
+     "late": 10,
+     "maxOverrunNs": 127600
+    }
+   },
+   "desMakespanNs": 30459170,
+   "listedMakespanNs": 69610230,
+   "speedup": 2.285362010849278,
+   "firstLate": [
+    {
+     "uid": 166,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 346,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 202,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 213,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 214,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.207
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 221,
+   "late": 5,
+   "byKind": {
+    "route": {
+     "late": 5,
+     "maxOverrunNs": 10208
+    }
+   },
+   "desMakespanNs": 3782360,
+   "listedMakespanNs": 9464010,
+   "speedup": 2.5021441639611246,
+   "firstLate": [
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 6152,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 10208,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 198,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 6246,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 56,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.455
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 221,
+   "late": 1,
+   "byKind": {
+    "route": {
+     "late": 1,
+     "maxOverrunNs": 3908
+    }
+   },
+   "desMakespanNs": 3039710,
+   "listedMakespanNs": 8424300,
+   "speedup": 2.7714156942603076,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 3908,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.443
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 221,
+   "late": 2,
+   "byKind": {
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 63800
+    }
+   },
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642540,
+   "speedup": 1.2371256828099266,
+   "firstLate": [
+    {
+     "uid": 142,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 178,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.66
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": true,
+   "ops": 221,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642540,
+   "speedup": 1.2371256828099266,
+   "firstLate": [],
+   "seconds": 0.915
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1013,
+   "late": 18,
+   "byKind": {
+    "measure": {
+     "late": 10,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 10226
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 8022840,
+   "listedMakespanNs": 19553130,
+   "speedup": 2.4371830922715647,
+   "firstLate": [
+    {
+     "uid": 300,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 301,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 313,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 327,
+     "kind": "route",
+     "line": 84,
+     "overrunNs": 10226,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 488,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.536
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1013,
+   "late": 16,
+   "byKind": {
+    "measure": {
+     "late": 14,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 1,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 6244220,
+   "listedMakespanNs": 16567130,
+   "speedup": 2.653194474249786,
+   "firstLate": [
+    {
+     "uid": 300,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 301,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 488,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 487,
+     "kind": "route",
+     "line": 56
+    },
+    {
+     "uid": 489,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.646
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1013,
+   "late": 16,
+   "byKind": {
+    "route": {
+     "late": 16,
+     "maxOverrunNs": 191400
+    }
+   },
+   "desMakespanNs": 47683900,
+   "listedMakespanNs": 70074380,
+   "speedup": 1.469560585438691,
+   "firstLate": [
+    {
+     "uid": 356,
+     "kind": "route",
+     "line": 113,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 390,
+     "kind": "route",
+     "line": 147,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 419,
+     "kind": "route",
+     "line": 176,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 607,
+     "kind": "route",
+     "line": 176,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 707,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.617
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1013,
+   "late": 3,
+   "byKind": {
+    "route": {
+     "late": 3,
+     "maxOverrunNs": 255200
+    }
+   },
+   "desMakespanNs": 43600700,
+   "listedMakespanNs": 64332380,
+   "speedup": 1.4754896136988627,
+   "firstLate": [
+    {
+     "uid": 331,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 546,
+     "kind": "route",
+     "line": 115,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 707,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 255200,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.862
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2720,
+   "late": 63,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "measure": {
+     "late": 15,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": null
+    },
+    "route": {
+     "late": 22,
+     "maxOverrunNs": 23962
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 22233710,
+   "listedMakespanNs": 102928200,
+   "speedup": 4.629375844157363,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 4.377
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2720,
+   "late": 122,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "CNOT": {
+     "late": 5,
+     "maxOverrunNs": 0
+    },
+    "measure": {
+     "late": 78,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 13,
+     "maxOverrunNs": null
+    },
+    "route": {
+     "late": 9,
+     "maxOverrunNs": 5320
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": null
+    },
+    "H": {
+     "late": 3,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 16683960,
+   "listedMakespanNs": 86239320,
+   "speedup": 5.168995849906137,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 3.439
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2720,
+   "late": 20,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 382800
+    }
+   },
+   "desMakespanNs": 99767840,
+   "listedMakespanNs": 377689940,
+   "speedup": 3.7856882538501386,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 7.166
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 2720,
+   "late": 20,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 382800
+    }
+   },
+   "desMakespanNs": 99767840,
+   "listedMakespanNs": 377689940,
+   "speedup": 3.7856882538501386,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 8.178
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 411,
+   "late": 4,
+   "byKind": {
+    "route": {
+     "late": 4,
+     "maxOverrunNs": 11240
+    }
+   },
+   "desMakespanNs": 5372890,
+   "listedMakespanNs": 15150340,
+   "speedup": 2.819774832538913,
+   "firstLate": [
+    {
+     "uid": 186,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 10168,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 196,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 9988,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 207,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 11240,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 387,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 408,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.698
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 411,
+   "late": 2,
+   "byKind": {
+    "measure": {
+     "late": 1,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 4210040,
+   "listedMakespanNs": 13212100,
+   "speedup": 3.138236216282981,
+   "firstLate": [
+    {
+     "uid": 277,
+     "kind": "measure",
+     "line": 65
+    },
+    {
+     "uid": 405,
+     "kind": "decode_syndrome",
+     "line": 160,
+     "overrunNs": null
+    }
+   ],
+   "seconds": 0.848
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 411,
+   "late": 7,
+   "byKind": {
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 191400
+    }
+   },
+   "desMakespanNs": 26039960,
+   "listedMakespanNs": 48985940,
+   "speedup": 1.8811833812340726,
+   "firstLate": [
+    {
+     "uid": 150,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 151,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 180,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.185
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 411,
+   "late": 7,
+   "byKind": {
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 191400
+    }
+   },
+   "desMakespanNs": 26039960,
+   "listedMakespanNs": 48985940,
+   "speedup": 1.8811833812340726,
+   "firstLate": [
+    {
+     "uid": 127,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 150,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 180,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.208
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1979,
+   "late": 36,
+   "byKind": {
+    "measure": {
+     "late": 10,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 25,
+     "maxOverrunNs": 29168
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 14507410,
+   "listedMakespanNs": 33280660,
+   "speedup": 2.294045594630606,
+   "firstLate": [
+    {
+     "uid": 326,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 338,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 511,
+     "kind": "route",
+     "line": 55
+    },
+    {
+     "uid": 526,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 523,
+     "kind": "route",
+     "line": 67
+    }
+   ],
+   "seconds": 2.468
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1979,
+   "late": 54,
+   "byKind": {
+    "measure": {
+     "late": 40,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 13,
+     "maxOverrunNs": 10828
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 10445960,
+   "listedMakespanNs": 26536060,
+   "speedup": 2.5403179793910757,
+   "firstLate": [
+    {
+     "uid": 325,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 326,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 338,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 339,
+     "kind": "measure",
+     "line": 71,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 513,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.256
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1979,
+   "late": 31,
+   "byKind": {
+    "route": {
+     "late": 31,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 69952900,
+   "listedMakespanNs": 124241060,
+   "speedup": 1.7760673253003092,
+   "firstLate": [
+    {
+     "uid": 356,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 380,
+     "kind": "route",
+     "line": 112,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 381,
+     "kind": "route",
+     "line": 113,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 415,
+     "kind": "route",
+     "line": 147,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 6.88
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "hardware": true,
+   "conforms": false,
+   "ops": 1979,
+   "late": 15,
+   "byKind": {
+    "route": {
+     "late": 15,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 69952900,
+   "listedMakespanNs": 124241060,
+   "speedup": 1.7760673253003092,
+   "firstLate": [
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 525,
+     "kind": "route",
+     "line": 69,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 545,
+     "kind": "route",
+     "line": 89,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 544,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 319000,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 603,
+     "kind": "route",
+     "line": 147,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 6.469
+  }
+ ]
+}

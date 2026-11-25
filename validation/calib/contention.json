@@ -1,0 +1,3315 @@
+{
+ "generated": "2026-11-25T14:53:04.652Z",
+ "rows": [
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 1222,
+   "ancillaPool": 37,
+   "listedNs": 45221040,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 45221040
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 480,
+    "atNs": 4722930,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 14892500,
+    "waited": 211,
+    "speedup": 3.03649756588887
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 11534276,
+    "waited": 197,
+    "speedup": 3.920578976955294
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 11149660,
+    "speedup": 4.05582233000827
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 8272000,
+    "speedup": 5.466760154738878
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "37/37",
+    "classical": "12/100",
+    "routing": "4/4",
+    "ancillaRate": "32/64"
+   }
+  },
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 1222,
+   "ancillaPool": 37,
+   "listedNs": 38333880,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 38333880
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 480,
+    "atNs": 3688960,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 11054790,
+    "waited": 197,
+    "speedup": 3.4676262507021844
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 7446698,
+    "waited": 179,
+    "speedup": 5.147768850032592
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 8114520,
+    "speedup": 4.724109374306798
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 5443718,
+    "speedup": 7.041856319522797
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "37/37",
+    "classical": "16/100",
+    "routing": "4/4",
+    "ancillaRate": "32/64"
+   }
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 1222,
+   "ancillaPool": 37,
+   "listedNs": 153568470,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 153568470
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 480,
+    "atNs": 24615890,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 85381100,
+    "waited": 193,
+    "speedup": 1.7986237000928778
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 50603008,
+    "waited": 192,
+    "speedup": 3.0347695931435537
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 70305890,
+    "speedup": 2.1842902493660206
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 43311744,
+    "speedup": 3.545654268735981
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "37/37",
+    "classical": "4/100",
+    "routing": "5/32",
+    "ancillaRate": "32/64"
+   }
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 1222,
+   "ancillaPool": 37,
+   "listedNs": 153568470,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 153568470
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 480,
+    "atNs": 24615890,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 85381100,
+    "waited": 193,
+    "speedup": 1.7986237000928778
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 72696008,
+    "waited": 193,
+    "speedup": 2.112474594203302
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 70305890,
+    "speedup": 2.1842902493660206
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 60131144,
+    "speedup": 2.5538923723120917
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "37/37",
+    "classical": "4/100",
+    "routing": "5/32",
+    "ancillaRate": "32/64"
+   }
+  },
+  {
+   "program": "bell-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 1222,
+   "ancillaPool": 37,
+   "listedNs": 2167310,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 2167310
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 480,
+    "atNs": 562412,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 1942682,
+    "waited": 186,
+    "speedup": 1.1156277764451412
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 485130,
+    "waited": 184,
+    "speedup": 4.467482942716385
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 1936002,
+    "speedup": 1.1194771493004656
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 455956,
+    "speedup": 4.7533314618077185
+   },
+   "peaks": {
+    "gates": "19/55",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "37/37",
+    "classical": "8/500",
+    "routing": "4000/27500",
+    "ancillaRate": "255/344"
+   }
+  },
+  {
+   "program": "bell-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 1222,
+   "ancillaPool": 37,
+   "listedNs": 499364,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 499364
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 480,
+    "atNs": 65488,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 165416,
+    "waited": 195,
+    "speedup": 3.0188373555157906
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 133706,
+    "waited": 191,
+    "speedup": 3.7347912584326806
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 158736,
+    "speedup": 3.145877431710513
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 124828,
+    "speedup": 4.000416573204729
+   },
+   "peaks": {
+    "gates": "19/55",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "37/37",
+    "classical": "8/500",
+    "routing": "4000/27500",
+    "ancillaRate": "255/344"
+   }
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 5910,
+   "ancillaPool": 81,
+   "listedNs": 99624720,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 99624720
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 2154,
+    "atNs": 14725150,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 41976810,
+    "waited": 1757,
+    "speedup": 2.3733275587163485
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 26213242,
+    "waited": 1469,
+    "speedup": 3.800549355932395
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 39286030,
+    "speedup": 2.535881584369813
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 23550972,
+    "speedup": 4.230174448850773
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "81/81",
+    "classical": "17/100",
+    "routing": "4/4",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 5910,
+   "ancillaPool": 81,
+   "listedNs": 79390920,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 79390920
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 2154,
+    "atNs": 9365640,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 27453200,
+    "waited": 1533,
+    "speedup": 2.8918639721416812
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 15199488,
+    "waited": 975,
+    "speedup": 5.2232627835885
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 24421470,
+    "speedup": 3.25086573412657
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 11845568,
+    "speedup": 6.702162361484059
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "81/81",
+    "classical": "24/100",
+    "routing": "4/4",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 5910,
+   "ancillaPool": 81,
+   "listedNs": 402661820,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 402661820
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 2154,
+    "atNs": 67018970,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 220218180,
+    "waited": 1029,
+    "speedup": 1.8284676587555124
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 177352210,
+    "waited": 1029,
+    "speedup": 2.270407681979266
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 180538180,
+    "speedup": 2.23034163743093
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 145163678,
+    "speedup": 2.773846912310943
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "81/81",
+    "classical": "11/100",
+    "routing": "12/32",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 5910,
+   "ancillaPool": 81,
+   "listedNs": 387349820,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 387349820
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 2154,
+    "atNs": 64403170,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 211541380,
+    "waited": 1029,
+    "speedup": 1.831082977713391
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 162241610,
+    "waited": 1029,
+    "speedup": 2.387487525549087
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 173456380,
+    "speedup": 2.233125238748785
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 134241610,
+    "speedup": 2.885467628107261
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "81/81",
+    "classical": "11/100",
+    "routing": "12/32",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "bell-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 5910,
+   "ancillaPool": 81,
+   "listedNs": 14647550,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 14647550
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 2154,
+    "atNs": 4060548,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 14168236,
+    "waited": 982,
+    "speedup": 1.0338301818236229
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 2420420,
+    "waited": 980,
+    "speedup": 6.051656324109039
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 14136978,
+    "speedup": 1.0361160638433475
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 2353852,
+    "speedup": 6.2227999041571005
+   },
+   "peaks": {
+    "gates": "35/131",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "81/81",
+    "classical": "15/500",
+    "routing": "6000/65500",
+    "ancillaRate": "560/819"
+   }
+  },
+  {
+   "program": "bell-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 5910,
+   "ancillaPool": 81,
+   "listedNs": 1880418,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 1880418
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 2154,
+    "atNs": 262732,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 826874,
+    "waited": 980,
+    "speedup": 2.2741288273666846
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 531982,
+    "waited": 1003,
+    "speedup": 3.5347398972145676
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 795616,
+    "speedup": 2.3634743393798012
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 515568,
+    "speedup": 3.6472744623405644
+   },
+   "peaks": {
+    "gates": "35/131",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "81/81",
+    "classical": "15/500",
+    "routing": "6000/65500",
+    "ancillaRate": "560/819"
+   }
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 222,
+   "ancillaPool": 15,
+   "listedNs": 9464200,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 9464200
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 222,
+    "atNs": null,
+    "makespanNs": 3782360,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 5063680,
+    "waited": 27,
+    "speedup": 1.8690359580384226
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 4361288,
+    "waited": 27,
+    "speedup": 2.1700470136345045
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 3782360,
+    "speedup": 2.50219439714887
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 3243026,
+    "speedup": 2.9183238123900335
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "17/100",
+    "routing": "2/4",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 222,
+   "ancillaPool": 15,
+   "listedNs": 8424490,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 8424490
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 222,
+    "atNs": null,
+    "makespanNs": 3039710,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 4073480,
+    "waited": 27,
+    "speedup": 2.068130934729028
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 2895128,
+    "waited": 26,
+    "speedup": 2.9098851587909067
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 3039710,
+    "speedup": 2.7714782002230476
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 2406002,
+    "speedup": 3.5014476297193435
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "18/100",
+    "routing": "2/4",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 222,
+   "ancillaPool": 15,
+   "listedNs": 28642730,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 28642730
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 222,
+    "atNs": null,
+    "makespanNs": 23152490,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 25985030,
+    "waited": 27,
+    "speedup": 1.102278119363341
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 14825076,
+    "waited": 27,
+    "speedup": 1.9320460819222782
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 23152490,
+    "speedup": 1.2371338892706574
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 14224944,
+    "speedup": 2.0135566087290044
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "12/100",
+    "routing": "2/32",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 222,
+   "ancillaPool": 15,
+   "listedNs": 28642730,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 28642730
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 222,
+    "atNs": null,
+    "makespanNs": 23152490,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 25985030,
+    "waited": 27,
+    "speedup": 1.102278119363341
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 22975476,
+    "waited": 27,
+    "speedup": 1.2466653574446074
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 23152490,
+    "speedup": 1.2371338892706574
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 20775744,
+    "speedup": 1.3786620589857095
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "12/100",
+    "routing": "2/32",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "dj-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 222,
+   "ancillaPool": 15,
+   "listedNs": 191064,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 191064
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 222,
+    "atNs": null,
+    "makespanNs": 151440,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 165206,
+    "waited": 28,
+    "speedup": 1.1565197389925306
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 100068,
+    "waited": 27,
+    "speedup": 1.909341647679578
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 151440,
+    "speedup": 1.261648177496038
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 95076,
+    "speedup": 2.0095923261390887
+   },
+   "peaks": {
+    "gates": "11/24",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "14/500",
+    "routing": "2500/12000",
+    "ancillaRate": "101/150"
+   }
+  },
+  {
+   "program": "dj-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 222,
+   "ancillaPool": 15,
+   "listedNs": 121032,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 121032
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 222,
+    "atNs": null,
+    "makespanNs": 61140,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 66928,
+    "waited": 27,
+    "speedup": 1.8083911068611045
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 64390,
+    "waited": 27,
+    "speedup": 1.8796707563286223
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 61140,
+    "speedup": 1.9795878312070658
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 59398,
+    "speedup": 2.0376443651301392
+   },
+   "peaks": {
+    "gates": "11/24",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "14/500",
+    "routing": "2500/12000",
+    "ancillaRate": "101/150"
+   }
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 2364,
+   "ancillaPool": 52,
+   "listedNs": 87631920,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 87631920
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 859,
+    "atNs": 13871090,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 26704690,
+    "waited": 528,
+    "speedup": 3.2815179655708415
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 17149770,
+    "waited": 436,
+    "speedup": 5.1098014725561915
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 21190600,
+    "speedup": 4.13541475937444
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 13205060,
+    "speedup": 6.636237926976477
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "52/52",
+    "classical": "15/100",
+    "routing": "4/4",
+    "ancillaRate": "47/64"
+   }
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 2364,
+   "ancillaPool": 52,
+   "listedNs": 72201360,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 72201360
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 859,
+    "atNs": 11370240,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 18659290,
+    "waited": 442,
+    "speedup": 3.8694591273301397
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 9998030,
+    "waited": 348,
+    "speedup": 7.221558647053469
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 14443190,
+    "speedup": 4.9989898353480084
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 8091464,
+    "speedup": 8.923151607669514
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "52/52",
+    "classical": "20/100",
+    "routing": "4/4",
+    "ancillaRate": "47/64"
+   }
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 2364,
+   "ancillaPool": 52,
+   "listedNs": 276625600,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 276625600
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 859,
+    "atNs": 42454030,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 126674310,
+    "waited": 400,
+    "speedup": 2.1837545434429444
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 70556874,
+    "waited": 399,
+    "speedup": 3.920604532451367
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 94734240,
+    "speedup": 2.9200170920250166
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 58197010,
+    "speedup": 4.753261378892145
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "52/52",
+    "classical": "6/100",
+    "routing": "9/32",
+    "ancillaRate": "47/64"
+   }
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 2364,
+   "ancillaPool": 52,
+   "listedNs": 341701600,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 341701600
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 859,
+    "atNs": 52662030,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 157936310,
+    "waited": 400,
+    "speedup": 2.1635404803366622
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 113342674,
+    "waited": 400,
+    "speedup": 3.014765647755937
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 118021240,
+    "speedup": 2.895255125263893
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 85042542,
+    "speedup": 4.018007834243713
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "52/52",
+    "classical": "6/100",
+    "routing": "9/32",
+    "ancillaRate": "47/64"
+   }
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 2364,
+   "ancillaPool": 52,
+   "listedNs": 6932312,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 6932312
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 859,
+    "atNs": 2172720,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 6499830,
+    "waited": 378,
+    "speedup": 1.066537432517466
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 926114,
+    "waited": 387,
+    "speedup": 7.4853765303191615
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 6492208,
+    "speedup": 1.0677895717450827
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 884334,
+    "speedup": 7.839020098740973
+   },
+   "peaks": {
+    "gates": "27/79",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "52/52",
+    "classical": "12/500",
+    "routing": "7000/39500",
+    "ancillaRate": "360/494"
+   }
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 2364,
+   "ancillaPool": 52,
+   "listedNs": 1309352,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 1309352
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 859,
+    "atNs": 171760,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 466716,
+    "waited": 389,
+    "speedup": 2.805457708756503
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 246996,
+    "waited": 385,
+    "speedup": 5.301106090786895
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 457184,
+    "speedup": 2.863949744522993
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 206298,
+    "speedup": 6.346896237481701
+   },
+   "peaks": {
+    "gates": "27/79",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "52/52",
+    "classical": "12/500",
+    "routing": "7000/39500",
+    "ancillaRate": "360/494"
+   }
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 1752,
+   "ancillaPool": 45,
+   "listedNs": 65402280,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 65402280
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1016,
+    "atNs": 7525560,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 12641010,
+    "waited": 333,
+    "speedup": 5.173817598435568
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 10562224,
+    "waited": 324,
+    "speedup": 6.192093634825393
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 11258990,
+    "speedup": 5.808894048222798
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 9376232,
+    "speedup": 6.975326549087096
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "45/45",
+    "classical": "26/100",
+    "routing": "4/4",
+    "ancillaRate": "40/64"
+   }
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 1752,
+   "ancillaPool": 45,
+   "listedNs": 56341950,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 56341950
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1016,
+    "atNs": 5912520,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 9685000,
+    "waited": 308,
+    "speedup": 5.817444501806918
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 6122624,
+    "waited": 247,
+    "speedup": 9.202255438191207
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 8539990,
+    "speedup": 6.597425758109787
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 5531260,
+    "speedup": 10.186096838694981
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "45/45",
+    "classical": "32/100",
+    "routing": "4/4",
+    "ancillaRate": "40/64"
+   }
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 1752,
+   "ancillaPool": 45,
+   "listedNs": 246440430,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 246440430
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1016,
+    "atNs": 43731950,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 70877170,
+    "waited": 290,
+    "speedup": 3.4770071942770855
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 37862610,
+    "waited": 287,
+    "speedup": 6.5088072375359225
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 62925650,
+    "speedup": 3.9163748010548955
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 35712542,
+    "speedup": 6.900668958261218
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "45/45",
+    "classical": "14/100",
+    "routing": "8/32",
+    "ancillaRate": "40/64"
+   }
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 1752,
+   "ancillaPool": 45,
+   "listedNs": 246440430,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 246440430
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1016,
+    "atNs": 43731950,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 70877170,
+    "waited": 290,
+    "speedup": 3.4770071942770855
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 62661408,
+    "waited": 290,
+    "speedup": 3.932890081244264
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 62925650,
+    "speedup": 3.9163748010548955
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 56144992,
+    "speedup": 4.389357291207736
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "45/45",
+    "classical": "14/100",
+    "routing": "8/32",
+    "ancillaRate": "40/64"
+   }
+  },
+  {
+   "program": "loop-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 1752,
+   "ancillaPool": 45,
+   "listedNs": 4844580,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 4844580
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1016,
+    "atNs": 1918492,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 3835878,
+    "waited": 284,
+    "speedup": 1.2629650890878177
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 679228,
+    "waited": 282,
+    "speedup": 7.132479815319745
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 3828256,
+    "speedup": 1.265479633545928
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 661024,
+    "speedup": 7.3289018250472
+   },
+   "peaks": {
+    "gates": "23/72",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "45/45",
+    "classical": "12/500",
+    "routing": "5000/36000",
+    "ancillaRate": "311/450"
+   }
+  },
+  {
+   "program": "loop-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 1752,
+   "ancillaPool": 45,
+   "listedNs": 899856,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 899856
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1016,
+    "atNs": 128238,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 237822,
+    "waited": 291,
+    "speedup": 3.7837374170598177
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 196902,
+    "waited": 315,
+    "speedup": 4.570070390346467
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 237822,
+    "speedup": 3.7837374170598177
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 197056,
+    "speedup": 4.566498863267294
+   },
+   "peaks": {
+    "gates": "23/72",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "45/45",
+    "classical": "19/500",
+    "routing": "5000/36000",
+    "ancillaRate": "311/450"
+   }
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 606,
+   "ancillaPool": 31,
+   "listedNs": 22336370,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 22336370
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 606,
+    "atNs": null,
+    "makespanNs": 7416840,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 8425060,
+    "waited": 84,
+    "speedup": 2.651182306120075
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 6009596,
+    "waited": 79,
+    "speedup": 3.716783956858331
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 7416840,
+    "speedup": 3.01157501038178
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 5322286,
+    "speedup": 4.1967624438070406
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "31/31",
+    "classical": "20/100",
+    "routing": "4/4",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 606,
+   "ancillaPool": 31,
+   "listedNs": 18759740,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 18759740
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 606,
+    "atNs": null,
+    "makespanNs": 5622450,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 6389790,
+    "waited": 79,
+    "speedup": 2.9358930418683555
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 4240308,
+    "waited": 73,
+    "speedup": 4.424145604517408
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 5622450,
+    "speedup": 3.336577470675595
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 3707952,
+    "speedup": 5.059326550074003
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "31/31",
+    "classical": "22/100",
+    "routing": "4/4",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 606,
+   "ancillaPool": 31,
+   "listedNs": 69610230,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 69610230
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 606,
+    "atNs": null,
+    "makespanNs": 30459170,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 37956300,
+    "waited": 79,
+    "speedup": 1.8339572086847242
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 21549354,
+    "waited": 79,
+    "speedup": 3.2302699189961794
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 30459170,
+    "speedup": 2.285362010849278
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 18301888,
+    "speedup": 3.8034453057520623
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "31/31",
+    "classical": "14/100",
+    "routing": "5/32",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 606,
+   "ancillaPool": 31,
+   "listedNs": 548668,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 548668
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 606,
+    "atNs": null,
+    "makespanNs": 448192,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 464328,
+    "waited": 77,
+    "speedup": 1.1816388415085888
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 261284,
+    "waited": 76,
+    "speedup": 2.099891306011849
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 448192,
+    "speedup": 1.2241807082678853
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 254926,
+    "speedup": 2.1522637941991007
+   },
+   "peaks": {
+    "gates": "19/58",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "31/31",
+    "classical": "18/500",
+    "routing": "8000/29000",
+    "ancillaRate": "213/363"
+   }
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 606,
+   "ancillaPool": 31,
+   "listedNs": 263244,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 263244
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 606,
+    "atNs": null,
+    "makespanNs": 113378,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 119838,
+    "waited": 76,
+    "speedup": 2.196665498422871
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 118572,
+    "waited": 76,
+    "speedup": 2.2201194211112236
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 113378,
+    "speedup": 2.3218261038296673
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 112214,
+    "speedup": 2.3459104924519223
+   },
+   "peaks": {
+    "gates": "19/58",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "31/31",
+    "classical": "18/500",
+    "routing": "8000/29000",
+    "ancillaRate": "213/363"
+   }
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 221,
+   "ancillaPool": 15,
+   "listedNs": 9464010,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 9464010
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 221,
+    "atNs": null,
+    "makespanNs": 3782360,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 5063680,
+    "waited": 27,
+    "speedup": 1.8689984359201213
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 4361288,
+    "waited": 27,
+    "speedup": 2.1700034485225466
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 3782360,
+    "speedup": 2.5021441639611246
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 3243026,
+    "speedup": 2.91826522513233
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "6/100",
+    "routing": "2/4",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 221,
+   "ancillaPool": 15,
+   "listedNs": 8424300,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 8424300
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 221,
+    "atNs": null,
+    "makespanNs": 3039710,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 4073480,
+    "waited": 27,
+    "speedup": 2.0680842915639697
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 2895128,
+    "waited": 26,
+    "speedup": 2.909819531295335
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 3039710,
+    "speedup": 2.7714156942603076
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 2406002,
+    "speedup": 3.5013686605414294
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "9/100",
+    "routing": "2/4",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 221,
+   "ancillaPool": 15,
+   "listedNs": 28642540,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 28642540
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 221,
+    "atNs": null,
+    "makespanNs": 23152490,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 25985030,
+    "waited": 27,
+    "speedup": 1.102270807461065
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 14825076,
+    "waited": 27,
+    "speedup": 1.9320332657991095
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 23152490,
+    "speedup": 1.2371256828099266
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 14224944,
+    "speedup": 2.0135432519101655
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "2/100",
+    "routing": "2/32",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 221,
+   "ancillaPool": 15,
+   "listedNs": 28642540,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 28642540
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 221,
+    "atNs": null,
+    "makespanNs": 23152490,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 25985030,
+    "waited": 27,
+    "speedup": 1.102270807461065
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 22975476,
+    "waited": 27,
+    "speedup": 1.2466570877573984
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 23152490,
+    "speedup": 1.2371256828099266
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 20775744,
+    "speedup": 1.3786529137055212
+   },
+   "peaks": {
+    "gates": "11/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "2/100",
+    "routing": "2/32",
+    "ancillaRate": "10/64"
+   }
+  },
+  {
+   "program": "memory-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 221,
+   "ancillaPool": 15,
+   "listedNs": 190882,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 190882
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 221,
+    "atNs": null,
+    "makespanNs": 151440,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 165206,
+    "waited": 28,
+    "speedup": 1.1554180840889556
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 100068,
+    "waited": 27,
+    "speedup": 1.9075228844385819
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 151440,
+    "speedup": 1.260446381405177
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 95076,
+    "speedup": 2.0076780680718582
+   },
+   "peaks": {
+    "gates": "11/24",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "3/500",
+    "routing": "2500/12000",
+    "ancillaRate": "101/150"
+   }
+  },
+  {
+   "program": "memory-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 221,
+   "ancillaPool": 15,
+   "listedNs": 120850,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 120850
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 221,
+    "atNs": null,
+    "makespanNs": 61140,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 66928,
+    "waited": 27,
+    "speedup": 1.8056717666746354
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 64390,
+    "waited": 27,
+    "speedup": 1.87684423047057
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 61140,
+    "speedup": 1.9766110565914294
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 59398,
+    "speedup": 2.034580288898616
+   },
+   "peaks": {
+    "gates": "11/24",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "15/15",
+    "classical": "3/500",
+    "routing": "2500/12000",
+    "ancillaRate": "101/150"
+   }
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 1013,
+   "ancillaPool": 35,
+   "listedNs": 19553130,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 19553130
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1013,
+    "atNs": null,
+    "makespanNs": 8022840,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 12317010,
+    "waited": 174,
+    "speedup": 1.5874899833644691
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 9324238,
+    "waited": 164,
+    "speedup": 2.0970217619927762
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 8022840,
+    "speedup": 2.4371830922715647
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 5924908,
+    "speedup": 3.300157572066942
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "35/35",
+    "classical": "12/100",
+    "routing": "4/4",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 1013,
+   "ancillaPool": 35,
+   "listedNs": 16567130,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 16567130
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1013,
+    "atNs": null,
+    "makespanNs": 5986720,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 9390730,
+    "waited": 165,
+    "speedup": 1.7642004402213673
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 5698122,
+    "waited": 147,
+    "speedup": 2.9074719705896084
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 5986720,
+    "speedup": 2.7673133201485958
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 4161742,
+    "speedup": 3.980816206290539
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "35/35",
+    "classical": "17/100",
+    "routing": "4/4",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 1013,
+   "ancillaPool": 35,
+   "listedNs": 70074380,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 70074380
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1013,
+    "atNs": null,
+    "makespanNs": 47683900,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 66215380,
+    "waited": 154,
+    "speedup": 1.058279511497178
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 57886610,
+    "waited": 154,
+    "speedup": 1.2105455821303062
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 47683900,
+    "speedup": 1.469560585438691
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 42802346,
+    "speedup": 1.637162131253273
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "35/35",
+    "classical": "5/100",
+    "routing": "5/32",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 1013,
+   "ancillaPool": 35,
+   "listedNs": 64332380,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 64332380
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1013,
+    "atNs": null,
+    "makespanNs": 43600700,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 60600980,
+    "waited": 154,
+    "speedup": 1.0615732616865272
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 51694610,
+    "waited": 154,
+    "speedup": 1.244469781278938
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 43600700,
+    "speedup": 1.4754896136988627
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 37746346,
+    "speedup": 1.704333977121918
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "35/35",
+    "classical": "5/100",
+    "routing": "5/32",
+    "ancillaRate": "26/64"
+   }
+  },
+  {
+   "program": "memory-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 1013,
+   "ancillaPool": 35,
+   "listedNs": 864626,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 864626
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1013,
+    "atNs": null,
+    "makespanNs": 780096,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 824698,
+    "waited": 148,
+    "speedup": 1.0484152986911572
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 453144,
+    "waited": 147,
+    "speedup": 1.9080601309958864
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 780096,
+    "speedup": 1.10835845844614
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 426936,
+    "speedup": 2.025188787078157
+   },
+   "peaks": {
+    "gates": "23/60",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "35/35",
+    "classical": "7/500",
+    "routing": "5000/30000",
+    "ancillaRate": "238/375"
+   }
+  },
+  {
+   "program": "memory-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 1013,
+   "ancillaPool": 35,
+   "listedNs": 485366,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 485366
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1013,
+    "atNs": null,
+    "makespanNs": 239286,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 265982,
+    "waited": 147,
+    "speedup": 1.8248076937537128
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 262664,
+    "waited": 147,
+    "speedup": 1.8478588615112843
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 239286,
+    "speedup": 2.0283928019190425
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 236456,
+    "speedup": 2.0526694184118823
+   },
+   "peaks": {
+    "gates": "23/60",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "35/35",
+    "classical": "7/500",
+    "routing": "5000/30000",
+    "ancillaRate": "238/375"
+   }
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 2720,
+   "ancillaPool": 78,
+   "listedNs": 102928200,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 102928200
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1645,
+    "atNs": 16074180,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 25589850,
+    "waited": 628,
+    "speedup": 4.022227562881377
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 18261976,
+    "waited": 529,
+    "speedup": 5.636202785503606
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 22233710,
+    "speedup": 4.629375844157363
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 15257734,
+    "speedup": 6.745968962363611
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "1/1",
+    "qubits": "78/78",
+    "classical": "21/100",
+    "routing": "4/4",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 2720,
+   "ancillaPool": 78,
+   "listedNs": 86239320,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 86239320
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1645,
+    "atNs": 12155900,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 19678610,
+    "waited": 548,
+    "speedup": 4.382388796769691
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 12956076,
+    "waited": 380,
+    "speedup": 6.65628389336401
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 16600060,
+    "speedup": 5.195120981490429
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 10916760,
+    "speedup": 7.899717498598485
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "1/1",
+    "qubits": "78/78",
+    "classical": "29/100",
+    "routing": "4/4",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 2720,
+   "ancillaPool": 78,
+   "listedNs": 377689940,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 377689940
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1645,
+    "atNs": 78083240,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 123058980,
+    "waited": 455,
+    "speedup": 3.069178210318337
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 56584404,
+    "waited": 453,
+    "speedup": 6.674806365372338
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 99767840,
+    "speedup": 3.7856882538501386
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 47239272,
+    "speedup": 7.995253186797629
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "1/1",
+    "qubits": "78/78",
+    "classical": "12/100",
+    "routing": "8/32",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 2720,
+   "ancillaPool": 78,
+   "listedNs": 377689940,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 377689940
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1645,
+    "atNs": 78083240,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 123058980,
+    "waited": 455,
+    "speedup": 3.069178210318337
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 92593404,
+    "waited": 455,
+    "speedup": 4.079015606770435
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 99767840,
+    "speedup": 3.7856882538501386
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 75901738,
+    "speedup": 4.976038098099941
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "1/1",
+    "qubits": "78/78",
+    "classical": "12/100",
+    "routing": "8/32",
+    "ancillaRate": "64/64"
+   }
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 2720,
+   "ancillaPool": 78,
+   "listedNs": 8156224,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 8156224
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1645,
+    "atNs": 4229898,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 7505310,
+    "waited": 415,
+    "speedup": 1.0867271305249218
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 1147244,
+    "waited": 466,
+    "speedup": 7.109406542984753
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 7505310,
+    "speedup": 1.0867271305249218
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 1037236,
+    "speedup": 7.863421632106869
+   },
+   "peaks": {
+    "gates": "35/96",
+    "decoders": "1/1",
+    "factories": "1/1",
+    "qubits": "78/78",
+    "classical": "12/500",
+    "routing": "5500/48000",
+    "ancillaRate": "536/600"
+   }
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 2720,
+   "ancillaPool": 78,
+   "listedNs": 1666144,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 1666144
+   },
+   "greedy": {
+    "deadlock": true,
+    "completed": 1645,
+    "atNs": 359880,
+    "makespanNs": null,
+    "blockedOn": [
+     "qubits"
+    ]
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 656058,
+    "waited": 460,
+    "speedup": 2.539629118157236
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 368730,
+    "waited": 454,
+    "speedup": 4.518601686871152
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 592952,
+    "speedup": 2.80991378728801
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 329080,
+    "speedup": 5.063036343746202
+   },
+   "peaks": {
+    "gates": "35/96",
+    "decoders": "2/2",
+    "factories": "1/1",
+    "qubits": "78/78",
+    "classical": "13/500",
+    "routing": "5000/48000",
+    "ancillaRate": "536/600"
+   }
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 411,
+   "ancillaPool": 23,
+   "listedNs": 15150340,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 15150340
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 411,
+    "atNs": null,
+    "makespanNs": 5372890,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 6519760,
+    "waited": 51,
+    "speedup": 2.323757316220229
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 4971526,
+    "waited": 51,
+    "speedup": 3.0474224614333707
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 5372890,
+    "speedup": 2.819774832538913
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 4032688,
+    "speedup": 3.7568837460274636
+   },
+   "peaks": {
+    "gates": "15/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "23/23",
+    "classical": "16/100",
+    "routing": "3/4",
+    "ancillaRate": "18/64"
+   }
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 411,
+   "ancillaPool": 23,
+   "listedNs": 13212100,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 13212100
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 411,
+    "atNs": null,
+    "makespanNs": 4210040,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 5177950,
+    "waited": 51,
+    "speedup": 2.551608261956952
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 3393172,
+    "waited": 48,
+    "speedup": 3.8937312933149277
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 4210040,
+    "speedup": 3.138236216282981
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 2746452,
+    "speedup": 4.810606557114415
+   },
+   "peaks": {
+    "gates": "15/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "23/23",
+    "classical": "17/100",
+    "routing": "3/4",
+    "ancillaRate": "18/64"
+   }
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 411,
+   "ancillaPool": 23,
+   "listedNs": 48985940,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 48985940
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 411,
+    "atNs": null,
+    "makespanNs": 26039960,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 34963360,
+    "waited": 51,
+    "speedup": 1.4010650006177896
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 20609410,
+    "waited": 51,
+    "speedup": 2.376872506296881
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 26039960,
+    "speedup": 1.8811833812340726
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 17667010,
+    "speedup": 2.7727351713730846
+   },
+   "peaks": {
+    "gates": "15/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "23/23",
+    "classical": "12/100",
+    "routing": "4/32",
+    "ancillaRate": "18/64"
+   }
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 411,
+   "ancillaPool": 23,
+   "listedNs": 48985940,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 48985940
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 411,
+    "atNs": null,
+    "makespanNs": 26039960,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 34963360,
+    "waited": 51,
+    "speedup": 1.4010650006177896
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 31013210,
+    "waited": 51,
+    "speedup": 1.579518534198814
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 26039960,
+    "speedup": 1.8811833812340726
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 23171810,
+    "speedup": 2.1140316617476147
+   },
+   "peaks": {
+    "gates": "15/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "23/23",
+    "classical": "12/100",
+    "routing": "4/32",
+    "ancillaRate": "18/64"
+   }
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 411,
+   "ancillaPool": 23,
+   "listedNs": 368450,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 368450
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 411,
+    "atNs": null,
+    "makespanNs": 298400,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 315006,
+    "waited": 52,
+    "speedup": 1.1696602604394837
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 181712,
+    "waited": 51,
+    "speedup": 2.0276591529453203
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 298400,
+    "speedup": 1.2347520107238605
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 172850,
+    "speedup": 2.1316170089673125
+   },
+   "peaks": {
+    "gates": "15/41",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "23/23",
+    "classical": "14/500",
+    "routing": "4000/20500",
+    "ancillaRate": "157/257"
+   }
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 411,
+   "ancillaPool": 23,
+   "listedNs": 155906,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 155906
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 411,
+    "atNs": null,
+    "makespanNs": 68072,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 76894,
+    "waited": 51,
+    "speedup": 2.0275444117876558
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 74678,
+    "waited": 51,
+    "speedup": 2.0877099011757143
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 68072,
+    "speedup": 2.290310259724997
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 65816,
+    "speedup": 2.368816093351161
+   },
+   "peaks": {
+    "gates": "15/41",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "23/23",
+    "classical": "14/500",
+    "routing": "4000/20500",
+    "ancillaRate": "157/257"
+   }
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "ops": 1979,
+   "ancillaPool": 59,
+   "listedNs": 33280660,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 33280660
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1979,
+    "atNs": null,
+    "makespanNs": 14507410,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 15581230,
+    "waited": 494,
+    "speedup": 2.1359456217512993
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 10148634,
+    "waited": 383,
+    "speedup": 3.2793240942574142
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 14507410,
+    "speedup": 2.294045594630606
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 8637862,
+    "speedup": 3.8528816505751076
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "59/59",
+    "classical": "17/100",
+    "routing": "4/4",
+    "ancillaRate": "50/64"
+   }
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "ops": 1979,
+   "ancillaPool": 59,
+   "listedNs": 26536060,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 26536060
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1979,
+    "atNs": null,
+    "makespanNs": 9328930,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 10818600,
+    "waited": 419,
+    "speedup": 2.4528182944188712
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 5933272,
+    "waited": 293,
+    "speedup": 4.472415894636214
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 9328930,
+    "speedup": 2.8444912760627425
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 4742086,
+    "speedup": 5.5958622429032285
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "59/59",
+    "classical": "22/100",
+    "routing": "4/4",
+    "ancillaRate": "50/64"
+   }
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "ops": 1979,
+   "ancillaPool": 59,
+   "listedNs": 124241060,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 124241060
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1979,
+    "atNs": null,
+    "makespanNs": 67627770,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 75005770,
+    "waited": 310,
+    "speedup": 1.656420032752147
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 67948012,
+    "waited": 310,
+    "speedup": 1.8284723326416084
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 67627770,
+    "speedup": 1.8371308117952136
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 59651478,
+    "speedup": 2.082782592578846
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "59/59",
+    "classical": "7/100",
+    "routing": "10/32",
+    "ancillaRate": "50/64"
+   }
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "ops": 1979,
+   "ancillaPool": 59,
+   "listedNs": 124241060,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 124241060
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1979,
+    "atNs": null,
+    "makespanNs": 67627770,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 75005770,
+    "waited": 310,
+    "speedup": 1.656420032752147
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 59282812,
+    "waited": 310,
+    "speedup": 2.0957349324117756
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 67627770,
+    "speedup": 1.8371308117952136
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 53494812,
+    "speedup": 2.3224880199597675
+   },
+   "peaks": {
+    "gates": "16/16",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "59/59",
+    "classical": "7/100",
+    "routing": "10/32",
+    "ancillaRate": "50/64"
+   }
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "ops": 1979,
+   "ancillaPool": 59,
+   "listedNs": 1708278,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 1708278
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1979,
+    "atNs": null,
+    "makespanNs": 1553816,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 1594530,
+    "waited": 292,
+    "speedup": 1.07133638125341
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 841128,
+    "waited": 291,
+    "speedup": 2.0309370274203213
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 1553816,
+    "speedup": 1.0994081667327407
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 834286,
+    "speedup": 2.0475927919202768
+   },
+   "peaks": {
+    "gates": "35/109",
+    "decoders": "1/1",
+    "factories": "0/1",
+    "qubits": "59/59",
+    "classical": "12/500",
+    "routing": "6000/54500",
+    "ancillaRate": "406/682"
+   }
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "ops": 1979,
+   "ancillaPool": 59,
+   "listedNs": 567258,
+   "triggered": {
+    "reproduces": true,
+    "makespanNs": 567258
+   },
+   "greedy": {
+    "deadlock": false,
+    "completed": 1979,
+    "atNs": null,
+    "makespanNs": 267460,
+    "blockedOn": []
+   },
+   "strict": {
+    "deadlock": false,
+    "makespanNs": 274390,
+    "waited": 291,
+    "speedup": 2.067342104304093
+   },
+   "strictMeasured": {
+    "deadlock": false,
+    "makespanNs": 269728,
+    "waited": 291,
+    "speedup": 2.103074208091114
+   },
+   "ordered": {
+    "deadlock": false,
+    "makespanNs": 267460,
+    "speedup": 2.120907799297091
+   },
+   "orderedMeasured": {
+    "deadlock": false,
+    "makespanNs": 262886,
+    "speedup": 2.1578098491361275
+   },
+   "peaks": {
+    "gates": "35/109",
+    "decoders": "2/2",
+    "factories": "0/1",
+    "qubits": "59/59",
+    "classical": "12/500",
+    "routing": "6000/54500",
+    "ancillaRate": "406/682"
+   }
+  }
+ ]
+}

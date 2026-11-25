@@ -1,0 +1,63 @@
+{
+ "id": "hardware-gate",
+ "title": "Does the hardware run the runtime's schedule?",
+ "kicker": "Contention · conformance gate",
+ "summary": "The runtime simulator's schedules are written back as timetables and run on the cycle-exact model of the same design. Every operation must finish inside the window the simulator gave it. A failure names something the simulator's resource model is missing.",
+ "method": [
+  "For every program and design of the corpus, the simulator's schedule with ordered acquisition and the declared durations is retimed, placed and run time-triggered. First with FormalRV's services only; then, for atoms and ions, with the hardware's movers and readout channels added to the simulator."
+ ],
+ "sections": [
+  {
+   "heading": "Schedules the cycle-exact model keeps",
+   "table": {
+    "head": [
+     "Platform",
+     "Simulator's resources",
+     "Conform",
+     "Why the others do not"
+    ],
+    "rows": [
+     [
+      "Superconducting",
+      "the VM's services",
+      "18 / 22",
+      "no legal placement (2), H late (2), request_magic late (2)"
+     ],
+     [
+      "Neutral atoms",
+      "the VM's services",
+      "0 / 22",
+      "route late (18), measure late (13), decode_syndrome late (13), no legal placement (2), request_ancilla late (2), request_magic late (2), CNOT late (1), H late (1)"
+     ],
+     [
+      "Trapped ions",
+      "the VM's services",
+      "2 / 21",
+      "route late (17), no legal placement (2), request_ancilla late (2)"
+     ],
+     [
+      "Neutral atoms",
+      "plus movers and readout channels",
+      "0 / 22",
+      "route late (18), measure late (13), decode_syndrome late (13), no legal placement (2), request_ancilla late (2), request_magic late (2), CNOT late (1), H late (1)"
+     ],
+     [
+      "Trapped ions",
+      "plus movers and readout channels",
+      "2 / 21",
+      "route late (17), no legal placement (2), request_ancilla late (2)"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "On superconducting hardware the VM's services are enough: a dynamic schedule over them runs on the cycle-exact model.",
+  "On atoms and ions they are not: a route's time depends on where the other atoms or ions are and on shared movers and zones, which a routing bandwidth cannot express. Measurements share readout channels and decodes share the decoder core.",
+  "Some schedules fit the qubit count but have no legal placement: a dynamic allocator must know geometry, not only counts (fragmentation).",
+  "Adding the movers and readout channels to the simulator does not change the outcome on atoms and ions: what is missing is not a count of resources but where the atoms and ions are when a route or a readout runs. A dynamic runtime for these platforms has to schedule with positions."
+ ],
+ "command": "node riscq/os/gate.mjs && node riscq/os/gate.mjs --hardware",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.418Z"
+}

@@ -32,6 +32,7 @@ import { slack, specFor } from "./derive.mjs";
 import * as formalrv from "./formalrv.mjs";
 import * as specText from "./spec.mjs";
 import * as mc from "./magic-circuits.mjs";
+import { placeOnBoards } from "../board.mjs";
 import { controllerTrack } from "./track.mjs";
 import { captured, nativeOp } from "./studio-capture.mjs";
 
@@ -356,7 +357,7 @@ export function geminiTwin(edits = {}) {
       "both encoders produce the stated color codes, and Fig. 3a accepts 1/6 of perfect inputs with a pure magic state out. Rabi frequencies, " +
       "fidelities, separations and the grid are the paper's. The paper gives no durations of moves, Rydberg pulses, imaging or initialization: " +
       "they come from the group's 2024 paper and the cited motion law, as marked. Composite (amplitude-robust) pulse sequences are not published; " +
-      "a rotation takes its Rabi time. The controller is QuantumOS's RISC-Q model at 100 MHz.",
+      "a rotation takes its Rabi time. The controller is QuantumOS's RISC-Q model at 500 MHz, its cores placed on ZCU216 boards.",
   };
 }
 
@@ -431,7 +432,8 @@ export function atomSchedule(circuit, twin = geminiTwin()) {
  */
 export async function runGemini(circuit, { outcomes = [], twin = geminiTwin() } = {}) {
   const s = atomSchedule(circuit, twin);
-  const period = 10_000; // 100 MHz
+  // RISC-Q's 500 MHz dspClk, as every multi-board build: the lane between boards is measured there.
+  const period = 2000;
   const b = (ns) => Math.round((ns * 1000) / period);
   const measures = s.listing.ops.filter((o) => o.kind === "measure");
   const cameras = Math.ceil(measures.length / 4);
@@ -447,8 +449,8 @@ export async function runGemini(circuit, { outcomes = [], twin = geminiTwin() } 
     ...Array.from({ length: cameras }, (_, c) => ({ name: "readout" + c, channels: [pulse("image"), { name: "pmt", kind: "dio", slots: 1 }] })),
     { name: "frame", channels: [{ name: "status", kind: "dio", slots: 1 }] },
   ];
-  if (cores.length > 64) throw Error("the controller needs " + cores.length + " cores, more than one board's 64");
-  const spec = socSpec({ name: twin.id, dsp_freq_hz: 100e6, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores });
+  // The cores on as many ZCU216 boards as they need (riscq/board.mjs), joined by RISC-Q's PutLane.
+  const spec = socSpec({ name: twin.id, dsp_freq_hz: 500e6, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores: placeOnBoards(cores).cores });
   const coreOf = (name) => spec.cores.findIndex((c) => c.name === name);
   const coreOfChannel = (ch) => spec.cores.findIndex((c) => c.channels.some((x) => x.name === ch));
   const tables = new Map(), actions = [], bindings = [];
@@ -485,7 +487,12 @@ export async function runGemini(circuit, { outcomes = [], twin = geminiTwin() } 
     const core = coreOf("readout" + c), at = b(mine[0].start), dur = b(mine[0].duration);
     const id = "cam" + c;
     s.origin.set(id, mine[0].uid);
-    actions.push({ segment: 0, core, at, fire: { channel: "image", slot: slotOf(core, "image", dur) }, source: id });
+    // The exposure, as consecutive table entries when it is longer than one (65535 batches).
+    for (let t = at, left = dur; left > 0; ) {
+      const part = Math.min(left, 65535);
+      actions.push({ segment: 0, core, at: t, fire: { channel: "image", slot: slotOf(core, "image", part) }, source: id });
+      t += part; left -= part;
+    }
     actions.push({ segment: 0, core, at, bits: mine.map((o) => "m[" + o.writes[0].index + "]"), source: id,
       count: { channel: "pmt", lines: mine.map((_, i) => i), until: at + dur, threshold: 1, atEnd: true } });
     hardwareOps.push({ id, t: mine[0].start * 1000 });
@@ -495,7 +502,7 @@ export async function runGemini(circuit, { outcomes = [], twin = geminiTwin() } 
     responses.push({ core, channel: chs.findIndex((x) => x.name === "image"), occurrence: 0, toCore: core, toChannel: chs.findIndex((x) => x.name === "pmt"), edges });
   }
   const lowered = { tables: [...tables.values()].map(({ keys: _k, lines: _l, ...t }) => t), segments: [{ span: b(s.makespanNs) }], actions, bindings };
-  const built = assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, bindings, responses });
+  const built = assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 2_000_000_000, maxBatches: 2 * b(s.makespanNs) + 10_000_000, bindings, responses });
   const result = await execute(built.document);
   // For the RISC-Q studio (riscq/ftqvm/studio-capture.mjs); nothing happens outside a studio run.
   captured({ spec, period, built, result, listing: s.listing, segments: [{ span: s.makespanNs * 1000,
@@ -508,7 +515,7 @@ export async function runGemini(circuit, { outcomes = [], twin = geminiTwin() } 
   // The control system for the 3D view: each pulse with the atoms it acts on.
   const opOf = new Map(s.listing.ops.map((o) => [o.uid, o]));
   const targetsOf = (k) => [...new Set(circuit.moments[k].ops.filter((o) => o.gate !== "I" || o.tag === "injection").flatMap((o) => o.targets))];
-  const controller = controllerTrack({ spec, result, baseBatch: report.baseBatch, periodPs: period, name: "RISC-Q board, 100 MHz",
+  const controller = controllerTrack({ spec, result, baseBatch: report.baseBatch, periodPs: period, name: "RISC-Q boards, 500 MHz",
     sitesOfOp: (id) => { const op = opOf.get(s.origin.get(id)); return !op ? [] : op.kind === "measure" ? measures.filter((x) => x.camera === op.camera).flatMap((x) => x.qubits) : targetsOf(op.moment); },
     coreSites: spec.cores.map((c) => (/^readout(\d+)$/.test(c.name) ? measures.filter((x) => x.camera === Number(c.name.slice(7))).flatMap((x) => x.qubits) : [])) });
   return { twin, schedule: s, report, readBack, cores: spec.cores.length, pulses: result.summary.pulses.length, status: result.summary.status, controller };
@@ -862,7 +869,7 @@ export async function queraDistillation({ shots = 200_000, dir = join(tmpdir(), 
       },
       capacities: {
         qubits: v(85, "published", "the 17 × 5 SLM grid"), factories: v(1, "twin", "one factory"), max_parallel_gates: v(85, "twin", "global pulses act on every atom"),
-        decoders: v(1, "twin", "one decoder unit"), classical_data_bandwidth: v(100, "twin", "board hub: one bit per batch at 100 MHz"),
+        decoders: v(1, "twin", "one decoder unit"), classical_data_bandwidth: v(500, "twin", "board hub: one bit per batch at 500 MHz"),
         qubit_routing_bandwidth: v(85, "twin", "one AOD job moves every atom of a layer"), ancilla_bandwidth: v(85, "twin", "global optical pumping"),
       },
     });

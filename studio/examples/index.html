@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Examples · QuantumOS</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+  <link rel="stylesheet" href="/reproduce/reproduce.css">
+  <link rel="stylesheet" href="/examples/examples.css">
+</head>
+<body>
+<main class="page wide"><article>
+  <p class="kicker">QuantumOS · Examples</p>
+  <h1>System calls, calibrated, and the operating system under load</h1>
+  <p class="lead">What each of QuantumOS's system calls actually costs on control hardware, and what happens when many of them compete for the same decoders, factories, ancillas and links. Every study runs on the cycle-exact model of RISC-Q control hardware across superconducting, neutral-atom and trapped-ion designs.</p>
+  <div class="note"><b>How to read these pages.</b> A machine specification gives every system call one latency and one capacity. These examples measure what the hardware needs, how that number should be chosen, and where a single number is not enough: the variation, the queueing and the deadlocks it hides. Each page ends with the command that regenerates it.</div>
+  <h2>The studies</h2>
+  <div id="list" class="cards" aria-live="polite">Loading…</div>
+</article></main>
+<script type="module" src="/site-nav.js"></script>
+<script type="module">
+  import { renderIndex } from "/examples/examples.js";
+  renderIndex(document.getElementById("list"));
+</script>
+</body>
+</html>

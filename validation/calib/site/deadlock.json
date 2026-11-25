@@ -1,0 +1,590 @@
+{
+ "id": "deadlock",
+ "title": "Deadlock and scheduling policy in a dynamic runtime",
+ "kicker": "Contention · request_ancilla and every service",
+ "summary": "FormalRV's VM admits a program as a fixed timetable. QuantumOS's runtime simulator instead runs the same program as soon as its dependencies and resources allow, the way a dynamic operating system would. Over the whole corpus: when does that deadlock, and how much faster is it when it does not?",
+ "method": [
+  "The simulator holds the VM's services as resource pools, with ancilla qubits held from request_ancilla to their release. Run time-triggered with the listed durations, it reproduces every admitted listing exactly (all 65), a check of the simulator against the VM.",
+  "Three dynamic policies: greedy (an operation that fits may pass one that waits), strict (no passing among ready operations), and ordered acquisition of the ancilla pool (granted in program order, which rules out a circular wait)."
+ ],
+ "sections": [
+  {
+   "heading": "Per platform",
+   "table": {
+    "head": [
+     "Platform",
+     "Runs",
+     "Greedy deadlocks",
+     "Ordered acquisition: speed-up over the timetable (declared latencies)",
+     "Same with each operation's measured latency"
+    ],
+    "rows": [
+     [
+      "Superconducting",
+      22,
+      10,
+      "1.04–3.78 (median 1.98)",
+      "2.01–7.86 (median 2.37)"
+     ],
+     [
+      "Neutral atoms",
+      22,
+      10,
+      "2.29–6.60 (median 3.14)",
+      "2.92–10.19 (median 5.06)"
+     ],
+     [
+      "Trapped ions",
+      21,
+      10,
+      "1.24–3.92 (median 2.18)",
+      "1.38–8.00 (median 2.77)"
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "Every run",
+   "table": {
+    "head": [
+     "Program",
+     "Design",
+     "Operations",
+     "Greedy",
+     "Ordered ×",
+     "Ordered, measured ×"
+    ],
+    "rows": [
+     [
+      "bell-d3",
+      "atoms-moving",
+      "1,222",
+      "deadlock at 4.72 ms",
+      "4.06",
+      "5.47"
+     ],
+     [
+      "bell-d3",
+      "atoms-static",
+      "1,222",
+      "deadlock at 3.69 ms",
+      "4.72",
+      "7.04"
+     ],
+     [
+      "bell-d3",
+      "ions-modules",
+      "1,222",
+      "deadlock at 24.62 ms",
+      "2.18",
+      "3.55"
+     ],
+     [
+      "bell-d3",
+      "ions-qccd",
+      "1,222",
+      "deadlock at 24.62 ms",
+      "2.18",
+      "2.55"
+     ],
+     [
+      "bell-d3",
+      "sc-A",
+      "1,222",
+      "deadlock at 0.56 ms",
+      "1.12",
+      "4.75"
+     ],
+     [
+      "bell-d3",
+      "sc-B",
+      "1,222",
+      "deadlock at 0.07 ms",
+      "3.15",
+      "4.00"
+     ],
+     [
+      "bell-d5",
+      "atoms-moving",
+      "5,910",
+      "deadlock at 14.73 ms",
+      "2.54",
+      "4.23"
+     ],
+     [
+      "bell-d5",
+      "atoms-static",
+      "5,910",
+      "deadlock at 9.37 ms",
+      "3.25",
+      "6.70"
+     ],
+     [
+      "bell-d5",
+      "ions-modules",
+      "5,910",
+      "deadlock at 67.02 ms",
+      "2.23",
+      "2.77"
+     ],
+     [
+      "bell-d5",
+      "ions-qccd",
+      "5,910",
+      "deadlock at 64.40 ms",
+      "2.23",
+      "2.89"
+     ],
+     [
+      "bell-d5",
+      "sc-A",
+      "5,910",
+      "deadlock at 4.06 ms",
+      "1.04",
+      "6.22"
+     ],
+     [
+      "bell-d5",
+      "sc-B",
+      "5,910",
+      "deadlock at 0.26 ms",
+      "2.36",
+      "3.65"
+     ],
+     [
+      "dj-d3",
+      "atoms-moving",
+      "222",
+      "completes",
+      "2.50",
+      "2.92"
+     ],
+     [
+      "dj-d3",
+      "atoms-static",
+      "222",
+      "completes",
+      "2.77",
+      "3.50"
+     ],
+     [
+      "dj-d3",
+      "ions-modules",
+      "222",
+      "completes",
+      "1.24",
+      "2.01"
+     ],
+     [
+      "dj-d3",
+      "ions-qccd",
+      "222",
+      "completes",
+      "1.24",
+      "1.38"
+     ],
+     [
+      "dj-d3",
+      "sc-A",
+      "222",
+      "completes",
+      "1.26",
+      "2.01"
+     ],
+     [
+      "dj-d3",
+      "sc-B",
+      "222",
+      "completes",
+      "1.98",
+      "2.04"
+     ],
+     [
+      "ghz3-d3",
+      "atoms-moving",
+      "2,364",
+      "deadlock at 13.87 ms",
+      "4.14",
+      "6.64"
+     ],
+     [
+      "ghz3-d3",
+      "atoms-static",
+      "2,364",
+      "deadlock at 11.37 ms",
+      "5.00",
+      "8.92"
+     ],
+     [
+      "ghz3-d3",
+      "ions-modules",
+      "2,364",
+      "deadlock at 42.45 ms",
+      "2.92",
+      "4.75"
+     ],
+     [
+      "ghz3-d3",
+      "ions-qccd",
+      "2,364",
+      "deadlock at 52.66 ms",
+      "2.90",
+      "4.02"
+     ],
+     [
+      "ghz3-d3",
+      "sc-A",
+      "2,364",
+      "deadlock at 2.17 ms",
+      "1.07",
+      "7.84"
+     ],
+     [
+      "ghz3-d3",
+      "sc-B",
+      "2,364",
+      "deadlock at 0.17 ms",
+      "2.86",
+      "6.35"
+     ],
+     [
+      "loop-d3",
+      "atoms-moving",
+      "1,752",
+      "deadlock at 7.53 ms",
+      "5.81",
+      "6.98"
+     ],
+     [
+      "loop-d3",
+      "atoms-static",
+      "1,752",
+      "deadlock at 5.91 ms",
+      "6.60",
+      "10.19"
+     ],
+     [
+      "loop-d3",
+      "ions-modules",
+      "1,752",
+      "deadlock at 43.73 ms",
+      "3.92",
+      "6.90"
+     ],
+     [
+      "loop-d3",
+      "ions-qccd",
+      "1,752",
+      "deadlock at 43.73 ms",
+      "3.92",
+      "4.39"
+     ],
+     [
+      "loop-d3",
+      "sc-A",
+      "1,752",
+      "deadlock at 1.92 ms",
+      "1.27",
+      "7.33"
+     ],
+     [
+      "loop-d3",
+      "sc-B",
+      "1,752",
+      "deadlock at 0.13 ms",
+      "3.78",
+      "4.57"
+     ],
+     [
+      "measurement-d3",
+      "atoms-moving",
+      "606",
+      "completes",
+      "3.01",
+      "4.20"
+     ],
+     [
+      "measurement-d3",
+      "atoms-static",
+      "606",
+      "completes",
+      "3.34",
+      "5.06"
+     ],
+     [
+      "measurement-d3",
+      "ions-modules",
+      "606",
+      "completes",
+      "2.29",
+      "3.80"
+     ],
+     [
+      "measurement-d3",
+      "sc-A",
+      "606",
+      "completes",
+      "1.22",
+      "2.15"
+     ],
+     [
+      "measurement-d3",
+      "sc-B",
+      "606",
+      "completes",
+      "2.32",
+      "2.35"
+     ],
+     [
+      "memory-d3",
+      "atoms-moving",
+      "221",
+      "completes",
+      "2.50",
+      "2.92"
+     ],
+     [
+      "memory-d3",
+      "atoms-static",
+      "221",
+      "completes",
+      "2.77",
+      "3.50"
+     ],
+     [
+      "memory-d3",
+      "ions-modules",
+      "221",
+      "completes",
+      "1.24",
+      "2.01"
+     ],
+     [
+      "memory-d3",
+      "ions-qccd",
+      "221",
+      "completes",
+      "1.24",
+      "1.38"
+     ],
+     [
+      "memory-d3",
+      "sc-A",
+      "221",
+      "completes",
+      "1.26",
+      "2.01"
+     ],
+     [
+      "memory-d3",
+      "sc-B",
+      "221",
+      "completes",
+      "1.98",
+      "2.03"
+     ],
+     [
+      "memory-d5",
+      "atoms-moving",
+      "1,013",
+      "completes",
+      "2.44",
+      "3.30"
+     ],
+     [
+      "memory-d5",
+      "atoms-static",
+      "1,013",
+      "completes",
+      "2.77",
+      "3.98"
+     ],
+     [
+      "memory-d5",
+      "ions-modules",
+      "1,013",
+      "completes",
+      "1.47",
+      "1.64"
+     ],
+     [
+      "memory-d5",
+      "ions-qccd",
+      "1,013",
+      "completes",
+      "1.48",
+      "1.70"
+     ],
+     [
+      "memory-d5",
+      "sc-A",
+      "1,013",
+      "completes",
+      "1.11",
+      "2.03"
+     ],
+     [
+      "memory-d5",
+      "sc-B",
+      "1,013",
+      "completes",
+      "2.03",
+      "2.05"
+     ],
+     [
+      "tinject-d3",
+      "atoms-moving",
+      "2,720",
+      "deadlock at 16.07 ms",
+      "4.63",
+      "6.75"
+     ],
+     [
+      "tinject-d3",
+      "atoms-static",
+      "2,720",
+      "deadlock at 12.16 ms",
+      "5.20",
+      "7.90"
+     ],
+     [
+      "tinject-d3",
+      "ions-modules",
+      "2,720",
+      "deadlock at 78.08 ms",
+      "3.79",
+      "8.00"
+     ],
+     [
+      "tinject-d3",
+      "ions-qccd",
+      "2,720",
+      "deadlock at 78.08 ms",
+      "3.79",
+      "4.98"
+     ],
+     [
+      "tinject-d3",
+      "sc-A",
+      "2,720",
+      "deadlock at 4.23 ms",
+      "1.09",
+      "7.86"
+     ],
+     [
+      "tinject-d3",
+      "sc-B",
+      "2,720",
+      "deadlock at 0.36 ms",
+      "2.81",
+      "5.06"
+     ],
+     [
+      "zzmerge-d3",
+      "atoms-moving",
+      "411",
+      "completes",
+      "2.82",
+      "3.76"
+     ],
+     [
+      "zzmerge-d3",
+      "atoms-static",
+      "411",
+      "completes",
+      "3.14",
+      "4.81"
+     ],
+     [
+      "zzmerge-d3",
+      "ions-modules",
+      "411",
+      "completes",
+      "1.88",
+      "2.77"
+     ],
+     [
+      "zzmerge-d3",
+      "ions-qccd",
+      "411",
+      "completes",
+      "1.88",
+      "2.11"
+     ],
+     [
+      "zzmerge-d3",
+      "sc-A",
+      "411",
+      "completes",
+      "1.23",
+      "2.13"
+     ],
+     [
+      "zzmerge-d3",
+      "sc-B",
+      "411",
+      "completes",
+      "2.29",
+      "2.37"
+     ],
+     [
+      "zzmerge-d5",
+      "atoms-moving",
+      "1,979",
+      "completes",
+      "2.29",
+      "3.85"
+     ],
+     [
+      "zzmerge-d5",
+      "atoms-static",
+      "1,979",
+      "completes",
+      "2.84",
+      "5.60"
+     ],
+     [
+      "zzmerge-d5",
+      "ions-modules",
+      "1,979",
+      "completes",
+      "1.84",
+      "2.08"
+     ],
+     [
+      "zzmerge-d5",
+      "ions-qccd",
+      "1,979",
+      "completes",
+      "1.84",
+      "2.32"
+     ],
+     [
+      "zzmerge-d5",
+      "sc-A",
+      "1,979",
+      "completes",
+      "1.10",
+      "2.05"
+     ],
+     [
+      "zzmerge-d5",
+      "sc-B",
+      "1,979",
+      "completes",
+      "2.12",
+      "2.16"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "Greedy execution deadlocks in 30 of 65 admitted programs, always on the ancilla pool: later iterations take ancillas early and hold them, and the operations that would release them wait for an ancilla. Every program with several blocks or loops deadlocks, on every platform.",
+  "Ordered acquisition never deadlocks and finishes 1.04 to 10 times sooner than the fixed timetable: a static timetable is safe but leaves most of the machine idle.",
+  "Those speed-ups use only the VM's services. Whether the hardware can actually run such a schedule is the next example."
+ ],
+ "command": "node riscq/os/contention.mjs",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.418Z"
+}

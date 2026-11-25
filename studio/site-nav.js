@@ -42,6 +42,7 @@ const LINKS = [
   ["Learn", "/course"],
   ["Background", "/learn"],
   ["Reproduce", "/reproduce"],
+  ["Examples", "/examples"],
   ["Platforms", null],
   ["Design", "/riscq-design"],
   ["Workspace", "/riscq-studio"],
@@ -111,7 +112,7 @@ function build() {
       const a = link(text, href);
       const background = here === "/course/background" || here.startsWith("/course/background/");
       if (here === href || (href === "/course" && here.startsWith("/course/") && !background) || (href === "/learn" && background) ||
-          (href === "/reproduce" && here.startsWith("/reproduce/")))
+          (href === "/reproduce" && here.startsWith("/reproduce/")) || (href === "/examples" && here.startsWith("/examples/")))
         a.setAttribute("aria-current", "page");
       links.append(a);
     } else {

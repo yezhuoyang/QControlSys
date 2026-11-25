@@ -155,6 +155,23 @@ function courseAsset(pathname) {
 }
 
 /**
+ * Examples: /examples is the list of calibration and runtime studies, /examples/<id> a study page
+ * (one template), /examples/data/<file> the study's content as riscq/calib/site.mjs wrote it
+ * (validation/calib/site/; only that folder is served). Exact routes above (/examples/*.json of the
+ * machine examples) are matched first.
+ */
+function examplesAsset(pathname) {
+  if (pathname !== "/examples" && !pathname.startsWith("/examples/")) return undefined;
+  const rest = pathname.slice("/examples".length).replace(/^\//, "");
+  if (rest.split("/").some((part) => part === ".." || !/^[A-Za-z0-9._-]*$/.test(part))) return undefined;
+  if (rest === "") return path.join("studio", "examples", "index.html");
+  if (rest.startsWith("data/")) return path.join("validation", "calib", "site", rest.slice(5));
+  if (path.extname(rest)) return path.join("studio", "examples", rest);
+  if (rest.includes("/") || !existsSync(path.join(root, "validation", "calib", "site", rest + ".json"))) return undefined;
+  return path.join("studio", "examples", "study.html");
+}
+
+/**
  * Reproductions: /reproduce is the list, /reproduce/<id> a paper page (one template), the page's
  * own files sit in studio/reproduce/, and /reproduce/data/<id>.json is that experiment's run
  * (validation/ftqvm/papers/, written by riscq/ftqvm/papers.mjs).
@@ -565,7 +582,7 @@ if (
           return reply(res, 200, "application/json", JSON.stringify({ error: error.message.split("\n")[0].slice(0, 600) }));
         }
       }
-      const asset = routes.get(url.pathname) ?? courseAsset(url.pathname) ?? reproduceAsset(url.pathname);
+      const asset = routes.get(url.pathname) ?? courseAsset(url.pathname) ?? reproduceAsset(url.pathname) ?? examplesAsset(url.pathname);
       // HEAD is answered like GET; Node sends the headers without the body.
       const read = req.method === "GET" || req.method === "HEAD";
       if (!read || !asset) {

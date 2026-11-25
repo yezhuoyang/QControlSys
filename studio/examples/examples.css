@@ -1,0 +1,2 @@
+.pager { display: flex; justify-content: space-between; gap: 16px; margin: 28px 0 8px; font-size: 14px; }
+.tbl table td code { font-size: 12px; }

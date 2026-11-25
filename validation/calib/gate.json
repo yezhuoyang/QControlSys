@@ -1,0 +1,6396 @@
+{
+ "generated": "2026-11-25T14:43:11.927Z",
+ "rows": [
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1222,
+   "late": 23,
+   "byKind": {
+    "route": {
+     "late": 23,
+     "maxOverrunNs": 20800
+    }
+   },
+   "desMakespanNs": 11149660,
+   "listedMakespanNs": 45221040,
+   "speedup": 4.05582233000827,
+   "firstLate": [
+    {
+     "uid": 237,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1096,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 307,
+     "kind": "route",
+     "line": 35
+    },
+    {
+     "uid": 186,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 11268,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 366,
+     "kind": "route",
+     "line": 34
+    },
+    {
+     "uid": 377,
+     "kind": "route",
+     "line": 45
+    }
+   ],
+   "seconds": 1.653
+  },
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1222,
+   "late": 143,
+   "byKind": {
+    "route": {
+     "late": 122,
+     "maxOverrunNs": 85574
+    },
+    "decode_syndrome": {
+     "late": 7,
+     "maxOverrunNs": null
+    },
+    "measure": {
+     "late": 14,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 8272000,
+   "listedMakespanNs": 45221040,
+   "speedup": 5.466760154738878,
+   "firstLate": [
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 8566,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 237,
+     "kind": "route",
+     "line": 25
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 12654,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 257,
+     "kind": "route",
+     "line": 45
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 8006,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.563
+  },
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1222,
+   "late": 42,
+   "byKind": {
+    "measure": {
+     "late": 25,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 12,
+     "maxOverrunNs": 11934
+    },
+    "decode_syndrome": {
+     "late": 5,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 8114520,
+   "listedMakespanNs": 38333880,
+   "speedup": 4.724109374306798,
+   "firstLate": [
+    {
+     "uid": 407,
+     "kind": "measure",
+     "line": 162
+    },
+    {
+     "uid": 264,
+     "kind": "measure",
+     "line": 52,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 268,
+     "kind": "measure",
+     "line": 56
+    },
+    {
+     "uid": 277,
+     "kind": "measure",
+     "line": 65
+    },
+    {
+     "uid": 136,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 8292,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.049
+  },
+  {
+   "program": "bell-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1222,
+   "late": 173,
+   "byKind": {
+    "route": {
+     "late": 111,
+     "maxOverrunNs": 94032
+    },
+    "measure": {
+     "late": 55,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 7,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 5443718,
+   "listedMakespanNs": 38333880,
+   "speedup": 7.041856319522797,
+   "firstLate": [
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 13692,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 407,
+     "kind": "measure",
+     "line": 162
+    },
+    {
+     "uid": 241,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 248,
+     "kind": "measure",
+     "line": 36,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 254,
+     "kind": "measure",
+     "line": 42
+    }
+   ],
+   "seconds": 1.64
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1222,
+   "late": 17,
+   "byKind": {
+    "route": {
+     "late": 17,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 70305890,
+   "listedMakespanNs": 153568470,
+   "speedup": 2.1842902493660206,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 210,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 390,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 391,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 169,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.698
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1222,
+   "late": 87,
+   "byKind": {
+    "route": {
+     "late": 80,
+     "maxOverrunNs": 1436400
+    },
+    "decode_syndrome": {
+     "late": 7,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 43311744,
+   "listedMakespanNs": 153568470,
+   "speedup": 3.545654268735981,
+   "firstLate": [
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 72
+    },
+    {
+     "uid": 138,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 177,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 318,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.545
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1222,
+   "late": 14,
+   "byKind": {
+    "route": {
+     "late": 14,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 70305890,
+   "listedMakespanNs": 153568470,
+   "speedup": 2.1842902493660206,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 210,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 390,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 391,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 169,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.076
+  },
+  {
+   "program": "bell-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1222,
+   "late": 94,
+   "byKind": {
+    "route": {
+     "late": 87,
+     "maxOverrunNs": 439000
+    },
+    "decode_syndrome": {
+     "late": 7,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 60131144,
+   "listedMakespanNs": 153568470,
+   "speedup": 2.5538923723120917,
+   "firstLate": [
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 72
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 183800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 120,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.183
+  },
+  {
+   "program": "bell-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1222,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 1936002,
+   "listedMakespanNs": 2167310,
+   "speedup": 1.1194771493004656,
+   "firstLate": [],
+   "seconds": 1.76
+  },
+  {
+   "program": "bell-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1222,
+   "late": 26,
+   "byKind": {
+    "measure": {
+     "late": 25,
+     "maxOverrunNs": 296
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 130
+    }
+   },
+   "desMakespanNs": 455956,
+   "listedMakespanNs": 2167310,
+   "speedup": 4.7533314618077185,
+   "firstLate": [
+    {
+     "uid": 44,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 130
+    },
+    {
+     "uid": 332,
+     "kind": "measure",
+     "line": 60,
+     "overrunNs": 162,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 380,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 276,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 392,
+     "kind": "measure",
+     "line": 60,
+     "overrunNs": 74,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.356
+  },
+  {
+   "program": "bell-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1222,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 158736,
+   "listedMakespanNs": 499364,
+   "speedup": 3.145877431710513,
+   "firstLate": [],
+   "seconds": 1.149
+  },
+  {
+   "program": "bell-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1222,
+   "late": 28,
+   "byKind": {
+    "measure": {
+     "late": 25,
+     "maxOverrunNs": 296
+    },
+    "decode_syndrome": {
+     "late": 3,
+     "maxOverrunNs": 164
+    }
+   },
+   "desMakespanNs": 124828,
+   "listedMakespanNs": 499364,
+   "speedup": 4.000416573204729,
+   "firstLate": [
+    {
+     "uid": 44,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 130
+    },
+    {
+     "uid": 332,
+     "kind": "measure",
+     "line": 60,
+     "overrunNs": 162,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 380,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 276,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 392,
+     "kind": "measure",
+     "line": 60,
+     "overrunNs": 74,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.287
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "error": "no free site for ancilla[261]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "error": "no free site for ancilla[255]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "error": "no free site for ancilla[251]"
+  },
+  {
+   "program": "bell-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "error": "no free site for ancilla[255]"
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 222,
+   "late": 5,
+   "byKind": {
+    "route": {
+     "late": 5,
+     "maxOverrunNs": 10208
+    }
+   },
+   "desMakespanNs": 3782360,
+   "listedMakespanNs": 9464200,
+   "speedup": 2.50219439714887,
+   "firstLate": [
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 6152,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 10208,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 198,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 6246,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 56,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.359
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 222,
+   "late": 13,
+   "byKind": {
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 82
+    },
+    "route": {
+     "late": 11,
+     "maxOverrunNs": 60562
+    }
+   },
+   "desMakespanNs": 3243026,
+   "listedMakespanNs": 9464200,
+   "speedup": 2.9183238123900335,
+   "firstLate": [
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 82
+    },
+    {
+     "uid": 111,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 40462,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 60562,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 127,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 42428,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 128,
+     "kind": "route",
+     "line": 45,
+     "overrunNs": 14220,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.369
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 222,
+   "late": 1,
+   "byKind": {
+    "route": {
+     "late": 1,
+     "maxOverrunNs": 3908
+    }
+   },
+   "desMakespanNs": 3039710,
+   "listedMakespanNs": 8424490,
+   "speedup": 2.7714782002230476,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 3908,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.349
+  },
+  {
+   "program": "dj-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 222,
+   "late": 20,
+   "byKind": {
+    "route": {
+     "late": 18,
+     "maxOverrunNs": 78638
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 2406002,
+   "listedMakespanNs": 8424490,
+   "speedup": 3.5014476297193435,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 1832,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 5286,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 8840,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 51,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 1122,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 67,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 3678,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.355
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 222,
+   "late": 2,
+   "byKind": {
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 63800
+    }
+   },
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642730,
+   "speedup": 1.2371338892706574,
+   "firstLate": [
+    {
+     "uid": 142,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 178,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.47
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 222,
+   "late": 14,
+   "byKind": {
+    "route": {
+     "late": 12,
+     "maxOverrunNs": 1181200
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 14224944,
+   "listedMakespanNs": 28642730,
+   "speedup": 2.0135566087290044,
+   "firstLate": [
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 72
+    },
+    {
+     "uid": 108,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 111,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 119,
+     "kind": "route",
+     "line": 36,
+     "overrunNs": 1181200,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.553
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": true,
+   "ops": 222,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642730,
+   "speedup": 1.2371338892706574,
+   "firstLate": [],
+   "seconds": 0.672
+  },
+  {
+   "program": "dj-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 222,
+   "late": 10,
+   "byKind": {
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    },
+    "route": {
+     "late": 8,
+     "maxOverrunNs": 375200
+    }
+   },
+   "desMakespanNs": 20775744,
+   "listedMakespanNs": 28642730,
+   "speedup": 1.3786620589857095,
+   "firstLate": [
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 72
+    },
+    {
+     "uid": 111,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 119,
+     "kind": "route",
+     "line": 36,
+     "overrunNs": 183800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 118,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 255200,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 129,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 375200,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.679
+  },
+  {
+   "program": "dj-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 222,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 151440,
+   "listedMakespanNs": 191064,
+   "speedup": 1.261648177496038,
+   "firstLate": [],
+   "seconds": 0.303
+  },
+  {
+   "program": "dj-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 222,
+   "late": 7,
+   "byKind": {
+    "measure": {
+     "late": 6,
+     "maxOverrunNs": 162
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 134
+    }
+   },
+   "desMakespanNs": 95076,
+   "listedMakespanNs": 191064,
+   "speedup": 2.0095923261390887,
+   "firstLate": [
+    {
+     "uid": 24,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 78,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 35,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 134
+    },
+    {
+     "uid": 131,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "measure",
+     "line": 55,
+     "overrunNs": 54,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.286
+  },
+  {
+   "program": "dj-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 222,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 61140,
+   "listedMakespanNs": 121032,
+   "speedup": 1.9795878312070658,
+   "firstLate": [],
+   "seconds": 0.311
+  },
+  {
+   "program": "dj-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 222,
+   "late": 8,
+   "byKind": {
+    "measure": {
+     "late": 6,
+     "maxOverrunNs": 162
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 302
+    }
+   },
+   "desMakespanNs": 59398,
+   "listedMakespanNs": 121032,
+   "speedup": 2.0376443651301392,
+   "firstLate": [
+    {
+     "uid": 24,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 78,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 35,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 134
+    },
+    {
+     "uid": 131,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "measure",
+     "line": 55,
+     "overrunNs": 54,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.317
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2364,
+   "late": 29,
+   "byKind": {
+    "measure": {
+     "late": 10,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 14,
+     "maxOverrunNs": 26626
+    },
+    "decode_syndrome": {
+     "late": 5,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 21190600,
+   "listedMakespanNs": 87631920,
+   "speedup": 4.13541475937444,
+   "firstLate": [
+    {
+     "uid": 421,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 428,
+     "kind": "measure",
+     "line": 36,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 438,
+     "kind": "measure",
+     "line": 46,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 486,
+     "kind": "route",
+     "line": 34
+    },
+    {
+     "uid": 585,
+     "kind": "decode_syndrome",
+     "line": 164,
+     "overrunNs": null
+    }
+   ],
+   "seconds": 3.182
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2364,
+   "late": 336,
+   "byKind": {
+    "route": {
+     "late": 273,
+     "maxOverrunNs": 127204
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": null
+    },
+    "measure": {
+     "late": 51,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 13205060,
+   "listedMakespanNs": 87631920,
+   "speedup": 6.636237926976477,
+   "firstLate": [
+    {
+     "uid": 14,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 60960,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 20958,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 28,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 18262,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 40890,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 57,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 3518,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.476
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2364,
+   "late": 63,
+   "byKind": {
+    "measure": {
+     "late": 48,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 8,
+     "maxOverrunNs": null
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 8066
+    }
+   },
+   "desMakespanNs": 14443190,
+   "listedMakespanNs": 72201360,
+   "speedup": 4.9989898353480084,
+   "firstLate": [
+    {
+     "uid": 421,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 428,
+     "kind": "measure",
+     "line": 36,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 434,
+     "kind": "measure",
+     "line": 42
+    },
+    {
+     "uid": 438,
+     "kind": "measure",
+     "line": 46,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 444,
+     "kind": "measure",
+     "line": 52,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 4.73
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2364,
+   "late": 408,
+   "byKind": {
+    "route": {
+     "late": 249,
+     "maxOverrunNs": 111042
+    },
+    "measure": {
+     "late": 146,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": null
+    },
+    "H": {
+     "late": 1,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 8091464,
+   "listedMakespanNs": 72201360,
+   "speedup": 8.923151607669514,
+   "firstLate": [
+    {
+     "uid": 14,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 10022,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 28,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 11678,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 7466,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 57,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 4292,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 18972,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.864
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2364,
+   "late": 109,
+   "byKind": {
+    "route": {
+     "late": 109,
+     "maxOverrunNs": 446600
+    }
+   },
+   "desMakespanNs": 94734240,
+   "listedMakespanNs": 276625600,
+   "speedup": 2.9200170920250166,
+   "firstLate": [
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 150,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 151,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 331,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 180,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 7.841
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2364,
+   "late": 190,
+   "byKind": {
+    "route": {
+     "late": 179,
+     "maxOverrunNs": 1500200
+    },
+    "decode_syndrome": {
+     "late": 11,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 58197010,
+   "listedMakespanNs": 276625600,
+   "speedup": 4.753261378892145,
+   "firstLate": [
+    {
+     "uid": 14,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 28,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 7600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 4.898
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2364,
+   "late": 3,
+   "byKind": {
+    "route": {
+     "late": 3,
+     "maxOverrunNs": 127600
+    }
+   },
+   "desMakespanNs": 118021240,
+   "listedMakespanNs": 341701600,
+   "speedup": 2.895255125263893,
+   "firstLate": [
+    {
+     "uid": 1626,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1797,
+     "kind": "route",
+     "line": 243,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1801,
+     "kind": "route",
+     "line": 236,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 7.984
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2364,
+   "late": 210,
+   "byKind": {
+    "route": {
+     "late": 199,
+     "maxOverrunNs": 694200
+    },
+    "decode_syndrome": {
+     "late": 11,
+     "maxOverrunNs": 82
+    }
+   },
+   "desMakespanNs": 85042542,
+   "listedMakespanNs": 341701600,
+   "speedup": 4.018007834243713,
+   "firstLate": [
+    {
+     "uid": 14,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 28,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 7600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 7.11
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 2364,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 6492208,
+   "listedMakespanNs": 6932312,
+   "speedup": 1.0677895717450827,
+   "firstLate": [],
+   "seconds": 2.836
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2364,
+   "late": 75,
+   "byKind": {
+    "measure": {
+     "late": 74,
+     "maxOverrunNs": 296
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 214
+    }
+   },
+   "desMakespanNs": 884334,
+   "listedMakespanNs": 6932312,
+   "speedup": 7.839020098740973,
+   "firstLate": [
+    {
+     "uid": 30,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 70,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 44,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 74,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 587,
+     "kind": "decode_syndrome",
+     "line": 166,
+     "overrunNs": 214
+    },
+    {
+     "uid": 435,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 128,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 541,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.604
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 2364,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 457184,
+   "listedMakespanNs": 1309352,
+   "speedup": 2.863949744522993,
+   "firstLate": [],
+   "seconds": 2.895
+  },
+  {
+   "program": "ghz3-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2364,
+   "late": 78,
+   "byKind": {
+    "measure": {
+     "late": 74,
+     "maxOverrunNs": 296
+    },
+    "decode_syndrome": {
+     "late": 4,
+     "maxOverrunNs": 2088
+    }
+   },
+   "desMakespanNs": 206298,
+   "listedMakespanNs": 1309352,
+   "speedup": 6.346896237481701,
+   "firstLate": [
+    {
+     "uid": 30,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 70,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 44,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 74,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 587,
+     "kind": "decode_syndrome",
+     "line": 166,
+     "overrunNs": 214
+    },
+    {
+     "uid": 435,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 128,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 541,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.021
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1752,
+   "late": 151,
+   "byKind": {
+    "route": {
+     "late": 117,
+     "maxOverrunNs": 67780
+    },
+    "measure": {
+     "late": 24,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 10,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 11258990,
+   "listedMakespanNs": 65402280,
+   "speedup": 5.808894048222798,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 9770,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 6246,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 2996,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 297,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 6152,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 318,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.283
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1752,
+   "late": 230,
+   "byKind": {
+    "route": {
+     "late": 180,
+     "maxOverrunNs": 83248
+    },
+    "measure": {
+     "late": 38,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 9376232,
+   "listedMakespanNs": 65402280,
+   "speedup": 6.975326549087096,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 18728,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 18262,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 288,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 15704,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 15506,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 291,
+     "kind": "route",
+     "line": 28
+    }
+   ],
+   "seconds": 2.941
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1752,
+   "late": 133,
+   "byKind": {
+    "route": {
+     "late": 60,
+     "maxOverrunNs": 32010
+    },
+    "measure": {
+     "late": 63,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 10,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 8539990,
+   "listedMakespanNs": 56341950,
+   "speedup": 6.597425758109787,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 4730,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 292,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 580,
+     "kind": "measure",
+     "line": 163
+    },
+    {
+     "uid": 309,
+     "kind": "measure",
+     "line": 46,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 319,
+     "kind": "measure",
+     "line": 56
+    }
+   ],
+   "seconds": 2.029
+  },
+  {
+   "program": "loop-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1752,
+   "late": 289,
+   "byKind": {
+    "route": {
+     "late": 171,
+     "maxOverrunNs": 101624
+    },
+    "measure": {
+     "late": 106,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 5531260,
+   "listedMakespanNs": 56341950,
+   "speedup": 10.186096838694981,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 4738,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 288,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 57194,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 9538,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 292,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 291,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 57194,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.96
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1752,
+   "late": 53,
+   "byKind": {
+    "route": {
+     "late": 53,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 62925650,
+   "listedMakespanNs": 246440430,
+   "speedup": 3.9163748010548955,
+   "firstLate": [
+    {
+     "uid": 322,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 358,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 141,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 142,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 595,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.323
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1752,
+   "late": 122,
+   "byKind": {
+    "route": {
+     "late": 110,
+     "maxOverrunNs": 1500200
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 35712542,
+   "listedMakespanNs": 246440430,
+   "speedup": 6.900668958261218,
+   "firstLate": [
+    {
+     "uid": 4,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 1053600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 288,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 291,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.994
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1752,
+   "late": 40,
+   "byKind": {
+    "route": {
+     "late": 40,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 62925650,
+   "listedMakespanNs": 246440430,
+   "speedup": 3.9163748010548955,
+   "firstLate": [
+    {
+     "uid": 118,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 141,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 171,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 178,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 610,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 5.264
+  },
+  {
+   "program": "loop-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1752,
+   "late": 132,
+   "byKind": {
+    "route": {
+     "late": 120,
+     "maxOverrunNs": 439000
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": 82
+    }
+   },
+   "desMakespanNs": 56144992,
+   "listedMakespanNs": 246440430,
+   "speedup": 4.389357291207736,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 151,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 288,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 183800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 298,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 579,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 72
+    }
+   ],
+   "seconds": 3.868
+  },
+  {
+   "program": "loop-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1752,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 3828256,
+   "listedMakespanNs": 4844580,
+   "speedup": 1.265479633545928,
+   "firstLate": [],
+   "seconds": 1.895
+  },
+  {
+   "program": "loop-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1752,
+   "late": 53,
+   "byKind": {
+    "measure": {
+     "late": 52,
+     "maxOverrunNs": 276
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 248
+    }
+   },
+   "desMakespanNs": 661024,
+   "listedMakespanNs": 4844580,
+   "speedup": 7.3289018250472,
+   "firstLate": [
+    {
+     "uid": 24,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 35,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 108,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 579,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 248
+    },
+    {
+     "uid": 421,
+     "kind": "measure",
+     "line": 37,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 427,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 216,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.811
+  },
+  {
+   "program": "loop-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1752,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 237822,
+   "listedMakespanNs": 899856,
+   "speedup": 3.7837374170598177,
+   "firstLate": [],
+   "seconds": 2.057
+  },
+  {
+   "program": "loop-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1752,
+   "late": 54,
+   "byKind": {
+    "measure": {
+     "late": 52,
+     "maxOverrunNs": 276
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 248
+    }
+   },
+   "desMakespanNs": 197056,
+   "listedMakespanNs": 899856,
+   "speedup": 4.566498863267294,
+   "firstLate": [
+    {
+     "uid": 24,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 35,
+     "kind": "measure",
+     "line": 153,
+     "overrunNs": 108,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 579,
+     "kind": "decode_syndrome",
+     "line": 162,
+     "overrunNs": 248
+    },
+    {
+     "uid": 421,
+     "kind": "measure",
+     "line": 37,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 427,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 216,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.182
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 606,
+   "late": 2,
+   "byKind": {
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 7934
+    }
+   },
+   "desMakespanNs": 7416840,
+   "listedMakespanNs": 22336370,
+   "speedup": 3.01157501038178,
+   "firstLate": [
+    {
+     "uid": 322,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 7934,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 432,
+     "kind": "route",
+     "line": 25
+    }
+   ],
+   "seconds": 0.743
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 606,
+   "late": 56,
+   "byKind": {
+    "route": {
+     "late": 52,
+     "maxOverrunNs": 70258
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    },
+    "measure": {
+     "late": 2,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 5322286,
+   "listedMakespanNs": 22336370,
+   "speedup": 4.1967624438070406,
+   "firstLate": [
+    {
+     "uid": 72,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 57730,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 38,
+     "kind": "route",
+     "line": 158,
+     "overrunNs": 20540,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 15396,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 92,
+     "kind": "route",
+     "line": 45,
+     "overrunNs": 28308,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 132,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 15704,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.724
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 606,
+   "late": 4,
+   "byKind": {
+    "measure": {
+     "late": 3,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 5622450,
+   "listedMakespanNs": 18759740,
+   "speedup": 3.336577470675595,
+   "firstLate": [
+    {
+     "uid": 436,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 464,
+     "kind": "measure",
+     "line": 57
+    },
+    {
+     "uid": 496,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 600,
+     "kind": "decode_syndrome",
+     "line": 167,
+     "overrunNs": null
+    }
+   ],
+   "seconds": 0.725
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 606,
+   "late": 60,
+   "byKind": {
+    "measure": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 45,
+     "maxOverrunNs": 88156
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 3707952,
+   "listedMakespanNs": 18759740,
+   "speedup": 5.059326550074003,
+   "firstLate": [
+    {
+     "uid": 256,
+     "kind": "measure",
+     "line": 29,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 602,
+     "kind": "measure",
+     "line": 169
+    },
+    {
+     "uid": 132,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 57194,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 135,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 57194,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 141,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 5416,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.673
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 606,
+   "late": 10,
+   "byKind": {
+    "route": {
+     "late": 10,
+     "maxOverrunNs": 127600
+    }
+   },
+   "desMakespanNs": 30459170,
+   "listedMakespanNs": 69610230,
+   "speedup": 2.285362010849278,
+   "firstLate": [
+    {
+     "uid": 166,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 346,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 202,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 213,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 214,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.014
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 606,
+   "late": 32,
+   "byKind": {
+    "route": {
+     "late": 31,
+     "maxOverrunNs": 1308800
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 18301888,
+   "listedMakespanNs": 69610230,
+   "speedup": 3.8034453057520623,
+   "firstLate": [
+    {
+     "uid": 57,
+     "kind": "route",
+     "line": 158,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 601,
+     "kind": "decode_syndrome",
+     "line": 168,
+     "overrunNs": 72
+    },
+    {
+     "uid": 132,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 135,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 333,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.111
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 606,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 448192,
+   "listedMakespanNs": 548668,
+   "speedup": 1.2241807082678853,
+   "firstLate": [],
+   "seconds": 0.867
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 606,
+   "late": 17,
+   "byKind": {
+    "measure": {
+     "late": 17,
+     "maxOverrunNs": 296
+    }
+   },
+   "desMakespanNs": 254926,
+   "listedMakespanNs": 548668,
+   "speedup": 2.1522637941991007,
+   "firstLate": [
+    {
+     "uid": 40,
+     "kind": "measure",
+     "line": 160,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 270,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 128,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 287,
+     "kind": "measure",
+     "line": 60,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 324,
+     "kind": "measure",
+     "line": 37,
+     "overrunNs": 108,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 330,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 296,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.956
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 606,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 113378,
+   "listedMakespanNs": 263244,
+   "speedup": 2.3218261038296673,
+   "firstLate": [],
+   "seconds": 0.898
+  },
+  {
+   "program": "measurement-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 606,
+   "late": 17,
+   "byKind": {
+    "measure": {
+     "late": 17,
+     "maxOverrunNs": 296
+    }
+   },
+   "desMakespanNs": 112214,
+   "listedMakespanNs": 263244,
+   "speedup": 2.3459104924519223,
+   "firstLate": [
+    {
+     "uid": 40,
+     "kind": "measure",
+     "line": 160,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 270,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 128,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 287,
+     "kind": "measure",
+     "line": 60,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 324,
+     "kind": "measure",
+     "line": 37,
+     "overrunNs": 108,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 330,
+     "kind": "measure",
+     "line": 43,
+     "overrunNs": 296,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.828
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 221,
+   "late": 5,
+   "byKind": {
+    "route": {
+     "late": 5,
+     "maxOverrunNs": 10208
+    }
+   },
+   "desMakespanNs": 3782360,
+   "listedMakespanNs": 9464010,
+   "speedup": 2.5021441639611246,
+   "firstLate": [
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 6152,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 10208,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 198,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 6246,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 56,
+     "overrunNs": 7062,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.383
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 221,
+   "late": 13,
+   "byKind": {
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 82
+    },
+    "route": {
+     "late": 11,
+     "maxOverrunNs": 60562
+    }
+   },
+   "desMakespanNs": 3243026,
+   "listedMakespanNs": 9464010,
+   "speedup": 2.91826522513233,
+   "firstLate": [
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 156,
+     "overrunNs": 82
+    },
+    {
+     "uid": 111,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 40462,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 60562,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 127,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 42428,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 128,
+     "kind": "route",
+     "line": 45,
+     "overrunNs": 14220,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.344
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 221,
+   "late": 1,
+   "byKind": {
+    "route": {
+     "late": 1,
+     "maxOverrunNs": 3908
+    }
+   },
+   "desMakespanNs": 3039710,
+   "listedMakespanNs": 8424300,
+   "speedup": 2.7714156942603076,
+   "firstLate": [
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 3908,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.345
+  },
+  {
+   "program": "memory-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 221,
+   "late": 20,
+   "byKind": {
+    "route": {
+     "late": 18,
+     "maxOverrunNs": 78638
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 2406002,
+   "listedMakespanNs": 8424300,
+   "speedup": 3.5013686605414294,
+   "firstLate": [
+    {
+     "uid": 11,
+     "kind": "route",
+     "line": 150,
+     "overrunNs": 1832,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 5286,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 8840,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 51,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 1122,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 67,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 3678,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.36
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 221,
+   "late": 2,
+   "byKind": {
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 63800
+    }
+   },
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642540,
+   "speedup": 1.2371256828099266,
+   "firstLate": [
+    {
+     "uid": 142,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 178,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.496
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 221,
+   "late": 14,
+   "byKind": {
+    "route": {
+     "late": 12,
+     "maxOverrunNs": 1181200
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 14224944,
+   "listedMakespanNs": 28642540,
+   "speedup": 2.0135432519101655,
+   "firstLate": [
+    {
+     "uid": 15,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 156,
+     "overrunNs": 72
+    },
+    {
+     "uid": 108,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 111,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 119,
+     "kind": "route",
+     "line": 36,
+     "overrunNs": 1181200,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.495
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": true,
+   "ops": 221,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 23152490,
+   "listedMakespanNs": 28642540,
+   "speedup": 1.2371256828099266,
+   "firstLate": [],
+   "seconds": 0.601
+  },
+  {
+   "program": "memory-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 221,
+   "late": 10,
+   "byKind": {
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    },
+    "route": {
+     "late": 8,
+     "maxOverrunNs": 375200
+    }
+   },
+   "desMakespanNs": 20775744,
+   "listedMakespanNs": 28642540,
+   "speedup": 1.3786529137055212,
+   "firstLate": [
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 156,
+     "overrunNs": 72
+    },
+    {
+     "uid": 111,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 119,
+     "kind": "route",
+     "line": 36,
+     "overrunNs": 183800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 118,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 255200,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 129,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 375200,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.631
+  },
+  {
+   "program": "memory-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 221,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 151440,
+   "listedMakespanNs": 190882,
+   "speedup": 1.260446381405177,
+   "firstLate": [],
+   "seconds": 0.268
+  },
+  {
+   "program": "memory-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 221,
+   "late": 7,
+   "byKind": {
+    "measure": {
+     "late": 6,
+     "maxOverrunNs": 162
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 134
+    }
+   },
+   "desMakespanNs": 95076,
+   "listedMakespanNs": 190882,
+   "speedup": 2.0076780680718582,
+   "firstLate": [
+    {
+     "uid": 24,
+     "kind": "measure",
+     "line": 152,
+     "overrunNs": 78,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 35,
+     "kind": "measure",
+     "line": 152,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 156,
+     "overrunNs": 134
+    },
+    {
+     "uid": 131,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "measure",
+     "line": 55,
+     "overrunNs": 54,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.256
+  },
+  {
+   "program": "memory-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 221,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 61140,
+   "listedMakespanNs": 120850,
+   "speedup": 1.9766110565914294,
+   "firstLate": [],
+   "seconds": 0.247
+  },
+  {
+   "program": "memory-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 221,
+   "late": 8,
+   "byKind": {
+    "measure": {
+     "late": 6,
+     "maxOverrunNs": 162
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 302
+    }
+   },
+   "desMakespanNs": 59398,
+   "listedMakespanNs": 120850,
+   "speedup": 2.034580288898616,
+   "firstLate": [
+    {
+     "uid": 24,
+     "kind": "measure",
+     "line": 152,
+     "overrunNs": 78,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 35,
+     "kind": "measure",
+     "line": 152,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 217,
+     "kind": "decode_syndrome",
+     "line": 156,
+     "overrunNs": 134
+    },
+    {
+     "uid": 131,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "measure",
+     "line": 55,
+     "overrunNs": 54,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.277
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1013,
+   "late": 18,
+   "byKind": {
+    "measure": {
+     "late": 10,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 10226
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 8022840,
+   "listedMakespanNs": 19553130,
+   "speedup": 2.4371830922715647,
+   "firstLate": [
+    {
+     "uid": 300,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 301,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 313,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 327,
+     "kind": "route",
+     "line": 84,
+     "overrunNs": 10226,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 488,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.105
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1013,
+   "late": 124,
+   "byKind": {
+    "route": {
+     "late": 102,
+     "maxOverrunNs": 69580
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    },
+    "measure": {
+     "late": 20,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 5924908,
+   "listedMakespanNs": 19553130,
+   "speedup": 3.300157572066942,
+   "firstLate": [
+    {
+     "uid": 17,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 18262,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 1726,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 30,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 12506,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 39,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 8548,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 52,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 49940,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.092
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1013,
+   "late": 23,
+   "byKind": {
+    "measure": {
+     "late": 20,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 2,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 5986720,
+   "listedMakespanNs": 16567130,
+   "speedup": 2.7673133201485958,
+   "firstLate": [
+    {
+     "uid": 300,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 301,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 313,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 488,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 487,
+     "kind": "route",
+     "line": 56
+    }
+   ],
+   "seconds": 1.037
+  },
+  {
+   "program": "memory-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1013,
+   "late": 154,
+   "byKind": {
+    "route": {
+     "late": 96,
+     "maxOverrunNs": 87366
+    },
+    "measure": {
+     "late": 56,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 4161742,
+   "listedMakespanNs": 16567130,
+   "speedup": 3.980816206290539,
+   "firstLate": [
+    {
+     "uid": 17,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 56,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 30,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 7426,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 39,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 15308,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 105,
+     "kind": "route",
+     "line": 50,
+     "overrunNs": 3622,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 110,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 24664,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.461
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1013,
+   "late": 16,
+   "byKind": {
+    "route": {
+     "late": 16,
+     "maxOverrunNs": 191400
+    }
+   },
+   "desMakespanNs": 47683900,
+   "listedMakespanNs": 70074380,
+   "speedup": 1.469560585438691,
+   "firstLate": [
+    {
+     "uid": 356,
+     "kind": "route",
+     "line": 113,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 390,
+     "kind": "route",
+     "line": 147,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 419,
+     "kind": "route",
+     "line": 176,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 607,
+     "kind": "route",
+     "line": 176,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 707,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 4.007
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1013,
+   "late": 53,
+   "byKind": {
+    "route": {
+     "late": 51,
+     "maxOverrunNs": 1500200
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 42802346,
+   "listedMakespanNs": 70074380,
+   "speedup": 1.637162131253273,
+   "firstLate": [
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 30,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 52,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 255200,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 56,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 7600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1009,
+     "kind": "decode_syndrome",
+     "line": 414,
+     "overrunNs": 72
+    }
+   ],
+   "seconds": 1.959
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1013,
+   "late": 3,
+   "byKind": {
+    "route": {
+     "late": 3,
+     "maxOverrunNs": 255200
+    }
+   },
+   "desMakespanNs": 43600700,
+   "listedMakespanNs": 64332380,
+   "speedup": 1.4754896136988627,
+   "firstLate": [
+    {
+     "uid": 331,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 546,
+     "kind": "route",
+     "line": 115,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 707,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 255200,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.509
+  },
+  {
+   "program": "memory-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1013,
+   "late": 63,
+   "byKind": {
+    "route": {
+     "late": 61,
+     "maxOverrunNs": 502800
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 37746346,
+   "listedMakespanNs": 64332380,
+   "speedup": 1.704333977121918,
+   "firstLate": [
+    {
+     "uid": 26,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 30,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 52,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 56,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 191400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 65,
+     "kind": "route",
+     "line": 408,
+     "overrunNs": 120000,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.536
+  },
+  {
+   "program": "memory-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1013,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 780096,
+   "listedMakespanNs": 864626,
+   "speedup": 1.10835845844614,
+   "firstLate": [],
+   "seconds": 1.28
+  },
+  {
+   "program": "memory-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1013,
+   "late": 26,
+   "byKind": {
+    "measure": {
+     "late": 26,
+     "maxOverrunNs": 296
+    }
+   },
+   "desMakespanNs": 426936,
+   "listedMakespanNs": 864626,
+   "speedup": 2.025188787078157,
+   "firstLate": [
+    {
+     "uid": 15,
+     "kind": "measure",
+     "line": 410,
+     "overrunNs": 276,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 54,
+     "kind": "measure",
+     "line": 410,
+     "overrunNs": 162,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 315,
+     "kind": "measure",
+     "line": 72,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 325,
+     "kind": "measure",
+     "line": 82,
+     "overrunNs": 216,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 334,
+     "kind": "measure",
+     "line": 91,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.734
+  },
+  {
+   "program": "memory-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1013,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 239286,
+   "listedMakespanNs": 485366,
+   "speedup": 2.0283928019190425,
+   "firstLate": [],
+   "seconds": 1.749
+  },
+  {
+   "program": "memory-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1013,
+   "late": 27,
+   "byKind": {
+    "measure": {
+     "late": 26,
+     "maxOverrunNs": 296
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 76
+    }
+   },
+   "desMakespanNs": 236456,
+   "listedMakespanNs": 485366,
+   "speedup": 2.0526694184118823,
+   "firstLate": [
+    {
+     "uid": 15,
+     "kind": "measure",
+     "line": 410,
+     "overrunNs": 276,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 54,
+     "kind": "measure",
+     "line": 410,
+     "overrunNs": 162,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 315,
+     "kind": "measure",
+     "line": 72,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 325,
+     "kind": "measure",
+     "line": 82,
+     "overrunNs": 216,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 334,
+     "kind": "measure",
+     "line": 91,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.597
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2720,
+   "late": 63,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "measure": {
+     "late": 15,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 12,
+     "maxOverrunNs": null
+    },
+    "route": {
+     "late": 22,
+     "maxOverrunNs": 23962
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 22233710,
+   "listedMakespanNs": 102928200,
+   "speedup": 4.629375844157363,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 4.849
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2720,
+   "late": 430,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "CNOT": {
+     "late": 8,
+     "maxOverrunNs": 0
+    },
+    "measure": {
+     "late": 100,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 291,
+     "maxOverrunNs": 126664
+    },
+    "decode_syndrome": {
+     "late": 16,
+     "maxOverrunNs": null
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": null
+    },
+    "H": {
+     "late": 1,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 15257734,
+   "listedMakespanNs": 102928200,
+   "speedup": 6.745968962363611,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 4.64
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2720,
+   "late": 123,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "CNOT": {
+     "late": 5,
+     "maxOverrunNs": 0
+    },
+    "measure": {
+     "late": 81,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 13,
+     "maxOverrunNs": null
+    },
+    "route": {
+     "late": 8,
+     "maxOverrunNs": 5320
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": null
+    },
+    "H": {
+     "late": 2,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 16600060,
+   "listedMakespanNs": 86239320,
+   "speedup": 5.195120981490429,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 3.46
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2720,
+   "late": 525,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "CNOT": {
+     "late": 20,
+     "maxOverrunNs": 0
+    },
+    "measure": {
+     "late": 200,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 272,
+     "maxOverrunNs": 107910
+    },
+    "H": {
+     "late": 4,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 16,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 10916760,
+   "listedMakespanNs": 86239320,
+   "speedup": 7.899717498598485,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 3.469
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2720,
+   "late": 20,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 382800
+    }
+   },
+   "desMakespanNs": 99767840,
+   "listedMakespanNs": 377689940,
+   "speedup": 3.7856882538501386,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 6.721
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2720,
+   "late": 237,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 206,
+     "maxOverrunNs": 1627800
+    },
+    "CNOT": {
+     "late": 1,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 15,
+     "maxOverrunNs": 82
+    },
+    "H": {
+     "late": 2,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 47239272,
+   "listedMakespanNs": 377689940,
+   "speedup": 7.995253186797629,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 6.19
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2720,
+   "late": 20,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 382800
+    }
+   },
+   "desMakespanNs": 99767840,
+   "listedMakespanNs": 377689940,
+   "speedup": 3.7856882538501386,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 8.321
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2720,
+   "late": 248,
+   "byKind": {
+    "request_ancilla": {
+     "late": 13,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 219,
+     "maxOverrunNs": 694200
+    },
+    "decode_syndrome": {
+     "late": 16,
+     "maxOverrunNs": 82
+    }
+   },
+   "desMakespanNs": 75901738,
+   "listedMakespanNs": 377689940,
+   "speedup": 4.976038098099941,
+   "firstLate": [
+    {
+     "uid": 408,
+     "kind": "request_ancilla",
+     "line": 13
+    },
+    {
+     "uid": 409,
+     "kind": "request_ancilla",
+     "line": 14
+    },
+    {
+     "uid": 410,
+     "kind": "request_ancilla",
+     "line": 15
+    },
+    {
+     "uid": 411,
+     "kind": "request_ancilla",
+     "line": 16
+    },
+    {
+     "uid": 412,
+     "kind": "request_ancilla",
+     "line": 17
+    }
+   ],
+   "seconds": 8.642
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2720,
+   "late": 5,
+   "byKind": {
+    "H": {
+     "late": 4,
+     "maxOverrunNs": 4
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 7505310,
+   "listedMakespanNs": 8156224,
+   "speedup": 1.0867271305249218,
+   "firstLate": [
+    {
+     "uid": 236,
+     "kind": "H",
+     "line": 83,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 237,
+     "kind": "H",
+     "line": 84,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 238,
+     "kind": "H",
+     "line": 85,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 239,
+     "kind": "H",
+     "line": 86,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 1175,
+     "kind": "request_magic",
+     "line": 198,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 2
+    }
+   ],
+   "seconds": 4.383
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2720,
+   "late": 88,
+   "byKind": {
+    "H": {
+     "late": 5,
+     "maxOverrunNs": 4
+    },
+    "measure": {
+     "late": 79,
+     "maxOverrunNs": 296
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 22
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": 0
+    },
+    "request_ancilla": {
+     "late": 2,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 1037236,
+   "listedMakespanNs": 8156224,
+   "speedup": 7.863421632106869,
+   "firstLate": [
+    {
+     "uid": 236,
+     "kind": "H",
+     "line": 83,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 237,
+     "kind": "H",
+     "line": 84,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 238,
+     "kind": "H",
+     "line": 85,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 239,
+     "kind": "H",
+     "line": 86,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 33,
+     "kind": "measure",
+     "line": 158,
+     "overrunNs": 296,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.403
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": false,
+   "ops": 2720,
+   "late": 5,
+   "byKind": {
+    "H": {
+     "late": 4,
+     "maxOverrunNs": 4
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 592952,
+   "listedMakespanNs": 1666144,
+   "speedup": 2.80991378728801,
+   "firstLate": [
+    {
+     "uid": 236,
+     "kind": "H",
+     "line": 83,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 237,
+     "kind": "H",
+     "line": 84,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 238,
+     "kind": "H",
+     "line": 85,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 239,
+     "kind": "H",
+     "line": 86,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 1175,
+     "kind": "request_magic",
+     "line": 198,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 2
+    }
+   ],
+   "seconds": 3.575
+  },
+  {
+   "program": "tinject-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 2720,
+   "late": 92,
+   "byKind": {
+    "H": {
+     "late": 5,
+     "maxOverrunNs": 4
+    },
+    "decode_syndrome": {
+     "late": 5,
+     "maxOverrunNs": 7614
+    },
+    "measure": {
+     "late": 79,
+     "maxOverrunNs": 296
+    },
+    "request_magic": {
+     "late": 1,
+     "maxOverrunNs": 0
+    },
+    "request_ancilla": {
+     "late": 2,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 329080,
+   "listedMakespanNs": 1666144,
+   "speedup": 5.063036343746202,
+   "firstLate": [
+    {
+     "uid": 236,
+     "kind": "H",
+     "line": 83,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 237,
+     "kind": "H",
+     "line": 84,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 238,
+     "kind": "H",
+     "line": 85,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 239,
+     "kind": "H",
+     "line": 86,
+     "overrunNs": 4,
+     "late": 1,
+     "overlap": 1
+    },
+    {
+     "uid": 588,
+     "kind": "decode_syndrome",
+     "line": 167,
+     "overrunNs": 36
+    }
+   ],
+   "seconds": 4.298
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 411,
+   "late": 4,
+   "byKind": {
+    "route": {
+     "late": 4,
+     "maxOverrunNs": 11240
+    }
+   },
+   "desMakespanNs": 5372890,
+   "listedMakespanNs": 15150340,
+   "speedup": 2.819774832538913,
+   "firstLate": [
+    {
+     "uid": 186,
+     "kind": "route",
+     "line": 34,
+     "overrunNs": 10168,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 196,
+     "kind": "route",
+     "line": 44,
+     "overrunNs": 9988,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 207,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 11240,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 387,
+     "kind": "route",
+     "line": 55,
+     "overrunNs": 408,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.73
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 411,
+   "late": 41,
+   "byKind": {
+    "route": {
+     "late": 38,
+     "maxOverrunNs": 69640
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    },
+    "measure": {
+     "late": 1,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 4032688,
+   "listedMakespanNs": 15150340,
+   "speedup": 3.7568837460274636,
+   "firstLate": [
+    {
+     "uid": 4,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 574,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 11286,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 7374,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 57,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 2572,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 8006,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.823
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 411,
+   "late": 2,
+   "byKind": {
+    "measure": {
+     "late": 1,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 4210040,
+   "listedMakespanNs": 13212100,
+   "speedup": 3.138236216282981,
+   "firstLate": [
+    {
+     "uid": 277,
+     "kind": "measure",
+     "line": 65
+    },
+    {
+     "uid": 405,
+     "kind": "decode_syndrome",
+     "line": 160,
+     "overrunNs": null
+    }
+   ],
+   "seconds": 1.046
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 411,
+   "late": 42,
+   "byKind": {
+    "route": {
+     "late": 33,
+     "maxOverrunNs": 94032
+    },
+    "measure": {
+     "late": 7,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 2746452,
+   "listedMakespanNs": 13212100,
+   "speedup": 4.810606557114415,
+   "firstLate": [
+    {
+     "uid": 28,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 5068,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 42,
+     "kind": "route",
+     "line": 153,
+     "overrunNs": 18514,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 407,
+     "kind": "measure",
+     "line": 162
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 54756,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 120,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 68792,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.884
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 411,
+   "late": 7,
+   "byKind": {
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 191400
+    }
+   },
+   "desMakespanNs": 26039960,
+   "listedMakespanNs": 48985940,
+   "speedup": 1.8811833812340726,
+   "firstLate": [
+    {
+     "uid": 150,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 151,
+     "kind": "route",
+     "line": 59,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 180,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.252
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 411,
+   "late": 21,
+   "byKind": {
+    "route": {
+     "late": 19,
+     "maxOverrunNs": 1372600
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 17667010,
+   "listedMakespanNs": 48985940,
+   "speedup": 2.7727351713730846,
+   "firstLate": [
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 72
+    },
+    {
+     "uid": 297,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 138,
+     "kind": "route",
+     "line": 46,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 177,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 1117400,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.564
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 411,
+   "late": 7,
+   "byKind": {
+    "route": {
+     "late": 7,
+     "maxOverrunNs": 191400
+    }
+   },
+   "desMakespanNs": 26039960,
+   "listedMakespanNs": 48985940,
+   "speedup": 1.8811833812340726,
+   "firstLate": [
+    {
+     "uid": 127,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 150,
+     "kind": "route",
+     "line": 58,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 180,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 187,
+     "kind": "route",
+     "line": 35,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 199,
+     "kind": "route",
+     "line": 47,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.969
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 411,
+   "late": 28,
+   "byKind": {
+    "route": {
+     "late": 26,
+     "maxOverrunNs": 319000
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 23171810,
+   "listedMakespanNs": 48985940,
+   "speedup": 2.1140316617476147,
+   "firstLate": [
+    {
+     "uid": 32,
+     "kind": "route",
+     "line": 143,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 72
+    },
+    {
+     "uid": 117,
+     "kind": "route",
+     "line": 25,
+     "overrunNs": 183800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 120,
+     "kind": "route",
+     "line": 28,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 128,
+     "kind": "route",
+     "line": 36,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 1.856
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 411,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 298400,
+   "listedMakespanNs": 368450,
+   "speedup": 1.2347520107238605,
+   "firstLate": [],
+   "seconds": 0.722
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 411,
+   "late": 19,
+   "byKind": {
+    "measure": {
+     "late": 18,
+     "maxOverrunNs": 276
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": 190
+    }
+   },
+   "desMakespanNs": 172850,
+   "listedMakespanNs": 368450,
+   "speedup": 2.1316170089673125,
+   "firstLate": [
+    {
+     "uid": 30,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 54,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 44,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 50,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 190
+    },
+    {
+     "uid": 249,
+     "kind": "measure",
+     "line": 37,
+     "overrunNs": 78,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 260,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 276,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.765
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 411,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 68072,
+   "listedMakespanNs": 155906,
+   "speedup": 2.290310259724997,
+   "firstLate": [],
+   "seconds": 0.764
+  },
+  {
+   "program": "zzmerge-d3",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 411,
+   "late": 20,
+   "byKind": {
+    "measure": {
+     "late": 18,
+     "maxOverrunNs": 276
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 190
+    }
+   },
+   "desMakespanNs": 65816,
+   "listedMakespanNs": 155906,
+   "speedup": 2.368816093351161,
+   "firstLate": [
+    {
+     "uid": 30,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 54,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 44,
+     "kind": "measure",
+     "line": 155,
+     "overrunNs": 50,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 406,
+     "kind": "decode_syndrome",
+     "line": 161,
+     "overrunNs": 190
+    },
+    {
+     "uid": 249,
+     "kind": "measure",
+     "line": 37,
+     "overrunNs": 78,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 260,
+     "kind": "measure",
+     "line": 48,
+     "overrunNs": 276,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 0.798
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1979,
+   "late": 36,
+   "byKind": {
+    "measure": {
+     "late": 10,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 25,
+     "maxOverrunNs": 29168
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 14507410,
+   "listedMakespanNs": 33280660,
+   "speedup": 2.294045594630606,
+   "firstLate": [
+    {
+     "uid": 326,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 338,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 511,
+     "kind": "route",
+     "line": 55
+    },
+    {
+     "uid": 526,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 523,
+     "kind": "route",
+     "line": 67
+    }
+   ],
+   "seconds": 3.132
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-moving",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1979,
+   "late": 284,
+   "byKind": {
+    "route": {
+     "late": 212,
+     "maxOverrunNs": 109400
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    },
+    "measure": {
+     "late": 70,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 8637862,
+   "listedMakespanNs": 33280660,
+   "speedup": 3.8528816505751076,
+   "firstLate": [
+    {
+     "uid": 22,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 12568,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 40,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 1622,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 54,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 12654,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 72,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 15564,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 130,
+     "kind": "route",
+     "line": 50,
+     "overrunNs": 350,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.694
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1979,
+   "late": 84,
+   "byKind": {
+    "measure": {
+     "late": 65,
+     "maxOverrunNs": 0
+    },
+    "route": {
+     "late": 18,
+     "maxOverrunNs": 10828
+    },
+    "decode_syndrome": {
+     "late": 1,
+     "maxOverrunNs": null
+    }
+   },
+   "desMakespanNs": 9328930,
+   "listedMakespanNs": 26536060,
+   "speedup": 2.8444912760627425,
+   "firstLate": [
+    {
+     "uid": 325,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 326,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 338,
+     "kind": "measure",
+     "line": 70,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 339,
+     "kind": "measure",
+     "line": 71,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 348,
+     "kind": "measure",
+     "line": 80
+    }
+   ],
+   "seconds": 3.06
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "neutral",
+   "design": "atoms-static",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1979,
+   "late": 344,
+   "byKind": {
+    "route": {
+     "late": 194,
+     "maxOverrunNs": 110656
+    },
+    "measure": {
+     "late": 146,
+     "maxOverrunNs": 0
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": null
+    },
+    "CNOT": {
+     "late": 2,
+     "maxOverrunNs": 0
+    }
+   },
+   "desMakespanNs": 4742086,
+   "listedMakespanNs": 26536060,
+   "speedup": 5.5958622429032285,
+   "firstLate": [
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 7048,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 22,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 10734,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 54,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 7886,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1975,
+     "kind": "measure",
+     "line": 422
+    },
+    {
+     "uid": 317,
+     "kind": "route",
+     "line": 49,
+     "overrunNs": 59824,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 2.59
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1979,
+   "late": 34,
+   "byKind": {
+    "route": {
+     "late": 34,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 67627770,
+   "listedMakespanNs": 124241060,
+   "speedup": 1.8371308117952136,
+   "firstLate": [
+    {
+     "uid": 356,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 380,
+     "kind": "route",
+     "line": 112,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 381,
+     "kind": "route",
+     "line": 113,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 415,
+     "kind": "route",
+     "line": 147,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 5.65
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-modules",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1979,
+   "late": 130,
+   "byKind": {
+    "route": {
+     "late": 128,
+     "maxOverrunNs": 1500200
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 82
+    }
+   },
+   "desMakespanNs": 59651478,
+   "listedMakespanNs": 124241060,
+   "speedup": 2.082782592578846,
+   "firstLate": [
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 120000,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 22,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 247600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 40,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 90,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 1053600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 1974,
+     "kind": "decode_syndrome",
+     "line": 421,
+     "overrunNs": 72
+    }
+   ],
+   "seconds": 5.905
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "spec",
+   "conforms": false,
+   "ops": 1979,
+   "late": 26,
+   "byKind": {
+    "route": {
+     "late": 26,
+     "maxOverrunNs": 319000
+    }
+   },
+   "desMakespanNs": 67627770,
+   "listedMakespanNs": 124241060,
+   "speedup": 1.8371308117952136,
+   "firstLate": [
+    {
+     "uid": 412,
+     "kind": "route",
+     "line": 144,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 525,
+     "kind": "route",
+     "line": 69,
+     "overrunNs": 127600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 545,
+     "kind": "route",
+     "line": 89,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 544,
+     "kind": "route",
+     "line": 88,
+     "overrunNs": 319000,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 603,
+     "kind": "route",
+     "line": 147,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 5.242
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "qccd",
+   "design": "ions-qccd",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1979,
+   "late": 180,
+   "byKind": {
+    "route": {
+     "late": 178,
+     "maxOverrunNs": 638000
+    },
+    "decode_syndrome": {
+     "late": 2,
+     "maxOverrunNs": 72
+    }
+   },
+   "desMakespanNs": 53494812,
+   "listedMakespanNs": 124241060,
+   "speedup": 2.3224880199597675,
+   "firstLate": [
+    {
+     "uid": 18,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 120000,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 22,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 247600,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 40,
+     "kind": "route",
+     "line": 399,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 54,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 72,
+     "kind": "route",
+     "line": 413,
+     "overrunNs": 63800,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 5.749
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1979,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 1553816,
+   "listedMakespanNs": 1708278,
+   "speedup": 1.0994081667327407,
+   "firstLate": [],
+   "seconds": 3.523
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "superconducting",
+   "design": "sc-A",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1979,
+   "late": 77,
+   "byKind": {
+    "measure": {
+     "late": 77,
+     "maxOverrunNs": 296
+    }
+   },
+   "desMakespanNs": 834286,
+   "listedMakespanNs": 1708278,
+   "speedup": 2.0475927919202768,
+   "firstLate": [
+    {
+     "uid": 529,
+     "kind": "measure",
+     "line": 73,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 701,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 196,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 702,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 218,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 574,
+     "kind": "measure",
+     "line": 118,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 607,
+     "kind": "measure",
+     "line": 151,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 3.461
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "spec",
+   "conforms": true,
+   "ops": 1979,
+   "late": 0,
+   "byKind": {},
+   "desMakespanNs": 267460,
+   "listedMakespanNs": 567258,
+   "speedup": 2.120907799297091,
+   "firstLate": [],
+   "seconds": 3.847
+  },
+  {
+   "program": "zzmerge-d5",
+   "platform": "superconducting",
+   "design": "sc-B",
+   "which": "measured",
+   "conforms": false,
+   "ops": 1979,
+   "late": 77,
+   "byKind": {
+    "measure": {
+     "late": 77,
+     "maxOverrunNs": 296
+    }
+   },
+   "desMakespanNs": 262886,
+   "listedMakespanNs": 567258,
+   "speedup": 2.1578098491361275,
+   "firstLate": [
+    {
+     "uid": 529,
+     "kind": "measure",
+     "line": 73,
+     "overrunNs": 0,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 701,
+     "kind": "measure",
+     "line": 57,
+     "overrunNs": 196,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 702,
+     "kind": "measure",
+     "line": 58,
+     "overrunNs": 218,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 574,
+     "kind": "measure",
+     "line": 118,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    },
+    {
+     "uid": 607,
+     "kind": "measure",
+     "line": 151,
+     "overrunNs": 158,
+     "late": 0,
+     "overlap": 0
+    }
+   ],
+   "seconds": 5.195
+  }
+ ]
+}

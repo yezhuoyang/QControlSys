@@ -1,0 +1,79 @@
+{
+ "id": "scale",
+ "title": "Control hardware at scale",
+ "kicker": "Scale · surface-code patches",
+ "summary": "What one rotated surface-code patch at large distance asks of a RISC-Q control system with one core per transmon, at the rates measured in the other examples.",
+ "method": [
+  "Arithmetic on measured rates, not a simulation: 14 cores per ZCU216 board (one demodulator per core), a hub of 500 bits/µs per board, a lane of 3.1 bits/µs between boards, and the compiled decoder's median of 750 ns per syndrome bit (d = 5, 4 rounds, p = 10⁻³). A syndrome round every microsecond."
+ ],
+ "sections": [
+  {
+   "heading": "One patch",
+   "table": {
+    "head": [
+     "d",
+     "Transmons",
+     "Boards",
+     "Syndrome bits/µs",
+     "Lanes to carry them off a board",
+     "Firmware decoder cores to keep up",
+     "10-round window, one core (ms)"
+    ],
+    "rows": [
+     [
+      11,
+      "241",
+      "18",
+      "120",
+      "39",
+      "90",
+      "0.90"
+     ],
+     [
+      15,
+      "449",
+      "33",
+      "224",
+      "72",
+      "168",
+      "1.68"
+     ],
+     [
+      21,
+      "881",
+      "63",
+      "440",
+      "141",
+      "330",
+      "3.30"
+     ],
+     [
+      27,
+      "1,457",
+      "105",
+      "728",
+      "233",
+      "546",
+      "5.46"
+     ],
+     [
+      35,
+      "2,449",
+      "175",
+      "1,224",
+      "392",
+      "918",
+      "9.18"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "A large patch spans dozens to hundreds of boards, so its syndrome stream has to cross boards. A lane that carries one bit per frame is two to three orders of magnitude short: control hardware at this scale needs syndrome bits packed into lane words, or decoding inside each board with a hierarchy above it.",
+  "A firmware decoder on control cores would need hundreds of cores per patch and milliseconds per decoding window. Large machines need dedicated decoder logic, roughly 500 times faster per unit, which FPGA union-find decoders reach."
+ ],
+ "command": "node riscq/calib/site.mjs",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.418Z"
+}

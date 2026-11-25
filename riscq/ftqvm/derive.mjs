@@ -142,7 +142,7 @@ export function roundContracts(listing, placement, report) {
  * Returns { iterations: [{ spec, verdict, report, sites, listing, placement, design, ... }], final }.
  */
 export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = {}, code = "surface", distance = 3, baseMachine,
-  maxIterations = 5, dir = join(tmpdir(), "quantumos-derive-" + process.pid + "-" + Date.now()), outcomes = {}, contracts = true, staged = false, compileOptions = [] }) {
+  maxIterations = 5, dir = join(tmpdir(), "quantumos-derive-" + process.pid + "-" + Date.now()), outcomes = {}, contracts = true, staged = false, compileOptions = [], runtimeNs = 1_000_000_000 }) {
   const baseText = readFileSync(baseMachine, "utf8");
   const base = specText.parseMachine(baseText);
   let factories = specText.parseFactories(baseText);
@@ -163,8 +163,8 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
   const witness = Object.fromEntries((/^witness\s+(.+)$/m.exec(readFileSync(qec, "utf8"))?.[1] ?? "").split(",").map((x) => x.trim().split("=")).filter((x) => x.length === 2).map(([k, v]) => [k, Number(v)]));
   if (missing.length) await formalrv.prepareQec(qppm, qec, { code, distance, specialize: { ...specialize, ...Object.fromEntries(missing.map((k) => [k, witness[k] ?? 1])) } });
   const gadgets = await formalrv.discoverGadgets(qec, { dir, name: "discover", staged, options: compileOptions,
-    machine: specText.machineText({ machine: specFor({}, capacities, base, { gridNs }).machine, factories }),
-    sysspecFor: (names) => specText.sysspecText(specFor({}, capacities, base, { gadgets: names, gridNs })) });
+    machine: specText.machineText({ machine: specFor({}, capacities, base, { gridNs, runtimeNs }).machine, factories }),
+    sysspecFor: (names) => specText.sysspecText(specFor({}, capacities, base, { gadgets: names, gridNs, runtimeNs })) });
   const iterations = [];
   let factoryMeasured = false;
   const attempt = async (spec, name) => {
@@ -177,7 +177,7 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
       makespanNs: Math.max(...built.listing.ops.map((o) => o.end)), batches: result?.summary?.elapsedBatches, slack: slack(report, built.listing) };
   };
   for (let i = 0; i < maxIterations; i++) {
-    const it = await attempt(specFor(durations, capacities, base, { gadgets, factories, gridNs }), "iter" + i);
+    const it = await attempt(specFor(durations, capacities, base, { gadgets, factories, gridNs, runtimeNs }), "iter" + i);
     iterations.push(it);
     if (it.verdict !== "RESOURCE_VALIDATED") throw Error("FormalRV's VM did not admit iteration " + i + ": " + JSON.stringify(it.verdictDetail).slice(0, 400));
     const measured = measuredDurations(it.report);

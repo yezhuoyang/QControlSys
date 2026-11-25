@@ -1,0 +1,223 @@
+{
+ "id": "factories",
+ "title": "Magic-state factories under demand",
+ "kicker": "Contention · request_magic",
+ "summary": "A magic-state factory keeps only some of its attempts (postselection), so its output time is random. How many factories a stream of T gates needs, what a single factory latency misses, and who starves when requests have priorities.",
+ "method": [
+  "The two factories reproduced on digital twins on this site: magic state cultivation on the Willow twin (an attempt takes 7.24 µs, 62.8% kept) and 5-to-1 distillation on the Gemini twin (1.63 ms, 5.2% kept). A request holds a factory until an attempt is kept. Requests arrive at a fixed interval and queue on F factories."
+ ],
+ "sections": [
+  {
+   "heading": "Factories needed, and what a single latency gives",
+   "table": {
+    "head": [
+     "Factory",
+     "T-request interval",
+     "Needed",
+     "Declared as one attempt",
+     "As the mean",
+     "As the 99th percentile"
+    ],
+    "rows": [
+     [
+      "cultivation",
+      "11.5 µs",
+      2,
+      "1 (unstable)",
+      "2",
+      4
+     ],
+     [
+      "cultivation",
+      "5.8 µs",
+      3,
+      "2 (unstable)",
+      "3",
+      7
+     ],
+     [
+      "cultivation",
+      "2.9 µs",
+      5,
+      "3 (unstable)",
+      "4 (unstable)",
+      13
+     ],
+     [
+      "cultivation",
+      "1.2 µs",
+      11,
+      "7 (unstable)",
+      "10 (unstable)",
+      32
+     ],
+     [
+      "distillation",
+      "31.2 ms",
+      2,
+      "1 (unstable)",
+      "1 (unstable)",
+      5
+     ],
+     [
+      "distillation",
+      "15.6 ms",
+      3,
+      "1 (unstable)",
+      "2 (unstable)",
+      9
+     ],
+     [
+      "distillation",
+      "7.8 ms",
+      6,
+      "1 (unstable)",
+      "4 (unstable)",
+      18
+     ],
+     [
+      "distillation",
+      "3.1 ms",
+      12,
+      "1 (unstable)",
+      "11 (unstable)",
+      45
+     ]
+    ]
+   }
+  },
+  {
+   "heading": "Priorities near saturation (4 factories, 20% urgent requests)",
+   "table": {
+    "head": [
+     "Factory",
+     "Load",
+     "Policy",
+     "Urgent: 99th-pct. wait",
+     "Background: 99th-pct. / longest wait"
+    ],
+    "rows": [
+     [
+      "cultivation",
+      0.7,
+      "first come",
+      "5.3 µs",
+      "5.3 µs / 9.4 µs"
+     ],
+     [
+      "cultivation",
+      0.7,
+      "strict priority",
+      "3.3 µs",
+      "5.3 µs / 13.5 µs"
+     ],
+     [
+      "cultivation",
+      0.9,
+      "first come",
+      "18.2 µs",
+      "19.0 µs / 24.6 µs"
+     ],
+     [
+      "cultivation",
+      0.9,
+      "strict priority",
+      "7.9 µs",
+      "26.2 µs / 34.9 µs"
+     ],
+     [
+      "cultivation",
+      0.95,
+      "first come",
+      "30.4 µs",
+      "29.4 µs / 34.0 µs"
+     ],
+     [
+      "cultivation",
+      0.95,
+      "strict priority",
+      "7.7 µs",
+      "43.8 µs / 50.3 µs"
+     ],
+     [
+      "cultivation",
+      1,
+      "first come",
+      "139.3 µs",
+      "138.4 µs / 142.1 µs"
+     ],
+     [
+      "cultivation",
+      1,
+      "strict priority",
+      "10.1 µs",
+      "192.9 µs / 200.1 µs"
+     ],
+     [
+      "distillation",
+      0.7,
+      "first come",
+      "35.2 ms",
+      "33.3 ms / 47.8 ms"
+     ],
+     [
+      "distillation",
+      0.7,
+      "strict priority",
+      "22.9 ms",
+      "41.8 ms / 85.4 ms"
+     ],
+     [
+      "distillation",
+      0.9,
+      "first come",
+      "99.8 ms",
+      "94.1 ms / 115.0 ms"
+     ],
+     [
+      "distillation",
+      0.9,
+      "strict priority",
+      "33.6 ms",
+      "121.4 ms / 151.1 ms"
+     ],
+     [
+      "distillation",
+      0.95,
+      "first come",
+      "158.8 ms",
+      "152.3 ms / 176.2 ms"
+     ],
+     [
+      "distillation",
+      0.95,
+      "strict priority",
+      "36.9 ms",
+      "209.4 ms / 246.4 ms"
+     ],
+     [
+      "distillation",
+      1,
+      "first come",
+      "488.3 ms",
+      "478.2 ms / 494.8 ms"
+     ],
+     [
+      "distillation",
+      1,
+      "strict priority",
+      "44.3 ms",
+      "657.8 ms / 683.4 ms"
+     ]
+    ]
+   }
+  }
+ ],
+ "findings": [
+  "Declaring one attempt as the factory's latency never keeps up. Declaring the mean keeps up only at low demand. Declaring the 99th percentile keeps up but needs 2 to 4 times the factories a queue needs.",
+  "Strict priority protects urgent T gates and starves background requests as the load approaches 1."
+ ],
+ "command": "node riscq/calib/factory.mjs",
+ "note": "All numbers are measured on QuantumOS's Lean model of RISC-Q control hardware (its cores, hubs and lanes are checked against RISC-Q's RTL cycle for cycle), on generated or published hardware designs. They are properties of that model, not of laboratory hardware.",
+ "generated": "2026-11-25T14:58:38.417Z"
+}
