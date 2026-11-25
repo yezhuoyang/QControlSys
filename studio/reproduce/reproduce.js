@@ -93,6 +93,8 @@ export async function renderPaper(el, id) {
     return;
   }
   const m = data.meta, rows = data.rows ?? [];
+  const runButtons = rows.map((r, i) =>
+    `<button type="button" data-run="${i}" aria-pressed="false">d = ${r.distance}${r.basis ? " · " + r.basis : ""}${r.rounds ? " · " + r.rounds + " rounds" : ""}</button>`).join("");
   document.title = m.title + " · Reproduce · QuantumOS";
   el.innerHTML = `
     <p class="kicker"><a href="/reproduce">Reproduce</a> · ${esc(m.platform)}</p>
@@ -100,6 +102,10 @@ export async function renderPaper(el, id) {
     <p>${badge(m.status)}</p>
     <p class="lead">${esc(m.summary)}</p>
     <p class="cite">${cite(m.paper)}</p>
+    ${rows.some((r) => r.track) ? `<h2>The twin, running the program</h2>
+    <p>The machine below is the twin this page describes, running the compiled program. Every pulse, move, readout and decode appears at the time the Lean model of the control system executed it; drag to turn the view, scroll to zoom.</p>
+    <div class="runpick" role="group" aria-label="Run">${runButtons}</div>
+    <div id="twin" class="twin"></div>` : ""}
     <h2>The program</h2><p>${code(m.program)}</p>
     <h2>The digital twin</h2><p>${code(m.twin)}</p>
     ${twinTable(data)}
@@ -109,13 +115,23 @@ export async function renderPaper(el, id) {
     ${data.generated ? `<p class="cite">Run on ${esc(data.generated.slice(0, 10))}.</p>` : ""}
     <h2>What we found</h2><ul>${m.findings.map((f) => `<li>${code(f)}</li>`).join("")}</ul>
     ${m.limits.length ? `<h2>Limits of this reproduction</h2><ul>${m.limits.map((f) => `<li>${code(f)}</li>`).join("")}</ul>` : ""}
-    ${rows.length ? `<h2>One run in detail</h2><div class="runpick" role="group" aria-label="Run">${rows.map((r, i) =>
-      `<button type="button" data-run="${i}" aria-pressed="false">d = ${r.distance}${r.basis ? " · " + r.basis : ""}${r.rounds ? " · " + r.rounds + " rounds" : ""}</button>`).join("")}</div><div id="run"></div>` : ""}
+    ${rows.length ? `<h2>One run in detail</h2><div class="runpick" role="group" aria-label="Run">${runButtons}</div><div id="run"></div>` : ""}
     ${m.command ? `<h2>Reproduce it yourself</h2><p>With QuantumOS and a built FormalRV checkout next to it:</p><pre class="code">${esc(m.command)}</pre>` : ""}`;
-  const run = el.querySelector("#run");
-  const show = (i) => {
+  const run = el.querySelector("#run"), twin = el.querySelector("#twin");
+  let viewer;
+  const show = async (i) => {
     run.innerHTML = runDetail(rows[i]);
     el.querySelectorAll(".runpick button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.run) === i)));
+    if (!twin) return;
+    viewer?.dispose();
+    viewer = undefined;
+    if (!rows[i].track) {
+      twin.innerHTML = `<p class="no">${rows[i].error ? "This run did not complete, so there is nothing to play: " + esc(rows[i].error) : "No track was recorded for this run."}</p>`;
+      return;
+    }
+    const { mountTwin } = await import("/reproduce/twin3d.js");
+    const tr = rows[i].track;
+    viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time, shown in about 45 s. Part sizes are drawn for legibility; positions and times are the run's.` });
   };
   if (run) {
     el.querySelectorAll(".runpick button").forEach((b) => b.addEventListener("click", () => show(Number(b.dataset.run))));

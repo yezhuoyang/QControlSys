@@ -20,3 +20,15 @@ pre.code { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 12p
 .runpick button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
 details.block { border-top: 1px solid var(--line); padding: 8px 0; }
 details.block > summary { cursor: pointer; font-weight: 600; }
+.twin { margin: 8px 0 24px; }
+.twin-stage { position: relative; height: min(68vh, 600px); border-radius: 10px; overflow: hidden; background: #0b1020; }
+.twin-stage canvas { width: 100%; height: 100%; display: block; }
+.twin-hud { position: absolute; left: 12px; top: 10px; color: #e2e8f0; font: 12.5px/1.45 var(--mono); pointer-events: none; max-width: 62%; }
+.twin-time { font-weight: 700; color: #fff; margin-bottom: 4px; }
+.twin-now { list-style: none; margin: 0; padding: 0; }
+.twin-now li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.twin-legend { position: absolute; right: 10px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px 12px; max-width: 70%; justify-content: flex-end; color: #cbd5e1; font-size: 12px; }
+.twin-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.twin-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; font-size: 13px; }
+.twin-controls input[type=range] { flex: 1 1 240px; }
+.twin-caption { font-size: 12.5px; color: var(--ink3); margin: 6px 0 0; }

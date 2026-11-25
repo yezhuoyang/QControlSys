@@ -33,6 +33,7 @@ import { gatedPairs } from "./place.mjs";
 import { layers, checks } from "./surface.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
 import { conformance, addRows } from "./sc-run.mjs";
+import { buildTrack } from "./track.mjs";
 
 const bluvstein = "Bluvstein et al., Nature 626, 58 (2024), arXiv:2312.03982, Methods";
 const norcia = "Norcia et al., PRX 13, 041034 (2023), arXiv:2305.19119";
@@ -307,9 +308,13 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     const from = zone[c];
     zone[c] = zone[a];
     const crowd = zone.map((z, k) => [z, k]).filter(([z, k]) => z === zone[a] && k !== a && k !== c).map(([, k]) => k);
-    if (crowd.length + 2 > prof.zoneCapacity.value) zone[crowd[0]] = from;
+    const ions = [{ site: c, from, to: zone[a] }];
+    if (crowd.length + 2 > prof.zoneCapacity.value) {
+      ions.push({ site: crowd[0], from: zone[a], to: from });
+      zone[crowd[0]] = from;
+    }
     const ch = movers.take(t, b(ns));
-    push(op, { op: "move", pool: "mover", channel: ch, at: t, dur: Math.min(65535, b(ns)), job: { ns, hops } });
+    push(op, { op: "move", pool: "mover", channel: ch, at: t, dur: Math.min(65535, b(ns)), job: { ns, hops, ions } });
     return t + b(ns);
   };
   const globalPulses = new Map(), globalBusy = {}, aodJobs = new Map(), sharedMoves = [], lentEnd = new Map(); // kind and batch → native of a shared global pulse
@@ -438,6 +443,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
           const id = "h" + counter++;
           origin.set(id, op.uid);
           sharedMoves.push({ id, of: shared.native.id });
+          shared.native.job.atoms.push(...jobs[0].atoms);
           break;
         }
         for (const job of jobs) {
@@ -615,6 +621,15 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     row.ok = row.ok && row.overrunNs === 0;
   }
   addRows(report, []);
+  // The animation track: atoms at their positions (µm) or ions at their zones, and every move played.
+  const moveList = natives.filter((n) => n.op === "move" && n.job).flatMap((n) =>
+    (n.job.atoms ?? n.job.ions ?? []).map((mv) => ({ t0: (n.at * period) / 1000, t1: ((n.at + Math.max(n.dur, b(n.job.ns))) * period) / 1000, s: mv.site, from: mv.from, to: mv.to })));
+  const ring = prof.ringZones?.value;
+  report.track = buildTrack({ listing, placement, report, moves: moveList, device: {
+    kind: prof.platform === "neutral" ? "atoms" : ring ? "ions-ring" : "ions", unit: prof.platform === "neutral" ? "µm" : ring ? "zone" : "µm",
+    sites: placement.sites.map((s, k) => ({ kind: s.kind, at: prof.platform === "neutral" || !ring ? design.home[k] : [design.zoneOfSite[k], 0] })),
+    ...(ring ? { ring: { zones: ring, capacity: prof.zoneCapacity.value } } : {}),
+    ...(design.point.globalEntangle ? { gateSiteUm: design.prof.siteUm?.value, interactUm: design.point.interactUm } : {}) } });
   report.pools = { beams: beams.peak, movers: movers.peak, readouts: readouts.peak, pumps: pumps.peak, lent: beams.lent + movers.lent + readouts.lent + pumps.lent };
   report.bits = measuredBits(result, built);
   void gatedPairs; void checks;

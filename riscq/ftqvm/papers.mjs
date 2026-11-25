@@ -20,6 +20,7 @@ export function details(last, qec) {
     machineText: specText.machineText(last.spec), sysspecText: specText.sysspecText(last.spec),
     spec: last.spec.machine, factories: last.spec.factories,
     byKind: last.report.byKind, slack: last.slack,
+    track: last.report.track,
   };
 }
 

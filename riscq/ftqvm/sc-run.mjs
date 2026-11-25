@@ -31,6 +31,7 @@ import * as superconducting from "../platforms/superconducting.mjs";
 import * as hardwareDesign from "../design.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
 import { layers } from "./surface.mjs";
+import { buildTrack } from "./track.mjs";
 
 const NOT_YET = new Set([]);
 const CLASSICAL = new Set(["pauli_frame_update", "parity"]);
@@ -260,6 +261,10 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
     row.ok = row.ok && row.overrunNs === 0;
   }
   addRows(report, []);
+  // The animation track (riscq/ftqvm/track.mjs): the chip's transmons and couplers on the lattice.
+  report.track = buildTrack({ listing, placement, report, device: {
+    kind: "transmon", unit: "lattice", sites: placement.sites.map((s) => ({ kind: s.kind, at: [s.rc[1], s.rc[0]] })),
+    couplers: (design.couplings ?? []).map((c) => c.qubits) } });
   return { m, hardware, lowered, built, result, report, origin, unrealized, quantization, decodes: decodeRows, factories: factoryRows };
 }
 
