@@ -40,9 +40,10 @@ test("FormalRV's test-profile durations do not hold on the chip; the derived one
   assert.equal(first.report.conforms, false);
   assert.equal(first.report.byKind.CZ.maxOverrunNs, 350); // a 400 ns CZ in a 50 ns window
   assert.equal(first.report.byKind.CZ.ok, 0);
-  // The derived spec: measured on the trace, rounded to the 2 ns batch grid.
+  // The derived spec: measured on the trace, rounded to the 2 ns batch grid. A measurement ends when
+  // its bit is stored; the result's path to the core is the one measured on RISC-Q's RTL.
   const m = last.spec.machine;
-  assert.deepEqual([m.gate1q_ns.value, m.gate2q_ns.value, m.measure_ns.value, m.reset_ns.value, m.route_latency_ns.value], [36, 472, 1420, 160, 2]);
+  assert.deepEqual([m.gate1q_ns.value, m.gate2q_ns.value, m.measure_ns.value, m.reset_ns.value, m.route_latency_ns.value], [36, 472, 1440, 160, 2]);
   for (const f of ["gate1q_ns", "gate2q_ns", "measure_ns", "reset_ns"]) assert.equal(m[f].source, "measured");
   // The decoder is the compiled Helios union-find, measured; the frame update is measured on the frame core.
   assert.equal(m.decoder_latency_ns.source, "measured");

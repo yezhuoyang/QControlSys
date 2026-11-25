@@ -19,8 +19,8 @@
 // gives `decoders` decoder units; the jobs of one decode run on one unit, one after another
 // (FormalRV charges a decode one decoder), or, with `coresPerDecoder > 1`, spread over that
 // many cores of the unit. A unit is busy from a job's start to its end. The decode is done when
-// its last job is. Decode times are properties of this model's core (one batch per instruction
-// plus its penalties, riscq/soc.mjs), not of a board.
+// its last job is. Decode times are properties of RISC-Q's core as QControl/RiscQ/Pipe.lean models it
+// (cycle for cycle as its RTL, validation/riscq/rtl/), not of a board.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import * as helios from "../decoders/helios.mjs";
 import { analyze } from "./place.mjs";
@@ -30,7 +30,10 @@ import { analyze } from "./place.mjs";
 // in the Lean model on the compiled decoder; the file lets a machine without the riscv32 clang
 // (the web server) rerun a listing on an edited design. Recompute with `saveDecoderTimes()`.
 const timesUrl = new URL("../../validation/ftqvm/decoder-times.json", import.meta.url);
-const stored = existsSync(timesUrl) ? JSON.parse(readFileSync(timesUrl, "utf8")) : { helios: {}, lookup: {} };
+// Entries measured on another core model are not reused: the file names the model it was measured on.
+export const CORE_MODEL = "riscq-pipe-rtl-2026-11-24";
+const read = existsSync(timesUrl) ? JSON.parse(readFileSync(timesUrl, "utf8")) : {};
+const stored = read.model === CORE_MODEL ? read : { helios: {}, lookup: {} };
 const helioCache = new Map(Object.entries(stored.helios ?? {})), lookupCache = new Map(Object.entries(stored.lookup ?? {}).map(([k, v]) => [Number(k), v]));
 let dirty = false;
 
@@ -39,6 +42,7 @@ export function saveDecoderTimes() {
   if (!dirty) return false;
   const sorted = (m) => Object.fromEntries([...m.entries()].sort(([a], [b]) => String(a).localeCompare(String(b))));
   writeFileSync(timesUrl, JSON.stringify({
+    model: CORE_MODEL,
     note: "Measured in the Lean model: Helios union-find batches (decodeBatches, reportBatches) by 'distance:syndrome', lookup decoder ns by bit count. Written by riscq/ftqvm/decoder.mjs.",
     helios: sorted(helioCache), lookup: sorted(lookupCache),
   }, null, 1) + "\n");
@@ -47,11 +51,14 @@ export function saveDecoderTimes() {
 }
 
 /**
- * Batches from a bit's store at its measuring core to the decoder core's board register on a
- * RISC-Q board with link depth 2: 86 − 34 ns from the window's close (tests/riscq-syscalls.test.mjs,
- * measured in the Lean model on the x6y3 build, the board the generated chips use).
+ * From a syndrome bit's store at its measuring core to its being readable at the decoder core, on one
+ * board: the store's posted write, the hub, the up-link and the read (riscq/soc.mjs hubDown, hubUp).
+ * Measured in the model that matches RISC-Q's RTL on the transmon ring at 500 MHz: the bit is at its
+ * measuring core 40 ns after the window closes and readable at every other core at 116 ns
+ * (tests/riscq-syscalls.test.mjs), so 76 ns. A decoder on another board adds the lane (308 + 8·L
+ * cycles, docs/control-fidelity-audit.md S9), which this constant does not include.
  */
-export const PUBLISH_NS = 52;
+export const PUBLISH_NS = 76;
 
 /** The decoding jobs of one decode operation. `d` is the code distance of the blocks. */
 export function jobsOf(listing, op, placement, d) {

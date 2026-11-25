@@ -21,7 +21,7 @@ export const REPRODUCTIONS = [
     findings: [
       "Every operation of the listing ran inside its listed window on the twin at d = 3, 5 and 7.",
       "On the same gate durations, FormalRV's surface-code round takes 2.5 to 4.0 µs where the paper's cycle is 1.1 µs: FormalRV's round runs at most (d² − 1)/2 gates at once, while the device runs every check in parallel (four CZ layers, two H, measure and reset come to about 0.95 µs).",
-      "The decoder compiled for a 500 MHz RISC-V core is slower than the paper's software decoder at d = 5 (94 µs for 10 rounds against 63 µs): a property of the decoder's placement, not of the system call.",
+      "The decoder compiled for RISC-Q's 500 MHz RISC-V core, timed by the core model that matches its RTL cycle for cycle, is slower than the paper's software decoder at d = 5 (191 µs for 10 rounds against 63 µs): a property of the decoder's placement, not of the system call.",
     ],
     limits: [
       "The data qubits are not read out at the end: FormalRV's encoded level has no transversal data readout in this form.",
@@ -73,7 +73,7 @@ export const REPRODUCTIONS = [
       "On the 32-qubit H2, FormalRV refuses the program: a request of 26 ancillas exceeds its live-qubit budget of 19. Its background maintenance reserves measure qubits for every live block, so this three-block teleportation needs more qubits than the up to 30 ions the paper ran it on.",
       "On the 56-qubit H2 every operation ran inside its listed window: 39 ions placed, 611 operations, three iterations of the derivation.",
       "FormalRV's routes license groups larger than an H2 zone holds (a Steane check routes its ancilla with four data ions; zones hold two), so on this twin transport moves into the two-qubit gate and `route` costs nothing. The derived two-qubit gate is then 295 µs: the worst trip half way round the track plus the MS gate. A gate whose pair already shares a zone needs 35 µs, the median gate 215 µs.",
-      "The Steane code's checks are decoded by the controller's lookup decoder in 98 to 280 ns, as Quantinuum decodes the Steane code with lookup tables.",
+      "The Steane code's checks are decoded by the controller's lookup decoder in 154 to 428 ns, as Quantinuum decodes the Steane code with lookup tables.",
     ],
     limits: [
       "Only the transversal teleportation is reproduced; the lattice-surgery variant is not yet written.",
