@@ -1,0 +1,410 @@
+{
+ "program": "memory-d3",
+ "scale": "S",
+ "distance": 3,
+ "platform": "qccd",
+ "design": "ions-modules",
+ "pools": {
+  "beams": 16,
+  "movers": 24,
+  "readouts": 16,
+  "pumps": 31,
+  "lent": 0
+ },
+ "verdict": "RESOURCE_VALIDATED",
+ "conforms": true,
+ "iterations": 3,
+ "sites": 24,
+ "ops": 221,
+ "kinds": {
+  "request_ancilla": 26,
+  "H": 19,
+  "route": 30,
+  "CZ": 9,
+  "CNOT": 78,
+  "measure": 31,
+  "release_ancilla": 26,
+  "decode_syndrome": 2
+ },
+ "makespanNs": 28642540,
+ "machine": {
+  "qubits": 24,
+  "factories": 1,
+  "max_parallel_gates": 16,
+  "decoders": 1,
+  "classical_data_bandwidth": 100,
+  "qubit_routing_bandwidth": 32,
+  "ancilla_bandwidth": 64,
+  "gate1q_ns": 5000,
+  "gate2q_ns": 35000,
+  "measure_ns": 125070,
+  "reset_ns": 10000,
+  "route_latency_ns": 1181200,
+  "decoder_latency_ns": 35820,
+  "pauli_frame_update_ns": 30,
+  "magic_state_latency_ns": 135000
+ },
+ "sources": {
+  "qubits": "derived",
+  "factories": "derived",
+  "max_parallel_gates": "derived",
+  "decoders": "derived",
+  "classical_data_bandwidth": "derived",
+  "qubit_routing_bandwidth": "derived",
+  "ancilla_bandwidth": "derived",
+  "gate1q_ns": "measured",
+  "gate2q_ns": "measured",
+  "measure_ns": "measured",
+  "reset_ns": "measured",
+  "route_latency_ns": "measured",
+  "decoder_latency_ns": "measured",
+  "pauli_frame_update_ns": "provisional",
+  "magic_state_latency_ns": "provisional"
+ },
+ "factory": {
+  "output_qubits": 9,
+  "workspace_qubits": 8,
+  "latency": 135000,
+  "gates": 1,
+  "decoders": 1,
+  "classical_data_bandwidth": 8,
+  "qubit_routing_bandwidth": 2
+ },
+ "contracts": {
+  "surfaceRound": {
+   "qubits": 17,
+   "runtime": 6676070,
+   "gates": 4,
+   "decoders": 0,
+   "factories": 0,
+   "classical_data_bandwidth": 2,
+   "qubit_routing_bandwidth": 2,
+   "ancilla_bandwidth": 8,
+   "hardware": {
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 1,
+    "ancilla_bandwidth": 8,
+    "runtime": 6671066
+   }
+  }
+ },
+ "slack": {
+  "request_ancilla": {
+   "count": 26,
+   "minNs": 10000,
+   "medianNs": 10000,
+   "maxNs": 10000,
+   "declaredNs": 10000
+  },
+  "H": {
+   "count": 19,
+   "minNs": 5000,
+   "medianNs": 5000,
+   "maxNs": 5000,
+   "declaredNs": 5000
+  },
+  "route": {
+   "count": 30,
+   "minNs": 0,
+   "medianNs": 0,
+   "maxNs": 1181200,
+   "declaredNs": 1181200
+  },
+  "CZ": {
+   "count": 9,
+   "minNs": 25000,
+   "medianNs": 25000,
+   "maxNs": 25000,
+   "declaredNs": 35000
+  },
+  "CNOT": {
+   "count": 78,
+   "minNs": 35000,
+   "medianNs": 35000,
+   "maxNs": 35000,
+   "declaredNs": 35000
+  },
+  "measure": {
+   "count": 31,
+   "minNs": 120066,
+   "medianNs": 125066,
+   "maxNs": 125066,
+   "declaredNs": 125070
+  },
+  "release_ancilla": {
+   "count": 26,
+   "minNs": 0,
+   "medianNs": 0,
+   "maxNs": 0,
+   "declaredNs": 0
+  },
+  "decode_syndrome": {
+   "count": 2,
+   "minNs": 154,
+   "medianNs": 154,
+   "maxNs": 35678,
+   "declaredNs": 35820
+  }
+ },
+ "seconds": 6.935,
+ "spec": {
+  "machine": {
+   "qubits": {
+    "value": 24,
+    "source": "derived",
+    "note": "one trapped ion per placed site"
+   },
+   "factories": {
+    "value": 1,
+    "source": "derived",
+    "note": "one factory region"
+   },
+   "max_parallel_gates": {
+    "value": 16,
+    "source": "derived",
+    "note": "16 locally addressed beams"
+   },
+   "decoders": {
+    "value": 1,
+    "source": "derived",
+    "note": "1 decoder unit(s) of 4 cores"
+   },
+   "classical_data_bandwidth": {
+    "value": 100,
+    "source": "derived",
+    "note": "the board hub carries one put of one bit per batch at 100 MHz (riscq/limits.mjs)"
+   },
+   "qubit_routing_bandwidth": {
+    "value": 32,
+    "source": "derived",
+    "note": "32 electrode lanes at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+   },
+   "ancilla_bandwidth": {
+    "value": 64,
+    "source": "derived",
+    "note": "64 pumping beams at once"
+   },
+   "gate1q_ns": {
+    "value": 5000,
+    "source": "measured",
+    "note": "longest gate1q in the trace of iteration 0"
+   },
+   "gate2q_ns": {
+    "value": 35000,
+    "source": "measured",
+    "note": "longest gate2q in the trace of iteration 0"
+   },
+   "measure_ns": {
+    "value": 125070,
+    "source": "measured",
+    "note": "longest measure in the trace of iteration 0"
+   },
+   "reset_ns": {
+    "value": 10000,
+    "source": "measured",
+    "note": "longest reset in the trace of iteration 0"
+   },
+   "route_latency_ns": {
+    "value": 1181200,
+    "source": "measured",
+    "note": "longest route_latency in the trace of iteration 0"
+   },
+   "decoder_latency_ns": {
+    "value": 35820,
+    "source": "measured",
+    "note": "longest decoder_latency in the trace of iteration 0"
+   },
+   "pauli_frame_update_ns": {
+    "value": 30,
+    "source": "provisional",
+    "note": "base machine value, rounded up to the 10 ns grid"
+   },
+   "magic_state_latency_ns": {
+    "value": 135000,
+    "source": "provisional",
+    "note": "base machine value, rounded up to the 10 ns grid"
+   }
+  },
+  "factories": {
+   "factory": {
+    "output_qubits": 9,
+    "workspace_qubits": 8,
+    "latency": 135000,
+    "gates": 1,
+    "decoders": 1,
+    "classical_data_bandwidth": 8,
+    "qubit_routing_bandwidth": 2
+   }
+  },
+  "program": {
+   "qubits_min": {
+    "value": 0,
+    "source": "provisional"
+   },
+   "qubits": {
+    "value": 24,
+    "source": "derived",
+    "note": "one trapped ion per placed site"
+   },
+   "runtime_min": {
+    "value": 0,
+    "source": "provisional"
+   },
+   "runtime": {
+    "value": 1000000000,
+    "source": "provisional"
+   }
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": {
+     "value": 17,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "runtime": {
+     "value": 6676070,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "gates": {
+     "value": 4,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "factories": {
+     "value": 0,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "decoders": {
+     "value": 0,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "classical_data_bandwidth": {
+     "value": 2,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 2,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "ancilla_bandwidth": {
+     "value": 8,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    }
+   },
+   "surfaceRoundLogicalAncilla": {
+    "qubits": {
+     "value": 24,
+     "source": "derived",
+     "note": "one trapped ion per placed site"
+    },
+    "runtime": {
+     "value": 1000000000,
+     "source": "provisional"
+    },
+    "gates": {
+     "value": 16,
+     "source": "derived",
+     "note": "16 locally addressed beams"
+    },
+    "factories": {
+     "value": 1,
+     "source": "derived",
+     "note": "one factory region"
+    },
+    "decoders": {
+     "value": 1,
+     "source": "derived",
+     "note": "1 decoder unit(s) of 4 cores"
+    },
+    "classical_data_bandwidth": {
+     "value": 100,
+     "source": "derived",
+     "note": "the board hub carries one put of one bit per batch at 100 MHz (riscq/limits.mjs)"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 32,
+     "source": "derived",
+     "note": "32 electrode lanes at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+    },
+    "ancilla_bandwidth": {
+     "value": 64,
+     "source": "derived",
+     "note": "64 pumping beams at once"
+    }
+   }
+  }
+ },
+ "machineText": "machine { qubits: 24 total, factories: 1 total, max_parallel_gates: 16 total, decoders: 1 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 32 qubits/us, ancilla_bandwidth: 64 qubits/us, gate1q_ns: 5000 ns, gate2q_ns: 35000 ns, measure_ns: 125070 ns, reset_ns: 10000 ns, route_latency_ns: 1181200 ns, decoder_latency_ns: 35820 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 30 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
+ "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 24 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 17 total, runtime: 6676070 ns, gates: 4 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 2 bits/us, qubit_routing_bandwidth: 2 qubits/us, ancilla_bandwidth: 8 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 24 total, runtime: 1000000000 ns, gates: 16 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 32 qubits/us, ancilla_bandwidth: 64 qubits/us }\n",
+ "report": {
+  "byKind": {
+   "request_ancilla": {
+    "count": 26,
+    "ok": 26,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 10000,
+    "maxBitOverrunNs": 0
+   },
+   "H": {
+    "count": 19,
+    "ok": 19,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 5000,
+    "maxBitOverrunNs": 0
+   },
+   "route": {
+    "count": 30,
+    "ok": 30,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 1181200,
+    "maxBitOverrunNs": 0
+   },
+   "CZ": {
+    "count": 9,
+    "ok": 9,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 25000,
+    "maxBitOverrunNs": 0
+   },
+   "CNOT": {
+    "count": 78,
+    "ok": 78,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 35000,
+    "maxBitOverrunNs": 0
+   },
+   "measure": {
+    "count": 31,
+    "ok": 31,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 125000,
+    "maxBitOverrunNs": 0
+   },
+   "release_ancilla": {
+    "count": 26,
+    "ok": 26,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 0,
+    "maxBitOverrunNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "ok": 2,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 35678,
+    "maxBitOverrunNs": 0
+   }
+  },
+  "unrealized": []
+ }
+}

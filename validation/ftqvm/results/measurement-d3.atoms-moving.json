@@ -1,0 +1,440 @@
+{
+ "program": "measurement-d3",
+ "scale": "L",
+ "distance": 3,
+ "platform": "neutral",
+ "design": "atoms-moving",
+ "pools": {
+  "beams": 16,
+  "movers": 4,
+  "readouts": 16,
+  "pumps": 64,
+  "lent": 0
+ },
+ "verdict": "RESOURCE_VALIDATED",
+ "conforms": true,
+ "iterations": 3,
+ "sites": 58,
+ "ops": 606,
+ "kinds": {
+  "request_ancilla": 74,
+  "H": 43,
+  "route": 78,
+  "CNOT": 237,
+  "CY": 3,
+  "CZ": 15,
+  "measure": 79,
+  "release_ancilla": 74,
+  "decode_syndrome": 2,
+  "pauli_frame_update": 1
+ },
+ "makespanNs": 22336370,
+ "machine": {
+  "qubits": 58,
+  "factories": 1,
+  "max_parallel_gates": 16,
+  "decoders": 1,
+  "classical_data_bandwidth": 100,
+  "qubit_routing_bandwidth": 4,
+  "ancilla_bandwidth": 64,
+  "gate1q_ns": 8000,
+  "gate2q_ns": 16270,
+  "measure_ns": 508070,
+  "reset_ns": 100000,
+  "route_latency_ns": 187570,
+  "decoder_latency_ns": 71360,
+  "pauli_frame_update_ns": 190,
+  "magic_state_latency_ns": 135000
+ },
+ "sources": {
+  "qubits": "derived",
+  "factories": "derived",
+  "max_parallel_gates": "derived",
+  "decoders": "derived",
+  "classical_data_bandwidth": "derived",
+  "qubit_routing_bandwidth": "derived",
+  "ancilla_bandwidth": "derived",
+  "gate1q_ns": "measured",
+  "gate2q_ns": "measured",
+  "measure_ns": "measured",
+  "reset_ns": "measured",
+  "route_latency_ns": "measured",
+  "decoder_latency_ns": "measured",
+  "pauli_frame_update_ns": "measured",
+  "magic_state_latency_ns": "provisional"
+ },
+ "factory": {
+  "output_qubits": 9,
+  "workspace_qubits": 8,
+  "latency": 135000,
+  "gates": 1,
+  "decoders": 1,
+  "classical_data_bandwidth": 8,
+  "qubit_routing_bandwidth": 2
+ },
+ "contracts": {
+  "surfaceRound": {
+   "qubits": 17,
+   "runtime": 1846780,
+   "gates": 4,
+   "decoders": 0,
+   "factories": 0,
+   "classical_data_bandwidth": 5,
+   "qubit_routing_bandwidth": 2,
+   "ancilla_bandwidth": 8,
+   "hardware": {
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 5,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "runtime": 1838776
+   }
+  }
+ },
+ "slack": {
+  "request_ancilla": {
+   "count": 74,
+   "minNs": 100000,
+   "medianNs": 100000,
+   "maxNs": 100000,
+   "declaredNs": 100000
+  },
+  "H": {
+   "count": 43,
+   "minNs": 8000,
+   "medianNs": 8000,
+   "maxNs": 8000,
+   "declaredNs": 8000
+  },
+  "route": {
+   "count": 78,
+   "minNs": 73340,
+   "medianNs": 92766,
+   "maxNs": 187568,
+   "declaredNs": 187570
+  },
+  "CNOT": {
+   "count": 237,
+   "minNs": 16270,
+   "medianNs": 16270,
+   "maxNs": 16270,
+   "declaredNs": 16270
+  },
+  "CY": {
+   "count": 3,
+   "minNs": 16270,
+   "medianNs": 16270,
+   "maxNs": 16270,
+   "declaredNs": 16270
+  },
+  "CZ": {
+   "count": 15,
+   "minNs": 270,
+   "medianNs": 270,
+   "maxNs": 270,
+   "declaredNs": 16270
+  },
+  "measure": {
+   "count": 79,
+   "minNs": 500066,
+   "medianNs": 508066,
+   "maxNs": 508066,
+   "declaredNs": 508070
+  },
+  "release_ancilla": {
+   "count": 74,
+   "minNs": 0,
+   "medianNs": 0,
+   "maxNs": 0,
+   "declaredNs": 0
+  },
+  "decode_syndrome": {
+   "count": 2,
+   "minNs": 154,
+   "medianNs": 154,
+   "maxNs": 71356,
+   "declaredNs": 71360
+  },
+  "pauli_frame_update": {
+   "count": 1,
+   "minNs": 182,
+   "medianNs": 182,
+   "maxNs": 182,
+   "declaredNs": 190
+  }
+ },
+ "seconds": 8.425,
+ "spec": {
+  "machine": {
+   "qubits": {
+    "value": 58,
+    "source": "derived",
+    "note": "one trapped atom per placed site"
+   },
+   "factories": {
+    "value": 1,
+    "source": "derived",
+    "note": "one factory region"
+   },
+   "max_parallel_gates": {
+    "value": 16,
+    "source": "derived",
+    "note": "16 locally addressed beams"
+   },
+   "decoders": {
+    "value": 1,
+    "source": "derived",
+    "note": "1 decoder unit(s) of 4 cores"
+   },
+   "classical_data_bandwidth": {
+    "value": 100,
+    "source": "derived",
+    "note": "the board hub carries one put of one bit per batch at 100 MHz (riscq/limits.mjs)"
+   },
+   "qubit_routing_bandwidth": {
+    "value": 4,
+    "source": "derived",
+    "note": "4 AOD jobs at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+   },
+   "ancilla_bandwidth": {
+    "value": 64,
+    "source": "derived",
+    "note": "64 pumping beams at once"
+   },
+   "gate1q_ns": {
+    "value": 8000,
+    "source": "measured",
+    "note": "longest gate1q in the trace of iteration 0"
+   },
+   "gate2q_ns": {
+    "value": 16270,
+    "source": "measured",
+    "note": "longest gate2q in the trace of iteration 0"
+   },
+   "measure_ns": {
+    "value": 508070,
+    "source": "measured",
+    "note": "longest measure in the trace of iteration 0"
+   },
+   "reset_ns": {
+    "value": 100000,
+    "source": "measured",
+    "note": "longest reset in the trace of iteration 0"
+   },
+   "route_latency_ns": {
+    "value": 187570,
+    "source": "measured",
+    "note": "longest route_latency in the trace of iteration 0"
+   },
+   "decoder_latency_ns": {
+    "value": 71360,
+    "source": "measured",
+    "note": "longest decoder_latency in the trace of iteration 0"
+   },
+   "pauli_frame_update_ns": {
+    "value": 190,
+    "source": "measured",
+    "note": "longest pauli_frame_update in the trace of iteration 0"
+   },
+   "magic_state_latency_ns": {
+    "value": 135000,
+    "source": "provisional",
+    "note": "base machine value, rounded up to the 10 ns grid"
+   }
+  },
+  "factories": {
+   "factory": {
+    "output_qubits": 9,
+    "workspace_qubits": 8,
+    "latency": 135000,
+    "gates": 1,
+    "decoders": 1,
+    "classical_data_bandwidth": 8,
+    "qubit_routing_bandwidth": 2
+   }
+  },
+  "program": {
+   "qubits_min": {
+    "value": 0,
+    "source": "provisional"
+   },
+   "qubits": {
+    "value": 58,
+    "source": "derived",
+    "note": "one trapped atom per placed site"
+   },
+   "runtime_min": {
+    "value": 0,
+    "source": "provisional"
+   },
+   "runtime": {
+    "value": 1000000000,
+    "source": "provisional"
+   }
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": {
+     "value": 17,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "runtime": {
+     "value": 1846780,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "gates": {
+     "value": 4,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "factories": {
+     "value": 0,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "decoders": {
+     "value": 0,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "classical_data_bandwidth": {
+     "value": 5,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 2,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    },
+    "ancilla_bandwidth": {
+     "value": 8,
+     "source": "measured",
+     "note": "peak over the gadget's calls in the conforming run, FormalRV's charging rule"
+    }
+   },
+   "surfaceRoundLogicalAncilla": {
+    "qubits": {
+     "value": 58,
+     "source": "derived",
+     "note": "one trapped atom per placed site"
+    },
+    "runtime": {
+     "value": 1000000000,
+     "source": "provisional"
+    },
+    "gates": {
+     "value": 16,
+     "source": "derived",
+     "note": "16 locally addressed beams"
+    },
+    "factories": {
+     "value": 1,
+     "source": "derived",
+     "note": "one factory region"
+    },
+    "decoders": {
+     "value": 1,
+     "source": "derived",
+     "note": "1 decoder unit(s) of 4 cores"
+    },
+    "classical_data_bandwidth": {
+     "value": 100,
+     "source": "derived",
+     "note": "the board hub carries one put of one bit per batch at 100 MHz (riscq/limits.mjs)"
+    },
+    "qubit_routing_bandwidth": {
+     "value": 4,
+     "source": "derived",
+     "note": "4 AOD jobs at once; FormalRV's ceiling charges each at least 1 qubit/µs"
+    },
+    "ancilla_bandwidth": {
+     "value": 64,
+     "source": "derived",
+     "note": "64 pumping beams at once"
+    }
+   }
+  }
+ },
+ "machineText": "machine { qubits: 58 total, factories: 1 total, max_parallel_gates: 16 total, decoders: 1 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4 qubits/us, ancilla_bandwidth: 64 qubits/us, gate1q_ns: 8000 ns, gate2q_ns: 16270 ns, measure_ns: 508070 ns, reset_ns: 100000 ns, route_latency_ns: 187570 ns, decoder_latency_ns: 71360 ns, magic_state_latency_ns: 135000 ns, pauli_frame_update_ns: 190 ns }\n\nspec factory:\n  resource { output_qubits: 9 total, workspace_qubits: 8 total, latency: 135000 ns, gates: 1 total, decoders: 1 total, classical_data_bandwidth: 8 bits/us, qubit_routing_bandwidth: 2 qubits/us }\n",
+ "sysspecText": "spec program:\n  resource { qubits_min: 0 total, qubits: 58 total, runtime_min: 0 ns, runtime: 1000000000 ns }\nspec surfaceRound:\n  resource { qubits: 17 total, runtime: 1846780 ns, gates: 4 total, factories: 0 total, decoders: 0 total, classical_data_bandwidth: 5 bits/us, qubit_routing_bandwidth: 2 qubits/us, ancilla_bandwidth: 8 qubits/us }\nspec surfaceRoundLogicalAncilla:\n  resource { qubits: 58 total, runtime: 1000000000 ns, gates: 16 total, factories: 1 total, decoders: 1 total, classical_data_bandwidth: 100 bits/us, qubit_routing_bandwidth: 4 qubits/us, ancilla_bandwidth: 64 qubits/us }\n",
+ "report": {
+  "byKind": {
+   "request_ancilla": {
+    "count": 74,
+    "ok": 74,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 100000,
+    "maxBitOverrunNs": 0
+   },
+   "H": {
+    "count": 43,
+    "ok": 43,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 8000,
+    "maxBitOverrunNs": 0
+   },
+   "route": {
+    "count": 78,
+    "ok": 78,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 187568,
+    "maxBitOverrunNs": 0
+   },
+   "CNOT": {
+    "count": 237,
+    "ok": 237,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 16270,
+    "maxBitOverrunNs": 0
+   },
+   "CY": {
+    "count": 3,
+    "ok": 3,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 16270,
+    "maxBitOverrunNs": 0
+   },
+   "CZ": {
+    "count": 15,
+    "ok": 15,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 270,
+    "maxBitOverrunNs": 0
+   },
+   "measure": {
+    "count": 79,
+    "ok": 79,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 508000,
+    "maxBitOverrunNs": 0
+   },
+   "release_ancilla": {
+    "count": 74,
+    "ok": 74,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 0,
+    "maxBitOverrunNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "ok": 2,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 71356,
+    "maxBitOverrunNs": 0
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "ok": 1,
+    "maxOverrunNs": 0,
+    "maxHardwareNs": 182,
+    "maxBitOverrunNs": 0
+   }
+  },
+  "unrealized": []
+ }
+}

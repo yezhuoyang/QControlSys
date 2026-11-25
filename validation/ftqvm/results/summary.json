@@ -1,0 +1,4506 @@
+[
+ {
+  "program": "memory-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-A",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 221,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2
+  },
+  "makespanNs": 190882,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 24,
+   "decoders": 1,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 12000,
+   "ancilla_bandwidth": 150,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 71356,
+   "pauli_frame_update_ns": 26,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 9746
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 19,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 71356,
+    "declaredNs": 71356
+   }
+  },
+  "seconds": 6.342
+ },
+ {
+  "program": "memory-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-B",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 221,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2
+  },
+  "makespanNs": 120850,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 24,
+   "decoders": 2,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 12000,
+   "ancilla_bandwidth": 150,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 36340,
+   "pauli_frame_update_ns": 26,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 9746
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 19,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 36340
+   }
+  },
+  "seconds": 6.908
+ },
+ {
+  "program": "memory-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-moving",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 221,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2
+  },
+  "makespanNs": 9464010,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 124240,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1530130,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 6,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 6,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 1522126
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 84760,
+    "medianNs": 92766,
+    "maxNs": 124236,
+    "declaredNs": 124240
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   }
+  },
+  "seconds": 6.178
+ },
+ {
+  "program": "memory-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-static",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 221,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2
+  },
+  "makespanNs": 8424300,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 74730,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1282580,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 7,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 7,
+     "qubit_routing_bandwidth": 1,
+     "ancilla_bandwidth": 8,
+     "runtime": 1274576
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 74722,
+    "declaredNs": 74730
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   }
+  },
+  "seconds": 5.854
+ },
+ {
+  "program": "memory-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-qccd",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 221,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2
+  },
+  "makespanNs": 28642540,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1181200,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 6676070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 6671066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 869800,
+    "medianNs": 1053600,
+    "maxNs": 1181200,
+    "declaredNs": 1181200
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   }
+  },
+  "seconds": 7.24
+ },
+ {
+  "program": "memory-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-modules",
+  "pools": {
+   "beams": 16,
+   "movers": 24,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 221,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2
+  },
+  "makespanNs": 28642540,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1181200,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 6676070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 1,
+     "ancilla_bandwidth": 8,
+     "runtime": 6671066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 1181200,
+    "declaredNs": 1181200
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   }
+  },
+  "seconds": 6.935
+ },
+ {
+  "program": "dj-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-A",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 222,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 191064,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 24,
+   "decoders": 1,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 12000,
+   "ancilla_bandwidth": 150,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 71356,
+   "pauli_frame_update_ns": 182,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 9746
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 19,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 71356,
+    "declaredNs": 71356
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 182
+   }
+  },
+  "seconds": 8.501
+ },
+ {
+  "program": "dj-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-B",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 222,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 121032,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 24,
+   "decoders": 2,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 12000,
+   "ancilla_bandwidth": 150,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 36340,
+   "pauli_frame_update_ns": 182,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 9746
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 19,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 36340
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 182
+   }
+  },
+  "seconds": 6.099
+ },
+ {
+  "program": "dj-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-moving",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 222,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 9464200,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 124240,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1530130,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 6,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 6,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 1522126
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 84760,
+    "medianNs": 92766,
+    "maxNs": 124236,
+    "declaredNs": 124240
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 6.976
+ },
+ {
+  "program": "dj-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-static",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 222,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 8424490,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 74730,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1282580,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 7,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 7,
+     "qubit_routing_bandwidth": 1,
+     "ancilla_bandwidth": 8,
+     "runtime": 1274576
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 74722,
+    "declaredNs": 74730
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 7.552
+ },
+ {
+  "program": "dj-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-qccd",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 222,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 28642730,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1181200,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 6676070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 6671066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 869800,
+    "medianNs": 1053600,
+    "maxNs": 1181200,
+    "declaredNs": 1181200
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 8.597
+ },
+ {
+  "program": "dj-d3",
+  "scale": "S",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-modules",
+  "pools": {
+   "beams": 16,
+   "movers": 24,
+   "readouts": 16,
+   "pumps": 31,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 24,
+  "ops": 222,
+  "kinds": {
+   "request_ancilla": 26,
+   "H": 19,
+   "route": 30,
+   "CZ": 9,
+   "CNOT": 78,
+   "measure": 31,
+   "release_ancilla": 26,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 28642730,
+  "machine": {
+   "qubits": 24,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1181200,
+   "decoder_latency_ns": 35820,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 6676070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 1,
+     "ancilla_bandwidth": 8,
+     "runtime": 6671066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 26,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 19,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 30,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 1181200,
+    "declaredNs": 1181200
+   },
+   "CZ": {
+    "count": 9,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 78,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 31,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 26,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 35678,
+    "declaredNs": 35820
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 6.669
+ },
+ {
+  "program": "ghz3-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-A",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 79,
+  "ops": 2364,
+  "kinds": {
+   "request_ancilla": 296,
+   "H": 172,
+   "route": 312,
+   "CZ": 45,
+   "CNOT": 915,
+   "measure": 316,
+   "release_ancilla": 296,
+   "decode_syndrome": 12
+  },
+  "makespanNs": 6932312,
+  "machine": {
+   "qubits": 79,
+   "factories": 1,
+   "max_parallel_gates": 79,
+   "decoders": 1,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 39500,
+   "ancilla_bandwidth": 494,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 539936,
+   "pauli_frame_update_ns": 26,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 10026
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 296,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 172,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 312,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 45,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 915,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 316,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 296,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 12,
+    "minNs": 154,
+    "medianNs": 71356,
+    "maxNs": 214068,
+    "declaredNs": 539936
+   }
+  },
+  "seconds": 15.841
+ },
+ {
+  "program": "ghz3-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-B",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 79,
+  "ops": 2364,
+  "kinds": {
+   "request_ancilla": 296,
+   "H": 172,
+   "route": 312,
+   "CZ": 45,
+   "CNOT": 915,
+   "measure": 316,
+   "release_ancilla": 296,
+   "decode_syndrome": 12
+  },
+  "makespanNs": 1309352,
+  "machine": {
+   "qubits": 79,
+   "factories": 1,
+   "max_parallel_gates": 79,
+   "decoders": 2,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 39500,
+   "ancilla_bandwidth": 494,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 71356,
+   "pauli_frame_update_ns": 26,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 10026
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 296,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 172,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 312,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 45,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 915,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 316,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 296,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 12,
+    "minNs": 154,
+    "medianNs": 35678,
+    "maxNs": 71356,
+    "declaredNs": 71356
+   }
+  },
+  "seconds": 15.536
+ },
+ {
+  "program": "ghz3-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-moving",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 79,
+  "ops": 2364,
+  "kinds": {
+   "request_ancilla": 296,
+   "H": 172,
+   "route": 312,
+   "CZ": 45,
+   "CNOT": 915,
+   "measure": 316,
+   "release_ancilla": 296,
+   "decode_syndrome": 12
+  },
+  "makespanNs": 87631920,
+  "machine": {
+   "qubits": 79,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 182560,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1821730,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 5,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 5,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 1813726
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 296,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 172,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 312,
+    "minNs": 73340,
+    "medianNs": 92766,
+    "maxNs": 182558,
+    "declaredNs": 182560
+   },
+   "CZ": {
+    "count": 45,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 915,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 316,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 296,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 12,
+    "minNs": 154,
+    "medianNs": 35678,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   }
+  },
+  "seconds": 17.604
+ },
+ {
+  "program": "ghz3-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-static",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 79,
+  "ops": 2364,
+  "kinds": {
+   "request_ancilla": 296,
+   "H": 172,
+   "route": 312,
+   "CZ": 45,
+   "CNOT": 915,
+   "measure": 316,
+   "release_ancilla": 296,
+   "decode_syndrome": 12
+  },
+  "makespanNs": 72201360,
+  "machine": {
+   "qubits": 79,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 106920,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1443530,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 6,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 6,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 1435526
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 296,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 172,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 312,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 106912,
+    "declaredNs": 106920
+   },
+   "CZ": {
+    "count": 45,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 915,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 316,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 296,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 12,
+    "minNs": 154,
+    "medianNs": 35678,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   }
+  },
+  "seconds": 19.713
+ },
+ {
+  "program": "ghz3-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-qccd",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 79,
+  "ops": 2364,
+  "kinds": {
+   "request_ancilla": 296,
+   "H": 172,
+   "route": 312,
+   "CZ": 45,
+   "CNOT": 915,
+   "measure": 316,
+   "release_ancilla": 296,
+   "decode_syndrome": 12
+  },
+  "makespanNs": 341701600,
+  "machine": {
+   "qubits": 79,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1500200,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 8271070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 8266066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 296,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 172,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 312,
+    "minNs": 869800,
+    "medianNs": 1053600,
+    "maxNs": 1500200,
+    "declaredNs": 1500200
+   },
+   "CZ": {
+    "count": 45,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 915,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 316,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 296,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 12,
+    "minNs": 154,
+    "medianNs": 35678,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   }
+  },
+  "seconds": 34.802
+ },
+ {
+  "program": "ghz3-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-modules",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 79,
+  "ops": 2364,
+  "kinds": {
+   "request_ancilla": 296,
+   "H": 172,
+   "route": 312,
+   "CZ": 45,
+   "CNOT": 915,
+   "measure": 316,
+   "release_ancilla": 296,
+   "decode_syndrome": 12
+  },
+  "makespanNs": 276625600,
+  "machine": {
+   "qubits": 79,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1181200,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 6676070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 1,
+     "ancilla_bandwidth": 8,
+     "runtime": 6671066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 296,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 172,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 312,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 1181200,
+    "declaredNs": 1181200
+   },
+   "CZ": {
+    "count": 45,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 915,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 316,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 296,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 12,
+    "minNs": 154,
+    "medianNs": 35678,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   }
+  },
+  "seconds": 20.279
+ },
+ {
+  "program": "measurement-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-A",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 58,
+  "ops": 606,
+  "kinds": {
+   "request_ancilla": 74,
+   "H": 43,
+   "route": 78,
+   "CNOT": 237,
+   "CY": 3,
+   "CZ": 15,
+   "measure": 79,
+   "release_ancilla": 74,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 548668,
+  "machine": {
+   "qubits": 58,
+   "factories": 1,
+   "max_parallel_gates": 58,
+   "decoders": 1,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 29000,
+   "ancilla_bandwidth": 363,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 214068,
+   "pauli_frame_update_ns": 182,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 10026
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 74,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 43,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 78,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CNOT": {
+    "count": 237,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "CY": {
+    "count": 3,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "CZ": {
+    "count": 15,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 79,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 74,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 214068,
+    "declaredNs": 214068
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 182
+   }
+  },
+  "seconds": 8.485
+ },
+ {
+  "program": "measurement-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "superconducting",
+  "design": "sc-B",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 58,
+  "ops": 606,
+  "kinds": {
+   "request_ancilla": 74,
+   "H": 43,
+   "route": 78,
+   "CNOT": 237,
+   "CY": 3,
+   "CZ": 15,
+   "measure": 79,
+   "release_ancilla": 74,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 263244,
+  "machine": {
+   "qubits": 58,
+   "factories": 1,
+   "max_parallel_gates": 58,
+   "decoders": 2,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 29000,
+   "ancilla_bandwidth": 363,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 71356,
+   "pauli_frame_update_ns": 182,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 10142,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 4000,
+    "ancilla_bandwidth": 56,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 56,
+     "runtime": 10026
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 74,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 43,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 78,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CNOT": {
+    "count": 237,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "CY": {
+    "count": 3,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "CZ": {
+    "count": 15,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 79,
+    "minNs": 1044,
+    "medianNs": 1236,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 74,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 71356,
+    "declaredNs": 71356
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 182
+   }
+  },
+  "seconds": 8.127
+ },
+ {
+  "program": "measurement-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-moving",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 58,
+  "ops": 606,
+  "kinds": {
+   "request_ancilla": 74,
+   "H": 43,
+   "route": 78,
+   "CNOT": 237,
+   "CY": 3,
+   "CZ": 15,
+   "measure": 79,
+   "release_ancilla": 74,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 22336370,
+  "machine": {
+   "qubits": 58,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 187570,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1846780,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 5,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 5,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 1838776
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 74,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 43,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 78,
+    "minNs": 73340,
+    "medianNs": 92766,
+    "maxNs": 187568,
+    "declaredNs": 187570
+   },
+   "CNOT": {
+    "count": 237,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "CY": {
+    "count": 3,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "CZ": {
+    "count": 15,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 79,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 74,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 8.425
+ },
+ {
+  "program": "measurement-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "neutral",
+  "design": "atoms-static",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 58,
+  "ops": 606,
+  "kinds": {
+   "request_ancilla": 74,
+   "H": 43,
+   "route": 78,
+   "CNOT": 237,
+   "CY": 3,
+   "CZ": 15,
+   "measure": 79,
+   "release_ancilla": 74,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 18759740,
+  "machine": {
+   "qubits": 58,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 117440,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 1496130,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 6,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 6,
+     "qubit_routing_bandwidth": 2,
+     "ancilla_bandwidth": 8,
+     "runtime": 1488126
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 74,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 43,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 78,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 117440,
+    "declaredNs": 117440
+   },
+   "CNOT": {
+    "count": 237,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "CY": {
+    "count": 3,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "CZ": {
+    "count": 15,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 79,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 74,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 9.612
+ },
+ {
+  "program": "measurement-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-qccd",
+  "error": "listing line 143: zone of the route's hub is full (12 ions, capacity 12; the route gathers 13; others there: )",
+  "seconds": 2.519
+ },
+ {
+  "program": "measurement-d3",
+  "scale": "L",
+  "distance": 3,
+  "platform": "qccd",
+  "design": "ions-modules",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 58,
+  "ops": 606,
+  "kinds": {
+   "request_ancilla": 74,
+   "H": 43,
+   "route": 78,
+   "CNOT": 237,
+   "CY": 3,
+   "CZ": 15,
+   "measure": 79,
+   "release_ancilla": 74,
+   "decode_syndrome": 2,
+   "pauli_frame_update": 1
+  },
+  "makespanNs": 69610230,
+  "machine": {
+   "qubits": 58,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1181200,
+   "decoder_latency_ns": 71360,
+   "pauli_frame_update_ns": 190,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "measured",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 17,
+    "runtime": 6676070,
+    "gates": 4,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 2,
+    "qubit_routing_bandwidth": 2,
+    "ancilla_bandwidth": 8,
+    "hardware": {
+     "gates": 4,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 2,
+     "qubit_routing_bandwidth": 1,
+     "ancilla_bandwidth": 8,
+     "runtime": 6671066
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 74,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 43,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 78,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 1181200,
+    "declaredNs": 1181200
+   },
+   "CNOT": {
+    "count": 237,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "CY": {
+    "count": 3,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "CZ": {
+    "count": 15,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 79,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 74,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 2,
+    "minNs": 154,
+    "medianNs": 154,
+    "maxNs": 71356,
+    "declaredNs": 71360
+   },
+   "pauli_frame_update": {
+    "count": 1,
+    "minNs": 182,
+    "medianNs": 182,
+    "maxNs": 182,
+    "declaredNs": 190
+   }
+  },
+  "seconds": 9.399
+ },
+ {
+  "program": "bell-d5",
+  "scale": "XL",
+  "distance": 5,
+  "platform": "superconducting",
+  "design": "sc-A",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 131,
+  "ops": 5910,
+  "kinds": {
+   "request_ancilla": 726,
+   "H": 393,
+   "route": 750,
+   "CZ": 75,
+   "CNOT": 2480,
+   "measure": 753,
+   "release_ancilla": 726,
+   "decode_syndrome": 7
+  },
+  "makespanNs": 14647550,
+  "machine": {
+   "qubits": 131,
+   "factories": 1,
+   "max_parallel_gates": 131,
+   "decoders": 1,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 65500,
+   "ancilla_bandwidth": 819,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 2015286,
+   "pauli_frame_update_ns": 26,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 49,
+    "runtime": 13922,
+    "gates": 12,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 7,
+    "qubit_routing_bandwidth": 11500,
+    "ancilla_bandwidth": 168,
+    "hardware": {
+     "gates": 12,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 7,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 168,
+     "runtime": 13886
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 726,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 393,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 750,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 75,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 2480,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 753,
+    "minNs": 1044,
+    "medianNs": 1218,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 726,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 7,
+    "minNs": 234,
+    "medianNs": 380960,
+    "maxNs": 761920,
+    "declaredNs": 2015286
+   }
+  },
+  "seconds": 32.413
+ },
+ {
+  "program": "bell-d5",
+  "scale": "XL",
+  "distance": 5,
+  "platform": "superconducting",
+  "design": "sc-B",
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 131,
+  "ops": 5910,
+  "kinds": {
+   "request_ancilla": 726,
+   "H": 393,
+   "route": 750,
+   "CZ": 75,
+   "CNOT": 2480,
+   "measure": 753,
+   "release_ancilla": 726,
+   "decode_syndrome": 7
+  },
+  "makespanNs": 1880418,
+  "machine": {
+   "qubits": 131,
+   "factories": 1,
+   "max_parallel_gates": 131,
+   "decoders": 2,
+   "classical_data_bandwidth": 500,
+   "qubit_routing_bandwidth": 65500,
+   "ancilla_bandwidth": 819,
+   "gate1q_ns": 36,
+   "gate2q_ns": 472,
+   "measure_ns": 1440,
+   "reset_ns": 160,
+   "route_latency_ns": 2,
+   "decoder_latency_ns": 191410,
+   "pauli_frame_update_ns": 26,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "provisional",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 49,
+    "runtime": 13922,
+    "gates": 12,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 7,
+    "qubit_routing_bandwidth": 11500,
+    "ancilla_bandwidth": 168,
+    "hardware": {
+     "gates": 12,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 7,
+     "qubit_routing_bandwidth": 0,
+     "ancilla_bandwidth": 168,
+     "runtime": 13886
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 726,
+    "minNs": 160,
+    "medianNs": 160,
+    "maxNs": 160,
+    "declaredNs": 160
+   },
+   "H": {
+    "count": 393,
+    "minNs": 36,
+    "medianNs": 36,
+    "maxNs": 36,
+    "declaredNs": 36
+   },
+   "route": {
+    "count": 750,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 2
+   },
+   "CZ": {
+    "count": 75,
+    "minNs": 400,
+    "medianNs": 400,
+    "maxNs": 400,
+    "declaredNs": 472
+   },
+   "CNOT": {
+    "count": 2480,
+    "minNs": 472,
+    "medianNs": 472,
+    "maxNs": 472,
+    "declaredNs": 472
+   },
+   "measure": {
+    "count": 753,
+    "minNs": 1044,
+    "medianNs": 1218,
+    "maxNs": 1440,
+    "declaredNs": 1440
+   },
+   "release_ancilla": {
+    "count": 726,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 7,
+    "minNs": 234,
+    "medianNs": 190480,
+    "maxNs": 190520,
+    "declaredNs": 191410
+   }
+  },
+  "seconds": 31.187
+ },
+ {
+  "program": "bell-d5",
+  "scale": "XL",
+  "distance": 5,
+  "platform": "neutral",
+  "design": "atoms-moving",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 4,
+  "sites": 131,
+  "ops": 5910,
+  "kinds": {
+   "request_ancilla": 726,
+   "H": 393,
+   "route": 750,
+   "CZ": 75,
+   "CNOT": 2480,
+   "measure": 753,
+   "release_ancilla": 726,
+   "decode_syndrome": 7
+  },
+  "makespanNs": 99624720,
+  "machine": {
+   "qubits": 131,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 173950,
+   "decoder_latency_ns": 190480,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 49,
+    "runtime": 2430690,
+    "gates": 12,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 12,
+    "qubit_routing_bandwidth": 4,
+    "ancilla_bandwidth": 24,
+    "hardware": {
+     "gates": 12,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 12,
+     "qubit_routing_bandwidth": 4,
+     "ancilla_bandwidth": 24,
+     "runtime": 2422686
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 726,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 393,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 750,
+    "minNs": 85032,
+    "medianNs": 92766,
+    "maxNs": 173950,
+    "declaredNs": 173950
+   },
+   "CZ": {
+    "count": 75,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 2480,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 753,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 726,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 7,
+    "minNs": 234,
+    "medianNs": 190480,
+    "maxNs": 190480,
+    "declaredNs": 190480
+   }
+  },
+  "seconds": 47.348
+ },
+ {
+  "program": "bell-d5",
+  "scale": "XL",
+  "distance": 5,
+  "platform": "neutral",
+  "design": "atoms-static",
+  "pools": {
+   "beams": 16,
+   "movers": 4,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 4,
+  "sites": 131,
+  "ops": 5910,
+  "kinds": {
+   "request_ancilla": 726,
+   "H": 393,
+   "route": 750,
+   "CZ": 75,
+   "CNOT": 2480,
+   "measure": 753,
+   "release_ancilla": 726,
+   "decode_syndrome": 7
+  },
+  "makespanNs": 79390920,
+  "machine": {
+   "qubits": 131,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 4,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 8000,
+   "gate2q_ns": 16270,
+   "measure_ns": 508070,
+   "reset_ns": 100000,
+   "route_latency_ns": 99010,
+   "decoder_latency_ns": 190480,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 49,
+    "runtime": 1831170,
+    "gates": 12,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 15,
+    "qubit_routing_bandwidth": 4,
+    "ancilla_bandwidth": 24,
+    "hardware": {
+     "gates": 12,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 15,
+     "qubit_routing_bandwidth": 3,
+     "ancilla_bandwidth": 24,
+     "runtime": 1823166
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 726,
+    "minNs": 100000,
+    "medianNs": 100000,
+    "maxNs": 100000,
+    "declaredNs": 100000
+   },
+   "H": {
+    "count": 393,
+    "minNs": 8000,
+    "medianNs": 8000,
+    "maxNs": 8000,
+    "declaredNs": 8000
+   },
+   "route": {
+    "count": 750,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 99004,
+    "declaredNs": 99010
+   },
+   "CZ": {
+    "count": 75,
+    "minNs": 270,
+    "medianNs": 270,
+    "maxNs": 270,
+    "declaredNs": 16270
+   },
+   "CNOT": {
+    "count": 2480,
+    "minNs": 16270,
+    "medianNs": 16270,
+    "maxNs": 16270,
+    "declaredNs": 16270
+   },
+   "measure": {
+    "count": 753,
+    "minNs": 500066,
+    "medianNs": 508066,
+    "maxNs": 508066,
+    "declaredNs": 508070
+   },
+   "release_ancilla": {
+    "count": 726,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 7,
+    "minNs": 234,
+    "medianNs": 190480,
+    "maxNs": 190480,
+    "declaredNs": 190480
+   }
+  },
+  "seconds": 44.897
+ },
+ {
+  "program": "bell-d5",
+  "scale": "XL",
+  "distance": 5,
+  "platform": "qccd",
+  "design": "ions-qccd",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 131,
+  "ops": 5910,
+  "kinds": {
+   "request_ancilla": 726,
+   "H": 393,
+   "route": 750,
+   "CZ": 75,
+   "CNOT": 2480,
+   "measure": 753,
+   "release_ancilla": 726,
+   "decode_syndrome": 7
+  },
+  "makespanNs": 387349820,
+  "machine": {
+   "qubits": 131,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1436400,
+   "decoder_latency_ns": 190630,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 49,
+    "runtime": 11104870,
+    "gates": 12,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 5,
+    "qubit_routing_bandwidth": 5,
+    "ancilla_bandwidth": 24,
+    "hardware": {
+     "gates": 12,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 5,
+     "qubit_routing_bandwidth": 5,
+     "ancilla_bandwidth": 24,
+     "runtime": 11099866
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 726,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 393,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 750,
+    "minNs": 869800,
+    "medianNs": 1053600,
+    "maxNs": 1436400,
+    "declaredNs": 1436400
+   },
+   "CZ": {
+    "count": 75,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 2480,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 753,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 726,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 7,
+    "minNs": 234,
+    "medianNs": 190480,
+    "maxNs": 190480,
+    "declaredNs": 190630
+   }
+  },
+  "seconds": 65.972
+ },
+ {
+  "program": "bell-d5",
+  "scale": "XL",
+  "distance": 5,
+  "platform": "qccd",
+  "design": "ions-modules",
+  "pools": {
+   "beams": 16,
+   "movers": 32,
+   "readouts": 16,
+   "pumps": 64,
+   "lent": 0
+  },
+  "verdict": "RESOURCE_VALIDATED",
+  "conforms": true,
+  "iterations": 3,
+  "sites": 131,
+  "ops": 5910,
+  "kinds": {
+   "request_ancilla": 726,
+   "H": 393,
+   "route": 750,
+   "CZ": 75,
+   "CNOT": 2480,
+   "measure": 753,
+   "release_ancilla": 726,
+   "decode_syndrome": 7
+  },
+  "makespanNs": 402661820,
+  "machine": {
+   "qubits": 131,
+   "factories": 1,
+   "max_parallel_gates": 16,
+   "decoders": 1,
+   "classical_data_bandwidth": 100,
+   "qubit_routing_bandwidth": 32,
+   "ancilla_bandwidth": 64,
+   "gate1q_ns": 5000,
+   "gate2q_ns": 35000,
+   "measure_ns": 125070,
+   "reset_ns": 10000,
+   "route_latency_ns": 1500200,
+   "decoder_latency_ns": 190630,
+   "pauli_frame_update_ns": 30,
+   "magic_state_latency_ns": 135000
+  },
+  "sources": {
+   "qubits": "derived",
+   "factories": "derived",
+   "max_parallel_gates": "derived",
+   "decoders": "derived",
+   "classical_data_bandwidth": "derived",
+   "qubit_routing_bandwidth": "derived",
+   "ancilla_bandwidth": "derived",
+   "gate1q_ns": "measured",
+   "gate2q_ns": "measured",
+   "measure_ns": "measured",
+   "reset_ns": "measured",
+   "route_latency_ns": "measured",
+   "decoder_latency_ns": "measured",
+   "pauli_frame_update_ns": "provisional",
+   "magic_state_latency_ns": "provisional"
+  },
+  "factory": {
+   "output_qubits": 9,
+   "workspace_qubits": 8,
+   "latency": 135000,
+   "gates": 1,
+   "decoders": 1,
+   "classical_data_bandwidth": 8,
+   "qubit_routing_bandwidth": 2
+  },
+  "contracts": {
+   "surfaceRound": {
+    "qubits": 49,
+    "runtime": 11551470,
+    "gates": 12,
+    "decoders": 0,
+    "factories": 0,
+    "classical_data_bandwidth": 5,
+    "qubit_routing_bandwidth": 5,
+    "ancilla_bandwidth": 24,
+    "hardware": {
+     "gates": 12,
+     "decoders": 0,
+     "factories": 0,
+     "classical_data_bandwidth": 5,
+     "qubit_routing_bandwidth": 3,
+     "ancilla_bandwidth": 24,
+     "runtime": 11546466
+    }
+   }
+  },
+  "slack": {
+   "request_ancilla": {
+    "count": 726,
+    "minNs": 10000,
+    "medianNs": 10000,
+    "maxNs": 10000,
+    "declaredNs": 10000
+   },
+   "H": {
+    "count": 393,
+    "minNs": 5000,
+    "medianNs": 5000,
+    "maxNs": 5000,
+    "declaredNs": 5000
+   },
+   "route": {
+    "count": 750,
+    "minNs": 0,
+    "medianNs": 869800,
+    "maxNs": 1500200,
+    "declaredNs": 1500200
+   },
+   "CZ": {
+    "count": 75,
+    "minNs": 25000,
+    "medianNs": 25000,
+    "maxNs": 25000,
+    "declaredNs": 35000
+   },
+   "CNOT": {
+    "count": 2480,
+    "minNs": 35000,
+    "medianNs": 35000,
+    "maxNs": 35000,
+    "declaredNs": 35000
+   },
+   "measure": {
+    "count": 753,
+    "minNs": 120066,
+    "medianNs": 125066,
+    "maxNs": 125066,
+    "declaredNs": 125070
+   },
+   "release_ancilla": {
+    "count": 726,
+    "minNs": 0,
+    "medianNs": 0,
+    "maxNs": 0,
+    "declaredNs": 0
+   },
+   "decode_syndrome": {
+    "count": 7,
+    "minNs": 234,
+    "medianNs": 190480,
+    "maxNs": 190480,
+    "declaredNs": 190630
+   }
+  },
+  "seconds": 45.602
+ }
+]
