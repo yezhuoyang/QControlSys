@@ -45,6 +45,8 @@ export function stim(request) {
   return new Promise((ok, fail) => {
     const child = execFile(process.env.QCONTROL_PYTHON || "python", ["-I", join(REPO, "bridge", "magic_sim.py")],
       { windowsHide: true, maxBuffer: 1 << 28, timeout: 1_800_000 }, (error, stdout, stderr) => {
+        if (error && (error.code === "ENOENT" || /No module named '(numpy|stim)'/.test(stderr ?? "")))
+          return fail(Error("The noise simulation needs Python with numpy and stim (pip install stim numpy), which this server does not have. Runs without noise do not need them."));
         if (error) return fail(Error("bridge/magic_sim.py: " + (stderr || error.message).trim().split("\n").slice(-3).join(" ")));
         ok(JSON.parse(stdout));
       });
@@ -629,7 +631,7 @@ const GOOGLE_PUBLISHED = {
  * design page: the RISC-Q run, its conformance, its track (device and controller), and with
  * `shots` the SI1000 noise simulation. `edits` change the twin (WILLOW_EDITS).
  */
-export async function googleRow(name, { shots = 0, p = 2.3e-3, edits = {}, qubitsPerCore = 1 } = {}) {
+export async function googleRow(name, { shots = 0, p = 2.3e-3, edits = {}, qubitsPerCore = 1, outcomes: given } = {}) {
   const circuit = mc.googleCircuit(name);
   const counts = mc.counts(circuit);
   // The bits the readout returns: a state-vector shot with the real T gates where it fits,
@@ -640,7 +642,7 @@ export async function googleRow(name, { shots = 0, p = 2.3e-3, edits = {}, qubit
     const rng = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
     sv = mc.runTransmonCircuit(circuit, { rng, trace: true });
     outcomes = sv.record;
-  } else outcomes = (await stim({ mode: "sample", stim: mc.stimText(circuit), seed: 3 })).bits;
+  } else outcomes = given ?? (await stim({ mode: "sample", stim: mc.stimText(circuit), seed: 3 })).bits;
   const run = await runWillow(circuit, { outcomes, edits, qubitsPerCore });
   let noise = null;
   if (shots && name !== "fig4-graft-N2") {
@@ -653,7 +655,7 @@ export async function googleRow(name, { shots = 0, p = 2.3e-3, edits = {}, qubit
     qubits: counts.qubits, ops: run.schedule.listing.ops.length, twoQubit: counts.twoQubit, measurements: counts.measurements, detectors: counts.detectors,
     tagged: counts.tagged, moments: counts.moments, circuitNs: run.schedule.makespanNs, bitAfterWindowNs: run.report.bitAfterWindowNs,
     ...conformanceView(run.report, run.schedule.listing), readBack: run.readBack, cores: run.cores, qubitsPerCore, pulses: run.pulses,
-    couplers: run.device.couplers.length, noise,
+    couplers: run.device.couplers.length, noise, outcomes,
     columns: {
       "On the twin (µs)": (run.schedule.makespanNs / 1000).toFixed(2),
       "RISC-Q cores": String(run.cores),
@@ -749,7 +751,7 @@ export async function googleCultivation({ shots = 2_000_000, sweepShots = 0, dir
  * page: the RISC-Q run, its conformance, its track, and with `shots` the injected and distilled
  * fidelities from the noise learned with Stim. `edits` change the twin (GEMINI_EDITS).
  */
-export async function queraRow(d, { shots = 0, edits = {} } = {}) {
+export async function queraRow(d, { shots = 0, edits = {}, outcomes: given } = {}) {
   const twin = geminiTwin(edits), noise = queraNoise(twin);
   const code = mc.encoderCode(d), c = mc.QUERA_CODES[d];
   // Rows of atoms as code blocks. In the factory the output (row 1) is decoded after the four
@@ -758,7 +760,7 @@ export async function queraRow(d, { shots = 0, edits = {} } = {}) {
     ...(stage === "factory" && r === 1 ? { given: [0, 2, 3, 4] } : {}) }));
   // Run the factory (Z basis) on RISC-Q with a noiseless shot as the readout.
   const factory = mc.queraFactory(d, { basis: "Z" });
-  const sample = (await stim({ mode: "sample", stim: mc.stimText(factory, { drives: true }), seed: 5 })).bits;
+  const sample = given ?? (await stim({ mode: "sample", stim: mc.stimText(factory, { drives: true }), seed: 5 })).bits;
   const run = await runGemini(factory, { outcomes: sample, twin });
   let inj = null, dist = null;
   if (shots) {
@@ -783,7 +785,7 @@ export async function queraRow(d, { shots = 0, edits = {} } = {}) {
     label: "d = " + d + " · " + c.name,
     distance: d, basis: c.name, view: "circuit", qubits: 5 * c.n, ops: run.schedule.listing.ops.length, circuitNs: run.schedule.makespanNs, bitAfterWindowNs: run.report.bitAfterWindowNs,
     ...conformanceView(run.report, run.schedule.listing), readBack: run.readBack, cores: run.cores, pulses: run.pulses,
-    encoderLayers: c.layers, injected: inj, distilled: dist, shots, moments: run.schedule.moments,
+    encoderLayers: c.layers, injected: inj, distilled: dist, shots, moments: run.schedule.moments, outcomes: sample,
     columns: {
       "On the twin (ms)": (run.schedule.makespanNs / 1e6).toFixed(3),
       "RISC-Q cores": String(run.cores),
@@ -913,6 +915,19 @@ export function distilledFidelity(byBasis) {
 
 /* ================================================================== the design pages */
 
+/**
+ * The readout bits a stored run used (a noiseless Stim shot), so that a rerun of an edited twin
+ * returns the same bits without Python; only the noise simulation needs Stim on the server.
+ */
+function storedOutcomes(id, match) {
+  try {
+    const data = JSON.parse(readFileSync(join(REPO, "validation", "ftqvm", "papers", id + ".json"), "utf8"));
+    return data.rows.find(match)?.outcomes;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Parameter fields of a design page from an edit table and the twin's own values and sources. */
 function fields(table, values, group) {
   return Object.entries(table).map(([key, f]) => ({ key, label: f.label, value: values[key].value, unit: f.unit || undefined, min: f.min, max: f.max, step: f.step, source: values[key].source, group }));
@@ -948,7 +963,8 @@ export const MAGIC_DESIGNS = {
     async run(params = {}) {
       const name = mc.GOOGLE_CIRCUITS[params.circuit] ? params.circuit : "fig3-kickback";
       const edits = Object.fromEntries(["gate1qNs", "czNs", "readoutNs", "resetNs"].filter((k) => params[k] !== undefined).map((k) => [k, Number(params[k])]));
-      const { row, run } = await googleRow(name, { edits, qubitsPerCore: Math.max(1, Math.min(4, Math.round(Number(params.qubitsPerCore ?? 1)))), shots: Number(params.shots ?? 0) });
+      const outcomes = storedOutcomes("google-cultivation-2025", (r) => r.circuit === name);
+      const { row, run } = await googleRow(name, { edits, qubitsPerCore: Math.max(1, Math.min(4, Math.round(Number(params.qubitsPerCore ?? 1)))), shots: Number(params.shots ?? 0), outcomes });
       return { rows: [row], design: run.design };
     },
   },
@@ -974,7 +990,7 @@ export const MAGIC_DESIGNS = {
     async run(params = {}) {
       const d = Number(params.d) === 5 ? 5 : 3;
       const edits = Object.fromEntries(Object.keys(GEMINI_EDITS).filter((k) => params[k] !== undefined).map((k) => [k, Number(params[k])]));
-      const { row } = await queraRow(d, { edits, shots: Number(params.shots ?? 0) });
+      const { row } = await queraRow(d, { edits, shots: Number(params.shots ?? 0), outcomes: storedOutcomes("quera-distillation-2025", (r) => r.distance === d) });
       return { rows: [row] };
     },
   },
