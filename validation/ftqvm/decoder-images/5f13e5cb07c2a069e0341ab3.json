@@ -1,1 +1,0 @@
-{"overflow":"clang failed for core dec0.0:\nld.lld: error: riscq: program overflows RAM (1 KB stack reserve)\r\nld.lld: error: riscq: program overflows RAM (1 KB stack reserve)\r\nclang: error: ld.lld command failed with exit code 1 (use -v to see invocation)\r\n"}
