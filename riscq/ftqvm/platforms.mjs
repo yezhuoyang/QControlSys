@@ -54,7 +54,7 @@ export function optical(id, overrides = {}) {
     design: (listing, placement) => opticalDesign(listing, placement, id, overrides),
     // The profile's durations, to start the derivation near the hardware (provisional until measured).
     initialDurations: () => {
-      const point = { ...OPTICAL_DESIGNS[id], ...overrides }, p = PROFILES[point.profile];
+      const point = { ...OPTICAL_DESIGNS[id], ...overrides }, p = { ...PROFILES[point.profile], ...(point.profileOverrides ?? {}) };
       const one = point.globalOneQubit ? p.globalOneQubitNs.value : p.oneQubitNs.value;
       // On a race track a gate may first carry an ion half way round the loop.
       const transport = p.ringZones ? p.splitNs.value + (p.ringZones.value / 2) * p.shuttleNs.value + p.mergeNs.value : 0;

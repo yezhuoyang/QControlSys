@@ -165,7 +165,38 @@ function reproduceAsset(pathname) {
   if (rest === "") return path.join("studio", "reproduce", "index.html");
   if (rest.startsWith("data/")) return path.join("validation", "ftqvm", "papers", rest.slice(5));
   if (path.extname(rest)) return path.join("studio", "reproduce", rest);
-  return REPRODUCTIONS.some((r) => r.id === rest) ? path.join("studio", "reproduce", "paper.html") : undefined;
+  // /reproduce/<id>/design: the paper's editable twin (studio/reproduce/design.html).
+  const [id, sub] = rest.split("/");
+  if (!REPRODUCTIONS.some((r) => r.id === id)) return undefined;
+  return sub === undefined ? path.join("studio", "reproduce", "paper.html") : sub === "design" ? path.join("studio", "reproduce", "design.html") : undefined;
+}
+
+/**
+ * The editable twin of a reproduction: riscq/ftqvm/designs.mjs for the papers, magic.mjs for the
+ * magic-state factories. A rerun is a Lean run of the stored listing on the edited twin; runs are
+ * served one at a time, each bounded to five minutes.
+ */
+let designQueue = Promise.resolve();
+async function designOf(id) {
+  const { DESIGNS } = await import("./riscq/ftqvm/designs.mjs");
+  if (DESIGNS[id]) return DESIGNS[id];
+  const { MAGIC_DESIGNS } = await import("./riscq/ftqvm/magic.mjs");
+  if (MAGIC_DESIGNS?.[id]) return MAGIC_DESIGNS[id];
+  throw Error("no editable twin for " + id);
+}
+function runDesign(id, params) {
+  const job = designQueue.then(async () => {
+    const design = await designOf(id);
+    let timer;
+    const limit = new Promise((_, reject) => (timer = setTimeout(() => reject(Error("the run took longer than five minutes")), 300000)));
+    try {
+      return await Promise.race([design.run(params ?? {}), limit]);
+    } finally {
+      clearTimeout(timer);
+    }
+  });
+  designQueue = job.catch(() => {});
+  return job;
 }
 
 /** The list of reproductions, with whether each has a run to show. */
@@ -508,6 +539,21 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(page));
       }
       if (url.pathname === "/reproduce/data/index.json") return reply(res, 200, "application/json", reproductionIndex());
+      if (url.pathname === "/api/reproduce/params" && req.method === "GET") {
+        try {
+          return reply(res, 200, "application/json", JSON.stringify(await (async (d) => ({ params: await d.params(), intro: d.intro }))(await designOf(url.searchParams.get("id")))));
+        } catch (error) {
+          return reply(res, 200, "application/json", JSON.stringify({ error: error.message }));
+        }
+      }
+      if (url.pathname === "/api/reproduce/run" && req.method === "POST") {
+        const { id, params } = JSON.parse(await readInput(req, 65536));
+        try {
+          return reply(res, 200, "application/json", JSON.stringify(await runDesign(id, params)));
+        } catch (error) {
+          return reply(res, 200, "application/json", JSON.stringify({ error: error.message.split("\n")[0].slice(0, 600) }));
+        }
+      }
       const asset = routes.get(url.pathname) ?? courseAsset(url.pathname) ?? reproduceAsset(url.pathname);
       // HEAD is answered like GET; Node sends the headers without the body.
       const read = req.method === "GET" || req.method === "HEAD";

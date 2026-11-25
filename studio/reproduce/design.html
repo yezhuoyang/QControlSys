@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Design · Reproduce · QuantumOS</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/course/course.css">
+  <link rel="stylesheet" href="/reproduce/reproduce.css">
+  <script type="importmap">{ "imports": { "three": "/three/three.module.js" } }</script>
+</head>
+<body>
+<main class="page wide"><article id="design" aria-live="polite">Loading…</article></main>
+<script type="module" src="/site-nav.js"></script>
+<script type="module">
+  import { renderDesign } from "/reproduce/design.js";
+  renderDesign(document.getElementById("design"), location.pathname.split("/").filter(Boolean)[1]);
+</script>
+</body>
+</html>

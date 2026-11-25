@@ -32,3 +32,28 @@ details.block > summary { cursor: pointer; font-weight: 600; }
 .twin-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; font-size: 13px; }
 .twin-controls input[type=range] { flex: 1 1 240px; }
 .twin-caption { font-size: 12.5px; color: var(--ink3); margin: 6px 0 0; }
+.twin-tip { position: absolute; z-index: 3; max-width: 300px; background: rgba(15,23,42,.94); color: #e2e8f0; border: 1px solid #334155; border-radius: 8px; padding: 8px 10px; font: 12.5px/1.45 var(--sans); pointer-events: none; }
+.twin-views { position: absolute; right: 10px; top: 10px; display: flex; gap: 4px; }
+.twin-views button { font: 600 12px/1 var(--sans); padding: 6px 9px; border-radius: 6px; border: 1px solid #334155; background: rgba(15,23,42,.8); color: #cbd5e1; cursor: pointer; }
+.twin-views button[aria-pressed="true"] { background: #e2e8f0; color: #0f172a; }
+.design-grid { display: grid; grid-template-columns: minmax(270px, 340px) minmax(0, 1fr); gap: 18px; align-items: start; margin: 14px 0; }
+@media (max-width: 860px) { .design-grid { grid-template-columns: 1fr; } }
+.dform fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 4px; margin: 0 0 12px; background: #fff; }
+.dform legend { font: 700 13px/1 var(--sans); padding: 0 6px; color: var(--ink2); }
+.dfield { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.dfield:last-child { border-bottom: 0; }
+.dfield label { display: block; font-size: 13.5px; font-weight: 600; }
+.dfield .unit { font-weight: 400; color: var(--ink3); }
+.dinput { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.dinput input, .dinput select { width: 100%; max-width: 190px; font: 13.5px var(--mono); padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; }
+.dchip { display: none; font: 600 11px/1 var(--sans); padding: 3px 6px; border-radius: 99px; background: #fff4dc; color: #8a5a00; }
+.dfield.edited .dchip { display: inline-block; }
+.dfield.edited input, .dfield.edited select { border-color: #d97706; background: #fffbeb; }
+.dsrc { margin: 3px 0 0; font-size: 11.5px; line-height: 1.35; color: var(--ink3); }
+.dactions { display: flex; gap: 8px; flex-wrap: wrap; }
+.dstatus { font-size: 13px; color: var(--ink2); min-height: 1.4em; }
+.dverdict { font-weight: 700; padding: 8px 12px; border-radius: 8px; margin: 0 0 8px; }
+.dverdict.ok { background: #e3f6ea; color: #146c3a; }
+.dverdict.bad { background: #fde8e4; color: #a8321c; }
+i.dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+.btn.design { margin-top: 4px; }

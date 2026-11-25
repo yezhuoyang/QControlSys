@@ -24,6 +24,27 @@ export function details(last, qec) {
   };
 }
 
+/**
+ * What a design page needs to run a row again on an edited twin (riscq/ftqvm/designs.mjs): the
+ * compiled listing (FormalRV's output, fixed), its distance and the twin it ran on. The CLI writes
+ * it to validation/ftqvm/twins/<id>/<key>.json, not into the page's data.
+ */
+const twinSource = (key, label, platform, distance, listing) => ({ key, label, platform, distance, listing: { ops: listing.ops.map(({ stack, ...o }) => o) } });
+
+/** Split each row's twin source off into its own file; record any newly measured decode times. */
+async function writeTwins(id, rows) {
+  const dir = join("validation", "ftqvm", "twins", id);
+  mkdirSync(dir, { recursive: true });
+  for (const row of rows) {
+    if (!row._twin) continue;
+    writeFileSync(join(dir, row._twin.key + ".json"), JSON.stringify({ id, generated: new Date().toISOString(), ...row._twin }) + "\n");
+    row.twinKey = row._twin.key;
+    delete row._twin;
+  }
+  const { saveDecoderTimes } = await import("./decoder.mjs");
+  saveDecoderTimes();
+}
+
 /** FormalRV's declaration of the distance-d surface code, as prepare_qec writes it. */
 export async function surfaceCodes(d, dir) {
   mkdirSync(dir, { recursive: true });
@@ -75,6 +96,7 @@ export async function googleExperiment({ distances = [3, 5, 7], rounds = 10, dir
       decoderNs: m.decoder_latency_ns, makespanNs: last.makespanNs,
       paper: { cycleNs: device.published.cycleNs.value, decoderLatencyNsAtD5: device.published.decoderLatencyNs.value },
       ...details(last, qec),
+      _twin: twinSource("d" + d, "d = " + d + ", " + rounds + " rounds", { kind: "transmonTwin", device: "willow", options: { qubitsPerCore: 2, decoders: 1, coresPerDecoder: 4 } }, d, last.listing),
     });
   }
   return { device: { id: device.id, title: device.title, basis: device.basis, durations: device.durations, published: device.published }, rows };
@@ -87,6 +109,7 @@ if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replac
   if (which === "google") {
     const { tmpdir } = await import("node:os");
     const result = await googleExperiment({ dir: join(tmpdir(), "quantumos-google-" + process.pid), baseMachine: join("validation", "ftqvm", "base.machine"), rounds: Number(process.argv[3] ?? 10) });
+    await writeTwins("google-2025", result.rows);
     writeFileSync(join(out, "google-2025.json"), JSON.stringify({ meta: byId("google-2025"), generated: new Date().toISOString(), ...result }, null, 1));
     const md = ["| d | Rounds | Qubits | Ops | Conforms | FormalRV round (µs) | Paper cycle (µs) | Gates per round | Decoder (µs) |", "|---|---|---|---|---|---|---|---|---|",
       ...result.rows.map((r) => `| ${r.distance} | ${r.rounds} | ${r.qubits} | ${r.ops} | ${r.conforms ? "yes" : "no"} | ${(r.roundNs / 1000).toFixed(2)} | ${(r.paper.cycleNs / 1000).toFixed(1)} | ${r.roundGates} | ${(r.decoderNs / 1000).toFixed(1)} |`)].join("\n") + "\n";
@@ -96,6 +119,7 @@ if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replac
   if (which === "quantinuum") {
     const { tmpdir } = await import("node:os");
     const result = await quantinuumExperiment({ dir: join(tmpdir(), "quantumos-quantinuum-" + process.pid), baseMachine: join("validation", "ftqvm", "base.machine") });
+    await writeTwins("ryan-anderson-2024", result.rows);
     writeFileSync(join(out, "ryan-anderson-2024.json"), JSON.stringify({ meta: byId("ryan-anderson-2024"), generated: new Date().toISOString(), ...result }, null, 1));
     console.log(JSON.stringify(result.rows.map(({ programText, listingHead, machineText, sysspecText, spec, byKind, slack, ...r }) => r), null, 1));
   }
@@ -103,6 +127,7 @@ if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replac
     const { tmpdir } = await import("node:os");
     const distances = (process.argv[3] ?? "3,5,7").split(",").map(Number);
     const result = await bluvsteinExperiment({ distances, dir: join(tmpdir(), "quantumos-bluvstein-" + process.pid), baseMachine: join("validation", "ftqvm", "base.machine") });
+    await writeTwins("bluvstein-2024", result.rows);
     writeFileSync(join(out, "bluvstein-2024.json"), JSON.stringify({ meta: byId("bluvstein-2024"), generated: new Date().toISOString(), ...result }, null, 1));
     const md = ["| d | Basis | Atoms placed | Ops | Conforms | Transversal CNOTs spread over (µs) | Route (µs) | CNOT (µs) | Measure (µs) | Decoder (µs) | Makespan (ms) |", "|---|---|---|---|---|---|---|---|---|---|---|",
       ...result.rows.map((r) => r.error ? `| ${r.distance} | ${r.basis} | | | error: ${r.error.replace(/\|/g, "/").slice(0, 160)} | | | | | | |` : `| ${r.distance} | ${r.basis} | ${r.qubits} | ${r.ops} | ${r.conforms ? "yes" : "no"} | ${(r.transversalSpreadNs / 1000).toFixed(1)} | ${(r.routeNs / 1000).toFixed(1)} | ${(r.gate2qNs / 1000).toFixed(2)} | ${(r.measureNs / 1000).toFixed(0)} | ${(r.decoderNs / 1000).toFixed(1)} | ${(r.makespanNs / 1e6).toFixed(2)} |`)].join("\n") + "\n";
@@ -184,6 +209,7 @@ export async function bluvsteinExperiment({ distances = [3, 5, 7], bases = ["Z",
         failing: Object.fromEntries(Object.entries(last.report.byKind).filter(([, v]) => v.ok < v.count).map(([k, v]) => [k, { ok: v.ok, count: v.count, maxOverrunNs: v.maxOverrunNs }])),
         firstFailing: last.report.rows.filter((r) => !r.ok).slice(0, 3).map((r) => ({ kind: r.kind, line: r.line, start: r.start, end: r.end, hardwareNs: r.hardwareNs, lent: r.lentChannel })),
         ...details(last, qec),
+        _twin: twinSource("d" + d + basis, "d = " + d + ", " + basis + " basis", { kind: "optical", id: "bluvstein-2024", overrides: {} }, d, last.listing),
       });
     }
   return { design: { id: "bluvstein-2024", ...OPTICAL_DESIGNS["bluvstein-2024"], profile: PROFILES.bluvstein }, rows };
@@ -233,7 +259,8 @@ export async function quantinuumExperiment({ dir, baseMachine } = {}) {
   ];
   for (const size of sizes) try {
     const sub = join(dir, size.qubits ? "q" + size.qubits.value : "q32");
-    const { iterations } = await deriveSpec({ platform: optical("quantinuum-h2", { blockSize: 7, ...(size.qubits ? { qubits: size.qubits } : {}) }), qec, distance: 3, baseMachine, dir: sub, staged: true, compileOptions: ["--opt", "pipeline-loops"] });
+    const overrides = { blockSize: 7, ...(size.qubits ? { qubits: size.qubits } : {}) };
+    const { iterations } = await deriveSpec({ platform: optical("quantinuum-h2", overrides), qec, distance: 3, baseMachine, dir: sub, staged: true, compileOptions: ["--opt", "pipeline-loops"] });
     const last = iterations.at(-1);
     const m = Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, v.value]));
     const moves = last.report.rows.filter((r) => ["CNOT", "CZ", "CY"].includes(r.kind));
@@ -243,6 +270,7 @@ export async function quantinuumExperiment({ dir, baseMachine } = {}) {
       twoQubitGates: moves.length, iterations: iterations.length, stripped: last.listing.source.stripped,
       failing: Object.fromEntries(Object.entries(last.report.byKind).filter(([, v]) => v.ok < v.count).map(([k, v]) => [k, { ok: v.ok, count: v.count, maxOverrunNs: v.maxOverrunNs }])),
       ...details(last, qec),
+      _twin: twinSource(size.qubits ? "q" + size.qubits.value : "q32", size.label, { kind: "optical", id: "quantinuum-h2", overrides }, 3, last.listing),
     });
   } catch (error) {
     // The line that says why (FormalRV's refusal or the VM's verdict), not the compiler's progress lines.

@@ -31,7 +31,7 @@ import * as superconducting from "../platforms/superconducting.mjs";
 import * as hardwareDesign from "../design.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
 import { layers } from "./surface.mjs";
-import { buildTrack } from "./track.mjs";
+import { buildTrack, controllerTrack } from "./track.mjs";
 
 const NOT_YET = new Set([]);
 const CLASSICAL = new Set(["pauli_frame_update", "parity"]);
@@ -265,6 +265,13 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
   report.track = buildTrack({ listing, placement, report, device: {
     kind: "transmon", unit: "lattice", sites: placement.sites.map((s) => ({ kind: s.kind, at: [s.rc[1], s.rc[0]] })),
     couplers: (design.couplings ?? []).map((c) => c.qubits) } });
+  // The control system: each core and the transmons it drives, and every pulse it played.
+  const opOf = new Map(listing.ops.map((o) => [o.uid, o]));
+  const coreIndex = new Map(m.spec.cores.map((c, i) => [c.name, i]));
+  const coreSites = m.spec.cores.map(() => []);
+  design.qubits.forEach((q, k) => coreSites[coreIndex.get(design.channels.find((c) => c.id === q.gate)?.core)]?.push(k));
+  report.track.controller = controllerTrack({ spec: m.spec, result, baseBatch: report.baseBatch, periodPs: m.period, coreSites, name: design.name,
+    sitesOfOp: (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) });
   return { m, hardware, lowered, built, result, report, origin, unrealized, quantization, decodes: decodeRows, factories: factoryRows };
 }
 

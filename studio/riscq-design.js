@@ -1001,7 +1001,9 @@ try {
   const query = new URLSearchParams(location.search);
   let kept = null;
   try {
-    kept = JSON.parse(localStorage.getItem(query.get("from") === "run" ? EDIT : STORE) ?? "null");
+    // ?from=reproduce: the chip of a reproduction's twin, handed over by /reproduce/<id>/design.
+    const from = query.get("from");
+    kept = JSON.parse(localStorage.getItem(from === "run" ? EDIT : from === "reproduce" ? "riscq-design:reproduce" : STORE) ?? "null");
   } catch {
     kept = null;
   }
@@ -1009,8 +1011,8 @@ try {
     doc = kept.design;
     qasm = kept.qasm ?? start.qasm;
     template = kept.template ?? "mine";
-    if (query.get("from") === "run") template = "mine";
-    if (query.get("from") === "run") history.replaceState(null, "", location.pathname);
+    if (["run", "reproduce"].includes(query.get("from"))) template = "mine";
+    if (["run", "reproduce"].includes(query.get("from"))) history.replaceState(null, "", location.pathname);
   } else {
     doc = await templateDoc("chain3");
     qasm = start.qasm;

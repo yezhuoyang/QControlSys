@@ -8,6 +8,7 @@
 // positions and times are the run's.
 import * as THREE from "three";
 import { OrbitControls } from "/three/OrbitControls.js";
+import { buildControl, describePick, ROLE_COLORS, ROLE_LABEL } from "/reproduce/control3d.js";
 
 const COLORS = {
   data: 0x22b8cf, ancilla: 0x8b7bd8, "1q": 0x34d399, "2q": 0xf97316, measure: 0xfacc15, reset: 0x60a5fa,
@@ -41,6 +42,8 @@ export function mountTwin(root, track, { caption = "" } = {}) {
     <div class="twin-stage"><canvas></canvas>
       <div class="twin-hud"><div class="twin-time"></div><ol class="twin-now"></ol></div>
       <div class="twin-legend"></div>
+      <div class="twin-tip" hidden></div>
+      <div class="twin-views"><button type="button" data-view="all" aria-pressed="true">Whole machine</button><button type="button" data-view="device">Device</button><button type="button" data-view="control">Control system</button></div>
     </div>
     <div class="twin-controls">
       <button type="button" class="btn small" data-act="play">Pause</button>
@@ -206,6 +209,42 @@ export function mountTwin(root, track, { caption = "" } = {}) {
   decoder.position.copy(frame.center).add(new THREE.Vector3(plateSize.x / 2 + 3, 0.25, 0));
   scene.add(decoder);
 
+  // ---- the control system: RISC-Q board, converters, cables, optics, host ----
+  const control = track.controller ? buildControl(scene, track.controller, { kind: dev.kind, center: frame.center, size: plateSize, positionAt, siteCount: n, glowSprite: glow }) : null;
+  const deviceBox = box.clone().expandByScalar(1.2);
+  const look = (b, tilt = 1) => {
+    const c = b.getCenter(new THREE.Vector3()), r = Math.max(2, b.getSize(new THREE.Vector3()).length() / 2);
+    camera.position.copy(c).add(new THREE.Vector3(0, r * 1.25 * tilt, r * 1.5));
+    controls.target.copy(c);
+  };
+  if (control) {
+    decoder.visible = false;
+    look(control.bounds);
+  }
+  const viewsEl = root.querySelector(".twin-views");
+  if (!control) viewsEl.hidden = true;
+  viewsEl.onclick = (e) => {
+    const v = e.target.dataset?.view;
+    if (!v) return;
+    for (const b of viewsEl.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b === e.target));
+    look(v === "device" ? deviceBox : v === "control" ? control.controlBounds.clone().expandByScalar(0.8) : control.bounds, v === "control" ? 1.2 : 1);
+  };
+  // Hover inspector for the control system's parts.
+  const tip = root.querySelector(".twin-tip"), ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+  canvas.addEventListener("pointermove", (ev) => {
+    if (!control) return;
+    const r = canvas.getBoundingClientRect();
+    mouse.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(mouse, camera);
+    const hit = ray.intersectObjects(control.pickables, false)[0];
+    if (!hit) { tip.hidden = true; return; }
+    tip.innerHTML = describePick(hit.object.userData, track.controller);
+    tip.style.left = Math.min(r.width - 300, ev.clientX - r.left + 14) + "px";
+    tip.style.top = ev.clientY - r.top + 14 + "px";
+    tip.hidden = false;
+  });
+  canvas.addEventListener("pointerleave", () => (tip.hidden = true));
+
   // ---- legend ----
   const used = new Set(track.events.map((e) => e.k));
   root.querySelector(".twin-legend").innerHTML = [
@@ -213,6 +252,7 @@ export function mountTwin(root, track, { caption = "" } = {}) {
     `<span><i style="background:#8b7bd8"></i>ancilla</span>`,
     ...[...used].map((k) => `<span><i style="background:#${COLORS[k].toString(16).padStart(6, "0")}"></i>${LABEL[k]}</span>`),
     ...(track.moves?.length ? [`<span><i style="background:#ffffff"></i>${dev.kind === "atoms" ? "AOD move" : "ion transport"}</span>`] : []),
+    ...(control ? [...new Set(track.controller.cores.map((c) => c.role))].map((r) => `<span><i style="background:#${ROLE_COLORS[r].toString(16).padStart(6, "0")};border-radius:2px"></i>${ROLE_LABEL[r]}</span>`) : []),
   ].join("");
 
   // ---- time ----
@@ -247,11 +287,11 @@ export function mountTwin(root, track, { caption = "" } = {}) {
       b.geometry.dispose();
       b.material.dispose();
     }
-    let decoding = 0;
+    let decoding = 0, framing = 0;
     const pairs = [];
     for (const e of active) {
       const color = COLORS[e.k];
-      if (e.k === "decode" || e.k === "frame") { decoding++; continue; }
+      if (e.k === "decode" || e.k === "frame") { if (e.k === "decode") decoding++; else framing++; continue; }
       for (const s of e.s) {
         const q = qubits[s];
         if (!q) continue;
@@ -286,10 +326,12 @@ export function mountTwin(root, track, { caption = "" } = {}) {
       qubits[k].flash.material.color.setHex(0xffffff);
       qubits[k].flash.material.opacity = 0.8;
     }
-    decoder.material.emissiveIntensity = decoding ? 1.6 : 0;
-    hudTime.textContent = "machine time " + fmt(t) + " / " + fmt(endNs);
+    decoder.material.emissiveIntensity = decoding + framing ? 1.6 : 0;
+    const ctl = control?.update(t, { decoding, framing });
+    hudTime.textContent = "machine time " + fmt(t) + " / " + fmt(endNs) + (ctl ? " · " + ctl.activePulses + " pulse" + (ctl.activePulses === 1 ? "" : "s") + " playing" : "");
     const lines = active.filter((e) => e.k !== "decode").slice(0, 5).map((e) => `<li><b style="color:#${COLORS[e.k].toString(16).padStart(6, "0")}">●</b> ${e.line.replace(/[<>&]/g, "")}</li>`);
-    if (decoding) lines.unshift(`<li><b style="color:#f472b6">●</b> decoder core: ${decoding} job${decoding > 1 ? "s" : ""} running</li>`);
+    if (decoding) lines.unshift(`<li><b style="color:#f472b6">●</b> decoder cores: ${decoding} decode${decoding > 1 ? "s" : ""} running</li>`);
+    if (framing) lines.unshift(`<li><b style="color:#e879f9">●</b> frame core: Pauli-frame update</li>`);
     hudNow.innerHTML = lines.join("");
     scrub.value = String(Math.round((t / endNs) * 1000));
   }

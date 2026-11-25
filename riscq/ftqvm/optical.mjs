@@ -33,7 +33,7 @@ import { gatedPairs } from "./place.mjs";
 import { layers, checks } from "./surface.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
 import { conformance, addRows } from "./sc-run.mjs";
-import { buildTrack } from "./track.mjs";
+import { buildTrack, controllerTrack } from "./track.mjs";
 
 const bluvstein = "Bluvstein et al., Nature 626, 58 (2024), arXiv:2312.03982, Methods";
 const norcia = "Norcia et al., PRX 13, 041034 (2023), arXiv:2305.19119";
@@ -123,7 +123,8 @@ const recordName = (r) => r.register + "[" + r.index + "]";
 /** The design of a listing on an optical platform: geometry, interaction and the controller's channels. */
 export function opticalDesign(listing, placement, id, overrides = {}) {
   const point = { ...OPTICAL_DESIGNS[id], ...overrides };
-  const prof = PROFILES[point.profile];
+  // `profile` overrides (an edited twin): { field: { value, source } } replace the profile's constants.
+  const prof = { ...PROFILES[point.profile], ...(point.profileOverrides ?? {}) };
   const pitch = prof.platform === "neutral" ? point.pitchUm : prof.segmentUm?.value ?? 1; // a race track places by zone index
   const home = placement.sites.map((s) => [s.rc[1] * pitch, s.rc[0] * pitch]);
   // Ions: the zone of a site is the site itself or its block's patch (non-block sites keep their own).
@@ -630,6 +631,9 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     sites: placement.sites.map((s, k) => ({ kind: s.kind, at: prof.platform === "neutral" || !ring ? design.home[k] : [design.zoneOfSite[k], 0] })),
     ...(ring ? { ring: { zones: ring, capacity: prof.zoneCapacity.value } } : {}),
     ...(design.point.globalEntangle ? { gateSiteUm: design.prof.siteUm?.value, interactUm: design.point.interactUm } : {}) } });
+  const opOf = new Map(listing.ops.map((o) => [o.uid, o]));
+  report.track.controller = controllerTrack({ spec, result, baseBatch: report.baseBatch, periodPs: period, name: design.point.title ?? design.id,
+    sitesOfOp: (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) });
   report.pools = { beams: beams.peak, movers: movers.peak, readouts: readouts.peak, pumps: pumps.peak, lent: beams.lent + movers.lent + readouts.lent + pumps.lent };
   report.bits = measuredBits(result, built);
   void gatedPairs; void checks;

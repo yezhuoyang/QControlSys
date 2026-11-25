@@ -102,6 +102,7 @@ export async function renderPaper(el, id) {
     <p>${badge(m.status)}</p>
     <p class="lead">${esc(m.summary)}</p>
     <p class="cite">${cite(m.paper)}</p>
+    <p><a class="btn design" href="/reproduce/${esc(id)}/design">Open the design: the whole machine, editable</a></p>
     ${rows.some((r) => r.track) ? `<h2>The twin, running the program</h2>
     <p>The machine below is the twin this page describes, running the compiled program. Every pulse, move, readout and decode appears at the time the Lean model of the control system executed it; drag to turn the view, scroll to zoom.</p>
     <div class="runpick" role="group" aria-label="Run">${runButtons}</div>

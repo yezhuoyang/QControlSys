@@ -15,6 +15,36 @@ const KIND = {
   measure: "measure", request_ancilla: "reset", decode_syndrome: "decode", pauli_frame_update: "frame", parity: "frame", request_magic: "factory",
 };
 
+/** A core's role, from its name in the build: what the 3D control system draws it as. */
+function roleOf(name) {
+  if (/^dec\d/.test(name)) return "decoder";
+  if (name === "decoder" || name === "frame") return "frame";
+  if (/^beams/.test(name)) return "beam";
+  if (/^pumps/.test(name)) return "pump";
+  if (/^movers/.test(name)) return "mover";
+  if (/^readout/.test(name)) return "readout";
+  if (/^global-/.test(name)) return "global";
+  return "qubit";
+}
+
+/**
+ * The control system of a run, for the 3D view: the board, its cores (role, channels, the sites a
+ * qubit core drives) and every pulse the trace shows ([core, channel, t0 ns, t1 ns, ...sites driven]),
+ * timed from the same time base as the conformance check.
+ * `sitesOfOp(id)`: the sites of the listing operation a native instruction belongs to.
+ */
+export function controllerTrack({ spec, result, baseBatch, periodPs, sitesOfOp, coreSites = [], name, limit = 30000 }) {
+  const cores = spec.cores.map((c, i) => ({ name: c.name, role: roleOf(c.name), channels: c.channels.map((ch) => [ch.kind, ch.name]), sites: coreSites[i] ?? [] }));
+  const pulses = [];
+  for (const p of result.summary.pulses) {
+    if (pulses.length >= limit) break;
+    const sites = sitesOfOp(p.source) ?? [];
+    const mine = cores[p.core]?.sites.length ? sites.filter((s) => cores[p.core].sites.includes(s)) : sites;
+    pulses.push([p.core, p.channel, Math.round(((p.opens - baseBatch) * periodPs) / 1000), Math.round(((p.closes - baseBatch) * periodPs) / 1000), ...(mine.length ? mine : sites)]);
+  }
+  return { board: { name, dspMHz: Math.round(1e6 / periodPs) }, cores, pulses, truncated: result.summary.pulses.length > limit };
+}
+
 /** Build a track from a listing, its placement, the conformance report and the device's geometry. */
 export function buildTrack({ listing, placement, report, device, moves = [] }) {
   const ops = new Map(listing.ops.map((o) => [o.uid, o]));

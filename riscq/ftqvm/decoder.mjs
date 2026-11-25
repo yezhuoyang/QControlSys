@@ -21,10 +21,30 @@
 // many cores of the unit. A unit is busy from a job's start to its end. The decode is done when
 // its last job is. Decode times are properties of this model's core (one batch per instruction
 // plus its penalties, riscq/soc.mjs), not of a board.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import * as helios from "../decoders/helios.mjs";
 import { analyze } from "./place.mjs";
 
-const helioCache = new Map(), lookupCache = new Map();
+// Measured decode times, kept between runs (validation/ftqvm/decoder-times.json): a Helios job's
+// batches by distance and syndrome, a lookup decode's ns by bit count. Every entry was measured
+// in the Lean model on the compiled decoder; the file lets a machine without the riscv32 clang
+// (the web server) rerun a listing on an edited design. Recompute with `saveDecoderTimes()`.
+const timesUrl = new URL("../../validation/ftqvm/decoder-times.json", import.meta.url);
+const stored = existsSync(timesUrl) ? JSON.parse(readFileSync(timesUrl, "utf8")) : { helios: {}, lookup: {} };
+const helioCache = new Map(Object.entries(stored.helios ?? {})), lookupCache = new Map(Object.entries(stored.lookup ?? {}).map(([k, v]) => [Number(k), v]));
+let dirty = false;
+
+/** Write the measured decode times back to validation/ftqvm/decoder-times.json, if any are new. */
+export function saveDecoderTimes() {
+  if (!dirty) return false;
+  const sorted = (m) => Object.fromEntries([...m.entries()].sort(([a], [b]) => String(a).localeCompare(String(b))));
+  writeFileSync(timesUrl, JSON.stringify({
+    note: "Measured in the Lean model: Helios union-find batches (decodeBatches, reportBatches) by 'distance:syndrome', lookup decoder ns by bit count. Written by riscq/ftqvm/decoder.mjs.",
+    helios: sorted(helioCache), lookup: sorted(lookupCache),
+  }, null, 1) + "\n");
+  dirty = false;
+  return true;
+}
 
 /**
  * Batches from a bit's store at its measuring core to the decoder core's board register on a
@@ -108,10 +128,11 @@ export async function jobNs(job, outcomes = {}, periodNs = 2) {
       const [dec] = decodes;
       // The union-find itself, from the last syndrome value read to the first root it reports: the
       // roots are then in RAM. Printing them through the test harness's fprintf (about 9 µs at
-      // d = 3) is kept apart as `reportNs`; it is Helios's test output, not decoding.
-      helioCache.set(key, { ns: dec.decodeBatches * periodNs, reportNs: (dec.lastOutputAt - dec.firstOutputAt) * periodNs });
+      // d = 3) is kept apart as `reportBatches`; it is Helios's test output, not decoding.
+      helioCache.set(key, { decodeBatches: dec.decodeBatches, reportBatches: dec.lastOutputAt - dec.firstOutputAt });
+      dirty = true;
     }
-    return helioCache.get(key).ns;
+    return helioCache.get(key).decodeBatches * periodNs;
   }
   // The lookup decoder's time is measured by riscq/limits.mjs `decodeFanIn` on the 8-transmon
   // ring, so up to 8 bits; 9 and 10 bits use the line through the measured 1- and 8-bit times
@@ -121,6 +142,7 @@ export async function jobNs(job, outcomes = {}, periodNs = 2) {
     if (!lookupCache.has(bits)) {
       const { decodeFanIn } = await import("../limits.mjs");
       lookupCache.set(bits, (await decodeFanIn(bits)).decodeNs);
+      dirty = true;
     }
     return lookupCache.get(bits);
   };

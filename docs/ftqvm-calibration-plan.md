@@ -466,6 +466,18 @@ Runner: `node riscq/ftqvm/papers.mjs quantinuum`.
 - **`/reproduce/<id>`:** one paper page (studio/reproduce/paper.html with reproduce.js), filled from validation/ftqvm/papers/<id>.json. It shows the paper, the program, the twin's parameters with sources, results against the paper, findings and limits, and one run in detail: compiled listing, derived spec with sources, per-kind conformance and slack, the FormalRV program, and the command.
 - **Menu:** "Reproduce" in studio/site-nav.js.
 - **Another session** (qcontrolsys-7e) adds two magic-state reproductions in new files (riscq/ftqvm/magic*.mjs): Google's cultivation, and QuEra's distillation.
+- **The whole machine in 3D** (studio/reproduce/control3d.js), drawn from `track.controller` (riscq/ftqvm/track.mjs controllerTrack):
+  - The parts: the RISC-Q board with one tile per core, coloured by role; its DACs and ADCs; the host; coax lines through the refrigerator to each transmon, or cables to the optical instruments (Rydberg, Raman and pumping lasers, AOM, AOD, camera or PMT).
+  - What lights up: a core glows and a packet runs along its cable for every pulse the Lean trace shows, at the trace's own time (`[core, channel, t0, t1, ...sites]`). Decoder and frame cores glow during the run's decode and frame events.
+  - Placement of the board and optics is schematic; cores, channels, sites and times are the build's and the run's.
+- **`/reproduce/<id>/design`** (studio/reproduce/design.js) is the paper's twin with editable parameters:
+  - What can be edited: device durations, and the controller's cores per qubit, decoders, beams and movers.
+  - What a rerun does: POST /api/reproduce/run plays the *stored compiled listing* (validation/ftqvm/twins/<id>/<key>.json, written by papers.mjs) time-triggered on the edited twin in the Lean model. It then reports per-kind conformance and why each failing operation missed its window: late, bit late, or no free channel.
+  - Registries: riscq/ftqvm/designs.mjs, and magic.mjs `MAGIC_DESIGNS` (same contract).
+  - Decode times come from validation/ftqvm/decoder-times.json. Every entry was measured in the Lean model on the compiled decoder, so the web server needs no riscv32 clang.
+  - A rerun answers "does this compiled program still fit the changed machine". Compiling for the changed machine means re-deriving the spec with FormalRV, which is offline.
+  - Example: on Willow at d = 3, CZ 42 → 60 ns puts 240 of 601 operations out of their windows, the worst by 18 ns.
+  - The superconducting chip opens in the hardware editor (`/riscq-design?from=reproduce`).
 
 ## 9. Open question
 
