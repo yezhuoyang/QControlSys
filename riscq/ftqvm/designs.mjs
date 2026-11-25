@@ -50,9 +50,14 @@ async function willowRun(src, p) {
   const { willow } = await import("./twins.mjs");
   const { transmonTwin } = await import("./platforms.mjs");
   const device = willow();
-  const set = (field, value) => { if (Number(value) !== device.durations[field].value) device.durations[field] = { value: Number(value), source: EDITED }; };
+  // A parameter left out keeps the paper's value.
+  const set = (field, value) => {
+    if (value === undefined || value === "" || !Number.isFinite(Number(value))) return;
+    if (Number(value) !== device.durations[field].value) device.durations[field] = { value: Number(value), source: EDITED };
+  };
+  const int = (value, fallback) => (Number.isFinite(Number(value)) && value !== undefined && value !== "" ? Number(value) : fallback);
   set("x90Ns", p.xyNs); set("xNs", p.xyNs); set("czNs", p.czNs); set("readoutNs", p.readoutNs); set("resetNs", p.resetNs);
-  const platform = transmonTwin(device, { qubitsPerCore: Number(p.qubitsPerCore), decoders: Number(p.decoders), coresPerDecoder: Number(p.coresPerDecoder) });
+  const platform = transmonTwin(device, { qubitsPerCore: int(p.qubitsPerCore, 2), decoders: int(p.decoders, 1), coresPerDecoder: int(p.coresPerDecoder, 4) });
   const placement = platform.place(src.listing, { distance: src.distance });
   const design = platform.design(src.listing, placement);
   const { report } = await platform.run(src.listing, placement, design, { outcomes: {}, distance: src.distance });
@@ -92,8 +97,10 @@ async function opticalRun(src, p) {
   const { optical } = await import("./platforms.mjs");
   const point = { ...OPTICAL_DESIGNS[src.platform.id], ...src.platform.overrides }, prof = PROFILES[point.profile];
   const profileOverrides = {};
-  for (const [f] of OPTICAL_FIELDS[point.profile] ?? []) if (prof[f] && p[f] !== undefined && Number(p[f]) !== prof[f].value) profileOverrides[f] = { value: Number(p[f]), source: EDITED };
-  const control = Object.fromEntries(CONTROL_FIELDS.filter(([f]) => p[f] !== undefined).map(([f]) => [f, Number(p[f])]));
+  for (const [f] of OPTICAL_FIELDS[point.profile] ?? [])
+    if (prof[f] && p[f] !== undefined && p[f] !== "" && Number.isFinite(Number(p[f])) && Number(p[f]) !== prof[f].value)
+      profileOverrides[f] = { value: Number(p[f]), source: EDITED };
+  const control = Object.fromEntries(CONTROL_FIELDS.filter(([f]) => p[f] !== undefined && p[f] !== "" && Number.isFinite(Number(p[f]))).map(([f]) => [f, Number(p[f])]));
   const platform = optical(src.platform.id, { ...src.platform.overrides, ...control, profileOverrides });
   const placement = platform.place(src.listing, { distance: src.distance });
   const design = platform.design(src.listing, placement);
