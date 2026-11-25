@@ -78,8 +78,23 @@ export function schedule(program, { policy = "order", strict = false, acquisitio
  * Returns { conforms, machine, iterations: [{ machine, text, makespanNs, conforms, rows, needed, raise }],
  * schedule (the last), result (the last run's value) }.
  */
+/**
+ * Per machine field (qsysasm.DURATION_FIELD, the interface's own table, request_magic included): the
+ * longest time any statement charged to it needed on the hardware, from its start to its last
+ * pulse, or for a measurement to its bit. A statement the hardware never completed measures nothing.
+ */
+export function measuredDurations(report) {
+  const out = {};
+  for (const r of report.rows) {
+    const field = qsysasm.DURATION_FIELD[r.kind];
+    if (!field) continue;
+    const need = Math.max(r.hardwareNs ? r.hardwareNs[1] - r.start : 0, r.bitNs !== undefined && r.bitNs !== null ? r.bitNs - r.start : 0);
+    if (Number.isFinite(need)) out[field] = Math.max(out[field] ?? 0, need);
+  }
+  return out;
+}
+
 export async function calibrate(program, run, { maxIterations = 6, policy = "order", gridNs = 2, title, scheduleOptions = {} } = {}) {
-  const { measuredDurations } = await import("../ftqvm/derive.mjs");
   let machine = { ...program.machine };
   const iterations = [];
   let last;

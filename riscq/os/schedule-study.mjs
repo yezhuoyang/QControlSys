@@ -133,11 +133,17 @@ export function annotate(rows, core, periodNs) {
 }
 
 /** The parity round from source to firmware. */
-async function round() {
-  const source = qsysasm.parse(ROUND_SOURCE);
+/**
+ * A program from source to firmware on its own generated chip: the calibration loop, the final
+ * timetable, every pulse, every core's annotated firmware, and the chip's geometry for the page's
+ * machine-level player. spec: { id, title, idea, source, n (data qubits in a row), outcomes }.
+ */
+async function machineRun({ id, title, idea, source: text, n, outcomes = {} }) {
+  const source = qsysasm.parse(text);
   // The OS's calibration loop (riscq/os/schedule.mjs calibrate) with this chip as the runner.
-  const cal = await calibrate({ ...source, machine: { ...PROVISIONAL } }, (listing) => runOnChip(listing, 3, { "s[0]": 1 }),
-    { title: "The parity round, scheduled by the OS" });
+  const cal = await calibrate({ ...source, machine: { ...PROVISIONAL, qubits: 16, max_parallel_gates: 16 } }, (listing) => runOnChip(listing, n, outcomes),
+    { title: title + ", scheduled by the OS" });
+  if (!cal.conforms) throw Error(id + ": " + cal.reason);
   const iterations = cal.iterations;
   const s = cal.schedule, run = cal.result;
   // Cores, and the transmon each drives.
@@ -185,16 +191,63 @@ async function round() {
       f.table.push({ issueNs: issue * PERIOD_NS(run.m), startNs: start * PERIOD_NS(run.m), channel: core?.channels[channel]?.name ?? channel, register: REG(offset), value, uid: data[k][4] });
     }
   }
+  // Couplers (site pairs), and the coupler each core's flux channel drives.
+  const couplers = (run.design.couplings ?? []).map((c) => c.qubits);
+  const couplerOf = {};
+  (run.design.couplings ?? []).forEach((c, k) => { for (const p of c.pulses ?? []) couplerOf[p.channel] = k; });
+  for (const p of pulses) { const k = couplerOf[p.core + "." + p.channel]; if (k !== undefined) p.coupler = k; }
   return {
-    source: ROUND_SOURCE, provisional: PROVISIONAL, edges: s.edges, iterations,
+    id, title, idea, source: text, provisional: PROVISIONAL, edges: s.edges, iterations, outcomes,
     final: {
       text: s.text, makespanNs: s.makespanNs, conforms: run.report.conforms, machineLine: qsysasm.machineLine(iterations.at(-1).machine),
-      statements: s.ops.map((o) => ({ uid: o.uid, kind: o.kind, line: o.line, text: o.text, start: o.start, end: o.end })),
+      statements: s.ops.map((o) => ({ uid: o.uid, kind: o.kind, line: o.line, text: o.text, start: o.start, end: o.end, qubits: o.qubits.map(key) })),
       rows: iterations.at(-1).rows, decodes: run.decodes, cores, natives, pulses, stores, firmware,
-      periodNs: PERIOD_NS(run.m), sites: run.placement.sites.map((x) => ({ id: x.id, kind: x.kind, rc: x.rc, address: x.address ?? null })),
+      periodNs: PERIOD_NS(run.m), couplers,
+      sites: run.placement.sites.map((x, k) => ({ id: x.id, kind: x.kind, rc: x.rc, address: x.address ?? siteKey.get(k) ?? null })),
     },
   };
 }
+
+// The programs the page's machine-level player replays.
+const MACHINE_RUNS = [
+  { id: "parity", title: "One parity round of the 3-qubit bit-flip code", n: 3, outcomes: { "s[0]": 1 }, source: ROUND_SOURCE,
+    idea: "Two parity checks, a decode on the decoder core and a frame update on the frame core: every kind of system call a round needs." },
+  { id: "ghz4", title: "A 4-qubit GHZ state", n: 4, outcomes: { "c[0]": 1, "c[1]": 1, "c[2]": 1, "c[3]": 1 },
+    idea: "A chain of CNOTs is the critical path; the four measurements then run in parallel, each on its own core.",
+    source: `# A 4-qubit GHZ state: H, a chain of CNOTs, every qubit measured.
+H  data[0]
+CNOT  data[0], data[1]
+CNOT  data[1], data[2]
+CNOT  data[2], data[3]
+measure  basis=Z  data[0] -> c[0]
+measure  basis=Z  data[1] -> c[1]
+measure  basis=Z  data[2] -> c[2]
+measure  basis=Z  data[3] -> c[3]
+` },
+  { id: "memory2", title: "Two rounds of the 3-qubit memory", n: 3, outcomes: { "s[1]": 1, "s[3]": 1 },
+    idea: "Ancillas are requested, measured and released every round; the second round's ancillas reuse the first round's transmons, and one decode reads both rounds.",
+    source: `# Two rounds of the bit-flip code; each round takes fresh ancillas and returns them.
+request_ancilla  count=2  ancilla[0:1]
+CNOT  data[0], ancilla[0]
+CNOT  data[1], ancilla[0]
+CNOT  data[1], ancilla[1]
+CNOT  data[2], ancilla[1]
+measure  basis=Z  ancilla[0] -> s[0]
+measure  basis=Z  ancilla[1] -> s[1]
+release_ancilla  count=2  ancilla[0:1]
+request_ancilla  count=2  ancilla[2:3]
+CNOT  data[0], ancilla[2]
+CNOT  data[1], ancilla[2]
+CNOT  data[1], ancilla[3]
+CNOT  data[2], ancilla[3]
+measure  basis=Z  ancilla[2] -> s[2]
+measure  basis=Z  ancilla[3] -> s[3]
+release_ancilla  count=2  ancilla[2:3]
+s[0:3] -> decode_syndrome  rounds=2
+s[0:3] -> pauli_frame_update  X data[0:2]
+` },
+];
+const round = () => machineRun(MACHINE_RUNS[0]);
 
 /**
  * decode_syndrome as a decoder core runs it: the walk-through's two syndrome bits decoded by the
@@ -413,7 +466,10 @@ function corpus() {
 
 if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replace(/^\//, "")) {
   const t0 = Date.now();
-  const data = { generated: new Date().toISOString(), round: await round(), decoder: await lookupDecoder() };
+  const runs = [];
+  for (const spec of MACHINE_RUNS) runs.push(await machineRun(spec));
+  // `round` is the walk-through (§ 3); `machineRuns` the other programs of the machine-level player.
+  const data = { generated: new Date().toISOString(), round: runs[0], machineRuns: runs.slice(1), decoder: await lookupDecoder() };
   console.log("round: iterations", data.round.iterations.length, "conforms", data.round.final.conforms, "makespan", data.round.final.makespanNs);
   data.problems = { hardness: hardness(), deadlock: deadlock(), starvation: starvation(), backlog: backlog() };
   console.log("problems: orders", data.problems.hardness.orders, "best", data.problems.hardness.best.makespanNs, "program order", data.problems.hardness.programOrder.makespanNs,

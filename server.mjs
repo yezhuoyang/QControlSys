@@ -47,6 +47,12 @@ const routes = new Map([
   ["/schedule", "studio/schedule.html"],
   ["/schedule.js", "studio/schedule.js"],
   ["/os/schedule.json", "validation/os/schedule.json"],
+  // The OS's own scheduler, run in the browser by the page's stepper (pure ES modules, each listed).
+  ["/schedule-anim.js", "studio/schedule-anim.js"],
+  ["/riscq/os/des.mjs", "riscq/os/des.mjs"],
+  ["/riscq/os/schedule.mjs", "riscq/os/schedule.mjs"],
+  ["/riscq/os/teaching-examples.mjs", "riscq/os/teaching-examples.mjs"],
+  ["/riscq/ftqvm/qsysasm.mjs", "riscq/ftqvm/qsysasm.mjs"],
   ["/site-nav.js", "studio/site-nav.js"],
   // Resizable and hideable panels and present mode of the design editor and the workspace.
   ["/panels.js", "studio/panels.js"],

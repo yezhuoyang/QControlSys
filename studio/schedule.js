@@ -163,6 +163,15 @@ export async function render(root, toc) {
   <li><b>Be fair.</b> When several programs share a machine, none may wait forever (§ 2.3).</li>
   <li><b>Never deadlock.</b> A program that holds ancillas and waits for more must not wait on another that does the same (§ 2.2).</li></ul>`;
 
+  html += h3("watch", "Watch the scheduler");
+  html += `<p>The OS schedules by <b>list scheduling</b>. Time moves from event to event: a statement becomes ready, starts, or ends.
+  At every event the scheduler looks at the statements that are <span style="color:#c62828">ready</span> (all their predecessors done),
+  takes them in the policy's order, and starts each one whose services all fit. A statement that does not fit waits, and with
+  backfill a later one may pass it. Below, the OS's own scheduler (<code>riscq/os/schedule.mjs</code>) runs in your browser on ten
+  small programs, one idea each. Step with ▶|, play with ▶, change the policy or a capacity, or edit the program.</p>
+  <div class="legend" style="margin-bottom:6px"><span><i style="background:#8a9a9c"></i>waiting for a predecessor</span><span><i style="background:#c62828"></i>ready, waiting for a service</span>
+  <span><i style="background:#4338ca"></i>running</span><span><i style="background:#1baf7a"></i>done</span><span><i style="background:#fde2e2;border:1px dashed #e9a0a0"></i>time spent waiting</span></div>
+  <div id="stepper">Loading the scheduler…</div>`;
   const H = P.hardness;
   html += h3("hardness", "2.1 How hard it is");
   html += `<p>This is the resource-constrained project scheduling problem. It is NP-hard in the strong sense
@@ -245,6 +254,13 @@ export async function render(root, toc) {
   html += h2("compile", "3", "From a timetable to RISC-Q firmware: one parity round");
   html += `<p>One round of the 3-qubit bit-flip code: two parity checks, a decode and a frame update, followed all the way down to the
   instructions RISC-Q's cores execute.</p>`;
+  html += h3("watch-machine", "Watch the machine run");
+  html += `<p>Three programs, each scheduled by the OS and run on its own generated chip in the cycle-exact model. Play the run, or
+  drag the time: the core whose pulse is playing lights its wire and its transmon (blue drive, violet coupler, orange readout),
+  a CZ lights its coupler, a measured bit travels from its core through the board hub to the decoder core, and the frame core
+  writes the Pauli frame. The left list highlights the statements whose window contains the moment; the right list shows the
+  firmware of the core you select, with the code of its current operation highlighted. Every time drawn is a time of the trace.</p>
+  <div id="machine-player">Loading the runs…</div>`;
   html += h3("machine", "3.1 The machine");
   const ctl = F.cores.filter((c) => c.role === "control");
   html += `<p>The OS places the program on a generated transmon chip: ${F.sites.filter((s) => s.kind === "data").length} data transmons in a row and
@@ -412,6 +428,14 @@ export async function render(root, toc) {
     <code>riscq/ftqvm/qsysasm.mjs</code>; the scheduler: <code>riscq/os/schedule.mjs</code>.</p>`;
 
   root.innerHTML = html;
+  // The interactive parts: the OS's own scheduler, and the cycle-exact runs on their chips.
+  try {
+    const [{ mountStepper, mountMachine }, { EXAMPLES, POLICIES }] = await Promise.all([import("/schedule-anim.js"), import("/riscq/os/teaching-examples.mjs")]);
+    mountStepper(document.getElementById("stepper"), { examples: EXAMPLES, policies: POLICIES });
+    mountMachine(document.getElementById("machine-player"), [R, ...(D.machineRuns ?? [])]);
+  } catch (error) {
+    for (const id of ["stepper", "machine-player"]) document.getElementById(id).innerHTML = `<p class="no">The animation could not load: ${esc(error.message)}</p>`;
+  }
   toc.innerHTML = sections.map(([id, title, level]) => `<li><a href="#${id}" style="${level === 3 ? "padding-left:20px;font-size:12.5px" : ""}">${esc(title)}</a></li>`).join("");
   const links = [...toc.querySelectorAll("a")];
   const observer = new IntersectionObserver((entries) => {
