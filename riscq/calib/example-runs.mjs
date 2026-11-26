@@ -24,7 +24,7 @@ import { transmon, optical } from "../ftqvm/platforms.mjs";
 import { DESIGNS } from "../ftqvm/corpus.mjs";
 import { programRow } from "../os/program-runs.mjs";
 import { PROGRAMS as OS_PROGRAMS } from "../os/programs.mjs";
-import { MEDIUM_PROGRAMS, MEDIUM_RUNS, MEDIUM_DESIGN, mediumRow } from "../ftqvm/medium.mjs";
+import { MEDIUM_PROGRAMS, MEDIUM_RUNS, MEDIUM_DESIGN, mediumRow, storedVariants } from "../ftqvm/medium.mjs";
 
 const RUNS = new URL("../../validation/calib/site/runs/", import.meta.url);
 const ADAPTERS = { superconducting: transmon, neutral: (o) => optical(o.id), qccd: (o) => optical(o.id) };
@@ -170,7 +170,10 @@ const INTRO = "Choose a program, a hardware design and how the operating system 
 // Algorithms at medium scale (riscq/ftqvm/medium.mjs): the programs whose compiled run is stored.
 const MEDIUM_STORE = new URL("../../validation/ftqvm/medium/", import.meta.url);
 const mediumStored = MEDIUM_RUNS.filter((r) => existsSync(new URL(r.params.program + ".json.gz", MEDIUM_STORE)));
-if (mediumStored.length) STUDY_RUNS.medium = mediumStored.map((r) => ({ ...r, medium: true }));
+// Each stored run, then its stored variants with other decoders (computed offline: about an hour each).
+const variantLabel = (v) => v.decoders + " decoder unit" + (v.decoders === "1" ? "" : "s") + " of " + v.coresPerDecoder + " core" + (v.coresPerDecoder === "1" ? "" : "s");
+if (mediumStored.length) STUDY_RUNS.medium = mediumStored.flatMap((r) => [{ ...r, medium: true },
+  ...storedVariants(r.params.program).map((v) => ({ label: r.label + " · " + variantLabel(v), params: v, medium: true }))]);
 
 /** Statements of a medium run's listing shown on a page; the whole listing stays in its stored run. */
 const LISTING_LINES = 400;
@@ -203,7 +206,8 @@ export const studyRun = (r) => (r.os ? programRow({ ...r.params, label: r.label 
 
 /**
  * The medium study's design page: the stored runs are served from the page's data; a run with other
- * decoders is a cycle-exact run of the whole machine (hundreds of cores, ~10⁵ s of compute), not offered here.
+ * decoders is a cycle-exact run of the whole machine (hundreds of cores, ~10⁵ s of compute), not offered here
+ * unless a variant with those decoders is stored (riscq/ftqvm/medium.mjs storedVariants).
  */
 const mediumDesign = {
   intro: MEDIUM_DESIGN.intro,
@@ -214,7 +218,8 @@ const mediumDesign = {
   async run(params = {}) {
     const defaults = Object.fromEntries(MEDIUM_DESIGN.params().map((f) => [f.key, String(f.value)]));
     const p = { ...defaults, ...Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v !== undefined && v !== null).map(([k, v]) => [k, String(v)])) };
-    if (p.decoders !== defaults.decoders || p.coresPerDecoder !== defaults.coresPerDecoder)
+    const stored = storedVariants(p.program).some((v) => v.decoders === p.decoders && v.coresPerDecoder === p.coresPerDecoder);
+    if ((p.decoders !== defaults.decoders || p.coresPerDecoder !== defaults.coresPerDecoder) && !stored)
       throw Error("A run with other decoders is a cycle-exact run of the whole control system (hundreds of cores over the program's full machine time) and takes about an hour, so the site does not start it. Run it from a checkout of the repository: mediumRow(" + JSON.stringify(p) + ") in the medium-scale module.");
     return { rows: [await mediumPageRow(p)] };
   },
