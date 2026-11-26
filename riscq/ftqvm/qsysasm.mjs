@@ -16,6 +16,7 @@
 //   statement  := time? (records "->")? op arg* operands? ("with" operands)? ("->" records)? guard?
 //                                                                "with": request_magic's workspace
 //   guard      := "if" band ("," band)*                           runs when every band holds
+//               | "if" "false"                                    never runs (a statically empty band)
 //   band       := "¬"? register "[" integer (":" integer)? "]"    a record or an inclusive range; it
 //                                                                holds when the XOR of its records is
 //                                                                1, or 0 with "¬" ("!" is accepted for
@@ -123,8 +124,12 @@ export function statement(op, { timed = true } = {}) {
  */
 export function guardText(guard) {
   if (!guard?.bands?.length) return "";
-  const bands = guard.bands.map(({ negated, records }) => {
-    if (!records?.length) throw Error("a guard band names no record");
+  // A band of no records has parity 0: plain, it never holds, so the whole guard is false; negated,
+  // it always holds and says nothing. The compiler keeps such bands (a statically empty selector).
+  if (guard.bands.some((b) => !b.records?.length && !b.negated)) return "if false";
+  const kept = guard.bands.filter((b) => b.records?.length);
+  if (!kept.length) return "";
+  const bands = kept.map(({ negated, records }) => {
     const contiguous = records.every((s, i) => s.register === records[0].register && s.index === records[0].index + i);
     if (!contiguous) throw Error("guard band " + records.map((s) => s.register + "[" + s.index + "]").join(" ") + " is not one record or one range of one register");
     return (negated ? "¬" : "") + sitesText(records);
@@ -143,6 +148,8 @@ export function guardHolds(guard, values) {
 
 /** Parse a guard's text (`c[3], ¬c[5:6]`) into { bands }. */
 function guardOf(text, line) {
+  // `if false`: a guard that never holds (a band of no records).
+  if (text.trim() === "false") return { bands: [{ negated: false, records: [] }] };
   const bands = text.split(",").map((b) => b.trim()).filter(Boolean).map((b) => {
     const m = /^([¬!])?\s*([A-Za-z_]\w*\[[^\]]*\])$/.exec(b);
     if (!m) throw new SyntaxError(`line ${line}: "${b}" is not a guard band (a record or a range, optionally negated with ¬)`);

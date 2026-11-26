@@ -115,3 +115,13 @@ test("a statement's own guard: parsed, printed back, evaluated, and waited for",
   assert.equal(s.ops[3].start, 1000);
   assert.match(s.text, /X {2}data\[3\] {2}if c\[3\], ¬c\[5:6\]/);
 });
+
+test("an always-false guard prints as `if false` and reads back as never holding", () => {
+  const empty = { negated: false, records: [] }, c3 = { negated: false, records: [{ register: "c", index: 3 }] };
+  assert.equal(qsysasm.guardText({ bands: [c3, empty] }), "if false");
+  assert.equal(qsysasm.guardText({ bands: [{ negated: true, records: [] }, c3] }), "if c[3]"); // a negated empty band always holds
+  const [op] = qsysasm.parse("X data[0] if false").ops;
+  assert.equal(qsysasm.guardHolds(op.guard, { "c[3]": 1 }), false);
+  assert.equal(qsysasm.guardText(op.guard), "if false");
+  assert.equal(qsysasm.guardHolds({ bands: [c3, empty] }, { "c[3]": 1 }), false);
+});

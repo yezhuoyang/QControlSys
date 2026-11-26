@@ -40,6 +40,7 @@ operand    ::= pauli? register "[" nat (":" nat)? "]"        # a:b is inclusive
 records    ::= register "[" nat (":" nat)? "]" ("," register "[" nat (":" nat)? "]")*
 pauli      ::= "X" | "Y" | "Z"
 guard      ::= "if" band ("," band)*                          # runs when every band holds
+            |  "if" "false"                                 # never runs (a statically empty band)
 band       ::= "¬"? register "[" nat (":" nat)? "]"            # XOR of its records is 1 (0 with ¬)
 nat        ::= digit+                                        # every index is a literal`;
 
