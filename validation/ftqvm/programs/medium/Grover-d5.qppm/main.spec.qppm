@@ -1,0 +1,7 @@
+spec program:
+  requires   2 ≤ n  ∧  s < 2^n  ∧  n ≤ anc  ∧  anc + (n - 2) ≤ rec
+  ∧  rec + n ≤ dim  ∧  n ≤ dim  ∧  rec + n + n ≤ dim
+  assumes    {{ |0⟩_q[0, rec + n) }}
+  ensures {{ |0⟩_q[0, rec + n) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * N_L + pT * N_T + pI * N_I)
+  outcomes Pr[ c[0, n) = s ]  ≥  (groverProb(n, k)) - (pL * N_L + pT * N_T + pI * N_I) ∧ Pr[ c[0, n) = s ]  ≤  (groverProb(n, k)) + (pL * N_L + pT * N_T + pI * N_I)
+  resource   { meas: 192·k+12·(k·n)+168·(k·(n-3))+7·n, frame: 188·k+16·(k·n)+156·(k·(n-3))+7·n, magicT: 28·k+28·(k·(n-3)), synthEps: 0, bound: upper }

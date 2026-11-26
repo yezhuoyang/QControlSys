@@ -1,0 +1,51 @@
+gadget groverDiffusion(n, anc):
+  for 0 <= i < n:
+    prepare |Y+> -> anc[3·i]
+    measure Z q[i] Z anc[3·i] -> m[6·i]
+    measure X anc[3·i] -> m[6·i+1]
+    when m[6·i]:
+      frame Z q[i]
+    when m[6·i+1]:
+      frame Z q[i]
+    prepare |Y+> -> anc[3·i+1]
+    measure X q[i] Z anc[3·i+1] -> m[6·i+2]
+    measure X anc[3·i+1] -> m[6·i+3]
+    when m[6·i+2]:
+      frame X q[i]
+    when m[6·i+3]:
+      frame X q[i]
+    prepare |Y+> -> anc[3·i+2]
+    measure Z q[i] Z anc[3·i+2] -> m[6·i+4]
+    measure X anc[3·i+2] -> m[6·i+5]
+    when m[6·i+4]:
+      frame Z q[i]
+    when m[6·i+5]:
+      frame Z q[i]
+  for 0 <= i < n:
+    frame X q[i]
+  mcz(n, anc) @ id()
+  for 0 <= i < n:
+    frame X q[i]
+  for 0 <= i < n:
+    prepare |Y+> -> anc[3·i+3·n]
+    measure Z q[i] Z anc[3·i+3·n] -> m[6·i+6·n]
+    measure X anc[3·i+3·n] -> m[6·i+6·n+1]
+    when m[6·i+6·n]:
+      frame Z q[i]
+    when m[6·i+6·n+1]:
+      frame Z q[i]
+    prepare |Y+> -> anc[3·i+3·n+1]
+    measure X q[i] Z anc[3·i+3·n+1] -> m[6·i+6·n+2]
+    measure X anc[3·i+3·n+1] -> m[6·i+6·n+3]
+    when m[6·i+6·n+2]:
+      frame X q[i]
+    when m[6·i+6·n+3]:
+      frame X q[i]
+    prepare |Y+> -> anc[3·i+3·n+2]
+    measure Z q[i] Z anc[3·i+3·n+2] -> m[6·i+6·n+4]
+    measure X anc[3·i+3·n+2] -> m[6·i+6·n+5]
+    when m[6·i+6·n+4]:
+      frame Z q[i]
+    when m[6·i+6·n+5]:
+      frame Z q[i]
+

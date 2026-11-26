@@ -1,0 +1,7 @@
+gadget gidneyForwardProp(m):
+  for 0 <= i < m:
+    if i != 0:
+      gidneyInterior(i) @ id()
+    else:
+      gidneyFirst() @ id()
+

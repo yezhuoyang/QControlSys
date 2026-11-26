@@ -1,0 +1,52 @@
+gadget mcz(n, anc):
+  if n-2 != 0:
+    andChain(n, anc) @ id()
+    prepare |Y+> -> anc[0]
+    measure Z q[anc+n-3] Z anc[0] -> m[0]
+    measure X anc[0] -> m[1]
+    when m[0]:
+      frame Z q[anc+n-3]
+    when m[1]:
+      frame Z q[anc+n-3]
+    frame Z q[anc+n-3]
+    prepare |Y+> -> anc[1]
+    measure Z q[n-1] Z anc[1] -> m[2]
+    measure X anc[1] -> m[3]
+    when m[2]:
+      frame Z q[n-1]
+    when m[3]:
+      frame Z q[n-1]
+    frame Z q[n-1]
+    prepare |Y+> -> anc[2]
+    measure Z q[anc+n-3] Z q[n-1] Z anc[2] -> m[4]
+    measure X anc[2] -> m[5]
+    when m[4]:
+      frame Z q[anc+n-3] Z q[n-1]
+    when m[5]:
+      frame Z q[anc+n-3] Z q[n-1]
+    andChainRev(n, anc) @ id()
+  else:
+    prepare |Y+> -> anc[0]
+    measure Z q[0] Z anc[0] -> m[0]
+    measure X anc[0] -> m[1]
+    when m[0]:
+      frame Z q[0]
+    when m[1]:
+      frame Z q[0]
+    frame Z q[0]
+    prepare |Y+> -> anc[1]
+    measure Z q[1] Z anc[1] -> m[2]
+    measure X anc[1] -> m[3]
+    when m[2]:
+      frame Z q[1]
+    when m[3]:
+      frame Z q[1]
+    frame Z q[1]
+    prepare |Y+> -> anc[2]
+    measure Z q[0] Z q[1] Z anc[2] -> m[4]
+    measure X anc[2] -> m[5]
+    when m[4]:
+      frame Z q[0] Z q[1]
+    when m[5]:
+      frame Z q[0] Z q[1]
+

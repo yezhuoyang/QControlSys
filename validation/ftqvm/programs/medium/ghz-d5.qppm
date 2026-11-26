@@ -1,0 +1,15 @@
+code surface d=5
+
+params  n
+
+program[q: n, c: n]:
+  for 0 <= i < n:
+    measure X q[i] -> m[i]
+    when m[i]:
+      frame Z q[i]
+  for 0 <= i < n - 1:
+    measure Z q[i] Z q[i+1] -> m[n+i]
+    when m[n+i]:
+      frame X q[i+1]
+  for 0 <= i < n:
+    measure Z q[i] -> c[i]

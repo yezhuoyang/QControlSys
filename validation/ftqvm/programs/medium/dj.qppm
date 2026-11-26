@@ -1,0 +1,27 @@
+code surface d=3
+
+params  n, s
+
+program[q: n+1, c: n]:
+  for 0 <= i < n + 1:
+    measure X q[i] -> m[i]
+    when m[i]:
+      frame Z q[i]
+  frame Z q[n]
+  for 0 <= i < n:
+    if (s >> i) % 2 = 1:
+      prepare |Y+> -> anc[0]
+      measure X anc[0] -> m[n+1+4·i]
+      when m[n+1+4·i]:
+        frame Z anc[0]
+      measure Z q[i] Z anc[0] -> m[n+2+4·i]
+      measure X anc[0] X q[n] -> m[n+3+4·i]
+      measure Z anc[0] -> m[n+4+4·i]
+      when m[n+2+4·i]:
+        frame X q[n]
+      when m[n+4+4·i]:
+        frame X q[n]
+      when m[n+3+4·i]:
+        frame Z q[i]
+  for 0 <= i < n:
+    measure X q[i] -> c[i]

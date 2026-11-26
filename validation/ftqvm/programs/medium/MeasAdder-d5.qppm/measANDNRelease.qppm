@@ -1,0 +1,51 @@
+gadget measANDNRelease(r, tgt, anc, s):
+  prepare |Y+> -> anc[0]
+  measure Z q[anc] Z anc[0] -> m[0]
+  measure X anc[0] -> m[1]
+  when m[0]:
+    frame Z q[anc]
+  when m[1]:
+    frame Z q[anc]
+  prepare |Y+> -> anc[1]
+  measure X q[anc] Z anc[1] -> m[2]
+  measure X anc[1] -> m[3]
+  when m[2]:
+    frame X q[anc]
+  when m[3]:
+    frame X q[anc]
+  prepare |Y+> -> anc[2]
+  measure Z q[anc] Z anc[2] -> m[4]
+  measure X anc[2] -> m[5]
+  when m[4]:
+    frame Z q[anc]
+  when m[5]:
+    frame Z q[anc]
+  measure Z q[anc] -> c[s]
+  when c[s]:
+    frame X q[tgt]
+    prepare |Y+> -> anc[3]
+    measure Z q[r] Z anc[3] -> m[6]
+    measure X anc[3] -> m[7]
+    when m[6]:
+      frame Z q[r]
+    when m[7]:
+      frame Z q[r]
+    frame Z q[r]
+    prepare |Y+> -> anc[4]
+    measure Z q[tgt] Z anc[4] -> m[8]
+    measure X anc[4] -> m[9]
+    when m[8]:
+      frame Z q[tgt]
+    when m[9]:
+      frame Z q[tgt]
+    frame Z q[tgt]
+    prepare |Y+> -> anc[5]
+    measure Z q[r] Z q[tgt] Z anc[5] -> m[10]
+    measure X anc[5] -> m[11]
+    when m[10]:
+      frame Z q[r] Z q[tgt]
+    when m[11]:
+      frame Z q[r] Z q[tgt]
+    frame X q[tgt]
+    frame X q[anc]
+

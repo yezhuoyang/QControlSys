@@ -1,0 +1,8 @@
+spec gidneyForwardProp:
+  ∀ x < 2^(3*m+2) .
+  requires   1 ≤ m  ∧  3*m + 2 ≤ dim
+  assumes    {{ |x⟩_q[0, 3*m+2) }}
+  ensures {{ |vFwd(m-1, x)⟩_q[0, 3*m+2) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyForwardProp(m) + pT * NT_gidneyForwardProp(m) + pI * N_I)
+  outcomes   none
+  resource   { meas: 106·m, frame: 108·m, magicT: 14·m, synthEps: 0 }
+

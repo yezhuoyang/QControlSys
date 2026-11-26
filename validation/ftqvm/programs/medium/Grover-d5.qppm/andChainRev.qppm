@@ -1,0 +1,291 @@
+gadget andChainRev(n, anc):
+  for 1 <= j < n-2:
+    prepare |Y+> -> anc[25·(j-1)]
+    measure Z q[anc+n-(j+2)] Z anc[25·(j-1)] -> m[42·(j-1)]
+    measure X anc[25·(j-1)] -> m[42·(j-1)+1]
+    when m[42·(j-1)]:
+      frame Z q[anc+n-(j+2)]
+    when m[42·(j-1)+1]:
+      frame Z q[anc+n-(j+2)]
+    prepare |Y+> -> anc[25·(j-1)+1]
+    measure X q[anc+n-(j+2)] Z anc[25·(j-1)+1] -> m[42·(j-1)+2]
+    measure X anc[25·(j-1)+1] -> m[42·(j-1)+3]
+    when m[42·(j-1)+2]:
+      frame X q[anc+n-(j+2)]
+    when m[42·(j-1)+3]:
+      frame X q[anc+n-(j+2)]
+    frame Z q[anc+n-(j+2)]
+    prepare |T> -> anc[25·(j-1)+2]
+    measure Z q[n-(j+1)] Z anc[25·(j-1)+2] -> m[42·(j-1)+4]
+    measure X anc[25·(j-1)+2] -> m[42·(j-1)+5]
+    when m[42·(j-1)+5]:
+      frame Z q[n-(j+1)]
+    when m[42·(j-1)+4]:
+      prepare |Y+> -> anc[25·(j-1)+3]
+      measure Z q[n-(j+1)] Z anc[25·(j-1)+3] -> m[42·(j-1)+6]
+      measure X anc[25·(j-1)+3] -> m[42·(j-1)+7]
+      when m[42·(j-1)+6]:
+        frame Z q[n-(j+1)]
+      when m[42·(j-1)+7]:
+        frame Z q[n-(j+1)]
+    prepare |T> -> anc[25·(j-1)+5]
+    measure Z q[anc+n-(j+3)] Z anc[25·(j-1)+5] -> m[42·(j-1)+8]
+    measure X anc[25·(j-1)+5] -> m[42·(j-1)+9]
+    when m[42·(j-1)+9]:
+      frame Z q[anc+n-(j+3)]
+    when m[42·(j-1)+8]:
+      prepare |Y+> -> anc[25·(j-1)+6]
+      measure Z q[anc+n-(j+3)] Z anc[25·(j-1)+6] -> m[42·(j-1)+10]
+      measure X anc[25·(j-1)+6] -> m[42·(j-1)+11]
+      when m[42·(j-1)+10]:
+        frame Z q[anc+n-(j+3)]
+      when m[42·(j-1)+11]:
+        frame Z q[anc+n-(j+3)]
+    prepare |T> -> anc[25·(j-1)+8]
+    measure Z q[anc+n-(j+2)] Z anc[25·(j-1)+8] -> m[42·(j-1)+12]
+    measure X anc[25·(j-1)+8] -> m[42·(j-1)+13]
+    when m[42·(j-1)+13]:
+      frame Z q[anc+n-(j+2)]
+    when m[42·(j-1)+12]:
+      prepare |Y+> -> anc[25·(j-1)+9]
+      measure Z q[anc+n-(j+2)] Z anc[25·(j-1)+9] -> m[42·(j-1)+14]
+      measure X anc[25·(j-1)+9] -> m[42·(j-1)+15]
+      when m[42·(j-1)+14]:
+        frame Z q[anc+n-(j+2)]
+      when m[42·(j-1)+15]:
+        frame Z q[anc+n-(j+2)]
+    prepare |T> -> anc[25·(j-1)+11]
+    measure Z q[n-(j+1)] Z q[anc+n-(j+3)] Z anc[25·(j-1)+11] -> m[42·(j-1)+16]
+    measure X anc[25·(j-1)+11] -> m[42·(j-1)+17]
+    when m[42·(j-1)+17]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+3)]
+    when m[42·(j-1)+16]:
+      prepare |Y+> -> anc[25·(j-1)+12]
+      measure Z q[n-(j+1)] Z q[anc+n-(j+3)] Z anc[25·(j-1)+12] -> m[42·(j-1)+18]
+      measure X anc[25·(j-1)+12] -> m[42·(j-1)+19]
+      when m[42·(j-1)+18]:
+        frame Z q[n-(j+1)] Z q[anc+n-(j+3)]
+      when m[42·(j-1)+19]:
+        frame Z q[n-(j+1)] Z q[anc+n-(j+3)]
+    prepare |Y+> -> anc[25·(j-1)+13]
+    measure Z q[n-(j+1)] Z q[anc+n-(j+3)] Z anc[25·(j-1)+13] -> m[42·(j-1)+20]
+    measure X anc[25·(j-1)+13] -> m[42·(j-1)+21]
+    when m[42·(j-1)+20]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+3)]
+    when m[42·(j-1)+21]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+3)]
+    frame Z q[n-(j+1)] Z q[anc+n-(j+3)]
+    prepare |T> -> anc[25·(j-1)+14]
+    measure Z q[n-(j+1)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+14] -> m[42·(j-1)+22]
+    measure X anc[25·(j-1)+14] -> m[42·(j-1)+23]
+    when m[42·(j-1)+23]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+2)]
+    when m[42·(j-1)+22]:
+      prepare |Y+> -> anc[25·(j-1)+15]
+      measure Z q[n-(j+1)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+15] -> m[42·(j-1)+24]
+      measure X anc[25·(j-1)+15] -> m[42·(j-1)+25]
+      when m[42·(j-1)+24]:
+        frame Z q[n-(j+1)] Z q[anc+n-(j+2)]
+      when m[42·(j-1)+25]:
+        frame Z q[n-(j+1)] Z q[anc+n-(j+2)]
+    prepare |Y+> -> anc[25·(j-1)+16]
+    measure Z q[n-(j+1)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+16] -> m[42·(j-1)+26]
+    measure X anc[25·(j-1)+16] -> m[42·(j-1)+27]
+    when m[42·(j-1)+26]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+2)]
+    when m[42·(j-1)+27]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+2)]
+    frame Z q[n-(j+1)] Z q[anc+n-(j+2)]
+    prepare |T> -> anc[25·(j-1)+17]
+    measure Z q[anc+n-(j+3)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+17] -> m[42·(j-1)+28]
+    measure X anc[25·(j-1)+17] -> m[42·(j-1)+29]
+    when m[42·(j-1)+29]:
+      frame Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    when m[42·(j-1)+28]:
+      prepare |Y+> -> anc[25·(j-1)+18]
+      measure Z q[anc+n-(j+3)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+18] -> m[42·(j-1)+30]
+      measure X anc[25·(j-1)+18] -> m[42·(j-1)+31]
+      when m[42·(j-1)+30]:
+        frame Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+      when m[42·(j-1)+31]:
+        frame Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    prepare |Y+> -> anc[25·(j-1)+19]
+    measure Z q[anc+n-(j+3)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+19] -> m[42·(j-1)+32]
+    measure X anc[25·(j-1)+19] -> m[42·(j-1)+33]
+    when m[42·(j-1)+32]:
+      frame Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    when m[42·(j-1)+33]:
+      frame Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    frame Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    prepare |T> -> anc[25·(j-1)+20]
+    measure Z q[n-(j+1)] Z q[anc+n-(j+3)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+20] -> m[42·(j-1)+34]
+    measure X anc[25·(j-1)+20] -> m[42·(j-1)+35]
+    when m[42·(j-1)+35]:
+      frame Z q[n-(j+1)] Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    when m[42·(j-1)+34]:
+      prepare |Y+> -> anc[25·(j-1)+21]
+      measure Z q[n-(j+1)] Z q[anc+n-(j+3)] Z q[anc+n-(j+2)] Z anc[25·(j-1)+21] -> m[42·(j-1)+36]
+      measure X anc[25·(j-1)+21] -> m[42·(j-1)+37]
+      when m[42·(j-1)+36]:
+        frame Z q[n-(j+1)] Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+      when m[42·(j-1)+37]:
+        frame Z q[n-(j+1)] Z q[anc+n-(j+3)] Z q[anc+n-(j+2)]
+    prepare |Y+> -> anc[25·(j-1)+23]
+    measure X q[anc+n-(j+2)] Z anc[25·(j-1)+23] -> m[42·(j-1)+38]
+    measure X anc[25·(j-1)+23] -> m[42·(j-1)+39]
+    when m[42·(j-1)+38]:
+      frame X q[anc+n-(j+2)]
+    when m[42·(j-1)+39]:
+      frame X q[anc+n-(j+2)]
+    prepare |Y+> -> anc[25·(j-1)+24]
+    measure Z q[anc+n-(j+2)] Z anc[25·(j-1)+24] -> m[42·(j-1)+40]
+    measure X anc[25·(j-1)+24] -> m[42·(j-1)+41]
+    when m[42·(j-1)+40]:
+      frame Z q[anc+n-(j+2)]
+    when m[42·(j-1)+41]:
+      frame Z q[anc+n-(j+2)]
+  prepare |Y+> -> anc[25·(n-3)]
+  measure Z q[anc] Z anc[25·(n-3)] -> m[42·(n-3)]
+  measure X anc[25·(n-3)] -> m[42·(n-3)+1]
+  when m[42·(n-3)]:
+    frame Z q[anc]
+  when m[42·(n-3)+1]:
+    frame Z q[anc]
+  prepare |Y+> -> anc[25·(n-3)+1]
+  measure X q[anc] Z anc[25·(n-3)+1] -> m[42·(n-3)+2]
+  measure X anc[25·(n-3)+1] -> m[42·(n-3)+3]
+  when m[42·(n-3)+2]:
+    frame X q[anc]
+  when m[42·(n-3)+3]:
+    frame X q[anc]
+  frame Z q[anc]
+  prepare |T> -> anc[25·(n-3)+2]
+  measure Z q[0] Z anc[25·(n-3)+2] -> m[42·(n-3)+4]
+  measure X anc[25·(n-3)+2] -> m[42·(n-3)+5]
+  when m[42·(n-3)+5]:
+    frame Z q[0]
+  when m[42·(n-3)+4]:
+    prepare |Y+> -> anc[25·(n-3)+3]
+    measure Z q[0] Z anc[25·(n-3)+3] -> m[42·(n-3)+6]
+    measure X anc[25·(n-3)+3] -> m[42·(n-3)+7]
+    when m[42·(n-3)+6]:
+      frame Z q[0]
+    when m[42·(n-3)+7]:
+      frame Z q[0]
+  prepare |T> -> anc[25·(n-3)+5]
+  measure Z q[1] Z anc[25·(n-3)+5] -> m[42·(n-3)+8]
+  measure X anc[25·(n-3)+5] -> m[42·(n-3)+9]
+  when m[42·(n-3)+9]:
+    frame Z q[1]
+  when m[42·(n-3)+8]:
+    prepare |Y+> -> anc[25·(n-3)+6]
+    measure Z q[1] Z anc[25·(n-3)+6] -> m[42·(n-3)+10]
+    measure X anc[25·(n-3)+6] -> m[42·(n-3)+11]
+    when m[42·(n-3)+10]:
+      frame Z q[1]
+    when m[42·(n-3)+11]:
+      frame Z q[1]
+  prepare |T> -> anc[25·(n-3)+8]
+  measure Z q[anc] Z anc[25·(n-3)+8] -> m[42·(n-3)+12]
+  measure X anc[25·(n-3)+8] -> m[42·(n-3)+13]
+  when m[42·(n-3)+13]:
+    frame Z q[anc]
+  when m[42·(n-3)+12]:
+    prepare |Y+> -> anc[25·(n-3)+9]
+    measure Z q[anc] Z anc[25·(n-3)+9] -> m[42·(n-3)+14]
+    measure X anc[25·(n-3)+9] -> m[42·(n-3)+15]
+    when m[42·(n-3)+14]:
+      frame Z q[anc]
+    when m[42·(n-3)+15]:
+      frame Z q[anc]
+  prepare |T> -> anc[25·(n-3)+11]
+  measure Z q[0] Z q[1] Z anc[25·(n-3)+11] -> m[42·(n-3)+16]
+  measure X anc[25·(n-3)+11] -> m[42·(n-3)+17]
+  when m[42·(n-3)+17]:
+    frame Z q[0] Z q[1]
+  when m[42·(n-3)+16]:
+    prepare |Y+> -> anc[25·(n-3)+12]
+    measure Z q[0] Z q[1] Z anc[25·(n-3)+12] -> m[42·(n-3)+18]
+    measure X anc[25·(n-3)+12] -> m[42·(n-3)+19]
+    when m[42·(n-3)+18]:
+      frame Z q[0] Z q[1]
+    when m[42·(n-3)+19]:
+      frame Z q[0] Z q[1]
+  prepare |Y+> -> anc[25·(n-3)+13]
+  measure Z q[0] Z q[1] Z anc[25·(n-3)+13] -> m[42·(n-3)+20]
+  measure X anc[25·(n-3)+13] -> m[42·(n-3)+21]
+  when m[42·(n-3)+20]:
+    frame Z q[0] Z q[1]
+  when m[42·(n-3)+21]:
+    frame Z q[0] Z q[1]
+  frame Z q[0] Z q[1]
+  prepare |T> -> anc[25·(n-3)+14]
+  measure Z q[0] Z q[anc] Z anc[25·(n-3)+14] -> m[42·(n-3)+22]
+  measure X anc[25·(n-3)+14] -> m[42·(n-3)+23]
+  when m[42·(n-3)+23]:
+    frame Z q[0] Z q[anc]
+  when m[42·(n-3)+22]:
+    prepare |Y+> -> anc[25·(n-3)+15]
+    measure Z q[0] Z q[anc] Z anc[25·(n-3)+15] -> m[42·(n-3)+24]
+    measure X anc[25·(n-3)+15] -> m[42·(n-3)+25]
+    when m[42·(n-3)+24]:
+      frame Z q[0] Z q[anc]
+    when m[42·(n-3)+25]:
+      frame Z q[0] Z q[anc]
+  prepare |Y+> -> anc[25·(n-3)+16]
+  measure Z q[0] Z q[anc] Z anc[25·(n-3)+16] -> m[42·(n-3)+26]
+  measure X anc[25·(n-3)+16] -> m[42·(n-3)+27]
+  when m[42·(n-3)+26]:
+    frame Z q[0] Z q[anc]
+  when m[42·(n-3)+27]:
+    frame Z q[0] Z q[anc]
+  frame Z q[0] Z q[anc]
+  prepare |T> -> anc[25·(n-3)+17]
+  measure Z q[1] Z q[anc] Z anc[25·(n-3)+17] -> m[42·(n-3)+28]
+  measure X anc[25·(n-3)+17] -> m[42·(n-3)+29]
+  when m[42·(n-3)+29]:
+    frame Z q[1] Z q[anc]
+  when m[42·(n-3)+28]:
+    prepare |Y+> -> anc[25·(n-3)+18]
+    measure Z q[1] Z q[anc] Z anc[25·(n-3)+18] -> m[42·(n-3)+30]
+    measure X anc[25·(n-3)+18] -> m[42·(n-3)+31]
+    when m[42·(n-3)+30]:
+      frame Z q[1] Z q[anc]
+    when m[42·(n-3)+31]:
+      frame Z q[1] Z q[anc]
+  prepare |Y+> -> anc[25·(n-3)+19]
+  measure Z q[1] Z q[anc] Z anc[25·(n-3)+19] -> m[42·(n-3)+32]
+  measure X anc[25·(n-3)+19] -> m[42·(n-3)+33]
+  when m[42·(n-3)+32]:
+    frame Z q[1] Z q[anc]
+  when m[42·(n-3)+33]:
+    frame Z q[1] Z q[anc]
+  frame Z q[1] Z q[anc]
+  prepare |T> -> anc[25·(n-3)+20]
+  measure Z q[0] Z q[1] Z q[anc] Z anc[25·(n-3)+20] -> m[42·(n-3)+34]
+  measure X anc[25·(n-3)+20] -> m[42·(n-3)+35]
+  when m[42·(n-3)+35]:
+    frame Z q[0] Z q[1] Z q[anc]
+  when m[42·(n-3)+34]:
+    prepare |Y+> -> anc[25·(n-3)+21]
+    measure Z q[0] Z q[1] Z q[anc] Z anc[25·(n-3)+21] -> m[42·(n-3)+36]
+    measure X anc[25·(n-3)+21] -> m[42·(n-3)+37]
+    when m[42·(n-3)+36]:
+      frame Z q[0] Z q[1] Z q[anc]
+    when m[42·(n-3)+37]:
+      frame Z q[0] Z q[1] Z q[anc]
+  prepare |Y+> -> anc[25·(n-3)+23]
+  measure X q[anc] Z anc[25·(n-3)+23] -> m[42·(n-3)+38]
+  measure X anc[25·(n-3)+23] -> m[42·(n-3)+39]
+  when m[42·(n-3)+38]:
+    frame X q[anc]
+  when m[42·(n-3)+39]:
+    frame X q[anc]
+  prepare |Y+> -> anc[25·(n-3)+24]
+  measure Z q[anc] Z anc[25·(n-3)+24] -> m[42·(n-3)+40]
+  measure X anc[25·(n-3)+24] -> m[42·(n-3)+41]
+  when m[42·(n-3)+40]:
+    frame Z q[anc]
+  when m[42·(n-3)+41]:
+    frame Z q[anc]
+

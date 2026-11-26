@@ -1,0 +1,8 @@
+spec gidneyInterior:
+  ∀ x < 2^(3*i+5) .
+  requires   1 ≤ i  ∧  3*i + 5 ≤ dim
+  assumes    {{ |x⟩_q[0, 3*i+5) }}
+  ensures {{ |vInt(i, x)⟩_q[0, 3*i+5) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyInterior(i) + pT * NT_gidneyInterior(i) + pI * N_I)
+  outcomes   none
+  resource   { meas: 56, frame: 58, magicT: 7, synthEps: 0 }
+

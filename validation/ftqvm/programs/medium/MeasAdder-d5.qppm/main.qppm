@@ -1,0 +1,3 @@
+program[q: 3·n, c: 4·n]:
+  gidneyAddMeasured(n, 3·n) @ id()
+

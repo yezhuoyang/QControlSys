@@ -1,0 +1,4 @@
+gadget groverStep(n, s, anc):
+  groverOracle(n, s, anc) @ id()
+  groverDiffusion(n, anc) @ id()
+

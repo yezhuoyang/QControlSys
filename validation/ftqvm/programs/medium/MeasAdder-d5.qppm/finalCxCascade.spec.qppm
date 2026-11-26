@@ -1,0 +1,8 @@
+spec finalCxCascade:
+  ∀ x < 2^(3*n-1) .
+  requires   1 ≤ n  ∧  3*n - 1 ≤ dim
+  assumes    {{ |x⟩_q[0, 3*n-1) }}
+  ensures {{ |vCas(n, x)⟩_q[0, 3*n-1) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_finalCxCascade(n) + pT * NT_finalCxCascade(n) + pI * N_I)
+  outcomes   none
+  resource   { meas: 6·n, frame: 8·n, magicT: 0, synthEps: 0 }
+

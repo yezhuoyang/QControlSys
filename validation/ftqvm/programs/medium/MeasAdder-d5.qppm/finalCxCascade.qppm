@@ -1,0 +1,26 @@
+gadget finalCxCascade(n):
+  for 0 <= i < n:
+    prepare |Y+> -> anc[3·i]
+    measure Z q[3·i] X q[3·i+1] Z anc[3·i] -> m[6·i]
+    measure X anc[3·i] -> m[6·i+1]
+    when m[6·i]:
+      frame Z q[3·i] X q[3·i+1]
+    when m[6·i+1]:
+      frame Z q[3·i] X q[3·i+1]
+    prepare |Y+> -> anc[3·i+1]
+    measure Z q[3·i] Z anc[3·i+1] -> m[6·i+2]
+    measure X anc[3·i+1] -> m[6·i+3]
+    when m[6·i+2]:
+      frame Z q[3·i]
+    when m[6·i+3]:
+      frame Z q[3·i]
+    frame Z q[3·i]
+    prepare |Y+> -> anc[3·i+2]
+    measure X q[3·i+1] Z anc[3·i+2] -> m[6·i+4]
+    measure X anc[3·i+2] -> m[6·i+5]
+    when m[6·i+4]:
+      frame X q[3·i+1]
+    when m[6·i+5]:
+      frame X q[3·i+1]
+    frame X q[3·i+1]
+

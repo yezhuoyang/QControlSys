@@ -1,0 +1,8 @@
+spec gidneyMeasInteriorRev:
+  ∀ x < 2^(3*i+5) .
+  requires   1 ≤ i  ∧  3*i + 5 ≤ dim  ∧  cb + 1 ≤ dim  ∧  3*i + 5 ≤ cb
+  assumes    {{ |x⟩_q[0, 3*i+5) }}
+  ensures {{ |vMInt(i, x)⟩_q[0, 3*i+5) }}  within ||Tr_anc(.)||_1 <= 2 * (pL * NL_gidneyMeasInteriorRev(i, cb) + pT * NT_gidneyMeasInteriorRev(i, cb) + pI * N_I)
+  outcomes   none
+  resource   { meas: 27, frame: 36, magicT: 0, synthEps: 0 }
+
