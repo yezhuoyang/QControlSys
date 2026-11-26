@@ -24,7 +24,7 @@ export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1,
     gridNs: 2, // 500 MHz RISC-Q board
     place: (listing, { distance }) => place(listing, { d: distance, gap }),
     design: (listing, placement) => chipDesign(listing, placement, options).design,
-    run: (listing, placement, design, { outcomes, distance }) => runListing(listing, placement, design, { outcomes, distance, ...(trace ? { trace } : {}) }),
+    run: (listing, placement, design, { outcomes, distance, guards }) => runListing(listing, placement, design, { outcomes, distance, guards, ...(trace ? { trace } : {}) }),
     capacities: (design, placement, durations) => {
       const sites = placement.sites.length;
       const route = Math.max(2, durations.route_latency_ns?.value ?? 2), reset = Math.max(2, durations.reset_ns?.value ?? 160);

@@ -95,18 +95,46 @@ def main(argv):
         # The statement of every line, as the expander numbered them: Pauli tags such as
         # `CZ ancilla[1], Z data[0]` and frame Paulis are read from it.
         lines = kept
-        guarded = {}  # line of a statement inside a guard -> the guard (text, line)
+        # With `--guards taken`, every guarded body is expanded, and each op carries the guards around
+        # it, evaluated where the expander evaluated them: the guard's own bands, as concrete records,
+        # from the compiler's `split` and `sites` in the guard's environment.
+        enclosing = {}  # statement line -> the lines of the guards around it in its body, outer first
+        instances = {}  # guard line -> [(stack, bands)], one per time the expander reached it
+        def mark(node, line):
+            for child in node.children:
+                chain = enclosing.setdefault(child.line, [])
+                if line not in chain:
+                    chain.append(line)
+                mark(child, line)
+        def take(node, env, offset, stack):
+            if node.line not in instances:
+                mark(node, node.line)
+            bands = []
+            for band in sysprog.split(node.text[5:-1]):
+                band = band.strip()
+                negated = band.startswith("¬")
+                records = sysprog.sites(band.lstrip("¬").strip(), env, node.line, records=True, allow_empty=True)
+                bands.append({"negated": negated, "records": [site(r) for r in records]})
+            instances.setdefault(node.line, []).append((tuple(stack), bands))
+            return True
         if guards == "taken":
-            def mark(node, guard):
-                for child in node.children:
-                    guarded.setdefault(child.line, guard)
-                    mark(child, guard)
-            def take(node, env, offset, stack):
-                mark(node, {"text": node.text, "line": node.line})
-                return True
             ops, calls = sysprog._expand(source, max_ops, choose_guard=take)
         else:
             ops, calls = sysprog.expand(source, max_ops)
+
+        def guard_of(op):
+            """The guards around one op, as one conjunction of bands, outer first: the op's own body,
+            then the bodies of the calls that reached it (each call's statement line)."""
+            lines = [calls[cid].line for cid in op.frames] + [op.line]
+            stack, bands, seen = tuple(op.stack), [], []
+            for line in lines:
+                for guard in enclosing.get(line, []):
+                    # The instance of this guard whose stack the op's stack extends, the latest reached.
+                    match = [b for s, b in instances.get(guard, []) if stack[:len(s)] == s]
+                    if match and guard not in seen:
+                        seen.append(guard)
+                        bands.extend(max(((s, b) for s, b in instances[guard] if stack[:len(s)] == s), key=lambda x: len(x[0]))[1])
+            return {"bands": bands, "lines": seen} if seen else None
     except sysprog.VMError as error:
         info = getattr(error, "info", {})
         print(json.dumps({"error": {"code": info.get("code"), "message": str(error),
@@ -127,7 +155,7 @@ def main(argv):
             "arg": op.arg, "inputNs": op.input_ns, "line": op.line,
             "text": lines[op.line - 1].split("#", 1)[0].strip() if 0 < op.line <= len(lines) else "",
             "stack": [str(s) for s in op.stack],
-            **({"guard": guarded[op.line]} if op.line in guarded else {}),
+            **({"guard": g} if (g := guard_of(op)) else {}),
         } for op in ops],
         "calls": [{"uid": c.uid, "name": c.name, "start": c.start, "end": c.end,
                    "line": c.line, "ops": [op.uid for op in c.ops]} for c in calls],

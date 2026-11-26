@@ -34,6 +34,9 @@ export function available() {
   return existsSync(join(compilerRoot(), "ftq_vm", "sysprog.py")) && existsSync(bin("qec_sys")) && existsSync(bin("prepare_qec"));
 }
 
+/** How long one compile of the encoded program may take, in ms (FT_COMPILE_TIMEOUT_MS; default 6 h). */
+const COMPILE_TIMEOUT_MS = Number(process.env.FT_COMPILE_TIMEOUT_MS) || 6 * 3600_000;
+
 function run(file, args, { cwd = compilerRoot(), timeoutMs = 600_000 } = {}) {
   return new Promise((ok, fail) => {
     execFile(file, args, { cwd, windowsHide: true, maxBuffer: 1 << 28, timeout: timeoutMs }, (error, stdout, stderr) => {
@@ -110,7 +113,9 @@ export async function prepareQppm(prog, out) {
 export async function compileSys(qec, { machine, sysspec, out, options = [], staged = false }) {
   rmSync(out, { force: true, recursive: true }); // a listing left by an earlier run must not pass for this one
   // `staged`: the compiler's staged back end (qec_sys_staged), which also lowers transversal gates.
-  const r = await run(bin(staged ? "qec_sys_staged" : "qec_sys"), [resolve(qec), "--machine", resolve(machine), "--system-spec", resolve(sysspec), "-o", resolve(out), ...options]);
+  // A medium program's compile can take more than an hour (Grover over 5 qubits at d = 5).
+  const r = await run(bin(staged ? "qec_sys_staged" : "qec_sys"), [resolve(qec), "--machine", resolve(machine), "--system-spec", resolve(sysspec), "-o", resolve(out), ...options],
+    { timeoutMs: COMPILE_TIMEOUT_MS });
   if (!existsSync(out)) throw new Error("qec_sys refused: " + (r.stdout + r.stderr).trim());
   return out;
 }
@@ -128,7 +133,8 @@ export async function admit(sysprog) {
  * program's text.
  */
 export async function expand(sysprog, { maxOps = 5_000_000 } = {}) {
-  const r = await runToFile(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps)], { cwd: REPO });
+  // Every guarded body is expanded, each op with the guard around it (`op.guard`); the run decides it.
+  const r = await runToFile(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps), "--guards", "taken"], { cwd: REPO });
   const out = JSON.parse(r.stdout);
   if (out.error) throw new Error(`The compiler refused the listing: ${out.error.code}: ${out.error.message}`);
   const flat = qsysasm.canonical(out);

@@ -32,6 +32,7 @@ import * as hardwareDesign from "../design.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
 import { layers } from "./surface.mjs";
 import { buildTrack, controllerTrack } from "./track.mjs";
+import { guardHolds as qsysasmGuardHolds } from "./qsysasm.mjs";
 
 const NOT_YET = new Set([]);
 const CLASSICAL = new Set(["pauli_frame_update", "parity"]);
@@ -51,6 +52,18 @@ function paulisOf(op) {
 
 /** Listing records as bit names: `c[3]`, `syndrome[12]`. */
 const recordName = (r) => r.register + "[" + r.index + "]";
+
+/**
+ * Whether a guarded operation runs. `op.guard.bands`: a conjunction of bands, each the XOR parity of
+ * its records, which must be 1 (0 for a negated band), as the compiler's `when` and `when ¬` define it
+ * (the compiler checkout's MachineSpectable.md, record guards). `guards: "taken"` runs every guarded
+ * operation, the bound the resource VM reserves; otherwise the bands read the run's record values
+ * (`outcomes`, 0 for a record not given). The records a guard reads are decoded values; the decoder
+ * service runs outside this run, so the run takes them as given rather than from its own bits.
+ */
+export function guardHolds(guard, { guards, outcomes = {} } = {}) {
+  return guards === "taken" || qsysasmGuardHolds(guard, outcomes);
+}
 
 /**
  * A schedule of native instructions with one timeline per qubit: an instruction starts when all
@@ -184,8 +197,14 @@ function natives(op, placement, m, options = {}) {
 export function lowerListing(listing, placement, m, options = {}) {
   const period = m.period;
   const ops = [], origin = new Map(), unrealized = [], classical = [], decodes = [], factories = [];
+  const skipped = new Set();
   let maxSlipPs = 0, counter = 0;
   for (const op of listing.ops) {
+    // A guarded body whose guard is false in this run plays nothing; its selector service still runs.
+    if (op.guard && !guardHolds(op.guard, options)) {
+      skipped.add(op.uid);
+      continue;
+    }
     if (NOT_YET.has(op.kind)) {
       unrealized.push(op);
       continue;
@@ -221,7 +240,7 @@ export function lowerListing(listing, placement, m, options = {}) {
   const span = ops.reduce((m, o) => Math.max(m, o.t + o.dur), 0);
   return {
     hardware: { kind: "hardware-program", version: 1, platform: "superconducting", machine: m.name, timeUnit: "ps", segments: [{ ops, span }] },
-    origin, unrealized, classical, decodes, factories, quantization: { maxSlipPs, gridPs: period },
+    origin, unrealized, classical, decodes, factories, skipped, quantization: { maxSlipPs, gridPs: period },
   };
 }
 
@@ -229,9 +248,9 @@ export function lowerListing(listing, placement, m, options = {}) {
  * Run a listing on a chip design and check it. options: { outcomes: { "c[0]": 1, … } }.
  * Returns { result, built, lowered, report }.
  */
-export async function runListing(listing, placement, design, { outcomes = {}, trace = "io", distance = placement.d, factoryRounds, forceCompact = false } = {}) {
+export async function runListing(listing, placement, design, { outcomes = {}, trace = "io", distance = placement.d, factoryRounds, forceCompact = false, guards } = {}) {
   const m = hardwareDesign.machine(design);
-  const { hardware, origin, unrealized, classical, decodes, factories, quantization } = lowerListing(listing, placement, m, { factoryRounds });
+  const { hardware, origin, unrealized, classical, decodes, factories, skipped, quantization } = lowerListing(listing, placement, m, { factoryRounds, guards, outcomes });
   const lowered = superconducting.lower(hardware, m);
   // Frame updates and parities: timed classical work on the frame core, in the same run.
   for (const c of classical) {
@@ -244,12 +263,14 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
     bindings: m.bindings, readouts: superconducting.readoutOracle(lowered, m, outcomes) });
   // A core on the compact interpreter: name its repeated rounds' pulses after their operations.
   const result = remapSources(await execute(built.document), built);
-  const report = conformance(listing, { hardware, lowered, origin, unrealized, classical, quantization }, result, built, m);
+  const report = conformance(listing, { hardware, lowered, origin, unrealized, classical, skipped, quantization }, result, built, m);
   // Decodes: the decoder service, from the bits' stores in this run.
   const bitStoredNs = {};
   for (const r of report.rows) if (r.kind === "measure" && r.bitNs !== undefined) bitStoredNs[r.record] = r.bitNs;
   const control = design.control ?? {};
-  const decodeRows = decodes.length ? await runDecodes(listing, placement, distance, bitStoredNs,
+  // A decode inside a guard that is false in this run does not run.
+  const running = skipped.size ? { ...listing, ops: listing.ops.filter((o) => !skipped.has(o.uid)) } : listing;
+  const decodeRows = decodes.length ? await runDecodes(running, placement, distance, bitStoredNs,
     { decoders: control.decoders ?? 1, coresPerDecoder: control.coresPerDecoder ?? 1, outcomes, periodNs: m.period / 1000 }) : [];
   addRows(report, decodeRows.map((r) => ({ ...r, hardwareNs: [r.start, r.doneNs] })));
   // Factories: the injection rounds ran in this run; their syndrome goes to the factory's own
@@ -307,7 +328,7 @@ function summarize(rows) {
  */
 export function conformance(listing, lowering, result, built, m) {
   const period = m.period;
-  const { hardware, lowered, origin, unrealized, classical = [], quantization } = lowering;
+  const { hardware, lowered, origin, unrealized, classical = [], skipped = new Set(), quantization } = lowering;
   const planned = new Map(hardware.segments[0].ops.map((o) => [o.id, o]));
   // Planned opening batches of every fired pulse, per native instruction and core.
   const plannedAt = new Map();
@@ -359,6 +380,10 @@ export function conformance(listing, lowering, result, built, m) {
   const rows = [];
   for (const op of listing.ops) {
     if (unrealized.includes(op) || op.kind === "decode_syndrome") continue;
+    if (skipped.has(op.uid)) {
+      rows.push({ uid: op.uid, kind: op.kind, line: op.line, start: op.start, end: op.end, skipped: true, ok: true });
+      continue;
+    }
     if (CLASSICAL.has(op.kind)) {
       const done = (doneOf.get(op.uid) * period) / 1000;
       rows.push({ uid: op.uid, kind: op.kind, line: op.line, start: op.start, end: op.end, hardwareNs: [op.start, done],
@@ -388,7 +413,7 @@ export function conformance(listing, lowering, result, built, m) {
   return {
     bitNs,
     status: result.summary.status, faults: result.summary.faults,
-    baseBatch: base, quantization, conforms: rows.every((r) => r.ok),
+    baseBatch: base, quantization, conforms: rows.every((r) => r.ok), skipped: skipped.size,
     byKind, rows, bits: measuredBits(result, built),
     unrealized: unrealized.map((op) => ({ uid: op.uid, kind: op.kind, line: op.line, start: op.start, text: op.text })),
   };

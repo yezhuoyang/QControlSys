@@ -182,7 +182,9 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
     const design = platform.design(built.listing, placement);
     let report, result;
     try {
-      ({ report, result } = await platform.run(built.listing, placement, design, { outcomes, distance }));
+      // Every guarded body runs: the specification must cover the longest path, which the resource
+      // VM reserves (the all-taken bound); a run with record values may then skip some of them.
+      ({ report, result } = await platform.run(built.listing, placement, design, { outcomes, distance, guards: "taken" }));
     } catch (error) {
       // The listing the run failed on, so that a caller can rerun or study it without the compiler.
       Object.assign(error, { listing: built.listing, spec, iteration: name });
