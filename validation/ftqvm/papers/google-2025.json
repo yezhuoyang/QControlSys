@@ -11,7 +11,7 @@
    "url": "https://arxiv.org/abs/2408.13687"
   },
   "summary": "A distance-3, 5 and 7 rotated surface-code memory on the 105-qubit Willow processor, with a 1.1 µs error-correction cycle and real-time decoding.",
-  "program": "The compiler's own surface-code declaration and an encoded program of R rounds of `extract`, then a `decode` (riscq/ftqvm/papers.mjs googleMemory). The compiler's back end lowers it to physical gates, resets, routes, measurements and decodes.",
+  "program": "The compiler's own surface-code declaration and an encoded program of R rounds of `extract`, then a `decode`. The compiler's back end lowers it to physical gates, resets, routes, measurements and decodes.",
   "twin": "The distance-7 patch of the paper's square grid: 49 data and 48 measure transmons, a tunable coupler between every diagonal pair, 25 ns XY rotations and 42 ns CZ from the paper, 500 ns readout and 160 ns reset from the group's 2023 paper. The control system is QuantumOS's RISC-Q model, the decoder Helios union-find compiled for its cores.",
   "findings": [
    "Every operation of the listing ran inside its listed window on the twin at d = 3, 5 and 7.",
@@ -23,7 +23,7 @@
    "Helios's decoding graph holds d rounds; a longer decode runs in consecutive windows without overlap.",
    "Qubit frequencies and pulse shapes are not published; the twin uses RISC-Q's pulse shapes with the paper's durations. 8 of the 105 qubits (leakage removal) are not placed."
   ],
-  "command": "node riscq/ftqvm/papers.mjs google 10"
+  "command": "npm run papers -- google 10"
  },
  "generated": "2026-11-25T15:28:14.903Z",
  "device": {

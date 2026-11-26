@@ -27,7 +27,7 @@
    "The paper's decoders are a neural network, an MLE decoder and Chromobius; the twin's statistics use Chromobius and PyMatching, and its decoder in the run is union-find.",
    "SI1000 is the noise of the authors' simulation, not of the device; leakage and crosstalk are not modeled."
   ],
-  "command": "node riscq/ftqvm/logical.mjs lacroix-2025 400 200000"
+  "command": "npm run logical -- lacroix-2025 400 200000"
  },
  "generated": "2026-11-25T09:06:08.766Z",
  "device": {

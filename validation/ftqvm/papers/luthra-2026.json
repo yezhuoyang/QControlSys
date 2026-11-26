@@ -26,13 +26,13 @@
    "The noise is the paper's simulation model (depolarizing gates, preparation and measurement errors, idling per layer) as its verification script states it; the hardware's own errors and leakage are not modeled.",
    "The paper's decoder is Tesseract. The twin's statistics use PyMatching, and the compiled union-find decoder runs on 400 noisy shots, so its own logical error is known only to a few tenths of a percent."
   ],
-  "command": "node riscq/ftqvm/logical.mjs luthra-2026 400 200000"
+  "command": "npm run logical -- luthra-2026 400 200000"
  },
  "generated": "2026-11-25T09:06:12.427Z",
  "device": {
   "id": "luthra-2026",
   "title": "Quantinuum H2 (QCCD race track), the 27 ions of the program",
-  "basis": "The circuits are the programs the authors submitted (Zenodo doi:10.5281/zenodo.23165109), translated gate for gate (Rz as S/S†, Rxy as √X/X, ZZMax as √ZZ); read back against the published shot data they reproduce the paper's counts and detector rates exactly. H2's per-operation durations are not public: the twin takes QCCD Studio's H2 model (the profile riscq/ftqvm/optical.mjs uses) and keeps the paper's four gate zones; ions are moved round the race track to their partner before each MS gate. Not scheduled, because H2 publishes no duration for them: sideband cooling before two-qubit gates, leakage repump (about 1 ms a cycle, the paper does not give the number of cycles) and the initial cooling (about 17 ms a shot on H2). That is why a twin shot (about 11.5 ms for XR3) is far shorter than the authors' estimate of about 500 ms. The paper decodes offline (it notes real-time decoding on H2 as future work); the twin adds the decoder and one conditioned pulse in the run, to show what that would take. The controller is a RISC-Q board at 500 MHz: four gate-zone laser channels, four transport lanes, cooling, and readout cores, with a decoder core.",
+  "basis": "The circuits are the programs the authors submitted (Zenodo doi:10.5281/zenodo.23165109), translated gate for gate (Rz as S/S†, Rxy as √X/X, ZZMax as √ZZ); read back against the published shot data they reproduce the paper's counts and detector rates exactly. H2's per-operation durations are not public: the twin takes QCCD Studio's H2 model (the profile the optical twin uses) and keeps the paper's four gate zones; ions are moved round the race track to their partner before each MS gate. Not scheduled, because H2 publishes no duration for them: sideband cooling before two-qubit gates, leakage repump (about 1 ms a cycle, the paper does not give the number of cycles) and the initial cooling (about 17 ms a shot on H2). That is why a twin shot (about 11.5 ms for XR3) is far shorter than the authors' estimate of about 500 ms. The paper decodes offline (it notes real-time decoding on H2 as future work); the twin adds the decoder and one conditioned pulse in the run, to show what that would take. The controller is a RISC-Q board at 500 MHz: four gate-zone laser channels, four transport lanes, cooling, and readout cores, with a decoder core.",
   "durations": {
    "oneQubitNs": {
     "value": 5000,

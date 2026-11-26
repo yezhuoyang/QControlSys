@@ -26,7 +26,7 @@
    "The twin's decoder is union-find in firmware, not the paper's Collision Clustering on an FPGA: its decode time is the twin's, not Rigetti's.",
    "No resets: as on the device, a 250 µs wait between shots (not simulated)."
   ],
-  "command": "node riscq/ftqvm/logical.mjs caune-2024 400 200000"
+  "command": "npm run logical -- caune-2024 400 200000"
  },
  "generated": "2026-11-25T09:05:49.261Z",
  "device": {

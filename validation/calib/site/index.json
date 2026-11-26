@@ -6,6 +6,12 @@
   "summary": "Small logical circuits on distance-3 surface-code blocks, written as QSysASM without a single time. The operating system schedules each one, the timetable is compiled to RISC-Q firmware and run on the design's cycle-exact model, and every latency the hardware needed beyond what the OS was told is learned, until every operation of the program fits its window. 11 programs on 6 designs of three platforms."
  },
  {
+  "id": "medium",
+  "title": "Algorithms at medium scale",
+  "kicker": "Scale · well-known algorithms",
+  "summary": "A GHZ state on 12 logical qubits, encoded at distance 5 in 839 physical qubits and run through the operating system's interface on a superconducting machine whose control system spans 224 boards."
+ },
+ {
   "id": "fabric",
   "title": "The classical fabric of a RISC-Q system",
   "kicker": "Calibration · every platform",

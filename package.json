@@ -5,7 +5,10 @@
   "scripts": {
     "build": "lake build",
     "start": "lake build && node server.mjs",
-    "test": "lake build && node --test"
+    "test": "lake build && node --test",
+    "papers": "node riscq/ftqvm/papers.mjs",
+    "logical": "node riscq/ftqvm/logical.mjs",
+    "magic": "node riscq/ftqvm/magic.mjs"
   },
   "dependencies": {
     "three": "0.180.0"

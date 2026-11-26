@@ -26,7 +26,7 @@
    "The four AWG streams are aligned to one clock from their CZ anchors (they agree within 2.6 µs); the paper's controller is five Spectrum AWGs and a PC.",
    "The paper's lattice-surgery and deep-circuit experiments are not reproduced: a decode on the board's hub reads at most 128 measured bits."
   ],
-  "command": "node riscq/ftqvm/logical.mjs bluvstein-2025 400 200000"
+  "command": "npm run logical -- bluvstein-2025 400 200000"
  },
  "generated": "2026-11-25T09:06:09.927Z",
  "device": {

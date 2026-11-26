@@ -1,6 +1,6 @@
 {
  "model": "riscq-pipe-rtl-2026-11-24",
- "note": "Measured in the Lean model: Helios union-find batches (decodeBatches, reportBatches) by 'distance:syndrome', lookup decoder ns by bit count. Written by riscq/ftqvm/decoder.mjs.",
+ "note": "Measured in the Lean model: Helios union-find batches (decodeBatches, reportBatches) by 'distance:syndrome', lookup decoder ns by bit count. Written by the decoder calibration.",
  "helios": {
   "3:000000000000": {
    "decodeBatches": 17839,

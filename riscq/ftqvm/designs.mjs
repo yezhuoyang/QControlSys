@@ -88,7 +88,7 @@ async function opticalParams(src) {
     ...(OPTICAL_FIELDS[point.profile] ?? []).filter(([f]) => prof[f]).map(([f, label]) =>
       num(f, label, prof[f].value, "ns", 10, Math.max(10 * prof[f].value, 10000), 10, prof[f].source, dev)),
     ...CONTROL_FIELDS.map(([f, label, min, max]) => num(f, label, point[f] ?? (f === "readouts" ? 16 : f === "coresPerDecoder" ? 4 : f === "decoders" ? 1 : 16), "", min, max, 1,
-      "the twin's design point (riscq/ftqvm/optical.mjs OPTICAL_DESIGNS " + src.platform.id + ")", ctl)),
+      "the twin's design point (optical design " + src.platform.id + ")", ctl)),
   ];
 }
 
@@ -137,7 +137,7 @@ function registry(id, kind) {
   return {
     async params() {
       const rows = sources(id);
-      if (!rows.length) throw Error("no stored twin for " + id + ": run `" + "node riscq/ftqvm/papers.mjs` for it first");
+      if (!rows.length) throw Error("no stored twin for " + id + ": run `" + "npm run papers` for it first");
       return [rowParam(rows), ...(kind === "transmon" ? await willowParams() : await opticalParams(rows[0]))];
     },
     async run(params = {}) {

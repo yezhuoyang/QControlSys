@@ -9,6 +9,7 @@ import { gzipSync } from "node:zlib";
 import { PROGRAMS, DESIGN_IDS, STUDY_RUNS, studyRun } from "./example-runs.mjs";
 import { PROGRAMS as OS_PROGRAMS, programText } from "../os/programs.mjs";
 import { parse as parseQsysasm } from "../ftqvm/qsysasm.mjs";
+import { mediumStudy } from "../ftqvm/medium.mjs";
 
 const DIR = new URL("../../validation/calib/", import.meta.url);
 const OUT = new URL("site/", DIR);
@@ -337,7 +338,10 @@ function writeRuns() {
 }
 
 export async function build({ runs = true } = {}) {
-  const studies = [programsStudy(), fabricStudy(), decoderStudy(), tableStudy(), methodsStudy(), backlogStudy(), factoryStudy(), contentionStudy(), gateStudy(), scaleStudy()];
+  // The medium-scale algorithms once a run of them is stored (riscq/ftqvm/medium.mjs).
+  // Its command: this page, from the stored runs (a compile of the programs needs the compiler).
+  const medium = STUDY_RUNS.medium ? [{ ...mediumStudy(), command: "node riscq/calib/site.mjs" }] : [];
+  const studies = [programsStudy(), ...medium, fabricStudy(), decoderStudy(), tableStudy(), methodsStudy(), backlogStudy(), factoryStudy(), contentionStudy(), gateStudy(), scaleStudy()];
   mkdirSync(OUT, { recursive: true });
   if (runs) console.log("stored listings:", writeRuns());
   for (const s of studies) {

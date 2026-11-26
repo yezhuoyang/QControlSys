@@ -24,6 +24,7 @@ import { transmon, optical } from "../ftqvm/platforms.mjs";
 import { DESIGNS } from "../ftqvm/corpus.mjs";
 import { programRow } from "../os/program-runs.mjs";
 import { PROGRAMS as OS_PROGRAMS } from "../os/programs.mjs";
+import { MEDIUM_PROGRAMS, MEDIUM_RUNS, MEDIUM_DESIGN, mediumRow } from "../ftqvm/medium.mjs";
 
 const RUNS = new URL("../../validation/calib/site/runs/", import.meta.url);
 const ADAPTERS = { superconducting: transmon, neutral: (o) => optical(o.id), qccd: (o) => optical(o.id) };
@@ -166,8 +167,58 @@ export const STUDY_RUNS = {
 
 const INTRO = "Choose a program, a hardware design and how the operating system runs it, then run it on the cycle-exact model of the RISC-Q control hardware. The timetable is the compiler's QSysASM listing; a runtime policy runs the same program as soon as its dependencies and resources allow and the hardware then plays that schedule. Every operation is checked against its window.";
 
-/** A study's run: the operating system's (programRow) or the corpus listing's (exampleRun). */
-export const studyRun = (r) => (r.os ? programRow({ ...r.params, label: r.label }) : exampleRun({ ...r.params, label: r.label }));
+// Algorithms at medium scale (riscq/ftqvm/medium.mjs): the programs whose compiled run is stored.
+const MEDIUM_STORE = new URL("../../validation/ftqvm/medium/", import.meta.url);
+const mediumStored = MEDIUM_RUNS.filter((r) => existsSync(new URL(r.params.program + ".json.gz", MEDIUM_STORE)));
+if (mediumStored.length) STUDY_RUNS.medium = mediumStored.map((r) => ({ ...r, medium: true }));
+
+/** Statements of a medium run's listing shown on a page; the whole listing stays in its stored run. */
+const LISTING_LINES = 400;
+
+/**
+ * A medium run as a page row. Its listing has hundreds of thousands of statements and its track
+ * as many operations: the page shows the first statements, and the 3D view the operations of the
+ * window the controller's pulses were recorded for (riscq/ftqvm/track.mjs keeps their first 30,000).
+ */
+export async function mediumPageRow(params) {
+  const row = await mediumRow(params);
+  const p = MEDIUM_PROGRAMS.find((x) => x.id === params.program) ?? MEDIUM_PROGRAMS[0];
+  const lines = (row.program ?? "").split("\n");
+  const program = lines.length > LISTING_LINES
+    ? lines.slice(0, LISTING_LINES).join("\n") + "\n# … " + (lines.length - LISTING_LINES).toLocaleString("en") + " more statements: the whole listing is stored with the run"
+    : row.program;
+  let track = row.track, animation;
+  const c = track?.controller;
+  if (track && c?.truncated && c.pulses?.length) {
+    const windowNs = Math.max(...c.pulses.map((x) => x[3]));
+    const events = track.events.filter((e) => e.t0 < windowNs);
+    animation = "the first " + (windowNs / 1000).toFixed(0) + " µs of " + (track.endNs / 1000).toFixed(0) + " µs: " + events.length.toLocaleString("en") + " of " + track.events.length.toLocaleString("en") + " operations, with the controller's first " + c.pulses.length.toLocaleString("en") + " pulses";
+    track = { ...track, events, endNs: windowNs };
+  }
+  return { ...row, label: params.label ?? row.label, program, track, columns: { ...row.columns, ...(animation ? { Animation: animation } : {}) } };
+}
+
+/** A study's run: the operating system's (programRow), a medium algorithm's, or the corpus listing's (exampleRun). */
+export const studyRun = (r) => (r.os ? programRow({ ...r.params, label: r.label }) : r.medium ? mediumPageRow({ ...r.params, label: r.label }) : exampleRun({ ...r.params, label: r.label }));
+
+/**
+ * The medium study's design page: the stored runs are served from the page's data; a run with other
+ * decoders is a cycle-exact run of the whole machine (hundreds of cores, ~10⁵ s of compute), not offered here.
+ */
+const mediumDesign = {
+  intro: MEDIUM_DESIGN.intro,
+  // Only the programs with a stored run, the first of them chosen; sources in words, not paths.
+  params: () => MEDIUM_DESIGN.params().map((f) => f.key !== "program" ? f : {
+    ...f, value: mediumStored[0].params.program, source: "logical programs compiled at distance 5 (the programs with a stored run)",
+    options: f.options.filter((o) => mediumStored.some((r) => r.params.program === o.value)) }),
+  async run(params = {}) {
+    const defaults = Object.fromEntries(MEDIUM_DESIGN.params().map((f) => [f.key, String(f.value)]));
+    const p = { ...defaults, ...Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v !== undefined && v !== null).map(([k, v]) => [k, String(v)])) };
+    if (p.decoders !== defaults.decoders || p.coresPerDecoder !== defaults.coresPerDecoder)
+      throw Error("A run with other decoders is a cycle-exact run of the whole control system (hundreds of cores over the program's full machine time) and takes about an hour, so the site does not start it. Run it from a checkout of the repository: mediumRow(" + JSON.stringify(p) + ") in the medium-scale module.");
+    return { rows: [await mediumPageRow(p)] };
+  },
+};
 
 const OS_INTRO = "Choose a logical program, a hardware design and how the operating system schedules it. The OS counts the design's capacities, schedules the untimed QSysASM program, compiles the timetable to RISC-Q firmware and runs it on the cycle-exact model; every latency the hardware needed beyond what the OS was told is learned, and the program is scheduled again until every operation fits its window.";
 
@@ -179,7 +230,7 @@ const osDesign = (runs) => ({
     const opt = (xs, labels = {}) => xs.map((x) => ({ value: x, label: labels[x] ?? String(x) }));
     return [
       { key: "program", label: "Logical program", value: d.program, group: "Program", source: "flat QSysASM without times (riscq/os/programs.mjs)", options: OS_PROGRAMS.map((p) => ({ value: p.id, label: p.title })) },
-      { key: "design", label: "Hardware design", value: d.design, group: "Machine", source: "two designs per platform (riscq/ftqvm/corpus.mjs)", options: DESIGN_IDS.map((x) => ({ value: x, label: x + " · " + Object.values(DESIGNS).flat().find((p) => p.id === x).title })) },
+      { key: "design", label: "Hardware design", value: d.design, group: "Machine", source: "two designs per platform", options: DESIGN_IDS.map((x) => ({ value: x, label: x + " · " + Object.values(DESIGNS).flat().find((p) => p.id === x).title })) },
       { key: "policy", label: "Scheduler policy", value: d.policy ?? "fifo", group: "Operating system", source: "riscq/os/des.mjs", options: opt(["fifo", "order", "deadline"], { fifo: "first ready, first served", order: "program order", deadline: "earliest listed start" }) },
       { key: "ordered", label: "Ancilla acquisition", value: d.ordered ?? "on", group: "Operating system", source: "ordered acquisition cannot deadlock", options: opt(["on", "off"], { on: "in program order", off: "greedy (may deadlock)" }) },
       { key: "readouts", label: "Readout channels", value: d.readouts ?? "counted", group: "Operating system", source: "not a field of the interface's machine line", options: opt(["counted", "not counted"], { counted: "counted on the design", "not counted": "not counted (the interface alone)" }) },
@@ -192,14 +243,14 @@ const osDesign = (runs) => ({
 });
 
 /** The design page of every Examples study: same machinery, the study's runs as starting points. */
-export const EXAMPLE_DESIGNS = Object.fromEntries(Object.entries(STUDY_RUNS).map(([id, runs]) => [id, runs[0].os ? osDesign(runs) : {
+export const EXAMPLE_DESIGNS = Object.fromEntries(Object.entries(STUDY_RUNS).map(([id, runs]) => [id, runs[0].os ? osDesign(runs) : runs[0].medium ? mediumDesign : {
   intro: INTRO,
   params() {
     const d = runs[0].params;
     const opt = (xs, labels = {}) => xs.map((x) => ({ value: x, label: labels[x] ?? String(x) }));
     return [
       { key: "program", label: "Program", value: d.program, group: "Program", source: "logical programs of the corpus, compiled and admitted", options: opt(PROGRAMS) },
-      { key: "design", label: "Hardware design", value: d.design, group: "Machine", source: "two designs per platform (riscq/ftqvm/corpus.mjs)", options: DESIGN_IDS.map((x) => ({ value: x, label: x + " · " + Object.values(DESIGNS).flat().find((p) => p.id === x).title })) },
+      { key: "design", label: "Hardware design", value: d.design, group: "Machine", source: "two designs per platform", options: DESIGN_IDS.map((x) => ({ value: x, label: x + " · " + Object.values(DESIGNS).flat().find((p) => p.id === x).title })) },
       { key: "execution", label: "How the OS runs it", value: d.execution ?? "timetable", group: "Operating system", source: "riscq/os/des.mjs policies",
         options: opt(["timetable", "greedy", "strict", "ordered"], { timetable: "the compiler's timetable", greedy: "runtime, greedy (may deadlock)", strict: "runtime, strict order", ordered: "runtime, ordered ancilla acquisition" }) },
       { key: "decoders", label: "Decoders (runtime)", value: d.decoders ?? "", unit: "", min: 1, max: 16, step: 1, group: "Operating system", source: "empty: the derived machine's count" },

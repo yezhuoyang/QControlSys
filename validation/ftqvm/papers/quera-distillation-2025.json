@@ -30,7 +30,7 @@
    "The decoder is a sampled lookup table for both distances (the paper's MLD at d = 3; at d = 5 the paper uses a most-likely-error decoder).",
    "The compiler has the d = 3 color code (Steane) built in but not the [[17,1,5]] code, so the system call is compiled for d = 3 only."
   ],
-  "command": "node riscq/ftqvm/magic.mjs quera 200000"
+  "command": "npm run magic -- quera 200000"
  },
  "generated": "2026-11-25T14:39:08.552Z",
  "device": {

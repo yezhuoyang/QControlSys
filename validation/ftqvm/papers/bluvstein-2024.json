@@ -24,7 +24,7 @@
    "Background maintenance of idle blocks is a reservation in the listing, not executed operations; the twin does not execute it.",
    "The camera readout (one exposure for every atom) is not modeled yet; this blocks d = 7."
   ],
-  "command": "node riscq/ftqvm/papers.mjs bluvstein 3,5,7"
+  "command": "npm run papers -- bluvstein 3,5,7"
  },
  "generated": "2026-11-25T15:29:13.246Z",
  "design": {

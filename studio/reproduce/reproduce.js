@@ -47,7 +47,7 @@ function twinTable(data) {
   if (data.device?.published) for (const [k, v] of Object.entries(data.device.published)) if (v?.value !== undefined) entries.push(["paper: " + k, v.value + (/Ns$/.test(k) ? " ns" : ""), v.source]);
   const unit = (k) => (/Ns$/.test(k) ? " ns" : /Um$/.test(k) ? " µm" : k === "accel" ? " m/s²" : "");
   if (data.design?.profile) for (const [k, v] of Object.entries(data.design.profile)) if (v?.value !== undefined) entries.push([k, v.value + unit(k), v.source]);
-  if (data.design) for (const k of ["pitchUm", "interactUm", "beams", "movers", "decoders"]) if (data.design[k] !== undefined) entries.push([k, data.design[k], "design point of the twin (riscq/ftqvm/optical.mjs)"]);
+  if (data.design) for (const k of ["pitchUm", "interactUm", "beams", "movers", "decoders"]) if (data.design[k] !== undefined) entries.push([k, data.design[k], "design point of the twin (optical.mjs)"]);
   if (!entries.length) return "";
   return `<div class="tbl"><table><thead><tr><th>Parameter</th><th>Value</th><th class="src">Source</th></tr></thead><tbody>${
     entries.map(([k, v, s]) => `<tr><td><code>${esc(k)}</code></td><td>${esc(v)}</td><td class="src">${esc(s)}</td></tr>`).join("")}</tbody></table></div>`;

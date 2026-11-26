@@ -29,7 +29,7 @@ export const LOGICAL_REPRODUCTIONS = [
       "The noise is the paper's simulation model (depolarizing gates, readout flips, idling over each layer's time); leakage, crosstalk and the learned weights of the paper's matching graph are not modeled.",
       "The paper does not state its control electronics: the controller is QuantumOS's RISC-Q model.",
     ],
-    command: "node riscq/ftqvm/logical.mjs besedin-2026 400 200000",
+    command: "npm run logical -- besedin-2026 400 200000",
   },
   {
     id: "caune-2024",
@@ -57,7 +57,7 @@ export const LOGICAL_REPRODUCTIONS = [
       "The twin's decoder is union-find in firmware, not the paper's Collision Clustering on an FPGA: its decode time is the twin's, not Rigetti's.",
       "No resets: as on the device, a 250 µs wait between shots (not simulated).",
     ],
-    command: "node riscq/ftqvm/logical.mjs caune-2024 400 200000",
+    command: "npm run logical -- caune-2024 400 200000",
   },
   {
     id: "lacroix-2025",
@@ -86,7 +86,7 @@ export const LOGICAL_REPRODUCTIONS = [
       "The paper's decoders are a neural network, an MLE decoder and Chromobius; the twin's statistics use Chromobius and PyMatching, and its decoder in the run is union-find.",
       "SI1000 is the noise of the authors' simulation, not of the device; leakage and crosstalk are not modeled.",
     ],
-    command: "node riscq/ftqvm/logical.mjs lacroix-2025 400 200000",
+    command: "npm run logical -- lacroix-2025 400 200000",
   },
   {
     id: "bluvstein-2025",
@@ -114,7 +114,7 @@ export const LOGICAL_REPRODUCTIONS = [
       "The four AWG streams are aligned to one clock from their CZ anchors (they agree within 2.6 µs); the paper's controller is five Spectrum AWGs and a PC.",
       "The paper's lattice-surgery and deep-circuit experiments are not reproduced: a decode on the board's hub reads at most 128 measured bits.",
     ],
-    command: "node riscq/ftqvm/logical.mjs bluvstein-2025 400 200000",
+    command: "npm run logical -- bluvstein-2025 400 200000",
   },
   {
     id: "luthra-2026",
@@ -142,7 +142,7 @@ export const LOGICAL_REPRODUCTIONS = [
       "The noise is the paper's simulation model (depolarizing gates, preparation and measurement errors, idling per layer) as its verification script states it; the hardware's own errors and leakage are not modeled.",
       "The paper's decoder is Tesseract. The twin's statistics use PyMatching, and the compiled union-find decoder runs on 400 noisy shots, so its own logical error is known only to a few tenths of a percent.",
     ],
-    command: "node riscq/ftqvm/logical.mjs luthra-2026 400 200000",
+    command: "npm run logical -- luthra-2026 400 200000",
   },
 ];
 

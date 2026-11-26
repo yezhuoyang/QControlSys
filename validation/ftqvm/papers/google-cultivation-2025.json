@@ -28,7 +28,7 @@
    "The grafted code of Fig. 4 is decoded in the paper with Tesseract; its noise is not simulated here, and the factory's acceptance is that of the Fig. 2 circuit (injection and cultivation).",
    "Only the transmons a circuit uses are placed: the full coordinate map of the 105-qubit chip is not published. Pulse shapes and frequencies are RISC-Q's x6y3 calibration at the paper's durations; leakage, crosstalk and flux transients are not modeled."
   ],
-  "command": "node riscq/ftqvm/magic.mjs google 30000000 20000000"
+  "command": "npm run magic -- google 30000000 20000000"
  },
  "generated": "2026-11-25T14:39:08.186Z",
  "device": {

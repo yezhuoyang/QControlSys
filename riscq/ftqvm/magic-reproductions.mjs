@@ -31,7 +31,7 @@ export const MAGIC_REPRODUCTIONS = [
       "The grafted code of Fig. 4 is decoded in the paper with Tesseract; its noise is not simulated here, and the factory's acceptance is that of the Fig. 2 circuit (injection and cultivation).",
       "Only the transmons a circuit uses are placed: the full coordinate map of the 105-qubit chip is not published. Pulse shapes and frequencies are RISC-Q's x6y3 calibration at the paper's durations; leakage, crosstalk and flux transients are not modeled.",
     ],
-    command: "node riscq/ftqvm/magic.mjs google 30000000 20000000",
+    command: "npm run magic -- google 30000000 20000000",
   },
   {
     id: "quera-distillation-2025",
@@ -63,7 +63,7 @@ export const MAGIC_REPRODUCTIONS = [
       "The decoder is a sampled lookup table for both distances (the paper's MLD at d = 3; at d = 5 the paper uses a most-likely-error decoder).",
       "The compiler has the d = 3 color code (Steane) built in but not the [[17,1,5]] code, so the system call is compiled for d = 3 only.",
     ],
-    command: "node riscq/ftqvm/magic.mjs quera 200000",
+    command: "npm run magic -- quera 200000",
   },
 ];
 

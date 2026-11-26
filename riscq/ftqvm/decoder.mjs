@@ -43,7 +43,7 @@ export function saveDecoderTimes() {
   const sorted = (m) => Object.fromEntries([...m.entries()].sort(([a], [b]) => String(a).localeCompare(String(b))));
   writeFileSync(timesUrl, JSON.stringify({
     model: CORE_MODEL,
-    note: "Measured in the Lean model: Helios union-find batches (decodeBatches, reportBatches) by 'distance:syndrome', lookup decoder ns by bit count. Written by riscq/ftqvm/decoder.mjs.",
+    note: "Measured in the Lean model: Helios union-find batches (decodeBatches, reportBatches) by 'distance:syndrome', lookup decoder ns by bit count. Written by the decoder calibration.",
     helios: sorted(helioCache), lookup: sorted(lookupCache),
   }, null, 1) + "\n");
   dirty = false;

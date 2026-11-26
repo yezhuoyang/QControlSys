@@ -26,7 +26,7 @@
    "The noise is the paper's simulation model (depolarizing gates, readout flips, idling over each layer's time); leakage, crosstalk and the learned weights of the paper's matching graph are not modeled.",
    "The paper does not state its control electronics: the controller is QuantumOS's RISC-Q model."
   ],
-  "command": "node riscq/ftqvm/logical.mjs besedin-2026 400 200000"
+  "command": "npm run logical -- besedin-2026 400 200000"
  },
  "generated": "2026-11-25T09:05:45.660Z",
  "device": {
