@@ -21,16 +21,16 @@ const storeDir = join(here, "..", "..", "validation", "ftqvm", "medium");
 
 /** The programs. `logical`: logical qubits the program declares (its q register). */
 export const MEDIUM_PROGRAMS = [
-  { id: "dj-12", title: "Deutsch–Jozsa on 12 inputs", logical: 13,
+  { id: "dj-12", short: "Deutsch–Jozsa", title: "Deutsch–Jozsa on 12 inputs", logical: 13,
     what: "12 inputs in |+⟩ and a target in |−⟩; a balanced oracle f(x) = s·x (s = 101101101101₂) applied as lattice-surgery CNOTs from each input of s onto the target; the inputs read out in X give s, so f is balanced.",
     qppm: join(programsDir, "medium", "dj-d5.qppm"), specialize: { n: 12, s: 2925 } },
-  { id: "grover-5", title: "Grover search over 5 qubits", logical: 13,
+  { id: "grover-5", short: "Grover search", title: "Grover search over 5 qubits", logical: 13,
     what: "One Grover iteration (oracle marking s = 10110₂, then diffusion) on 5 search qubits, with the multi-controlled Z built from an AND chain on 8 work blocks; every T gate consumes a magic state.",
     qppm: join(programsDir, "medium", "Grover-d5.qppm"), specialize: { n: 5, k: 1, s: 22, anc: 5, rec: 8 } },
-  { id: "adder-4", title: "Gidney adder of two 4-bit numbers", logical: 12,
+  { id: "adder-4", short: "a Gidney adder", title: "Gidney adder of two 4-bit numbers", logical: 12,
     what: "A 4-bit ripple-carry adder in Gidney's measured form: its AND gates computed with T states and uncomputed by measurement, on 12 blocks.",
     qppm: join(programsDir, "medium", "MeasAdder-d5.qppm"), specialize: { n: 4 } },
-  { id: "ghz-12", title: "GHZ state on 12 logical qubits", logical: 12,
+  { id: "ghz-12", short: "a GHZ state", title: "GHZ state on 12 logical qubits", logical: 12,
     what: "12 blocks in |+⟩ joined by a chain of Z⊗Z lattice-surgery merges into a 12-qubit GHZ state, then read out in Z.",
     qppm: join(programsDir, "medium", "ghz-d5.qppm"), specialize: { n: 12 } },
 ];
@@ -107,9 +107,10 @@ const µs = (ns) => (ns / 1000).toFixed(1);
 
 /** One run as an Examples row. params: { program, decoders?, coresPerDecoder? }. */
 export async function mediumRow(params = {}) {
-  const p = MEDIUM_PROGRAMS.find((x) => x.id === (params.program ?? MEDIUM_PROGRAMS[0].id)) ?? MEDIUM_PROGRAMS[0];
+  const first = storedPrograms()[0] ?? MEDIUM_PROGRAMS[0];
+  const p = MEDIUM_PROGRAMS.find((x) => x.id === (params.program ?? first.id)) ?? first;
   const stored = storedRun(p.id);
-  if (!stored) throw Error("no stored run of " + p.id + ": run node riscq/ftqvm/medium.mjs " + p.id + " where the compiler is installed");
+  if (!stored) throw Error(p.title + " has no stored run yet: it is compiled offline, where the fault-tolerant compiler is installed");
   const machine = { ...MEDIUM_MACHINE, ...(params.decoders ? { decoders: Number(params.decoders) } : {}), ...(params.coresPerDecoder ? { coresPerDecoder: Number(params.coresPerDecoder) } : {}) };
   const same = machine.decoders === MEDIUM_MACHINE.decoders && machine.coresPerDecoder === MEDIUM_MACHINE.coresPerDecoder;
   let report = { conforms: stored.conforms, byKind: stored.byKind, track: stored.track, rows: stored.failures }, cores = stored.cores, boards = stored.boards;
@@ -138,27 +139,38 @@ export async function mediumRow(params = {}) {
 
 export const MEDIUM_RUNS = MEDIUM_PROGRAMS.map((p) => ({ label: p.title, params: { program: p.id } }));
 
-/** The Examples study page. */
+/** The programs with a stored run, in MEDIUM_PROGRAMS order. */
+export function storedPrograms() {
+  return MEDIUM_PROGRAMS.filter((p) => existsSync(storeFile(p.id)));
+}
+
+/** "A, B and C". */
+const listed = (xs) => (xs.length < 2 ? xs.join("") : xs.slice(0, -1).join(", ") + " and " + xs.at(-1));
+const capital = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
+/** The Examples study page. Its text names only the programs that have a stored run. */
 export function mediumStudy() {
   const runs = MEDIUM_PROGRAMS.map((p) => ({ p, r: storedRun(p.id) })).filter((x) => x.r);
   const rows = runs.map(({ p, r }) => [p.title, String(p.logical), String(r.sites), String(r.cores), String(r.boards), String(r.ops), µs(r.makespanNs), r.conforms ? "yes" : "no"]);
   const biggest = runs.reduce((m, x) => (x.r.sites > (m?.r.sites ?? 0) ? x : m), null);
   return {
     id: "medium", title: "Algorithms at medium scale", kicker: "Scale · well-known algorithms",
-    summary: "Deutsch–Jozsa, Grover search, an adder and a GHZ state on 12–13 logical qubits, each encoded at distance 5 in hundreds of physical qubits and run through the operating system's interface on a superconducting machine whose control system spans dozens of boards.",
+    summary: runs.length
+      ? capital(listed(runs.map(({ p }) => p.short + " on " + p.logical + " logical qubits")) + ", encoded at distance 5 in " + listed(runs.map(({ r }) => String(r.sites))) + " physical qubits and run through the operating system's interface on a superconducting machine whose control system spans " + listed(runs.map(({ r }) => String(r.boards))) + " boards.")
+      : "Well-known algorithms on 10–15 logical qubits, encoded at distance 5 in hundreds of physical qubits. No run is stored yet.",
     method: [
       "Each algorithm is a logical program. The fault-tolerant compiler lowers it to a QSysASM listing of system calls against the machine's system specification, and its resource VM admits the listing. The OS then executes every system call at its listed time on the control system, and durations the hardware needed enter the next specification until every call fits its window.",
       "The machine is " + MACHINE_TEXT + ". Every core runs firmware compiled from the listing in the cycle-exact model of RISC-Q; boards exchange measured bits and barriers over their PutLanes.",
     ],
     sections: [
-      { heading: "The programs", text: MEDIUM_PROGRAMS.map((p) => p.title + ": " + p.what).join(" ") },
+      { heading: "The programs", text: runs.map(({ p }) => p.title + ": " + p.what).join(" ") },
       { heading: "The runs", table: { head: ["Program", "Logical qubits", "Physical qubits", "Control cores", "Boards", "System calls", "Machine time (µs)", "Every call in its window"], rows } },
     ],
     findings: runs.length
       ? [biggest ? "The largest run, " + biggest.p.title + ", uses " + biggest.r.sites + " physical qubits and " + biggest.r.cores + " control cores on " + biggest.r.boards + " boards." : "",
         runs.every((x) => x.r.conforms) ? "Every system call of every program ran inside its window." : runs.filter((x) => !x.r.conforms).map((x) => x.p.title + " did not keep every window.").join(" ")].filter(Boolean)
       : ["No run is stored yet."],
-    command: "node riscq/ftqvm/medium.mjs",
+    command: "node riscq/calib/site.mjs",
   };
 }
 
@@ -167,7 +179,7 @@ export const MEDIUM_DESIGN = {
   intro: "Choose an algorithm and the decoders of the control system, then run the compiled listing again on the cycle-exact model of the RISC-Q control system. Every system call is checked against its window.",
   params() {
     return [
-      { key: "program", label: "Algorithm", value: MEDIUM_PROGRAMS[0].id, group: "Program", source: "logical programs compiled at distance 5 (riscq/ftqvm/medium.mjs)", options: MEDIUM_PROGRAMS.map((p) => ({ value: p.id, label: p.title })) },
+      { key: "program", label: "Algorithm", value: (storedPrograms()[0] ?? MEDIUM_PROGRAMS[0]).id, group: "Program", source: "logical programs compiled at distance 5 by the fault-tolerant compiler", options: storedPrograms().map((p) => ({ value: p.id, label: p.title })) },
       { key: "decoders", label: "Decoder units", value: String(MEDIUM_MACHINE.decoders), group: "Control system", source: "the study's machine", options: ["1", "2", "4"].map((v) => ({ value: v, label: v })) },
       { key: "coresPerDecoder", label: "Cores per decoder unit", value: String(MEDIUM_MACHINE.coresPerDecoder), group: "Control system", source: "the study's machine", options: ["1", "2", "4", "8"].map((v) => ({ value: v, label: v })) },
     ];
