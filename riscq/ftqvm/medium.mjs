@@ -3,14 +3,16 @@
 // twin with its RISC-Q control system across many boards.
 //
 // Offline (needs the fault-tolerant compiler):   node riscq/ftqvm/medium.mjs [program id]
+// Offline (no compiler, about an hour each):       node riscq/ftqvm/medium.mjs variant <id> decoders=1 coresPerDecoder=4
+//   reruns a stored listing on another control system: validation/ftqvm/medium/<id>.decoders-1.cores-4.json.gz.
 //   compiles each program, derives its system specification on the twin until every operation fits its
 //   window (riscq/ftqvm/derive.mjs), and stores the run: validation/ftqvm/medium/<id>.json.gz.
 // On the site (no compiler): the stored runs, and the design page's rerun of a stored listing on the twin
 // in the Lean model of the control system (the same run the stored one is).
 //
 // Contract with the Examples section (riscq/calib/site.mjs, example-runs.mjs): mediumStudy(), MEDIUM_RUNS,
-// mediumRow(params), MEDIUM_DESIGN.
-import { existsSync, readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
+// mediumRow(params), MEDIUM_DESIGN, storedPrograms(), storedVariants(program).
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, statSync } from "node:fs";
 import { gzipSync, gunzipSync } from "node:zlib";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -105,20 +107,69 @@ async function rerun(stored, machine) {
 
 const µs = (ns) => (ns / 1000).toFixed(1);
 
+/** The study machine with a design form's control-system choices. */
+const machineOf = (params = {}) => ({ ...MEDIUM_MACHINE,
+  ...(params.decoders ? { decoders: Number(params.decoders) } : {}),
+  ...(params.coresPerDecoder ? { coresPerDecoder: Number(params.coresPerDecoder) } : {}) });
+
+// A variant: a stored listing rerun offline on another control system. A rerun of a medium listing takes
+// about an hour of the Lean model (GHZ-12 with one decoder unit: 4,572 s), too long for a page request.
+const variantFile = (id, m) => join(storeDir, id + ".decoders-" + m.decoders + ".cores-" + m.coresPerDecoder + ".json.gz");
+const VARIANT = /^(.+)\.decoders-(\d+)\.cores-(\d+)\.json\.gz$/;
+
+/** The control systems a program's listing was rerun on offline, as design-form keys. */
+export function storedVariants(program) {
+  if (!existsSync(storeDir)) return [];
+  return readdirSync(storeDir).map((f) => f.match(VARIANT)).filter((m) => m && m[1] === program)
+    .map((m) => ({ program, decoders: m[2], coresPerDecoder: m[3] }))
+    .sort((a, b) => a.decoders - b.decoders || a.coresPerDecoder - b.coresPerDecoder);
+}
+
+function storedVariant(id, m) {
+  const f = variantFile(id, m);
+  return existsSync(f) ? JSON.parse(gunzipSync(readFileSync(f)).toString("utf8")) : null;
+}
+
+/** Rerun a stored program on another control system and store the result. Needs no compiler. */
+export async function storeVariant(id, params, { log = console.log } = {}) {
+  const stored = storedRun(id);
+  if (!stored) throw Error("no stored run of " + id);
+  const machine = machineOf(params), t0 = Date.now();
+  const { report, design } = await rerun(stored, machine);
+  const variant = {
+    id, machine: { decoders: machine.decoders, coresPerDecoder: machine.coresPerDecoder },
+    conforms: report.conforms, byKind: report.byKind, track: report.track, makespanNs: report.makespanNs ?? stored.makespanNs,
+    failures: (report.rows ?? []).filter((r) => !r.ok).slice(0, 12),
+    cores: design.parts.filter((x) => x.type === "core").length, boards: design.control?.boards,
+    seconds: (Date.now() - t0) / 1000, generated: new Date().toISOString(),
+  };
+  writeFileSync(variantFile(id, machine), gzipSync(JSON.stringify(variant)));
+  log(id, "decoders", machine.decoders, "cores per decoder", machine.coresPerDecoder, variant.conforms ? "conforms" : "does not conform",
+    "| cores", variant.cores, "| boards", variant.boards, "|", variant.seconds, "s");
+  return variant;
+}
+
 /** One run as an Examples row. params: { program, decoders?, coresPerDecoder? }. */
 export async function mediumRow(params = {}) {
   const first = storedPrograms()[0] ?? MEDIUM_PROGRAMS[0];
   const p = MEDIUM_PROGRAMS.find((x) => x.id === (params.program ?? first.id)) ?? first;
   const stored = storedRun(p.id);
   if (!stored) throw Error(p.title + " has no stored run yet: it is compiled offline, where the fault-tolerant compiler is installed");
-  const machine = { ...MEDIUM_MACHINE, ...(params.decoders ? { decoders: Number(params.decoders) } : {}), ...(params.coresPerDecoder ? { coresPerDecoder: Number(params.coresPerDecoder) } : {}) };
+  const machine = machineOf(params);
   const same = machine.decoders === MEDIUM_MACHINE.decoders && machine.coresPerDecoder === MEDIUM_MACHINE.coresPerDecoder;
   let report = { conforms: stored.conforms, byKind: stored.byKind, track: stored.track, rows: stored.failures }, cores = stored.cores, boards = stored.boards;
-  if (!same) {
+  let makespanNs = stored.makespanNs;
+  // Another control system: its precomputed variant if one is stored, else the rerun itself.
+  const variant = same ? null : storedVariant(p.id, machine);
+  if (variant) {
+    report = { conforms: variant.conforms, byKind: variant.byKind, track: variant.track, rows: variant.failures };
+    ({ cores, boards, makespanNs } = variant);
+  } else if (!same) {
     const r = await rerun(stored, machine);
     report = r.report;
     cores = r.design.parts.filter((x) => x.type === "core").length;
     boards = r.design.control?.boards;
+    makespanNs = r.report.makespanNs ?? makespanNs;
   }
   const bad = (report.rows ?? []).filter((r) => !r.ok);
   return {
@@ -130,7 +181,7 @@ export async function mediumRow(params = {}) {
       "Physical qubits": stored.sites + " transmons (surface code, distance " + DISTANCE + ")",
       "Control system": cores + " RISC-Q cores on " + boards + " ZCU216 boards, " + machine.decoders + " decoder unit(s) of " + machine.coresPerDecoder + " cores",
       "System calls": stored.ops + " operations of the QSysASM listing",
-      "Machine time": µs(stored.makespanNs) + " µs",
+      "Machine time": µs(makespanNs) + " µs",
       Result: report.conforms ? "every operation ran inside its window" : bad.length + " operations ran past their windows",
     },
     failures: bad.slice(0, 12).map((r) => ({ kind: r.kind, line: r.line, start: r.start, end: r.end, hardwareNs: r.hardwareNs, reason: r.overrunNs > 0 ? "finished " + Math.round(r.overrunNs) + " ns late" : r.bitOverrunNs > 0 ? "bit stored late" : "outside its window" })),
@@ -191,6 +242,12 @@ export const MEDIUM_DESIGN = {
 
 if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replace(/^\//, "")) {
   const only = process.argv[2];
+  if (only === "variant") {
+    // node medium.mjs variant <program> decoders=<n> coresPerDecoder=<n>
+    const params = Object.fromEntries(process.argv.slice(4).map((a) => a.split("=")));
+    await storeVariant(process.argv[3], params);
+    process.exit(0);
+  }
   for (const p of MEDIUM_PROGRAMS.filter((x) => !only || x.id === only)) {
     try {
       await compileMedium(p.id);
