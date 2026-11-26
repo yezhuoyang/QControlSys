@@ -443,12 +443,19 @@ export function issueOrder(ops, core, channelOf, cost = inlineCost) {
 export const FOLD_OVERHEAD = 40;
 /** Core cycles more for a folded fire's phase offset, loaded from the round's table rather than built. */
 export const FOLD_PHASE_LOAD = 8;
+/**
+ * Core cycles more for a loop step read from the run's table: a run whose rounds repeat at uneven
+ * intervals (a merge's rounds between other blocks' merges) takes each round's time step from data.
+ */
+export const FOLD_STEP_LOAD = 8;
 
 /**
- * The runs of a compact segment's issue list: `{ items, repeat, period, bitStride }`. A run of K items that
- * recurs R times, each time `period` batches later (issue, start and window end alike) with every bit it
- * stores or tests `bitStride` bytes further on, is one run of K items repeated R times; other items are
- * runs of one. Only timed writes and result reads fold.
+ * The runs of a compact segment's issue list: `{ items, repeat, period, steps, bitStride }`. A run of K
+ * items that recurs R times, each time shifted by one amount for every item (issue, start and window end
+ * alike) with every bit it stores or tests `bitStride` bytes further on, is one run of K items repeated R
+ * times; other items are runs of one. When every shift is the same `period`, the loop adds a constant;
+ * otherwise `steps` lists the R - 1 shifts, which the loop reads in turn. Only timed writes and result
+ * reads fold.
  */
 export function foldRuns(items, fw, cost) {
   const MAX_K = 256;
@@ -477,22 +484,37 @@ export function foldRuns(items, fw, cost) {
       const firstBit = view.slice(i, i + K).find((v) => v?.bits.length);
       const B = firstBit ? view[i + K + view.slice(i, i + K).indexOf(firstBit)]?.bits[0] - firstBit.bits[0] : 0;
       if (!Number.isFinite(B) || B < 0) continue;
-      // The loop step between the round's last operation and the next round's first.
       const last = view[i + K - 1];
-      if (!last || next.times[0] - last.end < FOLD_OVERHEAD) continue;
-      const matches = (r) => {
+      if (!last) continue;
+      // Round r is round 0 shifted by `offset` batches, every item alike, with its bits r * B further on.
+      const matches = (r, offset) => {
         for (let j = 0; j < K; j++) {
           const a = view[i + j], b = view[i + r * K + j];
           if (!a || !b || a.sig !== b.sig) return false;
-          if (a.times.some((t, k) => b.times[k] - t !== r * P)) return false;
+          if (a.times.some((t, k) => b.times[k] - t !== offset)) return false;
           if (a.bits.some((x, k) => b.bits[k] - x !== r * B)) return false;
         }
         return true;
       };
-      let R = 1;
-      while (i + (R + 1) * K <= items.length && matches(R)) R++;
-      const gain = (R - 1) * K;
-      if (R > 1 && gain > 2 && gain > (best?.gain ?? 0)) best = { K, P, B, R, gain };
+      // The loop step between a round's last operation and the next round's first: FOLD_OVERHEAD cycles,
+      // and FOLD_STEP_LOAD more once the steps are uneven and read from a table.
+      const span = last.end - first.times[0];
+      const offsets = [0];
+      let even = true;
+      while (i + (offsets.length + 1) * K <= items.length) {
+        const r = offsets.length, offset = view[i + r * K]?.times[0] - first.times[0];
+        const step = offset - offsets[r - 1];
+        const unevenNow = !even || step !== P;
+        if (!Number.isFinite(offset) || step - span < FOLD_OVERHEAD + (unevenNow ? FOLD_STEP_LOAD : 0) || !matches(r, offset)) break;
+        // A run that turns uneven needs the step-load room at every step it already took.
+        if (unevenNow && even && P - span < FOLD_OVERHEAD + FOLD_STEP_LOAD) break;
+        even = !unevenNow;
+        offsets.push(offset);
+      }
+      const R = offsets.length;
+      // An uneven run keeps a table word per step.
+      const gain = (R - 1) * K - (even ? 0 : Math.ceil((R - 1) / 8));
+      if (R > 1 && gain > 2 && gain > (best?.gain ?? 0)) best = { K, P, B, R, gain, steps: even ? null : offsets.slice(1).map((o, r) => o - offsets[r]) };
     }
     if (best) {
       // The phase offsets of the run's fires, round by round, in the order the loop body reads them.
@@ -502,7 +524,8 @@ export function foldRuns(items, fw, cost) {
           const op = items[i + r * best.K + j].op;
           if (op.fire && op.phaseOffset !== undefined) phases.push(pack16(op.phaseOffset));
         }
-      out.push({ items: items.slice(i, i + best.K), repeat: best.R, period: best.P, bitStride: best.B, phases });
+      out.push({ items: items.slice(i, i + best.K), repeat: best.R, period: best.P, bitStride: best.B, phases,
+        ...(best.steps ? { steps: best.steps } : {}) });
       i += best.R * best.K;
     } else {
       out.push({ items: [items[i]], repeat: 1 });
@@ -643,6 +666,12 @@ function buildCore(spec, coreIndex, plan, { compact = false, bitTable = BIT_TABL
           data.push({ label: table, words: run.phases, source: "" });
           a.la("s8", table);
         }
+        if (run.steps) {
+          // Uneven rounds: the time step to each next round, one word per round after the first.
+          const table = a.fresh("steps");
+          data.push({ label: table, words: run.steps.map((x) => x >>> 0), source: "" });
+          a.la("s9", table);
+        }
         a.label(roundStart);
         waited = -Infinity;
        }
@@ -716,7 +745,10 @@ function buildCore(spec, coreIndex, plan, { compact = false, bitTable = BIT_TABL
         a.source("");
         a.beq("s7", "zero", roundEnd);
         a.addi("s7", "s7", -1);
-        a.li("t0", run.period);
+        if (run.steps) {
+          a.lw("t0", "s9", 0);
+          a.addi("s9", "s9", 4);
+        } else a.li("t0", run.period);
         a.add("s0", "s0", "t0");
         if (run.bitStride) {
           a.addi("s2", "s2", run.bitStride);
@@ -724,7 +756,7 @@ function buildCore(spec, coreIndex, plan, { compact = false, bitTable = BIT_TABL
         }
         a.j(roundStart);
         a.label(roundEnd);
-        shift += (run.repeat - 1) * run.period;
+        shift += run.steps ? run.steps.reduce((n, x) => n + x, 0) : (run.repeat - 1) * run.period;
         fw.bitShift += (run.repeat - 1) * run.bitStride;
         waited = -Infinity;
        }

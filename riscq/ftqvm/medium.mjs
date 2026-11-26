@@ -15,6 +15,7 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync, statSync } from "node:fs";
 import { gzipSync, gunzipSync } from "node:zlib";
 import { join, dirname } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -252,7 +253,13 @@ if (import.meta.url === "file:///" + process.argv[1]?.replace(/\\/g, "/").replac
     try {
       await compileMedium(p.id);
     } catch (error) {
-      console.log(p.id, "ERROR", error.message.slice(0, 400));
+      console.log(p.id, "ERROR", error.message.slice(0, 4000));
+      // The listing the twin failed on, kept outside the repository to study without the compiler.
+      if (error.listing) {
+        const file = join(tmpdir(), "quantumos-medium-" + p.id + "-failed.json.gz");
+        writeFileSync(file, gzipSync(JSON.stringify({ id: p.id, iteration: error.iteration, error: error.message, spec: error.spec, listing: publishable(error.listing) })));
+        console.log(p.id, "failed listing kept in", file);
+      }
     }
   }
 }

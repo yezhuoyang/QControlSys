@@ -180,7 +180,14 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
     if (built.verdict.status !== "RESOURCE_VALIDATED") return { spec, verdict: built.verdict.status, verdictDetail: built.verdict, report: { conforms: false, rows: [], byKind: {} }, files: built.files, listing: built.listing };
     const placement = platform.place(built.listing, { distance });
     const design = platform.design(built.listing, placement);
-    const { report, result } = await platform.run(built.listing, placement, design, { outcomes, distance });
+    let report, result;
+    try {
+      ({ report, result } = await platform.run(built.listing, placement, design, { outcomes, distance }));
+    } catch (error) {
+      // The listing the run failed on, so that a caller can rerun or study it without the compiler.
+      Object.assign(error, { listing: built.listing, spec, iteration: name });
+      throw error;
+    }
     return { spec, verdict: built.verdict.status, sites: placement.sites.length, report, files: built.files, listing: built.listing, placement, design,
       makespanNs: built.listing.ops.reduce((m, o) => Math.max(m, o.end), -Infinity), batches: result?.summary?.elapsedBatches, slack: slack(report, built.listing) };
   };

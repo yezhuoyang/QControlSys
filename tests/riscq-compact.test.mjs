@@ -31,6 +31,27 @@ test("a round that repeats is one copy of its code, and each repetition still fi
   assert.ok(FOLD_OVERHEAD > 0);
 });
 
+test("rounds that repeat at uneven intervals are still one copy of their code, stepped from a table", async () => {
+  // Forty rounds like the test above, but each round 200, 237 or 1,274 batches after the one before,
+  // as a merge's rounds fall between other merges.
+  const start = [3000];
+  for (let r = 1; r < 40; r++) start.push(start[r - 1] + [200, 237, 1274][r % 3]);
+  const ops = start.map((t, r) => [
+    { at: t, fire: { channel: "ch", slot: 0 }, phaseOffset: 1000 + 10 * r, source: "a" + r },
+    { at: t + 40, fire: { channel: "ch", slot: 1 }, source: "b" + r }]).flat();
+  const plan = { channels: [{ channel: 0, slots: [{ slot: 0, phase: 0, amp: 1000, env: 0, dur: 10 }, { slot: 1, phase: 0, amp: 900, env: 0, dur: 10 }] }],
+    segments: [{ ops, span: start.at(-1) + 400 }] };
+  const unfolded = compileCore(spec, 0, plan);
+  const folded = compileCore(spec, 0, plan, { compact: true });
+  assert.ok(folded.words.length < unfolded.words.length / 4, folded.words.length + " words against " + unfolded.words.length);
+  const run = async (image) => (await execute(program(spec, [{ words: image.words, sourceMap: image.sourceMap }], { trace: "io" }))).summary;
+  const [u, f] = [await run(unfolded), await run(folded)];
+  assert.deepEqual(f.faults, []);
+  assert.ok(f.pulses.every((p) => p.onTime && p.aligned !== false));
+  const rel = (ps) => ps.map((p) => [p.startTime - ps[0].startTime, p.phase, p.amp]);
+  assert.deepEqual(rel(f.pulses), rel(u.pulses));
+});
+
 test("a core that keeps more than 256 bits gets a larger bit table, and the host still sees every bit", async () => {
   // 300 readouts, 300 batches apart: a demodulation window, then its result stored as its own bit.
   // The usual table holds 256.
