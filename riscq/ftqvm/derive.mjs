@@ -146,6 +146,14 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
   const baseText = readFileSync(baseMachine, "utf8");
   const base = specText.parseMachine(baseText);
   let factories = specText.parseFactories(baseText);
+  // The base machine's factory hands out a distance-3 surface patch (9 qubits). A magic state is a patch
+  // of the program's code, so at another distance the factory's footprint starts as the injection
+  // circuit's at that distance (the same rule as the measured contract below); latency and bandwidth stay
+  // provisional until the trace measures them.
+  if (code === "surface" && factories.factory && factories.factory.output_qubits !== distance * distance) {
+    const n = distance * distance;
+    factories = { ...factories, factory: { ...factories.factory, output_qubits: n, workspace_qubits: n - 1, gates: n - 1 } };
+  }
   const gridNs = platform.gridNs;
   // First guess: the platform's own durations when it states them (its profile), else the base
   // machine's, marked provisional; the trace replaces each one it covers.

@@ -56,8 +56,13 @@ export const MIN_ISSUE_LEAD = 64;
 
 const FIELD = { phase: 0, amp: 4, env: 8, dur: 12 };
 
+/** Words of the bit table: 256 for most cores, 1,024 for a core that keeps more bits (BIG_BIT_TABLE). */
+export const BIT_TABLE = 256;
+export const BIG_BIT_TABLE = 1024;
+const STACK_RESERVE = 64;
+
 export class Firmware {
-  constructor(spec, coreIndex) {
+  constructor(spec, coreIndex, { bitTable = BIT_TABLE } = {}) {
     this.spec = spec;
     this.core = spec.cores[coreIndex];
     this.coreIndex = coreIndex;
@@ -67,8 +72,19 @@ export class Firmware {
     // offset is taken from the shifted bases, and host writes go through s11.
     this.bitShift = 0;
     this.hostReg = null;
-    // The bit table occupies the top of RAM, below a small stack reserve.
-    this.bitBase = MAP.MEM_BASE + 4 * (this.core.memWords - 320);
+    // The bit table occupies the top of RAM, below a small stack reserve. A load or store reaches 2,048
+    // bytes either side of its base register, so a table of more than 512 words is addressed from its
+    // middle: s2 (and s11, the host window's base on a folded core) point `bias` bytes into it.
+    if (bitTable > BIG_BIT_TABLE) throw Error("A bit table holds at most " + BIG_BIT_TABLE + " words.");
+    this.bitTable = bitTable;
+    this.bias = bitTable > 512 ? 2048 : 0;
+    this.bitBase = MAP.MEM_BASE + 4 * (this.core.memWords - bitTable - STACK_RESERVE);
+    this.bitReg = this.bitBase + this.bias;
+    this.hostBase = MAP.HOSTWIN + this.bias;
+  }
+  /** RAM words below the bit table, for the program. */
+  get programRoom() {
+    return this.core.memWords - this.bitTable - STACK_RESERVE;
   }
   channel(ref) {
     const index = typeof ref === "number" ? ref : this.core.channels.findIndex((ch) => ch.name === ref);
@@ -77,16 +93,16 @@ export class Firmware {
   }
   bit(name) {
     if (!this.bits.has(name)) {
-      if (this.bits.size >= 256) throw Error("Core " + this.core.name + " uses more than 256 classical bits.");
+      if (this.bits.size >= this.bitTable) throw Error("Core " + this.core.name + " uses more than " + this.bitTable + " classical bits.");
       this.bits.set(name, this.bits.size);
     }
-    return 4 * this.bits.get(name) - this.bitShift;
+    return 4 * this.bits.get(name) - this.bias - this.bitShift;
   }
   /** Load the fixed base registers. */
   begin() {
     const a = this.asm;
     a.li("s1", MAP.CTRL_TIME_CMP);
-    a.li("s2", this.bitBase);
+    a.li("s2", this.bitReg);
   }
   /** rd = current batch time (core-local copy). */
   now(rd) {
@@ -244,8 +260,11 @@ export class Firmware {
     const offset = this.bit(name);
     a.sw(rs, "s2", offset);
     if (this.hostReg) return a.sw(rs, this.hostReg, offset);
-    a.lui("t0", MAP.HOSTWIN >>> 12);
-    a.sw(rs, "t0", offset);
+    // The host sees bit i at byte 4i of the window: past 2,047 from the next 4 KiB page down.
+    const host = offset + this.bias + this.bitShift;
+    const page = host > 2047 ? 4096 : 0;
+    a.lui("t0", (MAP.HOSTWIN + page) >>> 12);
+    a.sw(rs, "t0", host - page);
   }
   /**
    * Lookup decode. The `width` shared bits that start at `slot` of group `group` index a table
@@ -538,8 +557,18 @@ export function prerollOf(core, ops, { compact = false } = {}) {
  * register address, data. Other segments are issued inline. A decode or a frame update runs
  * as soon as the core reaches it. It has no start time of its own.
  */
-export function compileCore(spec, coreIndex, plan, { compact = false } = {}) {
-  const fw = new Firmware(spec, coreIndex);
+export function compileCore(spec, coreIndex, plan, options = {}) {
+  try {
+    return buildCore(spec, coreIndex, plan, options);
+  } catch (error) {
+    // A core that keeps more bits than the usual table: the same code, with a larger table at the top of RAM.
+    if (options.bitTable || !/uses more than \d+ classical bits/.test(error.message)) throw error;
+    return buildCore(spec, coreIndex, plan, { ...options, bitTable: BIG_BIT_TABLE });
+  }
+}
+
+function buildCore(spec, coreIndex, plan, { compact = false, bitTable = BIT_TABLE } = {}) {
+  const fw = new Firmware(spec, coreIndex, { bitTable });
   const a = fw.asm;
   const core = fw.core;
   const tables = [], data = [], remap = [];
@@ -547,7 +576,7 @@ export function compileCore(spec, coreIndex, plan, { compact = false } = {}) {
   fw.begin();
   if (compact) {
     fw.hostReg = "s11";
-    a.li("s11", MAP.HOSTWIN);
+    a.li("s11", fw.hostBase);
   }
   for (const ch of plan.channels ?? []) fw.initChannel(ch.channel, ch.slots ?? [], ch.freq);
   let writes = 0;
@@ -710,8 +739,8 @@ export function compileCore(spec, coreIndex, plan, { compact = false } = {}) {
     // The next segment addresses its bits from the table's own base again.
     if (fw.bitShift) {
       a.source("");
-      a.li("s2", fw.bitBase);
-      a.li("s11", MAP.HOSTWIN);
+      a.li("s2", fw.bitReg);
+      a.li("s11", fw.hostBase);
       fw.bitShift = 0;
     }
   }
@@ -736,9 +765,9 @@ export function compileCore(spec, coreIndex, plan, { compact = false } = {}) {
     a.source("");
   }
   const image = a.assemble();
-  if (image.words.length > core.memWords - 320)
+  if (image.words.length > fw.programRoom)
     throw Error("Core " + core.name + ": the program needs " + image.words.length + " words and the RAM has " +
-      (core.memWords - 320) + " below the bit table.");
+      fw.programRoom + " below the bit table.");
   return { words: image.words, sourceMap: image.sourceMap, bits: Object.fromEntries(fw.bits),
-    bitBase: fw.bitBase, stats: { instructions: image.words.length, writes }, ...(remap.length ? { remap } : {}) };
+    bitBase: fw.bitBase, bitTable: fw.bitTable, stats: { instructions: image.words.length, writes }, ...(remap.length ? { remap } : {}) };
 }

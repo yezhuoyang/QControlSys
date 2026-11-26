@@ -6,7 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { socSpec, program, execute } from "../riscq/soc.mjs";
-import { compileCore, FOLD_OVERHEAD } from "../riscq/firmware.mjs";
+import { compileCore, FOLD_OVERHEAD, BIT_TABLE, BIG_BIT_TABLE } from "../riscq/firmware.mjs";
 
 const spec = socSpec({ name: "fold", dsp_freq_hz: 5e8, link_pipe: 4, core_defaults: { mem_depth: 8192, with_mul: true, queue_depth: 32 },
   cores: [{ name: "c0", channels: [{ name: "ch", kind: "pulse", dac: 0, slots: 2, env_depth: 16, interp: 4 }, { name: "demod", kind: "demod", adc: 0, slots: 1, env_depth: 16, interp: 4 }] }] });
@@ -29,6 +29,29 @@ test("a round that repeats is one copy of its code, and each repetition still fi
   const rel = (ps) => ps.map((p) => [p.startTime - ps[0].startTime, p.phase, p.amp]);
   assert.deepEqual(rel(f.pulses), rel(u.pulses));
   assert.ok(FOLD_OVERHEAD > 0);
+});
+
+test("a core that keeps more than 256 bits gets a larger bit table, and the host still sees every bit", async () => {
+  // 300 readouts, 300 batches apart: a demodulation window, then its result stored as its own bit.
+  // The usual table holds 256.
+  const measure = (n) => Array.from({ length: n }, (_, r) => [
+    { at: 3000 + 300 * r, fire: { channel: "demod", slot: 0 }, source: "m" + r },
+    { at: 3000 + 300 * r, read: { channel: "demod", until: 3000 + 300 * r + 40 }, bit: "m" + r, source: "m" + r }]).flat();
+  const planOf = (n) => ({ channels: [{ channel: 1, slots: [{ slot: 0, phase: 0, amp: 1000, env: 0, dur: 20 }] }],
+    segments: [{ ops: measure(n), span: 3000 + 300 * n + 300 }] });
+  for (const compact of [false, true]) {
+    const image = compileCore(spec, 0, planOf(300), { compact });
+    assert.equal(image.bitTable, BIG_BIT_TABLE);
+    const result = await execute(program(spec, [{ words: image.words, sourceMap: image.sourceMap }], { trace: "io" }));
+    assert.deepEqual(result.summary.faults, []);
+    assert.ok(result.summary.cores[0].done);
+    assert.ok(result.summary.pulses.every((p) => p.onTime));
+    // The host window holds bit i at byte 4i, past the first 2 KiB as well.
+    const names = result.summary.host.map((w) => Object.entries(image.bits).find(([, i]) => 4 * i === w.offset)?.[0]);
+    assert.deepEqual(names, Array.from({ length: 300 }, (_, r) => "m" + r), compact ? "folded" : "inline");
+  }
+  // A core with fewer bits keeps the usual table and the RAM below it.
+  assert.equal(compileCore(spec, 0, planOf(10)).bitTable, BIT_TABLE);
 });
 
 test("Google's d = 3 memory on folded firmware plays the same pulses, phases and bits in fewer words", { timeout: 600_000 }, async () => {
