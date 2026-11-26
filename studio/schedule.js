@@ -428,7 +428,7 @@ export async function render(root, toc) {
     <li><b>Scheduling experiments</b> (§ 2) run on the operating system's executor with the declared latencies. They show behaviour
     (deadlock, starvation, lag), which the cycle-exact runs of the <a href="/examples">Examples</a> confirm at scale.</li></ul>
     <p class="muted">Reproduce: <code>node riscq/os/schedule-study.mjs</code> (about a minute). QSysASM's grammar and its parser:
-    <code>riscq/ftqvm/qsysasm.mjs</code>; the scheduler: <code>riscq/os/schedule.mjs</code>.</p>`;
+    <code>qsysasm.mjs</code>; the scheduler: <code>schedule.mjs</code>.</p>`;
 
   root.innerHTML = html;
   // The interactive parts: the OS's own scheduler, and the cycle-exact runs on their chips.

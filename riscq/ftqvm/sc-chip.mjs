@@ -193,7 +193,7 @@ export function chipDesign(listing, placement, { pitchMm = 2, boardMm = [0, 0, 0
     control: { qubitsPerCore, decoders, coresPerDecoder, drivesPerDac: perDac, boards: boardSites.length,
       boardsOf: "riscq/board.mjs ZCU216: ≤ " + ZCU216.cores.value + " cores and ≤ " + ZCU216.dspCeiling.value + " DSP48E2 per board" },
     provenance: {
-      placement: "riscq/ftqvm/place.mjs: data at row-major lattice points, ancillas at the nearest free half-integer point",
+      placement: "place.mjs: data at row-major lattice points, ancillas at the nearest free half-integer point",
       calibration: "site k reuses qubit k mod 8 of " + calibration.source + "; every coupler reuses a non-sandwich CZ of that file (400 ns)",
       reset: STANDARD.superconducting.resetNs.source + ", 160 ns, unconditional; amplitude illustrative",
       couplers: pairs.length + " couplers, one per gated pair; lengths in lattice units " + JSON.stringify(summarizeLengths(pairs)),

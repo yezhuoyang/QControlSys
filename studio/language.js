@@ -145,7 +145,7 @@ export async function render(root, toc) {
   // 1 ── QSysASM ──
   html += h2("qsysasm", "1", "QSysASM: physical instructions and system calls");
   html += `<p>A program is flat: one statement per operation, on concrete qubits and records, with an absolute start or none. There are no
-  gadgets, no loops and no parameters. A repeated round is written out once per round. The parser is <code>riscq/ftqvm/qsysasm.mjs</code>.</p>`;
+  gadgets, no loops and no parameters. A repeated round is written out once per round. The parser is <code>qsysasm.mjs</code>.</p>`;
   html += h3("q-syntax", "1.1 Syntax");
   html += bnf(QSYSASM_BNF);
   html += `<p>The machine line declares the services. Every duration is an integer number of ns; every capacity is a count or a rate.</p>`;
@@ -265,11 +265,11 @@ export async function render(root, toc) {
     ["RISC-Q syntax and decoding", code("Rv32.lean") + " <code>Instr</code>, <code>decode</code>", '<span class="tag lean">in Lean</span>'],
     ["RISC-Q core step", code("Rv32.lean") + " <code>exec</code>", '<span class="tag lean">in Lean</span> ' + theorems.filter((t) => t.file.endsWith("Rv32.lean")).length + " theorems"],
     ["Timed queues, converters, hub, barriers", code("Soc.lean") + ", " + code("Timing.lean") + ", " + code("Pipe.lean"), '<span class="tag lean">in Lean</span> ' + theorems.filter((t) => !t.file.endsWith("Rv32.lean")).length + " theorems"],
-    ["QSysASM syntax (§ 1.1)", code("riscq/ftqvm/qsysasm.mjs") + " parse, format", '<span class="tag todo">to state</span> an inductive <code>Stmt</code>; the printer and parser as inverse functions (checked on 13,000 operations today)'],
+    ["QSysASM syntax (§ 1.1)", code("qsysasm.mjs") + " parse, format", '<span class="tag todo">to state</span> an inductive <code>Stmt</code>; the printer and parser as inverse functions (checked on 13,000 operations today)'],
     ["QSysASM well-formedness (§ 1.2)", "the parser and the resource VM", '<span class="tag todo">to state</span> <code>M ⊢ P wf</code> as an inductive predicate, decidable'],
     ["QSysASM semantics and scheduling (§ 1.3)", code("riscq/os/schedule.mjs") + ", " + code("riscq/os/des.mjs"), '<span class="tag todo">to state</span> the Start / Finish relation; a timetable is admitted iff every Start premise holds at its time'],
     ["HDL syntax and assertion rules (§ 2)", code("riscq/design.mjs") + " check", '<span class="tag todo">to state</span> <code>⊢ D ok</code>; each of H1–H30 a conjunct, each counterexample above a test'],
-    ["Lowering and conformance", code("riscq/ftqvm/sc-run.mjs"), '<span class="tag todo">to state</span> <code>D ⊢ T conforms</code> over the trace of the Lean SoC'],
+    ["Lowering and conformance", code("sc-run.mjs"), '<span class="tag todo">to state</span> <code>D ⊢ T conforms</code> over the trace of the Lean SoC'],
   ]);
 
   root.innerHTML = html;

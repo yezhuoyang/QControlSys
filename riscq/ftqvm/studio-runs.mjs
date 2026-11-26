@@ -66,7 +66,7 @@ async function circuitRun(exampleId, paper, choice, value, edited) {
     hardware: { kind: "hardware-program", version: 1, platform: PLATFORM[paper.platform], machine: paper.id, timeUnit: "ps", segments: piece.segments },
     built: piece.built, result: piece.result, design: piece.design, track: ran?.rows?.[0]?.track,
     source: { language: "Circuit schedule", text: ["# " + paper.title + " · " + label + ": the paper's circuit as this twin schedules it, one operation per line.", ...lines].join("\n") },
-    program: "the paper's circuit as the reproduction schedules it (riscq/ftqvm/" + (paper.id.includes("cultivation") || paper.id.includes("distillation") ? "magic" : "logical") + ".mjs)",
+    program: "the paper's circuit as the reproduction schedules it (" + (paper.id.includes("cultivation") || paper.id.includes("distillation") ? "magic" : "logical") + ".mjs)",
   });
 }
 
@@ -121,7 +121,7 @@ export async function studioRun(exampleId, { trace = "io", design: edited } = {}
     ({ report, result, built, spec, hardware } = await twin.run(src.listing, placement, d, { outcomes: {}, distance: src.distance }));
     period = spec.dspPeriodPs;
   }
-  if (edited && src.platform.kind !== "transmonTwin") throw Error("Only a transmon chip can be edited in /riscq-design; this twin's controller is built in riscq/ftqvm/optical.mjs.");
+  if (edited && src.platform.kind !== "transmonTwin") throw Error("Only a transmon chip can be edited in /riscq-design; this twin's controller is built by the optical twin (optical.mjs).");
   return bundle({ exampleId, paper, label: src.label + (edited ? " · on the edited chip" : ""), platform, spec, period, hardware, built, result, design, m, track: report?.track, baseBatch: report?.baseBatch,
     source: { language: "QSysASM", text: flat.text },
     program: "the QSysASM listing compiled for this twin (validation/ftqvm/twins/" + id + "/" + key + ".json)", conforms: report?.conforms });
