@@ -9,6 +9,8 @@
 //   records          a statement that reads a record waits for the measurement that wrote it
 //   decoding         a statement that reads a record a decode_syndrome has read (a frame update,
 //                    a parity) waits for that decode: consumers of a syndrome need it decoded
+//   guards           a guarded statement (`… if c[3], ¬c[5:6]`) waits for its guard's records as
+//                    for records it reads; whether it then runs is decided by their values at run time
 //   services         gates, decoders, factories, qubits and the three bandwidths are pools with the
 //                    machine line's capacities; a statement holds its demand while it runs, and
 //                    request_ancilla holds its qubits until their release_ancilla
@@ -33,21 +35,38 @@ export function dependencies(ops) {
       add(writer.get(key(r)), i, "record " + key(r));
       if (op.kind !== "decode_syndrome") add(decodedBy.get(key(r)), i, "decoded " + key(r));
     }
+    for (const r of qsysasm.guardRecords(op.guard)) {
+      add(writer.get(key(r)), i, "guard " + key(r));
+      add(decodedBy.get(key(r)), i, "decoded " + key(r));
+    }
     for (const w of op.writes ?? []) writer.set(key(w), i);
     if (op.kind === "decode_syndrome") for (const r of op.reads) decodedBy.set(key(r), i);
   });
   return edges;
 }
 
-/** Ops in the shape riscq/os/des.mjs reads, with the decoding rule made a record dependency. */
+/**
+ * Ops in the shape riscq/os/des.mjs reads, with the decoding and guard rules made record
+ * dependencies. `ownReads` keeps the records the statement itself reads, which set its demand.
+ */
 function forSimulation(ops) {
   const decodedBy = new Map();
   return ops.map((op, i) => {
     const reads = [...(op.reads ?? [])], writes = [...(op.writes ?? [])];
     if (op.kind === "decode_syndrome") for (const r of op.reads) { writes.push({ register: "decoded:" + r.register, index: r.index }); decodedBy.set(key(r), true); }
     else for (const r of op.reads ?? []) if (decodedBy.has(key(r))) reads.push({ register: "decoded:" + r.register, index: r.index });
-    return { ...op, uid: i, order: i, reads, writes, qubits: [...op.qubits, ...(op.work ?? [])], start: op.start ?? 0, end: (op.start ?? 0) + op.duration };
+    for (const r of qsysasm.guardRecords(op.guard)) {
+      reads.push({ register: r.register, index: r.index });
+      if (decodedBy.has(key(r))) reads.push({ register: "decoded:" + r.register, index: r.index });
+    }
+    return { ...op, uid: i, order: i, reads, ownReads: op.reads ?? [], writes, qubits: [...op.qubits, ...(op.work ?? [])], start: op.start ?? 0, end: (op.start ?? 0) + op.duration };
   });
+}
+
+/** The machine's service model, its demand computed from a statement's own reads only. */
+function modelFor(machine) {
+  const base = machineModel(machine);
+  return { ...base, needs: (op, ns) => base.needs(op.ownReads ? { ...op, reads: op.ownReads } : op, ns) };
 }
 
 /**
@@ -59,7 +78,7 @@ function forSimulation(ops) {
 export function schedule(program, { policy = "order", strict = false, acquisition = "atomic", orderedPools = [], mode = "dependency", title } = {}) {
   const parsed = qsysasm.withDurations({ machine: program.machine, ops: program.ops.map((o) => ({ ...o })) });
   const ops = parsed.ops;
-  const sim = simulate({ ops: forSimulation(ops) }, { model: machineModel(program.machine), mode, policy, strict, acquisition, orderedPools });
+  const sim = simulate({ ops: forSimulation(ops) }, { model: modelFor(program.machine), mode, policy, strict, acquisition, orderedPools });
   const timed = ops.map((op, i) => {
     const s = sim.ops.find((x) => x.uid === i);
     return { ...op, uid: i, order: i, start: s?.start ?? null, end: s?.start === null || s?.start === undefined ? null : s.start + op.duration };

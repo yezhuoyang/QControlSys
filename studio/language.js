@@ -28,7 +28,7 @@ header     ::= "machine" "{" field ("," field)* "}"          # the machine's dec
 field      ::= name ":" nat unit
 unit       ::= "ns" | "total" | "bits/us" | "qubits/us"
 line       ::= statement | "#" text
-statement  ::= time? (records "->")? op arg* operands? ("with" operands)? ("->" records)?
+statement  ::= time? (records "->")? op arg* operands? ("with" operands)? ("->" records)? guard?
 time       ::= "@" nat "ns"                                  # absolute start; none: the OS assigns it
 op         ::= gate | "measure" | syscall
 gate       ::= "H" | "S" | "Sdg" | "X" | "Z" | "CNOT" | "CZ" | "CY"
@@ -39,6 +39,8 @@ operands   ::= operand ("," operand)*
 operand    ::= pauli? register "[" nat (":" nat)? "]"        # a:b is inclusive
 records    ::= register "[" nat (":" nat)? "]" ("," register "[" nat (":" nat)? "]")*
 pauli      ::= "X" | "Y" | "Z"
+guard      ::= "if" band ("," band)*                          # runs when every band holds
+band       ::= "¬"? register "[" nat (":" nat)? "]"            # XOR of its records is 1 (0 with ¬)
 nat        ::= digit+                                        # every index is a literal`;
 
 const MACHINE_FIELDS = [
@@ -145,7 +147,9 @@ export async function render(root, toc) {
   // 1 ── QSysASM ──
   html += h2("qsysasm", "1", "QSysASM: physical instructions and system calls");
   html += `<p>A program is flat: one statement per operation, on concrete qubits and records, with an absolute start or none. There are no
-  gadgets, no loops and no parameters. A repeated round is written out once per round. The parser is <code>qsysasm.mjs</code>.</p>`;
+  gadgets, no loops, no guard blocks and no parameters. A repeated round is written out once per round. A statement may carry its own
+  guard, <code>X data[3] if c[3], ¬c[5:6]</code>: it runs only when measured records say so. A statement under several nested
+  conditions of a compiled program carries all their bands, outer first, so the guard is exact and still opens no block. The parser is <code>qsysasm.mjs</code>.</p>`;
   html += h3("q-syntax", "1.1 Syntax");
   html += bnf(QSYSASM_BNF);
   html += `<p>The machine line declares the services. Every duration is an integer number of ns; every capacity is a count or a rate.</p>`;
@@ -158,11 +162,12 @@ export async function render(root, toc) {
     ${rule("Q-Fresh", ["a ∉ requested(P before k)"], "M ⊢ request_ancilla … a … wf at k")}
     ${rule("Q-Held", ["a ∈ held(P before k)"], "M ⊢ release_ancilla … a … wf at k")}
     ${rule("Q-Read", ["r ∈ written(P before k)"], "M ⊢ (r -> stmt) wf at k")}
+    ${rule("Q-Guard", ["∀ r ∈ guard(k). r ∈ written(P before k)"], "M ⊢ (stmt if g) wf at k")}
     ${rule("Q-Field", ["kind(s) ∈ dom(DURATION)", "DURATION(kind(s)) ∈ dom(M)"], "M ⊢ s wf")}
     ${rule("Q-Done", ["held(P) = ∅", "undecoded(P) = ∅"], "M ⊢ P complete")}</div>`;
   html += table(["Rule", "Enforced by"], [
     ["Q-Lit, Q-Arity, Q-Count, and the grammar itself", "the parser, before anything runs " + '<span class="tag js">JS</span>'],
-    ["Q-Fresh, Q-Held, Q-Read, Q-Done", "the resource VM, which admits or refuses a timetable and names the rule it breaks " + '<span class="tag js">VM</span>'],
+    ["Q-Fresh, Q-Held, Q-Read, Q-Guard, Q-Done", "the resource VM, which admits or refuses a timetable and names the rule it breaks " + '<span class="tag js">VM</span>'],
     ["Q-Field", "the machine line: every kind is charged one field (the table in § 1.4)"],
   ]);
   html += `<p>What the parser refuses, with its message:</p>` + table(["Text", "Refused because"], Q.refusals.map((r) => [{ cls: "f", html: esc(r.text) }, { cls: "msg", html: esc(r.error) }]));
@@ -174,11 +179,15 @@ export async function render(root, toc) {
     ${rule("Pred-Qubit", ["j < k", "qubits(j) ∩ qubits(k) ≠ ∅", "j the last such"], "j ≺ k")}
     ${rule("Pred-Record", ["r ∈ reads(k)", "j the last writer of r before k"], "j ≺ k")}
     ${rule("Pred-Decoded", ["r ∈ reads(k)", "kind k ≠ decode_syndrome", "j the last decode reading r"], "j ≺ k")}
+    ${rule("Pred-Guard", ["r ∈ guard(k)", "j the last writer of r before k"], "j ≺ k")}
   </div><div class="rules">
     ${rule("Start", ["∀ j ≺ k. j done", "∀ r. U_r + d(k, r) ≤ M_r", "(@t_k ≤ t)"], "σ → σ[run += k, U += d(k), start(k) = t]")}
     ${rule("Finish", ["k ∈ run", "t = start(k) + p(k)"], "σ → σ[run −= k, U −= d(k), W ∪= writes(k), K ∪= decoded(k)]")}
     ${rule("Hold", ["kind k = request_ancilla"], "U_qubits keeps count(k) until the release of its names")}
+    ${rule("Guard", ["k starts", "∀ (ν, B) ∈ guard(k). ⊕ W[B] = (ν ? 0 : 1)"], "k's body plays; otherwise it plays nothing")}
   </div>
+  <p>A guarded statement keeps its window and its services whether or not its guard holds: the OS schedules it before the records
+  are known, as the resource VM reserves every guarded body. Only the run decides whether its body plays.</p>
   <p>Among the statements that may start at the same moment, the OS's <b>policy</b> chooses the order: program order, first ready, or
   listed time; with or without backfill. That choice, and why it is hard, is the subject of <a href="/schedule#problem">Schedule and
   Compilation</a>. A timetable T assigns every statement its start. The resource VM's admission is this semantics with every start

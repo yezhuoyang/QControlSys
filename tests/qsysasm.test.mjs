@@ -79,3 +79,39 @@ test("hold and wait deadlocks two tenants; granting ancillas in program order do
   assert.equal(ordered.deadlock, null);
   assert.equal(ordered.completed, ops.length);
 });
+
+test("a statement's own guard: parsed, printed back, evaluated, and waited for", () => {
+  const text = [
+    "machine { qubits: 8 total, decoders: 1 total, factories: 1 total, classical_data_bandwidth: 500 bits/us, qubit_routing_bandwidth: 5000 qubits/us, ancilla_bandwidth: 1000 qubits/us, max_parallel_gates: 8 total, gate1q_ns: 40 ns, gate2q_ns: 200 ns, measure_ns: 1000 ns, reset_ns: 160 ns, route_latency_ns: 2 ns, decoder_latency_ns: 400 ns, magic_state_latency_ns: 5000 ns, pauli_frame_update_ns: 30 ns }",
+    "measure basis=Z data[0] -> c[3]",
+    "measure basis=Z data[1] -> c[5]",
+    "measure basis=Z data[2] -> c[6]",
+    "X data[3] if c[3], ¬c[5:6]",
+    "c[3] -> pauli_frame_update Z data[4] if !c[5]",
+  ].join("\n");
+  const p = qsysasm.parse(text);
+  const [, , , x, frame] = p.ops;
+  assert.deepEqual(x.guard, { bands: [{ negated: false, records: [{ register: "c", index: 3 }] }, { negated: true, records: [{ register: "c", index: 5 }, { register: "c", index: 6 }] }] });
+  assert.deepEqual(x.qubits, [{ register: "data", index: 3 }]);
+  assert.equal(frame.guard.bands[0].negated, true);
+  assert.deepEqual(frame.paulis, ["Z"]);
+  // Printed back with ¬, and read again to the same guard.
+  assert.equal(qsysasm.guardText(x.guard), "if c[3], ¬c[5:6]");
+  const again = qsysasm.parse(qsysasm.format({ ops: p.ops.map((o, i) => ({ ...o, start: i * 10, order: i })) }).text).ops;
+  assert.deepEqual(again.map((o) => o.guard ?? null), p.ops.map((o) => o.guard ?? null));
+  // Holds when c[3] = 1 and c[5] xor c[6] = 0.
+  assert.equal(qsysasm.guardHolds(x.guard, { "c[3]": 1, "c[5]": 1, "c[6]": 1 }), true);
+  assert.equal(qsysasm.guardHolds(x.guard, { "c[3]": 1, "c[5]": 1 }), false);
+  assert.equal(qsysasm.guardHolds(x.guard, {}), false);
+  // A band that is not one range of one register cannot be printed; a malformed band is refused.
+  assert.throws(() => qsysasm.guardText({ bands: [{ negated: false, records: [{ register: "c", index: 1 }, { register: "c", index: 4 }] }] }));
+  assert.throws(() => qsysasm.parse("X data[0] if c[i]"), SyntaxError);
+  assert.throws(() => qsysasm.parse("X data[0] if"), SyntaxError);
+  assert.throws(() => qsysasm.parse("when c[1]:"), SyntaxError);
+  // The scheduler waits for the guard's measurements.
+  const edges = dependencies(p.ops);
+  for (const [from, why] of [[0, "guard c[3]"], [1, "guard c[5]"], [2, "guard c[6]"]]) assert.ok(edges.some((e) => e.from === from && e.to === 3 && e.why === why), why);
+  const s = schedule(p);
+  assert.equal(s.ops[3].start, 1000);
+  assert.match(s.text, /X {2}data\[3\] {2}if c\[3\], ¬c\[5:6\]/);
+});

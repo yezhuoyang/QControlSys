@@ -2,17 +2,25 @@
 //
 // A QSysASM program is flat. It names concrete physical qubits and classical records, and every
 // statement is one physical instruction or one system call. There are no gadgets, no contracts
-// for gadgets, no calls, no loops, no guards and no parameters: a repeated round is written out
-// once per round. The instruction set, the system calls and the `machine { … }` fields are the
-// interface's; what a compiler may use to produce a listing (gadgets, loops) is expanded before
-// a program reaches the operating system.
+// for gadgets, no calls, no loops, no guard blocks and no parameters: a repeated round is written
+// out once per round. A statement may carry its own guard (`… if c[3], c[4:6]`): it runs only when
+// measured records say so. The guard is part of that one statement; it opens no block and names
+// nothing. The instruction set, the system calls and the `machine { … }` fields are the
+// interface's; what a compiler may use to produce a listing (gadgets, loops, `when` blocks) is
+// expanded before a program reaches the operating system.
 //
 // Grammar (one statement per line; `#` starts a comment):
 //   program    := header* statement*
 //   header     := "machine {" fields "}"                       the machine's declared services
 //               | "factory {" fields "}"                       the request_magic service contract
-//   statement  := time? (records "->")? op arg* operands? ("with" operands)? ("->" records)?
+//   statement  := time? (records "->")? op arg* operands? ("with" operands)? ("->" records)? guard?
 //                                                                "with": request_magic's workspace
+//   guard      := "if" band ("," band)*                           runs when every band holds
+//   band       := "¬"? register "[" integer (":" integer)? "]"    a record or an inclusive range; it
+//                                                                holds when the XOR of its records is
+//                                                                1, or 0 with "¬" ("!" is accepted for
+//                                                                "¬"). A statement under nested guards
+//                                                                carries all their bands, outer first.
 //   time       := "@" integer "ns"                              absolute start; omitted = not yet
 //                                                                scheduled (the OS assigns it)
 //   op         := H | S | Sdg | X | Z | CNOT | CZ | CY | measure
@@ -36,7 +44,7 @@ const REFUSED = [
   [/^spec\b/, "a contract for a gadget or program: the machine line declares every service"],
   [/^call\b|\bcall\s+\w+\s*\(/, "a gadget call: write the gadget's operations out"],
   [/^(for|repeat|loop)\b/, "a loop: write each iteration out"],
-  [/^(when|if)\b/, "a guard: a conditional correction is a pauli_frame_update"],
+  [/^(when|if)\b/, "a guard block: put the guard on each statement it governs (… if c[1])"],
   [/^(params|program\[|codes:|code\s)/, "a logical-program declaration, not an instruction"],
   [/^maintenance\b/, "background maintenance is the operating system's, not the program's"],
   [/^resource\s*\{/, "a resource summary: the operating system derives it"],
@@ -60,7 +68,9 @@ export function sitesText(sites, paulis) {
 
 /** The Pauli written before each operand of a statement (`CZ a[0], Z d[1]`), if any. */
 function paulisFrom(text, count) {
-  const body = text.replace(/^@\S+\s+ns\s+/, "").replace(/^.*?->\s*(?=[A-Za-z_]+\s)/, "");
+  // A guard's bands are records, not operands.
+  // The operation's own name (X, Z, CZ …) is not a Pauli tag: only what follows it is read.
+  const body = text.replace(/^@\S+\s+ns\s+/, "").replace(/\s+if\s+[¬!]?[A-Za-z_]\w*\[.*$/, "").replace(/^.*?->\s*(?=[A-Za-z_]+\s)/, "").replace(/^\s*[A-Za-z_]\w*/, "");
   // Operand groups `P reg[i]`, `P reg[a:b]` or `reg[…]`; a parametric range's length is not in the
   // text, so it is what the other groups leave of `count`.
   const groups = [...body.matchAll(/(?:^|,|\s)(?:([XYZ])\s+)?[A-Za-z_]\w*\[([^\]]+)\]/g)].map((g) => {
@@ -100,8 +110,46 @@ export function statement(op, { timed = true } = {}) {
   }
   if (op.kind === "request_magic" && op.work?.length) parts.push("with", sitesText(op.work));
   if (op.writes?.length) parts.push("->", sitesText(op.writes));
+  const guard = guardText(op.guard);
+  if (guard) parts.push(guard);
   const body = parts.join("  ").replace(/ {2}-> {2}/g, " -> ");
   return timed ? ("@" + op.start + " ns").padEnd(14) + body : body;
+}
+
+/**
+ * A guard ({ bands: [{ negated, records: [site, …] }, …] }) as `if c[3], ¬c[5:6]`. A band prints as
+ * one record or one inclusive range of one register; any other band cannot be written as one band
+ * and is refused. A guard without bands (an older shape) prints nothing.
+ */
+export function guardText(guard) {
+  if (!guard?.bands?.length) return "";
+  const bands = guard.bands.map(({ negated, records }) => {
+    if (!records?.length) throw Error("a guard band names no record");
+    const contiguous = records.every((s, i) => s.register === records[0].register && s.index === records[0].index + i);
+    if (!contiguous) throw Error("guard band " + records.map((s) => s.register + "[" + s.index + "]").join(" ") + " is not one record or one range of one register");
+    return (negated ? "¬" : "") + sitesText(records);
+  });
+  return "if " + bands.join(", ");
+}
+
+/** The records a guard reads, in order. */
+export const guardRecords = (guard) => (guard?.bands ?? []).flatMap((b) => b.records ?? []);
+
+/** Does a guard hold for record values ({ "c[3]": 1, … }, missing records read 0)? */
+export function guardHolds(guard, values) {
+  if (!guard?.bands?.length) return true;
+  return guard.bands.every(({ negated, records }) => records.reduce((p, s) => p ^ ((values[s.register + "[" + s.index + "]"] ?? 0) & 1), 0) === (negated ? 0 : 1));
+}
+
+/** Parse a guard's text (`c[3], ¬c[5:6]`) into { bands }. */
+function guardOf(text, line) {
+  const bands = text.split(",").map((b) => b.trim()).filter(Boolean).map((b) => {
+    const m = /^([¬!])?\s*([A-Za-z_]\w*\[[^\]]*\])$/.exec(b);
+    if (!m) throw new SyntaxError(`line ${line}: "${b}" is not a guard band (a record or a range, optionally negated with ¬)`);
+    return { negated: !!m[1], records: sitesOf(m[2], line).sites };
+  });
+  if (!bands.length) throw new SyntaxError(`line ${line}: "if" with no band`);
+  return { bands };
 }
 
 const MACHINE_ORDER = ["qubits", "decoders", "factories", "classical_data_bandwidth", "qubit_routing_bandwidth", "ancilla_bandwidth", "max_parallel_gates",
@@ -223,9 +271,13 @@ export function parse(text) {
   let machine = null;
   const factories = {}, ops = [];
   text.split(/\r?\n/).forEach((raw, i) => {
-    const line = i + 1, s = raw.replace(/#.*/, "").trim();
-    if (!s) return;
-    for (const [rx, why] of REFUSED) if (rx.test(s)) throw new SyntaxError(`line ${line}: ${why} ("${s.slice(0, 60)}")`);
+    const line = i + 1, full = raw.replace(/#.*/, "").trim();
+    if (!full) return;
+    for (const [rx, why] of REFUSED) if (rx.test(full)) throw new SyntaxError(`line ${line}: ${why} ("${full.slice(0, 60)}")`);
+    // A statement's own guard: everything after its last top-level " if ".
+    const g = /\s+if\s+(.+)$/.exec(full);
+    const guard = g ? guardOf(g[1], line) : null;
+    const s = g ? full.slice(0, g.index).trim() : full;
     const header = /^(machine|factory\w*)\s*\{(.*)\}$/.exec(s);
     if (header) {
       if (header[1] === "machine") machine = fieldsOf(header[2]);
@@ -256,7 +308,7 @@ export function parse(text) {
     const reads = before ? sitesOf(before, line).sites : [];
     const arg = kind === "measure" ? args.basis ?? "Z" : kind === "request_magic" ? args.state ?? null : args.count ?? null;
     const op = { uid: ops.length, order: ops.length, kind, start: at === undefined ? null : Number(at), duration: null,
-      qubits: sites, work, reads, writes, arg, inputNs: args.input_ns ?? null, line, text: s, paulis: paulis.some(Boolean) ? paulis : null };
+      qubits: sites, work, reads, writes, arg, inputNs: args.input_ns ?? null, line, text: full, paulis: paulis.some(Boolean) ? paulis : null, ...(guard ? { guard } : {}) };
     if ((kind === "request_ancilla" || kind === "release_ancilla") && op.arg !== null && op.arg !== sites.length)
       throw new SyntaxError(`line ${line}: count=${op.arg} but ${sites.length} qubits are named`);
     if (GATES.includes(kind) && sites.length !== (["CNOT", "CZ", "CY"].includes(kind) ? 2 : 1))

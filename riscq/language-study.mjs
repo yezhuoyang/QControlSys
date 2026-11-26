@@ -168,7 +168,7 @@ function qsys() {
     release_ancilla: "release_ancilla count=2 ancilla[0:1]", route: "route ancilla[0], data[0:1]", decode_syndrome: "s[0:1] -> decode_syndrome rounds=1",
     request_magic: "request_magic state=|T> magic[0]", pauli_frame_update: "s[0:1] -> pauli_frame_update X data[0:2]", parity: "s[0:1] -> parity -> p[0]" };
   const statements = Object.entries(samples).map(([kind, text]) => ({ kind, text, field: qsysasm.DURATION_FIELD[kind] ?? null, services: services(text) }));
-  const refusals = ["gadget surfaceRound[data: dbase + 9](dbase) spans 2478 ns:", "spec surfaceRound:", "call surfaceRound(0, 0, 0)", "for 0 <= i < n:", "when c[1]:", "H data[i]", "request_ancilla count=3 ancilla[0:1]", "CNOT data[0]"]
+  const refusals = ["gadget surfaceRound[data: dbase + 9](dbase) spans 2478 ns:", "spec surfaceRound:", "call surfaceRound(0, 0, 0)", "for 0 <= i < n:", "when c[1]:", "H data[i]", "X data[0] if c[i]", "request_ancilla count=3 ancilla[0:1]", "CNOT data[0]"]
     .map((text) => { try { qsysasm.parse(text); return { text, error: null }; } catch (e) { return { text, error: e.message }; } });
   if (refusals.some((r) => !r.error)) throw Error("the parser accepted " + refusals.find((r) => !r.error).text);
   return { machineLine: qsysasm.machineLine(machine), gates: qsysasm.GATES, systemCalls: qsysasm.SYSTEM_CALLS, statements, refusals };
