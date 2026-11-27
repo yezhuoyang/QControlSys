@@ -324,7 +324,7 @@ export function mountMachine(root, runs) {
   root.className = "mp";
   root.innerHTML = `<div class="mp-tabs">${runs.map((r, i) => `<button data-r="${i}" aria-pressed="${i === 0}">${esc(r.title)}</button>`).join("")}</div>
     <p class="stp-lesson mp-idea"></p>
-    <h6>The hardware in 3D: the chip, its coax, the converters and the RISC-Q board, as the trace drives them</h6>
+    <h6>The hardware in 3D, as the trace drives it: the whole machine with each core lit while it plays a pulse, and the chip with each operation lighting its qubits</h6>
     <div class="mp-3d"></div>
     <div class="mp-views"><button data-v="all" aria-pressed="true">Whole machine</button><button data-v="device">Chip</button><button data-v="control">Control system</button>
       <span class="muted">Drag to turn, scroll to zoom, hover a part to name it.</span></div>
