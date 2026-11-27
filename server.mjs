@@ -86,7 +86,7 @@ const routes = new Map([
   ["/apparatus.js", "machine/apparatus.mjs"],
   ["/machine/interconnect.mjs","machine/interconnect.mjs"],
   ...["ion-installation", "neutral-installation", "cryo-installation", "provenance", "installation-display","interconnect","wiring"].map(name => ["/" + name + ".mjs", "machine/" + name + ".mjs"]),
-  ...["ion-hardware", "neutral-hardware", "cryo-hardware", "pulse-inspector","wire-inspector","wire-section"].map(name => ["/" + name + ".js", "studio/" + name + ".js"]),
+  ...["ion-hardware", "neutral-hardware", "cryo-hardware", "zcu216-hardware", "pulse-inspector","wire-inspector","wire-section"].map(name => ["/" + name + ".js", "studio/" + name + ".js"]),
   ["/installation-display.js", "machine/installation-display.mjs"],
   ["/installation-lens.js", "studio/installation-lens.js"],
   ["/register-view.js", "studio/register-view.js"],
@@ -144,6 +144,12 @@ const routes = new Map([
     "/three/OrbitControls.js",
     "node_modules/three/examples/jsm/controls/OrbitControls.js",
   ],
+  // The hardware design page (studio/hw): one document, built in 3D (riscq/hw/document.mjs).
+  ["/three/TransformControls.js", "node_modules/three/examples/jsm/controls/TransformControls.js"],
+  ["/hw/design", "studio/hw/design.html"],
+  ["/hw/design.js", "studio/hw/design.js"],
+  ["/hw/design.css", "studio/hw/design.css"],
+  ["/hw/editor2d.js", "studio/hw/editor2d.js"],
 ]);
 const mime = {
   ".mjs": "text/javascript",
@@ -536,7 +542,7 @@ const runSlots = {
   },
 };
 const isSimulation = (req, url) => url.pathname.startsWith("/api/") && !routes.has(url.pathname) &&
-  !["/api/riscq/examples", "/api/machines/examples", "/api/studio/h2"].includes(url.pathname) &&
+  !["/api/riscq/examples", "/api/machines/examples", "/api/studio/h2"].includes(url.pathname) && !url.pathname.startsWith("/api/hw/") &&
   !(req.method === "GET" && url.pathname.startsWith("/api/riscq/design"));
 
 if (
@@ -584,6 +590,15 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(
           [...examples, ...await import("./riscq/ftqvm/studio-runs.mjs").then((m) => m.studioExamples())]
             .map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
+      }
+      if (url.pathname.startsWith("/api/hw/") && req.method === "GET") {
+        // Hardware documents (riscq/hw/service.mjs): every reproduction and Examples run as one document.
+        const { hwService } = await import("./riscq/hw/service.mjs");
+        try {
+          return reply(res, 200, "application/json", JSON.stringify(hwService(url.pathname.slice("/api/hw".length), Object.fromEntries(url.searchParams))));
+        } catch (error) {
+          return reply(res, error.status ?? 500, "application/json", JSON.stringify({ error: error.message }));
+        }
       }
       if (url.pathname.startsWith("/api/riscq/design")) {
         // Hardware designs (riscq/design.mjs). GET /api/riscq/design?template=ring|ring-decoder

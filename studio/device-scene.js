@@ -2,6 +2,7 @@ import * as T from "three";
 import { drawNeutralHardware, drawNeutralZones } from "./neutral-hardware.js";
 import { drawIonHardware, drawStudioTrap } from "./ion-hardware.js";
 import { drawCryoHardware } from "./cryo-hardware.js";
+import { drawZcu216 } from "./zcu216-hardware.js";
 
 // Coordinates in mm, in the same x / up / z convention as the machine editor.
 const boxGeometry = new T.BoxGeometry(),
@@ -82,7 +83,8 @@ export function buildApparatusPart(group, p) {
   if (
     drawNeutralHardware(s, p) ||
     drawIonHardware(s, p) ||
-    drawCryoHardware(s, p)
+    drawCryoHardware(s, p) ||
+    drawZcu216(s, p)
   )
     return s.dispose;
   switch (p.form) {

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hardware design · QuantumOS</title>
+  <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/hw/design.css">
+  <script type="importmap">{ "imports": { "three": "/three/three.module.js" } }</script>
+</head>
+<body>
+<div class="hw">
+  <header class="hw-bar">
+    <label class="open">Machine <select id="doc" aria-label="Machine to open"></select></label>
+    <span class="facts" id="facts"></span>
+    <span class="grow"></span>
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" data-view="all" aria-pressed="true">Whole machine</button>
+      <button type="button" data-view="device">Device</button>
+      <button type="button" data-view="control">Control system</button>
+    </div>
+    <button type="button" id="build">Build from scratch</button>
+    <button type="button" id="undo" disabled>Undo</button>
+    <button type="button" id="save">Save</button>
+    <label class="btn">Open file<input type="file" id="file" accept=".json,application/json" hidden></label>
+    <a class="btn primary" id="runs" href="#">See it run</a>
+  </header>
+  <aside class="hw-left">
+    <h2>Parts</h2>
+    <p class="hint">Click a brick to add it; drag any part in the scene to move it.</p>
+    <div id="palette" class="palette"></div>
+    <h2>This machine</h2>
+    <div id="outline" class="outline"></div>
+  </aside>
+  <main class="hw-stage" id="stage">
+    <div class="stage-note" id="note">Drag to orbit · scroll to zoom · click a part to select it, then drag its arrows to move it.</div>
+    <div class="caption" id="caption" hidden></div>
+  </main>
+  <aside class="hw-right">
+    <h2>Inspector</h2>
+    <div id="inspector"><p class="hint">Nothing selected. Click a part in the scene or in the list.</p></div>
+    <h2>Document</h2>
+    <p class="hint">One hardware document describes this machine: the design page edits it, and the run pages draw it.</p>
+    <details><summary>The document (JSON)</summary><pre id="json" class="json"></pre></details>
+  </aside>
+</div>
+<div id="detail" class="detail" hidden></div>
+<script type="module" src="/site-nav.js"></script>
+<script type="module" src="/hw/design.js"></script>
+</body>
+</html>
