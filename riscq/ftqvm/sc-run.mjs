@@ -50,6 +50,26 @@ function paulisOf(op) {
   return letters;
 }
 
+/**
+ * The Lean model's simulated-time budget for a lowering, in batches: the segments' span with a fifth
+ * more (the barrier, the preroll and the last windows' settling), at least the model's default
+ * 100,000,000 and at most its ceiling 2,000,000,000 (QControl/RiscQ/Soc.lean validate). DJ-12 at
+ * d = 5 lasts 483 ms, 241,000,000 batches at 2 ns: past the default.
+ */
+export function batchBudget(lowered) {
+  const span = lowered.segments.reduce((n, s) => n + (s.span ?? 0), 0);
+  const budget = Math.max(100_000_000, Math.ceil(span * 1.2) + 1_000_000);
+  if (budget > 2_000_000_000) throw Error("the program lasts " + span + " batches, past the Lean model's budget of 2,000,000,000");
+  return budget;
+}
+
+/** A run that ended on its budget stopped before the program did: its rows would be the missing work. */
+export function checkFinished(result) {
+  if (["time limit", "step limit", "event limit"].includes(result.summary.status))
+    throw Error("the Lean model stopped on its " + result.summary.status + " before the program ended (" + result.summary.elapsedBatches + " batches)");
+  return result;
+}
+
 /** Listing records as bit names: `c[3]`, `syndrome[12]`. */
 const recordName = (r) => r.register + "[" + r.index + "]";
 
@@ -249,6 +269,10 @@ export function lowerListing(listing, placement, m, options = {}) {
  * Returns { result, built, lowered, report }.
  */
 export async function runListing(listing, placement, design, { outcomes = {}, trace = "io", distance = placement.d, factoryRounds, forceCompact = false, guards } = {}) {
+  // QUANTUMOS_PROFILE=1: each phase's wall time and the heap after it, on stderr.
+  const t0 = Date.now();
+  const phase = process.env.QUANTUMOS_PROFILE ? (name, extra = "") => console.error("[run] " + name + " " + ((Date.now() - t0) / 1000).toFixed(1) +
+    " s, heap " + (process.memoryUsage().heapUsed / 1e9).toFixed(2) + " GB " + extra) : () => {};
   const m = hardwareDesign.machine(design);
   const { hardware, origin, unrealized, classical, decodes, factories, skipped, quantization } = lowerListing(listing, placement, m, { factoryRounds, guards, outcomes });
   const lowered = superconducting.lower(hardware, m);
@@ -259,11 +283,28 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
     lowered.actions.push({ segment: 0, core: m.decoderCore, timed: true, ...rest, source: id });
   }
   // A summary run keeps no frames, so its budget is the model's largest: a medium program takes hundreds of millions of steps.
-  const built = assemble(m.spec, lowered, { trace, maxEvents: 400_000, maxSteps: trace === "summary" ? 2_000_000_000 : 20_000_000, forceCompact,
+  phase("lowered", lowered.actions.length + " actions, " + hardware.segments[0].ops.length + " natives");
+  const built = assemble(m.spec, lowered, { trace, maxEvents: 400_000, maxSteps: trace === "summary" ? 2_000_000_000 : 20_000_000, forceCompact, maxBatches: batchBudget(lowered),
     bindings: m.bindings, readouts: superconducting.readoutOracle(lowered, m, outcomes) });
   // A core on the compact interpreter: name its repeated rounds' pulses after their operations.
-  const result = remapSources(await execute(built.document), built);
+  phase("assembled", built.compact.length + " folded cores");
+  const result = remapSources(checkFinished(await execute(built.document)), built);
+  phase("executed", result.summary.pulses.length + " pulses, " + result.summary.steps + " steps");
   const report = conformance(listing, { hardware, lowered, origin, unrealized, classical, skipped, quantization }, result, built, m);
+  phase("conformance");
+  const opOf = new Map(listing.ops.map((o) => [o.uid, o]));
+  const { decodeRows, factoryRows } = await completeReport({ listing, placement, design, m, report, skipped, decodes, factories, outcomes, distance,
+    controller: { result, sitesOfOp: (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) } });
+  phase("track");
+  return { m, hardware, lowered, built, result, report, origin, unrealized, quantization, decodes: decodeRows, factories: factoryRows };
+}
+
+/**
+ * The rest of a run's report, from its conformance rows: the decoder service's rows (from the bits'
+ * stores), the factories' decodes, the animation track and the control system's track. A sharded run
+ * (riscq/ftqvm/sc-shards.mjs) calls it with its merged report. `controller`: { result, sitesOfOp(id) }.
+ */
+export async function completeReport({ listing, placement, design, m, report, skipped, decodes, factories, outcomes, distance, controller }) {
   // Decodes: the decoder service, from the bits' stores in this run.
   const bitStoredNs = {};
   for (const r of report.rows) if (r.kind === "measure" && r.bitNs !== undefined) bitStoredNs[r.record] = r.bitNs;
@@ -276,8 +317,9 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
   // Factories: the injection rounds ran in this run; their syndrome goes to the factory's own
   // decoder, and the state is ready when that decode is done.
   const factoryRows = await runFactoryDecodes(factories, report.bitNs, distance, { outcomes, periodNs: m.period / 1000 });
+  const rowOf = new Map(report.rows.map((r) => [r.uid, r]));
   for (const f of factoryRows) {
-    const row = report.rows.find((r) => r.uid === f.uid);
+    const row = rowOf.get(f.uid);
     row.factory = f;
     row.hardwareNs = [row.hardwareNs?.[0] ?? row.start, Math.max(row.hardwareNs?.[1] ?? row.start, f.doneNs)];
     row.overrunNs = Math.max(0, row.hardwareNs[1] - row.end);
@@ -289,13 +331,12 @@ export async function runListing(listing, placement, design, { outcomes = {}, tr
     kind: "transmon", unit: "lattice", sites: placement.sites.map((s) => ({ kind: s.kind, at: [s.rc[1], s.rc[0]] })),
     couplers: (design.couplings ?? []).map((c) => c.qubits) } });
   // The control system: each core and the transmons it drives, and every pulse it played.
-  const opOf = new Map(listing.ops.map((o) => [o.uid, o]));
   const coreIndex = new Map(m.spec.cores.map((c, i) => [c.name, i]));
   const coreSites = m.spec.cores.map(() => []);
   design.qubits.forEach((q, k) => coreSites[coreIndex.get(design.channels.find((c) => c.id === q.gate)?.core)]?.push(k));
-  report.track.controller = controllerTrack({ spec: m.spec, result, baseBatch: report.baseBatch, periodPs: m.period, coreSites, name: design.name,
-    sitesOfOp: (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) });
-  return { m, hardware, lowered, built, result, report, origin, unrealized, quantization, decodes: decodeRows, factories: factoryRows };
+  report.track.controller = controllerTrack({ spec: m.spec, result: controller.result, baseBatch: report.baseBatch, periodPs: m.period, coreSites, name: design.name,
+    sitesOfOp: controller.sitesOfOp });
+  return { decodeRows, factoryRows };
 }
 
 /** Add rows to a report and recompute its per-kind summary and verdict. */
@@ -327,9 +368,23 @@ function summarize(rows) {
  * be stored by the end of its measurement.
  */
 export function conformance(listing, lowering, result, built, m) {
-  const period = m.period;
-  const { hardware, lowered, origin, unrealized, classical = [], skipped = new Set(), quantization } = lowering;
-  const planned = new Map(hardware.segments[0].ops.map((o) => [o.id, o]));
+  const parts = conformanceParts(lowering, result, built, m);
+  const base = bestBase(parts.offsets);
+  return conformanceReport(listing, lowering, { base, ...parts.aggregate(base), bits: parts.bits, status: parts.status, faults: parts.faults }, m);
+}
+
+/** The time base: the offset that most pulses share between the trace and the plan. */
+export function bestBase(offsets) {
+  return [...offsets.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
+}
+
+/**
+ * What one run contributes to the check: the time-base votes of its pulses, and, given the base,
+ * each listing op's pulses and each bit's first store (`aggregate`). A sharded run
+ * (riscq/ftqvm/sc-shards.mjs) merges these over its shards; `conformance` uses one run's.
+ */
+export function conformanceParts({ hardware, lowered, origin }, result, built, m) {
+  const planned = new Set(hardware.segments[0].ops.map((o) => o.id));
   // Planned opening batches of every fired pulse, per native instruction and core.
   const plannedAt = new Map();
   for (const a of lowered.actions)
@@ -339,47 +394,58 @@ export function conformance(listing, lowering, result, built, m) {
     const ats = (plannedAt.get(p.source) ?? []).filter((x) => x.core === p.core).map((x) => x.at);
     return ats.reduce((best, at) => (Math.abs(p.opens - base - at) < Math.abs(p.opens - base - best) ? at : best), ats[0]);
   };
-  // The time base: the offset that most pulses share between the trace and the plan.
   const offsets = new Map();
   for (const p of pulses) {
     const o = p.opens - nearest(p, 0);
     offsets.set(o, (offsets.get(o) ?? 0) + 1);
   }
-  const base = [...offsets.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
-  const byOp = new Map();
-  for (const p of pulses) {
-    const uid = origin.get(p.source);
-    const at = byOp.get(uid) ?? byOp.set(uid, { pulses: 0, opens: Infinity, closes: -Infinity, late: 0, overlap: 0 }).get(uid);
-    at.pulses++;
-    at.opens = Math.min(at.opens, p.opens - base);
-    at.closes = Math.max(at.closes, p.closes - base);
-    if (p.opens - base !== nearest(p, base)) at.late++;
-    if (p.overlap) at.overlap++;
-  }
-  // When each measured bit was stored: the host write of the bit, in batches.
-  const bitAt = new Map();
-  for (const w of result.summary.host) {
-    const name = Object.entries(built.images[w.core].bits).find(([, index]) => 4 * index === w.offset)?.[0];
-    if (name !== undefined && !bitAt.has(name)) bitAt.set(name, w.atBatch - base);
-  }
+  // The bit a host write stores: its core's bit table, by byte offset.
+  const names = new Map();
+  const nameOf = (w) => {
+    if (!names.has(w.core)) names.set(w.core, new Map(Object.entries(built.images[w.core].bits).map(([name, index]) => [4 * index, name])));
+    return names.get(w.core).get(w.offset);
+  };
+  const aggregate = (base) => {
+    const byOp = new Map();
+    for (const p of pulses) {
+      const uid = origin.get(p.source);
+      const at = byOp.get(uid) ?? byOp.set(uid, { pulses: 0, opens: Infinity, closes: -Infinity, late: 0, overlap: 0 }).get(uid);
+      at.pulses++;
+      at.opens = Math.min(at.opens, p.opens - base);
+      at.closes = Math.max(at.closes, p.closes - base);
+      if (p.opens - base !== nearest(p, base)) at.late++;
+      if (p.overlap) at.overlap++;
+    }
+    // When each measured bit was stored: the host write of the bit, in batches.
+    const bitAt = new Map();
+    // Classical work on the frame core: each word's stores, in order.
+    const writesOf = new Map();
+    for (const w of result.summary.host) {
+      const name = nameOf(w);
+      if (name === undefined) continue;
+      if (!bitAt.has(name)) bitAt.set(name, w.atBatch - base);
+      if (w.core === m.decoderCore) (writesOf.get(name) ?? writesOf.set(name, []).get(name)).push(w.atBatch - base);
+    }
+    return { byOp, bitAt, writesOf };
+  };
+  return { offsets, aggregate, bits: measuredBits(result, built), status: result.summary.status, faults: result.summary.faults };
+}
+
+/** The check's report from the merged parts: a row per listing operation. */
+export function conformanceReport(listing, { unrealized, classical = [], skipped = new Set(), quantization }, { base, byOp, bitAt, writesOf, bits, status, faults }, m) {
+  const period = m.period;
   // Classical work on the frame core: done when its last word is stored. A frame word that
   // several updates change is matched to them in time order.
-  const frameCore = m.decoderCore;
-  const writesOf = new Map();
-  for (const w of result.summary.host) {
-    if (w.core !== frameCore) continue;
-    const name = Object.entries(built.images[frameCore].bits).find(([, index]) => 4 * index === w.offset)?.[0];
-    if (name !== undefined) (writesOf.get(name) ?? writesOf.set(name, []).get(name)).push(w.atBatch - base);
-  }
   const doneOf = new Map();
   for (const c of [...classical].sort((x, y) => x.at - y.at)) {
     const name = c.frame ? c.frame.name : c.parity.output;
     const at = writesOf.get(name)?.shift();
     doneOf.set(c.uid, Math.max(doneOf.get(c.uid) ?? -Infinity, at ?? Infinity));
   }
+  const notRealized = new Set(unrealized.map((op) => op.uid));
   const rows = [];
   for (const op of listing.ops) {
-    if (unrealized.includes(op) || op.kind === "decode_syndrome") continue;
+    if (notRealized.has(op.uid) || op.kind === "decode_syndrome") continue;
     if (skipped.has(op.uid)) {
       rows.push({ uid: op.uid, kind: op.kind, line: op.line, start: op.start, end: op.end, skipped: true, ok: true });
       continue;
@@ -411,10 +477,9 @@ export function conformance(listing, lowering, result, built, m) {
   const byKind = summarize(rows);
   const bitNs = Object.fromEntries([...bitAt].map(([name, b]) => [name, (b * period) / 1000]));
   return {
-    bitNs,
-    status: result.summary.status, faults: result.summary.faults,
+    bitNs, status, faults,
     baseBatch: base, quantization, conforms: rows.every((r) => r.ok), skipped: skipped.size,
-    byKind, rows, bits: measuredBits(result, built),
+    byKind, rows, bits,
     unrealized: unrealized.map((op) => ({ uid: op.uid, kind: op.kind, line: op.line, start: op.start, text: op.text })),
   };
 }

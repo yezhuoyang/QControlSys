@@ -221,11 +221,13 @@ const executable = process.env.QCONTROL_BIN || path.join(root, ".lake", "build",
  */
 export function execute(document, { checkTrace = false, timeoutMs = document?.trace === "summary" ? 6 * 3600_000 : 240_000 } = {}) {
   return new Promise((resolve, reject) => {
+    const started = Date.now();
     const child = execFile(executable, checkTrace ? ["--check-trace"] : [],
       { windowsHide: true, timeout: timeoutMs, maxBuffer: 1 << 30 },
       (error, stdout, stderr) => {
         if (error?.killed) return reject(Error("The Lean model did not finish within " + Math.round(timeoutMs / 1000) + " s." + (stderr.trim() ? " " + stderr.trim() : "")));
         if (error) return reject(Error(stderr.trim() || error.message));
+        if (process.env.QUANTUMOS_PROFILE) console.error("[lean] " + ((Date.now() - started) / 1000).toFixed(1) + " s, output " + (stdout.length / 1e6).toFixed(1) + " MB");
         try {
           resolve(JSON.parse(stdout));
         } catch (parseError) {
@@ -233,6 +235,8 @@ export function execute(document, { checkTrace = false, timeoutMs = document?.tr
         }
       });
     child.stdin.on("error", () => {});
-    child.stdin.end(JSON.stringify(document));
+    const input = JSON.stringify(document);
+    if (process.env.QUANTUMOS_PROFILE) console.error("[lean] input " + (input.length / 1e6).toFixed(1) + " MB");
+    child.stdin.end(input);
   });
 }

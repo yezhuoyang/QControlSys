@@ -14,7 +14,7 @@ test("every stored medium run encodes 10–15 logical qubits in 500–1,000 phys
     assert.equal(r.distance, 5);
     assert.equal(r.conforms, true, p.id);
     assert.ok(Object.values(r.byKind).every((k) => k.ok === k.count), p.id);
-    assert.equal(r.listing.ops.length, r.ops);
+    assert.equal(r.listing.ops?.length ?? r.listing.opCount, r.ops);
   }
 });
 

@@ -8,7 +8,9 @@
 // repository root; it must be built (`dune build` in its compiler/ folder). Outputs go to a
 // directory of ours, never into the checkout.
 import { execFile, spawn } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, openSync, closeSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, openSync, closeSync, writeSync, createReadStream } from "node:fs";
+import { createInterface } from "node:readline";
+import { readSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -132,13 +134,88 @@ export async function admit(sysprog) {
  * statement in the flat program, which has no gadgets, loops or parameters. `qsysasm` is that
  * program's text.
  */
-export async function expand(sysprog, { maxOps = 5_000_000 } = {}) {
+export async function expand(sysprog, { maxOps = 50_000_000 } = {}) {
   // Every guarded body is expanded, each op with the guard around it (`op.guard`); the run decides it.
-  const r = await runToFile(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps), "--guards", "taken"], { cwd: REPO });
-  const out = JSON.parse(r.stdout);
-  if (out.error) throw new Error(`The compiler refused the listing: ${out.error.code}: ${out.error.message}`);
-  const flat = qsysasm.canonical(out);
-  return { ...flat.listing, qsysasm: flat.text };
+  // The bridge writes one JSON value per line (--ndjson), read here a line at a time: a medium
+  // program's listing has millions of operations, more than one string can hold.
+  const file = join(tmpdir(), "qos-expand-" + process.pid + "-" + Date.now() + ".ndjson");
+  const { code, stderr } = await runToPath(python(), [join(REPO, "bridge", "ftqvm_expand.py"), resolve(sysprog), "--max-ops", String(maxOps), "--guards", "taken", "--ndjson"], file, { cwd: REPO });
+  let header = null;
+  const ops = [], calls = [];
+  for await (const line of createInterface({ input: createReadStream(file, "utf8"), crlfDelay: Infinity })) {
+    if (!line) continue;
+    const value = JSON.parse(line);
+    if (!header) header = value;
+    else if (value.op) ops.push(value.op);
+    else if (value.call) calls.push(value.call);
+  }
+  rmSync(file, { force: true });
+  if (header?.error) throw new Error(`The compiler refused the listing: ${header.error.code}: ${header.error.message}`);
+  if (!header) throw new Error("The listing expansion failed: " + (stderr.trim() || "exit " + code));
+  return flatListing({ ...header, ops, calls });
+}
+
+/** The flat program's text is kept in the listing up to this many characters; beyond, in a file. */
+const QSYSASM_IN_MEMORY = 200_000_000;
+
+/**
+ * The expansion restated as flat QSysASM, as qsysasm.canonical does (each op's `line` and `text`
+ * are its statement's), written a statement at a time: the text of a listing of millions of
+ * operations goes to a file (`qsysasmFile`), and `qsysasm` keeps its first 2,000 lines.
+ */
+export function flatListing(expansion, { inMemory = QSYSASM_IN_MEMORY } = {}) {
+  const options = { machineLine: qsysasm.machineLine(expansion.machine), factories: qsysasm.factoriesIn(expansion.specs) };
+  const head = qsysasm.format({ ops: [] }, options).text; // the headers and their blank line, each ended by "\n"
+  const headLines = head.split("\n").length - 1;
+  const order = expansion.ops.map((op, i) => i).sort((a, b) => expansion.ops[a].start - expansion.ops[b].start || expansion.ops[a].order - expansion.ops[b].order);
+  const file = join(tmpdir(), "qos-qsysasm-" + process.pid + "-" + Date.now() + ".qsysasm");
+  const fd = openSync(file, "w");
+  writeSync(fd, head);
+  let size = head.length, kept = [head], chunk = [];
+  order.forEach((i, k) => {
+    const op = expansion.ops[i];
+    const text = qsysasm.statement(op);
+    op.line = headLines + k + 1;
+    op.text = text.trim();
+    chunk.push(text);
+    if (chunk.length === 10_000 || k === order.length - 1) {
+      const block = chunk.join("\n") + "\n";
+      writeSync(fd, block);
+      size += block.length;
+      if (kept && size <= inMemory) kept.push(block);
+      else if (kept) kept = null;
+      chunk = [];
+    }
+  });
+  closeSync(fd);
+  if (kept) {
+    rmSync(file, { force: true });
+    return { ...expansion, qsysasm: kept.join("") };
+  }
+  const first = readHead(file, headLines + 2000);
+  return { ...expansion, qsysasm: first + "# … " + (order.length - 2000) + " more statements\n", qsysasmFile: file };
+}
+
+/** The first `count` lines of a text file. */
+function readHead(file, count) {
+  const fd = openSync(file, "r"), buffer = Buffer.alloc(1 << 20);
+  let text = "", n;
+  while ((text.match(/\n/g)?.length ?? 0) < count && (n = readSync(fd, buffer, 0, buffer.length, null)) > 0) text += buffer.toString("utf8", 0, n);
+  closeSync(fd);
+  return text.split("\n").slice(0, count).join("\n") + "\n";
+}
+
+/** Run a program with its stdout written to `path`. Resolves { code, stderr }. */
+function runToPath(file, args, path, { cwd = compilerRoot(), timeoutMs = 12 * 3_600_000 } = {}) {
+  const fd = openSync(path, "w");
+  return new Promise((ok, fail) => {
+    const child = spawn(file, args, { cwd, windowsHide: true, stdio: ["ignore", fd, "pipe"] });
+    let stderr = "";
+    child.stderr.on("data", (d) => (stderr += d));
+    const timer = setTimeout(() => child.kill(), timeoutMs);
+    child.on("error", (error) => { clearTimeout(timer); closeSync(fd); fail(error); });
+    child.on("close", (code) => { clearTimeout(timer); closeSync(fd); ok({ code, stderr }); });
+  });
 }
 
 /**

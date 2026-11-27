@@ -18,9 +18,12 @@ import { compileCore, prerollOf } from "./firmware.mjs";
  * A measured bit is published to a shared group slot. A core that conditions on a bit it did
  * not measure reads the shared slot after the barrier of the segment that uses it.
  */
-export function plans(spec, lowered, { compact = new Set() } = {}) {
-  // A core with no action parks at once and joins no barrier.
+export function plans(spec, lowered, { compact = new Set(), prerolls: givenPrerolls, members: extraMembers } = {}) {
+  // A core with no action parks at once and joins no barrier. `members`: cores that join the
+  // barriers although this lowering gives them no action (a sharded run: the cores of the other
+  // shards, so that every barrier has the members, and releases as, it does in the whole run).
   const active = new Set(lowered.actions.map((a) => a.core));
+  for (const c of extraMembers ?? []) active.add(c);
   const members = active.size;
   const shared = new Map();
   const owner = new Map();
@@ -66,7 +69,8 @@ export function plans(spec, lowered, { compact = new Set() } = {}) {
     (bySegmentCore.get(key) ?? bySegmentCore.set(key, []).get(key)).push(a);
   }
   const actionsOf = (s, index) => bySegmentCore.get(s + "/" + index) ?? [];
-  const prerolls = lowered.segments.map((_, s) => [...active].reduce((m, index) =>
+  // `prerolls`: given by a sharded run, the whole run's (corePrerolls over every shard).
+  const prerolls = givenPrerolls ?? lowered.segments.map((_, s) => [...active].reduce((m, index) =>
     Math.max(m, prerollOf(spec.cores[index], actionsOf(s, index), { compact: compact.has(index) })), 0));
   const shift = (op, by) => ({
     ...op, at: op.at + by,
@@ -104,8 +108,38 @@ export function plans(spec, lowered, { compact = new Set() } = {}) {
   });
 }
 
+/**
+ * Each core's preroll per segment, for the cores with actions: `{ core: [batches per segment] }`.
+ * The segment's preroll is the largest over the run's cores (plans); a sharded run takes it over
+ * every shard. `compact`: the cores on folded firmware.
+ */
+export function corePrerolls(spec, lowered, { compact = new Set() } = {}) {
+  const out = {};
+  const bySegmentCore = new Map();
+  for (const a of lowered.actions) {
+    const key = a.segment + "/" + a.core;
+    (bySegmentCore.get(key) ?? bySegmentCore.set(key, []).get(key)).push(a);
+  }
+  for (const index of new Set(lowered.actions.map((a) => a.core)))
+    out[index] = lowered.segments.map((_, s) => prerollOf(spec.cores[index], bySegmentCore.get(s + "/" + index) ?? [], { compact: compact.has(index) }));
+  return out;
+}
+
 /** Compile lowered actions to the document the Lean executable runs, with per-core statistics. */
 export function assemble(spec, lowered, options = {}) {
+  // A shard of a sharded run (riscq/ftqvm/sc-shards.mjs): the whole run's prerolls, folded cores and
+  // barrier members are given, and every core is compiled as the whole run compiles it.
+  if (options.shard) {
+    const { prerolls, compact, members } = options.shard;
+    const corePlans = plans(spec, lowered, { compact, prerolls, members });
+    const images = corePlans.map((plan, i) => compileCore(spec, i, plan, { compact: compact.has(i) }));
+    return {
+      document: program(spec, images, (({ forceCompact: _f, shard: _s, ...rest }) => rest)(options)),
+      plans: corePlans,
+      images: images.map((image, i) => ({ core: spec.cores[i].name, ...image.stats, bits: image.bits, bitBase: image.bitBase, ...(image.remap ? { remap: image.remap } : {}) })),
+      compact: [...compact],
+    };
+  }
   let corePlans = plans(spec, lowered);
   // A core whose program does not fit its RAM runs its segments on the compact interpreter
   // (riscq/firmware.mjs): the plans are made again with its costs, which every core's preroll sees.

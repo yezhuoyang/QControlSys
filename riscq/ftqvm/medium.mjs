@@ -69,6 +69,26 @@ export function publishable(listing) {
   return { ...listing, source: { ...source, ...(path ? { file: path.split(/[\\/]/).at(-1) } : {}) } };
 }
 
+// A run of more operations than this is stored without its operations, and its track without the
+// events past the first STORE_EVENTS: one JSON text holds at most about 500 MB. Such a run is not
+// rerun from its file (the design page serves its stored variants); it is compiled again instead.
+const STORE_OPS = 1_000_000;
+const STORE_EVENTS = 300_000;
+
+/** A listing as the store keeps it: all of it, or past STORE_OPS its headers and first statements. */
+function storable(listing) {
+  if (listing.ops.length <= STORE_OPS) return listing;
+  const { ops, calls: _c, qsysasmFile: _f, ...rest } = listing;
+  const text = listing.qsysasm.length > 50_000_000 ? listing.qsysasm.split("\n").slice(0, 2000).join("\n") + "\n# … more statements\n" : listing.qsysasm;
+  return { ...rest, qsysasm: text, opCount: ops.length, opsStored: false };
+}
+
+/** A track as the store keeps it: past STORE_EVENTS events, the first ones by start. */
+function storableTrack(track) {
+  if (!track || track.events.length <= STORE_EVENTS) return track;
+  return { ...track, events: track.events.slice(0, STORE_EVENTS), eventsDropped: track.events.length - STORE_EVENTS };
+}
+
 /** Compile, derive and run one program; store what the site needs. Needs the compiler. */
 export async function compileMedium(id, { log = console.log } = {}) {
   const p = MEDIUM_PROGRAMS.find((x) => x.id === id);
@@ -77,16 +97,16 @@ export async function compileMedium(id, { log = console.log } = {}) {
   const { transmon } = await import("./platforms.mjs");
   const t0 = Date.now();
   const { iterations } = await deriveSpec({ platform: transmon(MEDIUM_MACHINE), qppm: p.qppm, specialize: p.specialize, distance: DISTANCE,
-    baseMachine: join(here, "..", "..", "validation", "ftqvm", "base.machine"), maxIterations: 6 });
+    baseMachine: join(here, "..", "..", "validation", "ftqvm", "base.machine"), maxIterations: 6, slim: true });
   const last = iterations.at(-1);
   const machine = Object.fromEntries(Object.entries(last.spec.machine).map(([k, v]) => [k, v.value]));
   const run = {
     id, title: p.title, logical: p.logical, distance: DISTANCE, ...count(last), conforms: last.report.conforms, verdict: last.verdict,
     iterations: iterations.map((it) => ({ conforms: it.report.conforms, makespanNs: it.makespanNs,
-      late: (it.report.rows ?? []).filter((r) => !r.ok).length })),
+      late: it.report.late ?? (it.report.rows ?? []).filter((r) => !r.ok).length })),
     makespanNs: last.makespanNs, byKind: last.report.byKind, machine,
     failures: (last.report.rows ?? []).filter((r) => !r.ok).slice(0, 12),
-    listing: publishable(last.listing), spec: last.spec, track: last.report.track,
+    listing: storable(publishable(last.listing)), spec: last.spec, track: storableTrack(last.report.track),
     seconds: (Date.now() - t0) / 1000, generated: new Date().toISOString(),
   };
   mkdirSync(storeDir, { recursive: true });
@@ -98,6 +118,8 @@ export async function compileMedium(id, { log = console.log } = {}) {
 
 /** Rerun a stored listing on the twin (no compiler): the Lean model of the control system, every op checked. */
 async function rerun(stored, machine) {
+  if (stored.listing.opsStored === false)
+    throw Error(stored.title + " has " + stored.listing.opCount + " operations, too many to rerun from its stored run: its other control systems are precomputed variants");
   const { transmon } = await import("./platforms.mjs");
   const platform = transmon(machine);
   const placement = platform.place(stored.listing, { distance: DISTANCE });

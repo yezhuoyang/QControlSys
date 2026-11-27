@@ -5,7 +5,7 @@ the fault-tolerant compiler's checkout (FT_COMPILER_ROOT, or the path in ft-comp
 prints what `parse_source` and `expand` produce. QuantumOS never re-implements the listing's
 semantics; it executes what the compiler says the listing is.
 
-Usage: python bridge/ftqvm_expand.py LISTING.sysprog [--max-ops N] [--guards taken]
+Usage: python bridge/ftqvm_expand.py LISTING.sysprog [--max-ops N] [--guards taken] [--ndjson]
 Output: {"source": {...}, "machine": {...}, "specs": {...}, "ops": [...], "calls": [...]}
 Errors are printed as {"error": {"code", "message", "line"}} with exit status 1.
 
@@ -140,14 +140,16 @@ def main(argv):
         print(json.dumps({"error": {"code": info.get("code"), "message": str(error),
                                     "line": info.get("line", 0)}}, default=str))
         return 1
-    out = {
+    header = {
         "source": {"path": str(Path(path).resolve()), "sha256": source.sha256, "stripped": stripped, "guards": guards or "refused",
                    "params": list(source.params), "witness": dict(source.witness),
                    "compiler": str(root)},
         "machine": source.machine,
         "specs": {name: {k: v for k, v in spec.items()} if isinstance(spec, dict) else str(spec)
                   for name, spec in source.specs.items()},
-        "ops": [{
+    }
+    def op_json(op):
+        return {
             "uid": op.uid, "order": op.order, "kind": op.kind,
             "start": op.start, "duration": op.duration, "end": op.end,
             "qubits": [site(q) for q in op.qubits], "work": [site(q) for q in op.work],
@@ -156,11 +158,22 @@ def main(argv):
             "text": lines[op.line - 1].split("#", 1)[0].strip() if 0 < op.line <= len(lines) else "",
             "stack": [str(s) for s in op.stack],
             **({"guard": g} if (g := guard_of(op)) else {}),
-        } for op in ops],
-        "calls": [{"uid": c.uid, "name": c.name, "start": c.start, "end": c.end,
-                   "line": c.line, "ops": [op.uid for op in c.ops]} for c in calls],
-    }
-    print(json.dumps(out, default=str))
+        }
+    def call_json(c):
+        return {"uid": c.uid, "name": c.name, "start": c.start, "end": c.end,
+                "line": c.line, "ops": [op.uid for op in c.ops]}
+    if "--ndjson" in argv:
+        # One JSON value per line: the header, then {"op": …} per operation, then {"call": …} per call.
+        # A listing of millions of operations is read a line at a time, never as one string.
+        write = sys.stdout.write
+        newline = chr(10)
+        write(json.dumps(header, default=str) + newline)
+        for op in ops:
+            write(json.dumps({"op": op_json(op)}, default=str) + newline)
+        for c in calls:
+            write(json.dumps({"call": call_json(c)}, default=str) + newline)
+        return 0
+    print(json.dumps({**header, "ops": [op_json(op) for op in ops], "calls": [call_json(c) for c in calls]}, default=str))
     return 0
 
 

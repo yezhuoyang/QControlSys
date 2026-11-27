@@ -117,10 +117,40 @@ export function place(listing, { d = 3, gap = 2, n: blockSize } = {}) {
     blocks.push({ id, kind: "ancilla", slot, members, from, to, requestedBy: op.uid });
   }
   const positionOf = (k) => (blockMember.has(k) ? blockRc(blockMember.get(k).slot, blockMember.get(k).j) : undefined);
-  // Every other identity is placed one by one; a site is busy over the lifetimes placed on it.
+  // Every other identity is placed one by one; a site is busy over the lifetimes placed on it. The
+  // lifetimes on one site never overlap (each is placed only where it is free), so they are kept
+  // sorted by start, and a lifetime [from, to) is free there unless the last one starting before
+  // `to` ends after `from`: the same test as against every lifetime, in log time.
   const busy = new Map();
-  const free = (rc, from, to) => (busy.get(rc.join(",")) ?? []).every(([a, b]) => to <= a || b <= from);
-  const occupy = (rc, from, to) => (busy.get(rc.join(",")) ?? busy.set(rc.join(","), []).get(rc.join(","))).push([from, to]);
+  const lastBefore = (list, to) => {
+    let lo = 0, hi = list.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (list[mid][0] < to) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo - 1;
+  };
+  const freeAt = (k, from, to) => {
+    const list = busy.get(k);
+    if (!list) return true;
+    const i = lastBefore(list, to);
+    return i < 0 || list[i][1] <= from;
+  };
+  const free = (rc, from, to) => freeAt(rc.join(","), from, to);
+  const occupyAt = (k, from, to) => {
+    const list = busy.get(k) ?? busy.set(k, []).get(k);
+    // After every lifetime that starts earlier, or at the same time and ends no later: the ends stay
+    // sorted too (a zero-length lifetime may share its start with a longer one).
+    let lo = 0, hi = list.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (list[mid][0] < from || (list[mid][0] === from && list[mid][1] <= to)) lo = mid + 1;
+      else hi = mid;
+    }
+    list.splice(lo, 0, [from, to]);
+  };
+  const occupy = (rc, from, to) => occupyAt(rc.join(","), from, to);
   for (const b of blocks.filter((x) => x.kind === "ancilla")) b.members.forEach((m, j) => occupy(blockRc(b.slot, j), b.from, b.to));
   // Factory workspace: the measure sites of the output block's patch.
   const factories = [];
@@ -149,8 +179,10 @@ export function place(listing, { d = 3, gap = 2, n: blockSize } = {}) {
   const candidates = [];
   for (let r = -1.5; r <= d + 0.5 + Math.ceil(spare / Math.max(1, width)); r += 1)
     for (let c = -1.5; c <= width + 0.5 + spare; c += 1) candidates.push([r, c]);
+  const candidateKey = candidates.map((c) => c.join(","));
   // Workspace first (fixed sites), then identities that gate with block qubits, then the rest.
-  const touchesBlock = (k) => [...(partners.get(k)?.keys() ?? [])].some((p) => blockMember.has(p));
+  const touches = new Map();
+  const touchesBlock = (k) => touches.get(k) ?? touches.set(k, [...(partners.get(k)?.keys() ?? [])].some((p) => blockMember.has(p))).get(k);
   const order = [...live.entries()].filter(([k]) => !blockMember.has(k)).sort(([kx, x], [ky, y]) =>
     (workspaceAt.has(ky) - workspaceAt.has(kx)) || (touchesBlock(ky) - touchesBlock(kx)) || x.from - y.from || x.address.index - y.address.index);
   // A patch's measure sites belong to checks of its own block: an ancilla whose block partners
@@ -162,10 +194,7 @@ export function place(listing, { d = 3, gap = 2, n: blockSize } = {}) {
     const slots = [...(partners.get(k)?.keys() ?? [])].map((p) => blockMember.get(p)?.slot);
     return slots.length && slots.every((x) => x !== undefined && x === slots[0]) ? slots[0] : undefined;
   };
-  const allowed = (c, k) => {
-    const slot = patchSlot.get(c.join(","));
-    return slot === undefined || localSlot(k) === slot;
-  };
+  const candidateSlot = candidateKey.map((k) => patchSlot.get(k));
   for (const [k, l] of order) {
     let rc;
     const want = workspaceAt.get(k);
@@ -175,8 +204,10 @@ export function place(listing, { d = 3, gap = 2, n: blockSize } = {}) {
       const slotOf = Math.max(0, Math.min(totalSlots - 1, Math.round(p[1] / pitch)));
       const centre = [(d - 1) / 2, (d - 1) / 2 + slotOf * pitch];
       let bestScore = Infinity;
-      for (const c of candidates) {
-        if (!free(c, l.from, l.to) || !allowed(c, k)) continue;
+      const mine = localSlot(k);
+      for (let i = 0; i < candidates.length; i++) {
+        const c = candidates[i];
+        if (!(candidateSlot[i] === undefined || mine === candidateSlot[i]) || !freeAt(candidateKey[i], l.from, l.to)) continue;
         const score = Math.round(Math.hypot(c[0] - p[0], c[1] - p[1]) * 1e6) - Math.hypot(c[0] - centre[0], c[1] - centre[1]) * 1e-3;
         if (score < bestScore) (bestScore = score), (rc = c);
       }

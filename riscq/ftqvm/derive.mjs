@@ -142,7 +142,12 @@ export function roundContracts(listing, placement, report) {
  * Returns { iterations: [{ spec, verdict, report, sites, listing, placement, design, ... }], final }.
  */
 export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = {}, code = "surface", distance = 3, baseMachine,
-  maxIterations = 5, dir = join(tmpdir(), "quantumos-derive-" + process.pid + "-" + Date.now()), outcomes = {}, contracts = true, staged = false, compileOptions = [], runtimeNs = 1_000_000_000 }) {
+  maxIterations = 5, dir = join(tmpdir(), "quantumos-derive-" + process.pid + "-" + Date.now()), outcomes = {}, contracts = true, staged = false, compileOptions = [], runtimeNs = 1_000_000_000,
+  slim = false }) {
+  // `slim`: an iteration before the latest keeps only its spec, verdict, makespan and the summary of its
+  // report (a medium program's listing, placement and rows take gigabytes per iteration).
+  const slimmed = (it) => ({ spec: it.spec, verdict: it.verdict, verdictDetail: it.verdictDetail, sites: it.sites, makespanNs: it.makespanNs, batches: it.batches,
+    report: { conforms: it.report.conforms, byKind: it.report.byKind, late: it.report.rows.filter((r) => !r.ok).length, rows: it.report.rows.filter((r) => !r.ok).slice(0, 100) } });
   const baseText = readFileSync(baseMachine, "utf8");
   const base = specText.parseMachine(baseText);
   let factories = specText.parseFactories(baseText);
@@ -194,6 +199,7 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
       makespanNs: built.listing.ops.reduce((m, o) => Math.max(m, o.end), -Infinity), batches: result?.summary?.elapsedBatches, slack: slack(report, built.listing) };
   };
   for (let i = 0; i < maxIterations; i++) {
+    if (slim && iterations.length) iterations[iterations.length - 1] = slimmed(iterations.at(-1));
     const it = await attempt(specFor(durations, capacities, base, { gadgets, factories, gridNs, runtimeNs }), "iter" + i);
     iterations.push(it);
     if (it.verdict !== "RESOURCE_VALIDATED") throw Error("The resource VM did not admit iteration " + i + ": " + JSON.stringify(it.verdictDetail).slice(0, 400));
@@ -242,6 +248,7 @@ export async function deriveSpec({ platform, qppm, qec: qecSource, specialize = 
       const note = "peak over the gadget's calls in the conforming run, the interface's charging rule";
       spec.contracts[name] = Object.fromEntries(Object.keys(specText.CONTRACT_FIELDS).map((k) => [k, { value: c[k], source: "measured", note }]));
     }
+    if (slim) iterations[iterations.length - 1] = slimmed(last);
     const it = await attempt(spec, "contracts");
     iterations.push({ ...it, contracts: measured });
   }

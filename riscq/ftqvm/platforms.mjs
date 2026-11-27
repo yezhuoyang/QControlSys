@@ -4,6 +4,10 @@ import { place, gatedPairs } from "./place.mjs";
 import { onDevice } from "./twins.mjs";
 import { chipDesign } from "./sc-chip.mjs";
 import { runListing } from "./sc-run.mjs";
+import { runListingSharded } from "./sc-shards.mjs";
+
+/** A summary run of more operations than this is sharded across Lean processes (riscq/ftqvm/sc-shards.mjs). */
+export const SHARD_OPS = 200_000;
 import { opticalDesign, runOptical, OPTICAL_DESIGNS, PROFILES } from "./optical.mjs";
 
 const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) });
@@ -15,8 +19,10 @@ const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) }
  *   gap              empty lattice columns between code blocks
  *   memWords         words of RAM per control core (default: RISC-Q's x6y3 build; at most 16,384)
  *   trace            "summary" for medium programs: no trace frames, slim pulse records (default "io")
+ *   shards           Lean processes a summary run is split over, by groups of boards (default: one per
+ *                    SHARD_OPS operations, at most 32); 1 runs the whole machine in one process
  */
-export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords, trace } = {}) {
+export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords, trace, shards } = {}) {
   const options = { qubitsPerCore, decoders, coresPerDecoder, ...(memWords ? { memWords } : {}) };
   return {
     name: name ?? "transmon " + JSON.stringify(options),
@@ -24,7 +30,11 @@ export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1,
     gridNs: 2, // 500 MHz RISC-Q board
     place: (listing, { distance }) => place(listing, { d: distance, gap }),
     design: (listing, placement) => chipDesign(listing, placement, options).design,
-    run: (listing, placement, design, { outcomes, distance, guards }) => runListing(listing, placement, design, { outcomes, distance, guards, ...(trace ? { trace } : {}) }),
+    run: (listing, placement, design, { outcomes, distance, guards }) => {
+      const count = shards ?? (trace === "summary" ? Math.min(32, Math.ceil(listing.ops.length / SHARD_OPS)) : 1);
+      return count > 1 ? runListingSharded(listing, placement, design, { outcomes, distance, guards, trace, shards: count })
+        : runListing(listing, placement, design, { outcomes, distance, guards, ...(trace ? { trace } : {}) });
+    },
     capacities: (design, placement, durations) => {
       const sites = placement.sites.length;
       const route = Math.max(2, durations.route_latency_ns?.value ?? 2), reset = Math.max(2, durations.reset_ns?.value ?? 160);
