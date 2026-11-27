@@ -219,7 +219,22 @@ const executable = process.env.QCONTROL_BIN || path.join(root, ".lake", "build",
  * Run or check a document with the Lean executable. A run is stopped after `timeoutMs`: four minutes,
  * or six hours for a summary run (a medium program takes hundreds of millions of steps).
  */
-export function execute(document, { checkTrace = false, timeoutMs = document?.trace === "summary" ? 6 * 3600_000 : 240_000 } = {}) {
+export async function execute(document, options = {}) {
+  // With several Lean processes at once on Windows, the executable sometimes stops at once with
+  // "uncaught exception: invalid argument (error code: 22 ...)" (EINVAL from its I/O) and passes when
+  // run again. The model is deterministic, so a retried run is the same run.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await executeOnce(document, options);
+    } catch (error) {
+      if (attempt >= 3 || !/invalid argument \(error code: 22/.test(error.message)) throw error;
+      console.error("[lean] attempt " + attempt + " stopped on EINVAL; running it again");
+      await new Promise((ok) => setTimeout(ok, 2000 * attempt));
+    }
+  }
+}
+
+function executeOnce(document, { checkTrace = false, timeoutMs = document?.trace === "summary" ? 6 * 3600_000 : 240_000 } = {}) {
   return new Promise((resolve, reject) => {
     const started = Date.now();
     const child = execFile(executable, checkTrace ? ["--check-trace"] : [],

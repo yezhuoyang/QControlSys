@@ -1,4 +1,4 @@
-// Algorithms at medium scale: well-known algorithms on up to 13 logical qubits, encoded in hundreds of
+// Algorithms at medium scale: well-known algorithms on up to 17 logical qubits, encoded in hundreds of
 // physical qubits (more than any reproduced paper's, at most 98), run through the operating system's
 // interface on a superconducting twin with its RISC-Q control system across many boards. Each program is
 // sized so that its whole derivation (compile, run on the twin, derive the specification, until every call
@@ -32,12 +32,21 @@ export const MEDIUM_PROGRAMS = [
   { id: "dj-12", short: "Deutsch–Jozsa", title: "Deutsch–Jozsa on 12 inputs", logical: 13, distance: 3,
     what: "12 inputs in |+⟩ and a target in |−⟩; a balanced oracle f(x) = s·x (s = 101101101101₂) applied as lattice-surgery CNOTs from each input of s onto the target; the inputs read out in X give s, so f is balanced.",
     qppm: join(programsDir, "medium", "dj.qppm"), specialize: { n: 12, s: 2925 } },
-  { id: "adder-2", short: "a Gidney adder", title: "Gidney adder of two 2-bit numbers", logical: 6, distance: 3,
-    what: "A 2-bit ripple-carry adder in Gidney's measured form: its AND gates computed with T states and uncomputed by measurement, whose corrections run only when their measured bits ask for them.",
-    qppm: join(programsDir, "algorithms", "MeasAdder.qppm"), specialize: { n: 2 } },
   { id: "ghz-6-d5", short: "a GHZ state", title: "GHZ state on 6 logical qubits at distance 5", logical: 6, distance: 5,
     what: "6 blocks of the distance-5 surface code in |+⟩ joined by Z⊗Z lattice-surgery merges into a GHZ state, then read out in Z.",
     qppm: join(programsDir, "medium", "ghz-d5.qppm"), specialize: { n: 6 } },
+  { id: "bv-16", short: "Bernstein–Vazirani", title: "Bernstein–Vazirani on 16 inputs", logical: 17, distance: 3,
+    what: "The hidden string s = 1011001110001101₂ of the oracle f(x) = s·x, found with one query: 16 inputs in |+⟩ and a target in |−⟩, a lattice-surgery CNOT from each input where s has a 1, then the inputs read out in X, which give s. It is the Deutsch–Jozsa circuit with a linear oracle; Bernstein–Vazirani asks for s itself.",
+    qppm: join(programsDir, "medium", "dj.qppm"), specialize: { n: 16, s: 45965 } },
+  { id: "teleport-16", short: "teleportation", title: "Teleportation along 16 logical qubits", logical: 16, distance: 3,
+    what: "A logical |+⟩ teleported block to block along a chain of 16: each step prepares the next block in |+⟩, merges the two by Z⊗Z lattice surgery and measures the old block in X; the two outcomes set the next block's X and Z frame corrections. The last block, read out in X, gives +.",
+    qppm: join(programsDir, "medium", "teleport.qppm"), specialize: { n: 16 } },
+  { id: "dj-8-d5", short: "Deutsch–Jozsa", title: "Deutsch–Jozsa on 8 inputs at distance 5", logical: 9, distance: 5,
+    what: "8 inputs and a target in blocks of the distance-5 surface code; the balanced oracle f(x) = s·x (s = 10110101₂) as lattice-surgery CNOTs onto the target; the inputs read out in X give s, so f is balanced.",
+    qppm: join(programsDir, "medium", "dj-d5.qppm"), specialize: { n: 8, s: 181 } },
+  { id: "ghz-10-d5", short: "a GHZ state", title: "GHZ state on 10 logical qubits at distance 5", logical: 10, distance: 5,
+    what: "10 blocks of the distance-5 surface code in |+⟩ joined by Z⊗Z lattice-surgery merges into a GHZ state, then read out in Z.",
+    qppm: join(programsDir, "medium", "ghz-d5.qppm"), specialize: { n: 10 } },
 ];
 /** The whole derivation of one program must finish within this many seconds (the module's header). */
 export const MEDIUM_BUDGET_S = 3600;
@@ -235,7 +244,7 @@ export function mediumStudy() {
     id: "medium", title: "Algorithms at medium scale", kicker: "Scale · well-known algorithms",
     summary: runs.length
       ? capital(listed(runs.map(({ p, r }) => p.short + " on " + p.logical + " logical qubits in " + r.sites + " physical qubits at distance " + r.distance)) + ", each run through the operating system's interface on a superconducting machine whose control system spans " + listed(runs.map(({ r }) => String(r.boards))) + " boards.")
-      : "Well-known algorithms on up to 13 logical qubits, encoded in hundreds of physical qubits. No run is stored yet.",
+      : "Well-known algorithms on up to 17 logical qubits, encoded in hundreds of physical qubits. No run is stored yet.",
     method: [
       "Each algorithm is a logical program. The fault-tolerant compiler lowers it to a QSysASM listing of system calls against the machine's system specification, and its resource VM admits the listing. The OS then executes every system call at its listed time on the control system, and durations the hardware needed enter the next specification until every call fits its window.",
       "The machine is " + MACHINE_TEXT + ". Every core runs firmware compiled from the listing in the cycle-exact model of RISC-Q; boards exchange measured bits and barriers over their PutLanes.",

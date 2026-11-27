@@ -6,8 +6,8 @@ import { chipDesign } from "./sc-chip.mjs";
 import { runListing } from "./sc-run.mjs";
 import { runListingSharded } from "./sc-shards.mjs";
 
-/** A summary run of more operations than this is sharded across Lean processes (riscq/ftqvm/sc-shards.mjs). */
-export const SHARD_OPS = 200_000;
+/** A summary run of more operations than this is sharded across Lean processes, one per this many (riscq/ftqvm/sc-shards.mjs). */
+export const SHARD_OPS = 100_000;
 import { opticalDesign, runOptical, OPTICAL_DESIGNS, PROFILES } from "./optical.mjs";
 
 const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) });

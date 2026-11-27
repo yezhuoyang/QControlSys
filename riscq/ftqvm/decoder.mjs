@@ -61,10 +61,20 @@ export function saveDecoderTimes() {
 export const PUBLISH_NS = 76;
 
 /** The decoding jobs of one decode operation. `d` is the code distance of the blocks. */
+// Per listing: which measurement wrote each record, and each address's two-qubit partners. The same for
+// every decode of a run, so computed once (a medium program has thousands of decodes).
+const indexOfListing = new WeakMap();
+function listingIndex(listing) {
+  if (!indexOfListing.has(listing)) {
+    const writer = new Map();
+    for (const o of listing.ops) if (o.kind === "measure") for (const w of o.writes) writer.set(w.register + "[" + w.index + "]", o);
+    indexOfListing.set(listing, { writer, partners: analyze(listing).partners });
+  }
+  return indexOfListing.get(listing);
+}
+
 export function jobsOf(listing, op, placement, d) {
-  const writer = new Map();
-  for (const o of listing.ops) if (o.kind === "measure") for (const w of o.writes) writer.set(w.register + "[" + w.index + "]", o);
-  const { partners } = analyze(listing);
+  const { writer, partners } = listingIndex(listing);
   // Helios decodes the rotated surface code (blocks of d² qubits); other codes use the lookup.
   const n = placement.n ?? d * d, surface = n === d * d;
   const groups = new Map();
