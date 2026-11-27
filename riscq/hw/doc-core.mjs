@@ -105,6 +105,13 @@ function ionDevice(sites, device, label) {
       const z = zones[s.at[0] % n];
       return [round(z.x + (s.at[1] - 0.5) * 0.005), 0.07, z.z];
     };
+  } else if (device.zones?.length) {
+    // The trap's own zones (a native run's architecture: riscq/hw on studio/hw/from-run.js), in µm, and its segments.
+    const pts = [...device.zones.map((z) => [z.at[0] / 1000, z.at[1] / 1000]), ...sites.map((s) => [s.at[0] / 1000, s.at[1] / 1000])];
+    const [x0, y0] = bounds(pts);
+    zones = device.zones.map((z) => ({ id: z.id, x: round(z.at[0] / 1000 - x0), z: round(z.at[1] / 1000 - y0), zone: z.zone ?? "gate" }));
+    edges = (device.edges ?? []).filter(([a, b]) => zones.some((z) => z.id === a) && zones.some((z) => z.id === b));
+    ionAt = (s) => [round(s.at[0] / 1000 - x0), 0.07, round(s.at[1] / 1000 - y0)];
   } else {
     const pts = sites.map((s) => [s.at[0] / 1000, s.at[1] / 1000]);
     const [x0, y0] = bounds(pts);
@@ -122,7 +129,7 @@ function ionDevice(sites, device, label) {
   const xs = zones.map((z) => z.x), zs = zones.map((z) => z.z);
   // How the run's track places an ion: a race-track zone index (one of layout.sites), or a position in µm.
   const trackFrame = device.ring ? { kind: "ring", zones: zones.map((z) => z.id), heightMm: 0.07 }
-    : { kind: "um", originMm: bounds(sites.map((s) => [s.at[0] / 1000, s.at[1] / 1000])).slice(0, 2).map(round), heightMm: 0.07 };
+    : { kind: "um", originMm: bounds([...(device.zones ?? []).map((z) => [z.at[0] / 1000, z.at[1] / 1000]), ...sites.map((s) => [s.at[0] / 1000, s.at[1] / 1000])]).slice(0, 2).map(round), heightMm: 0.07 };
   return {
     kind: "ion", label, centerMm: t.centerMm,
     qubits: sites.map((s, i) => ({ id: "q[" + i + "]", site: (s.kind ?? "ion") + " " + i, positionMm: ionAt(s) })),

@@ -154,6 +154,7 @@ const routes = new Map([
   ["/hw/editor2d.js", "studio/hw/editor2d.js"],
   ["/hw/machine3d.js", "studio/hw/machine3d.js"],
   ["/hw/doc-core.mjs", "riscq/hw/doc-core.mjs"],
+  ["/hw/from-run.js", "studio/hw/from-run.js"],
 ]);
 const mime = {
   ".mjs": "text/javascript",

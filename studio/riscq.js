@@ -1278,6 +1278,7 @@ function paint() {
     if (current) $("sourceText").scrollTop = Math.max(0, current.offsetTop - $("sourceText").clientHeight / 2);
   }
   scene.show(frame, state, frame ? model.causalPath(run, frame.id) : [], chosen, fault);
+  twin?.setTime(((state.atBatch - twinBase) * period()) / 1000);
   paintInspector(frame, fault);
   timeline.show(state.atBatch, frame?.part, chosen);
   paintPlatform();
@@ -1328,6 +1329,7 @@ function show(bundle, text, keepStep) {
   $("step").max = run.frames.length;
   for (const id of ["step", "export", "play"]) $(id).disabled = false;
   scene.setSystem(run.system);
+  mountMachineView();
   timeline.setRun(run);
   traceList.setCount(run.frames.length);
   paintRun();
@@ -1379,6 +1381,42 @@ $("example").onchange = (e) => {
 };
 $("fullTrace").onchange = () => program && load(program, false);
 $("resetView").onclick = () => scene.home();
+
+// The machine: every run plays on its hardware document, the machine the design page (/riscq-design)
+// builds (studio/hw/machine3d.js through studio/reproduce/twin3d.js), set to the batch of the step shown.
+// "Controller schematic" shows this debugger's own scene of cores, links, channels and converters.
+let twin = null, twinBox = null, twinBase = 0, machineView = "device";
+async function mountMachineView() {
+  twin?.dispose();
+  twin = null;
+  twinBox?.remove();
+  twinBox = null;
+  if (!run || machineView === "schematic") return;
+  const mine = run;
+  let track = run.derived?.track;
+  twinBase = run.derived?.trackBaseBatch ?? 0;
+  if (!track) {
+    const { trackFromBundle } = await import("/hw/from-run.js");
+    try { track = trackFromBundle(run); twinBase = 0; } catch (error) { note("The machine could not be drawn for this run: " + error.message); }
+  }
+  if (!track || mine !== run || machineView === "schematic") return;
+  const { mountTwin } = await import("/reproduce/twin3d.js");
+  twinBox = document.createElement("div");
+  twinBox.className = "machine-twin";
+  $("viewport").append(twinBox);
+  twin = mountTwin(twinBox, track, { external: true });
+  twin.setView(machineView);
+  schedule();
+}
+for (const b of document.querySelectorAll("[data-mview]"))
+  b.onclick = () => {
+    const was = machineView;
+    machineView = b.dataset.mview;
+    for (const x of document.querySelectorAll("[data-mview]")) x.setAttribute("aria-pressed", String(x === b));
+    $("viewTitle").textContent = machineView === "schematic" ? "Controller schematic" : "The machine";
+    if (machineView === "schematic" || was === "schematic" || !twin) mountMachineView();
+    else twin.setView(machineView);
+  };
 $("timelineFit").onclick = () => timeline.whole();
 $("back").onclick = () => jump(index - 1);
 $("next").onclick = () => jump(index + 1);

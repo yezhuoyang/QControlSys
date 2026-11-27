@@ -528,3 +528,10 @@ h3.sub {
     margin-left: 0;
   }
 }
+
+/* The machine (studio/hw/machine3d.js) over the controller schematic, below the view bar. */
+.machine-twin { position: absolute; inset: 46px 0 0 0; z-index: 2; }
+.machine-twin .twin-stage { height: 100%; border-radius: 0; }
+.viewport .viewbar { position: relative; z-index: 3; }
+.machine-views { display: flex; gap: 4px; flex-wrap: wrap; }
+.machine-views button[aria-pressed="true"] { background: #1d2b4f; color: #fff; border-color: #1d2b4f; }

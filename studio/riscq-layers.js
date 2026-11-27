@@ -476,7 +476,7 @@ export function ionPositions(bundle, atBatch) {
  * `x` and `y` are the tone channel parts that carry the atom. A job runs from the first window of
  * its pickup to the last window of its drop.
  */
-function atomJobs(bundle) {
+export function atomJobs(bundle) {
   return memo(bundle, "atomJobs", () => {
     const windows = new Map();
     for (const r of bundle.summary?.pulses ?? []) {

@@ -7,6 +7,7 @@
     <link rel="icon" href="/quantumos.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/riscq.css" />
+    <link rel="stylesheet" href="/reproduce/twin3d.css" />
     <script type="importmap">
       { "imports": { "three": "/three/three.module.js" } }
     </script>
@@ -57,8 +58,11 @@
         <section class="physical" aria-label="Controller schematic and stepping">
           <div class="viewport" id="viewport">
             <div class="viewbar">
-              <span class="view-title">Controller schematic</span>
-              <div><button id="resetView">Reset view</button></div>
+              <span class="view-title" id="viewTitle">The machine</span>
+              <div class="machine-views" role="group" aria-label="View">
+                <button type="button" data-mview="all" aria-pressed="false">Whole machine</button><button type="button" data-mview="device" aria-pressed="true">Device</button><button type="button" data-mview="control" aria-pressed="false">Control system</button><button type="button" data-mview="schematic" aria-pressed="false" title="The controller's cores, links, channels and converters, with the causal path of each step">Controller schematic</button>
+                <button id="resetView">Reset view</button>
+              </div>
             </div>
             <div id="labels"></div>
             <div class="legend" aria-label="Highlight colours">

@@ -121,8 +121,10 @@ const stage = createWorkspaceStage($("viewport"), {
   hover: (id, x, y) => (id ? card(partCard(id), x, y) : card(null)),
 });
 
-// A reproduced paper's run (riscq/ftqvm/studio-runs.mjs) carries the track its reproduce page plays: the
-// stage is then that same 3D twin (studio/reproduce/twin3d.js), set to the machine time of this step.
+// Every run plays on its hardware document, the machine the design page (/riscq-design) builds
+// (studio/hw/machine3d.js through studio/reproduce/twin3d.js), set to the machine time of this step. A
+// reproduced paper's run (riscq/ftqvm/studio-runs.mjs) carries the track its reproduce page plays; a
+// Workspace run's track is derived from its trace and geometry (studio/hw/from-run.js).
 let twin = null, twinBox = null;
 const TWIN_VIEW = { chip: "device", control: "control", machine: "all" };
 async function mountReproduction() {
@@ -130,7 +132,13 @@ async function mountReproduction() {
   twin = null;
   twinBox?.remove();
   twinBox = null;
-  const track = run?.derived?.track;
+  let track = run?.derived?.track;
+  if (!track && run) {
+    const mine = run, { trackFromBundle } = await import("/hw/from-run.js");
+    if (mine !== run) return;
+    try { track = trackFromBundle(run); } catch (error) { note("The machine could not be drawn for this run: " + error.message); }
+    if (track) (run.derived ??= {}).trackBaseBatch = 0;
+  }
   if (!track) return;
   const { mountTwin } = await import("/reproduce/twin3d.js");
   twinBox = document.createElement("div");
