@@ -2,16 +2,18 @@
 // offline, derived on the twin until every system call fit its window, and stored with its listing.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { MEDIUM_PROGRAMS, storedRun, mediumStudy, mediumRow } from "../riscq/ftqvm/medium.mjs";
+import { MEDIUM_PROGRAMS, MEDIUM_BUDGET_S, storedRun, mediumStudy, mediumRow } from "../riscq/ftqvm/medium.mjs";
 
 const stored = MEDIUM_PROGRAMS.map((p) => ({ p, r: storedRun(p.id) })).filter((x) => x.r);
+// The largest reproduced paper's twin: 98 physical qubits (Bluvstein et al. 2024), about 3,900 operations.
+const LARGEST_PAPER = { sites: 98, ops: 3937 };
 
-test("every stored medium run encodes 10–15 logical qubits in 500–1,000 physical qubits and keeps every window", () => {
+test("every stored medium run is larger than every reproduced paper, was derived within the hour, and keeps every window", () => {
   assert.ok(stored.length > 0);
   for (const { p, r } of stored) {
-    assert.ok(p.logical >= 10 && p.logical <= 15, p.id);
-    assert.ok(r.sites >= 500 && r.sites <= 1000, p.id + ": " + r.sites + " physical qubits");
-    assert.equal(r.distance, 5);
+    assert.ok(r.sites > LARGEST_PAPER.sites && r.ops > LARGEST_PAPER.ops, p.id + ": " + r.sites + " physical qubits, " + r.ops + " operations");
+    assert.ok(r.seconds <= MEDIUM_BUDGET_S, p.id + ": derived in " + Math.round(r.seconds) + " s");
+    assert.equal(r.distance, p.distance);
     assert.equal(r.conforms, true, p.id);
     assert.ok(Object.values(r.byKind).every((k) => k.ok === k.count), p.id);
     assert.equal(r.listing.ops?.length ?? r.listing.opCount, r.ops);

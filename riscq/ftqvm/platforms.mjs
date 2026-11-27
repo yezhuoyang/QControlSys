@@ -19,10 +19,13 @@ const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) }
  *   gap              empty lattice columns between code blocks
  *   memWords         words of RAM per control core (default: RISC-Q's x6y3 build; at most 16,384)
  *   trace            "summary" for medium programs: no trace frames, slim pulse records (default "io")
+ *   factories        magic-state injections the chip runs at once (default 1). Each is realized on its
+ *                    output block's own patch (riscq/ftqvm/sc-run.mjs factoryNatives), so injections on
+ *                    different blocks share no hardware; the compiler schedules up to this many at once
  *   shards           Lean processes a summary run is split over, by groups of boards (default: one per
  *                    SHARD_OPS operations, at most 32); 1 runs the whole machine in one process
  */
-export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords, trace, shards } = {}) {
+export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords, trace, shards, factories = 1 } = {}) {
   const options = { qubitsPerCore, decoders, coresPerDecoder, ...(memWords ? { memWords } : {}) };
   return {
     name: name ?? "transmon " + JSON.stringify(options),
@@ -40,7 +43,7 @@ export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1,
       const route = Math.max(2, durations.route_latency_ns?.value ?? 2), reset = Math.max(2, durations.reset_ns?.value ?? 160);
       return {
         qubits: v(sites, "derived", "one transmon per placed site"),
-        factories: v(1, "provisional", "no factory realized yet"),
+        factories: v(factories, "design", factories + " injection(s) at once, each on its output block's patch (riscq/ftqvm/sc-run.mjs factoryNatives)"),
         max_parallel_gates: v(sites, "derived", "every transmon has its own drive and coupler channels"),
         decoders: v(decoders, "derived", decoders + " decoder unit(s) of " + coresPerDecoder + " core(s)"),
         classical_data_bandwidth: v(500, "derived", "the board hub carries one put of one bit per batch at 500 MHz (riscq/limits.mjs)"),
