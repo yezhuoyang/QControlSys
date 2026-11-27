@@ -215,7 +215,8 @@ export async function render(root, toc) {
   html += h2("hdl", "2", "The hardware description language");
   html += `<p>A machine is a document: the parts with their positions in mm, the channels of the control cores, the wires with their routed
   paths, the calibrated pulses of every qubit and coupler. Nothing in it names a platform. <code>riscq/design.mjs</code> checks it and
-  derives the RISC-Q build from it. The <a href="/riscq-design">design editor</a> writes it.</p>`;
+  derives the RISC-Q build from it. The <a href="/riscq-design/wiring">wiring editor</a> writes it;
+  the <a href="/riscq-design">3D design page</a> builds the version-2 document from the same parts.</p>`;
   html += h3("h-syntax", "2.1 Syntax");
   html += bnf(HDL_BNF);
   html += `<p>Units: lengths mm, times ns, frequencies Hz, amplitudes a fraction of the DAC's full scale, phases rad. A qubit is addressed in
