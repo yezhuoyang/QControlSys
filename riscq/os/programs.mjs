@@ -96,7 +96,7 @@ class Program {
   magic(at) {
     const out = (j) => "ancilla[" + (at + j) + "]", ws = "ancilla[" + (at + N) + ":" + (at + N + 7) + "]";
     this.op("request_ancilla  count=" + N + "  ancilla[" + at + ":" + (at + N - 1) + "]");
-    this.op("request_magic  state=|T>  ancilla[" + at + ":" + (at + N - 1) + "]  with  " + ws);
+    this.op("ancilla[" + at + ":" + (at + N - 1) + "]  request_magic  state=|T>  with  " + ws);
     this.op("release_ancilla  count=8  " + ws);
     return { name: out, text: "ancilla[" + at + ":" + (at + N - 1) + "]" };
   }
