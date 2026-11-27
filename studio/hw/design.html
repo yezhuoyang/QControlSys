@@ -20,6 +20,8 @@
       <button type="button" data-view="control">Control system</button>
     </div>
     <button type="button" id="build">Build from scratch</button>
+    <button type="button" id="present" title="Full screen (F); fly with the keyboard">Present</button>
+    <button type="button" id="keys" title="The keyboard keys (?)">Keys</button>
     <button type="button" id="undo" disabled>Undo</button>
     <button type="button" id="save">Save</button>
     <label class="btn">Open file<input type="file" id="file" accept=".json,application/json" hidden></label>
@@ -33,7 +35,7 @@
     <div id="outline" class="outline"></div>
   </aside>
   <main class="hw-stage" id="stage">
-    <div class="stage-note" id="note">Drag to orbit · scroll to zoom · click a part to select it, then drag its arrows to move it.</div>
+    <div class="stage-note" id="note">Drag to orbit · scroll to zoom · click a part to select it (Esc to let go), then drag its arrows · fly with ↑ ↓ ← → W A S D Q E · 1 2 3 views · F present · ? keys</div>
     <div class="caption" id="caption" hidden></div>
   </main>
   <aside class="hw-right">

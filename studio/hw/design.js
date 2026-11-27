@@ -5,7 +5,7 @@
 // (the chip, the atom array, the trap, a board's cores) open a 2D detail editor (studio/hw/editor2d.js).
 import * as T from "three";
 import { TransformControls } from "/three/TransformControls.js";
-import { createStage, buildScene, showView } from "/hw/machine3d.js";
+import { createStage, buildScene, showView, highlight } from "/hw/machine3d.js";
 import { openDetail } from "/hw/editor2d.js";
 
 const $ = (id) => document.getElementById(id);
@@ -56,6 +56,19 @@ function setView(v) {
   showView(stage, current, doc, v);
 }
 document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => setView(b.dataset.view)));
+// Keys 1, 2, 3 switch the views; Escape lets go of the selection; F presents; ? lists the keys.
+stage.setViewKeys((v) => setView(v));
+addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !selected || e.target?.closest?.("input, select, textarea")) return;
+  selected = null;
+  gizmo.detach();
+  highlight(current, null);
+  paintInspector();
+  $("outline").querySelectorAll("[data-part]").forEach((b) => b.setAttribute("aria-current", "false"));
+  render();
+});
+$("present").onclick = () => stage.keys.present();
+$("keys").onclick = () => stage.keys.toggleHelp();
 
 // ---------------------------------------------------------------- what the document holds
 const roleCount = (cores) => Object.entries(cores.reduce((m, c) => ((m[c.role] = (m[c.role] ?? 0) + 1), m), {})).map(([r, n]) => n + " " + r).join(", ");
@@ -135,6 +148,9 @@ function select(id, { focus = false } = {}) {
   selected = id;
   const g = groups.get(id);
   if (g) gizmo.attach(g); else gizmo.detach();
+  // The chosen part keeps its colours; the rest of the machine turns translucent.
+  highlight(current, g ? [id] : null);
+  render();
   if (focus && g) fit([g]);
   paintInspector();
   $("outline").querySelectorAll("[data-part]").forEach((b) => b.setAttribute("aria-current", String(b.dataset.part === id)));

@@ -26,8 +26,36 @@ export async function documentForTrack(track, options = {}) {
   return documentFromTrack(track, options);
 }
 
-/** The stage both pages share: renderer, lights, floor grid, orbit camera, render on demand. */
-export function createStage(host, { canvas } = {}) {
+// ---------------------------------------------------------------- keyboard flight
+// Every stage can be flown from the keyboard, as in a 3D game. Keys go to the stage the user last
+// pointed at or clicked (a page may hold several, such as a list of cards), never while typing in a field.
+export const KEYS_HELP = [
+  ["\u2191 \u2193 or W S", "fly forward, back"], ["\u2190 \u2192", "turn left, right"], ["A D", "strafe left, right"], ["Q E", "rise, sink"],
+  ["Z X", "orbit round what you look at"], ["+ \u2212", "zoom in, out"], ["Shift", "faster"], ["1 2 3", "whole machine \u00b7 device \u00b7 control system"],
+  ["R or Home", "reset the view"], ["F", "present: full screen"], ["?", "show or hide these keys"],
+];
+let activeStage = null;
+const typing = (e) => e.target?.closest?.("input, select, textarea, [contenteditable=true]") || e.ctrlKey || e.metaKey || e.altKey;
+const FLY = new Set(["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d", "q", "e", "z", "x", "+", "=", "-", "_", "pageup", "pagedown"]);
+addEventListener("keydown", (e) => {
+  const st = activeStage;
+  if (!st || typing(e) || !st.host.isConnected) return;
+  const k = e.key.toLowerCase();
+  // A stage inside a page that steps with ← → (the Workspace, the debugger, /schedule) leaves those keys,
+  // Home, F and 1 2 3 to the page.
+  if (st.mode === "fly" && ["arrowleft", "arrowright", "home", "f", "1", "2", "3"].includes(k)) return;
+  if (FLY.has(k)) { e.preventDefault(); st.press(k, e.shiftKey); return; }
+  if (k === "shift") return st.press("shift", true);
+  if (k === "?" || (k === "/" && e.shiftKey)) { e.preventDefault(); return st.toggleHelp(); }
+  if (k === "f") { e.preventDefault(); return st.present(); }
+  if (k === "r" || k === "home") { e.preventDefault(); return st.reset(); }
+  if (["1", "2", "3"].includes(k) && st.onView) { e.preventDefault(); st.onView(["all", "device", "control"][Number(k) - 1]); }
+});
+addEventListener("keyup", (e) => activeStage?.release(e.key.toLowerCase()));
+addEventListener("blur", () => activeStage?.release(null));
+
+/** The stage both pages share: renderer, lights, floor grid, orbit camera, render on demand, keyboard flight. */
+export function createStage(host, { canvas, keys = "full" } = {}) {
   const renderer = new T.WebGLRenderer({ antialias: true, ...(canvas ? { canvas } : {}) });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   if (!canvas) host.prepend(renderer.domElement);
@@ -59,8 +87,10 @@ export function createStage(host, { canvas } = {}) {
   };
   const observer = new ResizeObserver(resize);
   observer.observe(host);
-  /** Point the camera at objects (or a Box3). */
+  /** Point the camera at objects (or a Box3). The last fit is what "reset" returns to. */
+  let lastFit = null;
   function fit(objects, { dir = new T.Vector3(0.55, 0.62, 1) } = {}) {
+    lastFit = [objects, { dir }];
     const box = objects instanceof T.Box3 ? objects.clone() : new T.Box3();
     if (!(objects instanceof T.Box3)) for (const o of objects) box.expandByObject(o);
     if (box.isEmpty()) return;
@@ -74,10 +104,134 @@ export function createStage(host, { canvas } = {}) {
     orbit.update();
     render();
   }
-  return {
-    renderer, scene, camera, orbit, grid, render, fit,
-    dispose() { disposed = true; observer.disconnect(); orbit.dispose(); renderer.dispose(); renderer.forceContextLoss(); },
+  // Keyboard flight: held keys move the camera and what it looks at together, at a speed that scales
+  // with the distance to what it looks at (a chip and a fridge fly alike); turning swings the target
+  // round the camera, orbiting swings the camera round the target.
+  const held = new Set();
+  let fast = false, flying = false, last = 0;
+  const v = new T.Vector3(), fwd = new T.Vector3(), right = new T.Vector3(), up = new T.Vector3(0, 1, 0);
+  function step(now) {
+    if (disposed || !held.size) { flying = false; return; }
+    const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+    last = now;
+    const dist = camera.position.distanceTo(orbit.target), speed = dist * (fast ? 2.4 : 0.8) * dt, turn = (fast ? 2.2 : 1.1) * dt;
+    camera.getWorldDirection(fwd);
+    right.crossVectors(fwd, up).normalize();
+    v.set(0, 0, 0);
+    if (held.has("arrowup") || held.has("w")) v.addScaledVector(fwd, speed);
+    if (held.has("arrowdown") || held.has("s")) v.addScaledVector(fwd, -speed);
+    if (held.has("a")) v.addScaledVector(right, -speed);
+    if (held.has("d")) v.addScaledVector(right, speed);
+    if (held.has("q") || held.has("pageup")) v.addScaledVector(up, speed);
+    if (held.has("e") || held.has("pagedown")) v.addScaledVector(up, -speed);
+    camera.position.add(v);
+    orbit.target.add(v);
+    const yaw = (held.has("arrowleft") ? 1 : 0) - (held.has("arrowright") ? 1 : 0);
+    if (yaw) {
+      const d = orbit.target.clone().sub(camera.position).applyAxisAngle(up, yaw * turn);
+      orbit.target.copy(camera.position).add(d);
+    }
+    const spin = (held.has("z") ? 1 : 0) - (held.has("x") ? 1 : 0);
+    if (spin) {
+      const d = camera.position.clone().sub(orbit.target).applyAxisAngle(up, spin * turn);
+      camera.position.copy(orbit.target).add(d);
+    }
+    const zoom = (held.has("+") || held.has("=") ? 1 : 0) - (held.has("-") || held.has("_") ? 1 : 0);
+    if (zoom > 0) camera.position.lerp(orbit.target, Math.min(0.5, (fast ? 2.5 : 1.2) * dt));
+    if (zoom < 0) camera.position.add(camera.position.clone().sub(orbit.target).multiplyScalar((fast ? 2.5 : 1.2) * dt));
+    const range = camera.position.distanceTo(orbit.target);
+    camera.near = Math.max(1e-6, range / 150);
+    camera.far = Math.max(camera.near * 1e4, range * 60);
+    camera.updateProjectionMatrix();
+    camera.lookAt(orbit.target);
+    orbit.update();
+    render();
+    requestAnimationFrame(step);
+  }
+  // The keys panel, shown with "?".
+  const help = document.createElement("div");
+  help.className = "hw-keys";
+  help.hidden = true;
+  const shown = keys === "fly" ? KEYS_HELP.filter(([k]) => !/^(\u2190|1 2 3|F$|R or Home)/.test(k) && !k.startsWith("←")) : KEYS_HELP;
+  help.innerHTML = "<b>Fly with the keyboard</b><dl>" + shown.map(([k, d]) => `<dt>${k}</dt><dd>${d}</dd>`).join("") + "</dl>";
+  Object.assign(help.style, { position: "absolute", right: "10px", top: "10px", zIndex: 5, background: "#0d1b20ee", color: "#eaf4f1", padding: "8px 12px",
+    borderRadius: "8px", font: "12px system-ui, sans-serif", maxWidth: "320px", pointerEvents: "none" });
+  if (!document.getElementById("hw-keys-style")) {
+    const st = document.createElement("style");
+    st.id = "hw-keys-style";
+    st.textContent = ".hw-keys dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:6px 0 0}.hw-keys dt{font-family:ui-monospace,monospace;color:#ffd27a}.hw-keys dd{margin:0}.hw-keys[hidden]{display:none}";
+    document.head.append(st);
+  }
+  if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  host.append(help);
+  const me = {
+    host, onView: null, mode: keys,
+    press(k, shift) {
+      fast = shift || fast;
+      if (k === "shift") return;
+      held.add(k);
+      if (!flying) { flying = true; last = performance.now(); requestAnimationFrame(step); }
+    },
+    release(k) {
+      if (k === null) { held.clear(); fast = false; return; }
+      if (k === "shift") fast = false;
+      held.delete(k);
+    },
+    toggleHelp() { help.hidden = !help.hidden; },
+    present() {
+      if (document.fullscreenElement) document.exitFullscreen?.();
+      else host.requestFullscreen?.().catch(() => {});
+    },
+    reset() { if (lastFit) fit(...lastFit); },
   };
+  const claim = () => (activeStage = me);
+  renderer.domElement.tabIndex = 0;
+  renderer.domElement.style.outline = "none";
+  for (const ev of ["pointerdown", "pointerenter", "focus", "wheel"]) renderer.domElement.addEventListener(ev, claim, { passive: true });
+  if (!activeStage) activeStage = me;
+  return {
+    renderer, scene, camera, orbit, grid, render, fit, keys: me,
+    /** What 1, 2 and 3 do on this stage: fn("all" | "device" | "control"). */
+    setViewKeys(fn) { me.onView = fn; },
+    dispose() {
+      disposed = true;
+      if (activeStage === me) activeStage = null;
+      help.remove();
+      observer.disconnect(); orbit.dispose(); renderer.dispose(); renderer.forceContextLoss();
+    },
+  };
+}
+
+/**
+ * Highlight parts of a scene by opacity: the parts named in `ids` keep their colours, every other part
+ * of the machine turns translucent so the chosen ones stand out. `ids` null or empty restores all.
+ */
+export function highlight(sceneObj, ids) {
+  const keep = new Set(ids ?? []), dim = keep.size > 0;
+  const faded = (sceneObj._faded ??= new Map());
+  sceneObj.root.traverse((o) => {
+    if (!o.isMesh && !o.isLine) return;
+    let g = o;
+    while (g && g.parent !== sceneObj.root) g = g.parent;
+    const part = g?.userData.part;
+    if (!dim || (part && keep.has(part))) {
+      if (o.userData.original) { o.material = o.userData.original; delete o.userData.original; }
+      return;
+    }
+    const own = o.userData.original ?? o.material;
+    o.userData.original = own;
+    const ghost = (m) => {
+      if (!faded.has(m)) {
+        const c = m.clone();
+        c.transparent = true;
+        c.opacity = Math.min(m.opacity ?? 1, 0.13);
+        c.depthWrite = false;
+        faded.set(m, c);
+      }
+      return faded.get(m);
+    };
+    o.material = Array.isArray(own) ? own.map(ghost) : ghost(own);
+  });
 }
 
 /**
@@ -157,7 +311,7 @@ export function mountMachine(root, track, { caption = "", external = false, comp
   if (external) for (const sel of [".twin-controls", ".twin-caption", ".twin-views"]) root.querySelector(sel).style.display = "none";
   if (compact) for (const sel of [".twin-controls", ".twin-caption"]) root.querySelector(sel).style.display = "none";
   const stageEl = root.querySelector(".twin-stage"), hudTime = root.querySelector(".twin-time"), hudNow = root.querySelector(".twin-now");
-  const stage = createStage(stageEl, { canvas: root.querySelector("canvas") });
+  const stage = createStage(stageEl, { canvas: root.querySelector("canvas"), keys: external ? "fly" : "full" });
   const endNs = Math.max(1, track.endNs ?? 1), events = track.events ?? [];
   let t = 0, playing = !(compact && matchMedia("(prefers-reduced-motion: reduce)").matches), speed = 1, last = performance.now(), disposed = false;
   let view = firstView, scene = null, doc = null, anim = null;
@@ -168,6 +322,7 @@ export function mountMachine(root, track, { caption = "", external = false, comp
   controlsEl.querySelector('[data-act="restart"]').onclick = () => { t = 0; playing = true; playBtn.textContent = "Pause"; };
   controlsEl.querySelector('[data-act="speed"]').onchange = (e) => (speed = Number(e.target.value));
   scrub.oninput = () => { t = (Number(scrub.value) / 1000) * endNs; };
+  stage.setViewKeys((v) => setView(v));
   const viewsEl = root.querySelector(".twin-views");
   const setView = (v) => {
     view = v;

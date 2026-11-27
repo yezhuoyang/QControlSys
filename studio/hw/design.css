@@ -85,3 +85,4 @@ h2 { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: 
 #playstage .twin-controls { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; align-items: center; padding: 6px 10px; }
 #playstage .twin-controls input[type=range] { flex: 1 1 auto; }
 #playstage .twin-caption { display: none; }
+.hw-bar button, .hw-bar .btn { white-space: nowrap; }
