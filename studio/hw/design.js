@@ -4,9 +4,8 @@
 // the document's RISC-Q boards; the run pages draw the same document. Parts that are 2D in nature
 // (the chip, the atom array, the trap, a board's cores) open a 2D detail editor (studio/hw/editor2d.js).
 import * as T from "three";
-import { OrbitControls } from "/three/OrbitControls.js";
 import { TransformControls } from "/three/TransformControls.js";
-import { installation, buildMachine } from "/machine-scene.js";
+import { createStage, buildScene, showView } from "/hw/machine3d.js";
 import { openDetail } from "/hw/editor2d.js";
 
 const $ = (id) => document.getElementById(id);
@@ -14,40 +13,19 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const DEVICE_KIND = { superconducting: "transmon", neutral: "atom", qccd: "ion" };
 const PLATFORM_WORD = { superconducting: "Superconducting", neutral: "Neutral atoms", qccd: "Trapped ions" };
 const ZCU216_MM = [180, 14, 130];
-const STUB = { pickQubit() {}, pickConductor() {}, probeValue: () => null };
 const round = (v) => Math.round(v * 10) / 10;
 
-let doc = null, system = null, built = null, selected = null, undoStack = [], partIds = new Set();
-const groups = new Map();
+let doc = null, system = null, built = null, current = null, selected = null, undoStack = [], partIds = new Set();
+let groups = new Map();
 
-// ---------------------------------------------------------------- the stage
+// ---------------------------------------------------------------- the stage (shared with the run pages: studio/hw/machine3d.js)
 const host = $("stage");
-const renderer = new T.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-host.prepend(renderer.domElement);
-const scene = new T.Scene();
-scene.background = new T.Color(0x20343a);
-scene.add(new T.HemisphereLight(0xf1faf8, 0x839890, 2.3));
-const sun = new T.DirectionalLight(0xfff0d4, 2.4);
-sun.position.set(-400, 900, 600);
-scene.add(sun);
-const grid = new T.GridHelper(6000, 120, 0x4d6c72, 0x31505a);
-grid.position.y = -2.5;
-scene.add(grid);
-const camera = new T.PerspectiveCamera(38, 1, 0.01, 80000);
-const orbit = new OrbitControls(camera, renderer.domElement);
-// Render on demand: a machine of hundreds of parts is drawn again only when the view or the document changes.
-let pending = false;
-const render = () => {
-  if (pending) return;
-  pending = true;
-  requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); });
-};
-orbit.addEventListener("change", render);
+const stage = createStage(host);
+const { renderer, camera, orbit, render, fit } = stage;
 const gizmo = new TransformControls(camera, renderer.domElement);
 gizmo.setMode("translate");
 gizmo.setSize(0.8);
-scene.add(gizmo.getHelper());
+stage.scene.add(gizmo.getHelper());
 gizmo.addEventListener("change", render);
 let moving = false;
 gizmo.addEventListener("dragging-changed", (e) => {
@@ -55,45 +33,14 @@ gizmo.addEventListener("dragging-changed", (e) => {
   if (e.value) moving = true;
   else { moving = false; commitMove(); }
 });
-new ResizeObserver(() => {
-  const w = host.clientWidth, h = host.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / Math.max(1, h);
-  camera.updateProjectionMatrix();
-  render();
-}).observe(host);
-
-/** Point the camera at a set of scene objects. */
-function fit(objects, { dir = new T.Vector3(0.55, 0.62, 1) } = {}) {
-  const box = new T.Box3();
-  for (const o of objects) box.expandByObject(o);
-  if (box.isEmpty()) return;
-  const c = box.getCenter(new T.Vector3()), r = box.getSize(new T.Vector3()).length() / 2;
-  const dist = r / Math.sin((camera.fov * Math.PI) / 360) * 1.05;
-  camera.position.copy(c).add(dir.clone().normalize().multiplyScalar(dist));
-  camera.near = Math.max(0.0005, dist / 150);
-  camera.far = dist * 50;
-  camera.updateProjectionMatrix();
-  orbit.target.copy(c);
-  orbit.update();
-  render();
-}
 
 // ---------------------------------------------------------------- the document → the scene
-const machineView = (d) => ({ kind: "machine-design", version: 1, parts: d.parts, wires: d.wires ?? [], device: { ...d.device, kind: DEVICE_KIND[d.platform] } });
-
 function rebuild({ refit = false } = {}) {
-  if (built) { scene.remove(built.root); built.dispose?.(); }
+  if (current) { stage.scene.remove(current.root); current.dispose(); }
   gizmo.detach();
-  system = installation(machineView(doc));
-  // Positions the designer moved, and the extra parts the designer added (drawn, not yet wired).
-  for (const p of system.parts) { const o = doc.install?.[p.id]; if (o?.centerMm) p.centerMm = [...o.centerMm]; }
-  for (const x of doc.extras ?? []) system.parts.push({ ...x });
-  built = buildMachine(system, STUB);
-  scene.add(built.root);
-  groups.clear();
-  partIds = new Set(system.parts.map((p) => p.id));
-  for (const g of built.root.children) if (partIds.has(g.userData.part)) groups.set(g.userData.part, g);
+  current = buildScene(doc);
+  ({ system, built, groups, partIds } = current);
+  stage.scene.add(current.root);
   paintOutline();
   paintFacts();
   $("json").textContent = JSON.stringify(doc, null, 1).slice(0, 200000);
@@ -106,13 +53,7 @@ function rebuild({ refit = false } = {}) {
 
 function setView(v) {
   document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
-  const chip = system.equipment?.chip;
-  // The device sits inside its cryostat, chamber or optics: its view shows it alone.
-  for (const g of built.root.children) g.visible = v !== "device" || g.userData.part === chip;
-  grid.visible = v !== "device";
-  if (v === "device" && groups.get(chip)) return fit([groups.get(chip)], { dir: new T.Vector3(0.3, doc.device.mounting?.faceDown ? -1 : 1, 0.7) });
-  if (v === "control") return fit(doc.parts.map((p) => groups.get(p.id)).filter(Boolean));
-  fit([built.root]);
+  showView(stage, current, doc, v);
 }
 document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => setView(b.dataset.view)));
 

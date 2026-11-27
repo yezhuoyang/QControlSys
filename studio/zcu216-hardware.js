@@ -14,9 +14,13 @@ export function drawZcu216(s, p) {
   s.box([0, top + 1.2, -d * 0.05], [chip, 2.4, chip], rfsoc);
   for (let k = 0; k < 7; k++) s.box([(k - 3) * chip * 0.14, top + 2.4 + 2.5, -d * 0.05], [chip * 0.06, 5, chip * 0.92], sink);
   const cores = p.model?.zcu216?.cores ?? 0, perRow = 4;
+  // Each tile has its own material, so a run can light the core that plays a pulse (studio/hw/machine3d.js);
+  // `userData.coreTile` is the core's place among the cores of its board.
   for (let i = 0; i < Math.min(cores, 16); i++) {
     const r = Math.floor(i / perRow), c = i % perRow;
-    s.box([(c - 1.5) * chip * 0.22, top + 7.7, -d * 0.05 + (r - 1.5) * chip * 0.22], [chip * 0.17, 0.6, chip * 0.17], core);
+    const m = s.box([(c - 1.5) * chip * 0.22, top + 7.7, -d * 0.05 + (r - 1.5) * chip * 0.22], [chip * 0.17, 0.6, chip * 0.17], core);
+    m.material = m.material.clone();
+    m.userData.coreTile = i;
   }
   // RF-DAC (16) and RF-ADC (16) SMA connectors along the front edge, each row drawn as one strip of
   // connector bodies with a dark band of sockets (a machine of many boards stays light to draw).

@@ -49,7 +49,7 @@ export async function renderStudy(el, id) {
     <p class="kicker"><a href="/examples">Examples</a> · ${esc(s.kicker)}</p>
     <h1>${esc(s.title)}</h1>
     <p class="lead">${code(s.summary)}</p>
-    <p><a class="btn design" href="/examples/${esc(id)}/design">Open the design: run it on a machine you choose</a></p>
+    <p><a class="btn design" href="/examples/${esc(id)}/design">Open the design: run it on a machine you choose</a> <a class="btn design" data-hw href="/hw/design?doc=example:${esc(id)}:0">Build this machine in 3D</a></p>
     ${rows.length ? `<h2>The machine, running it</h2>
     <p>The hardware design below runs the program on the cycle-exact model of its RISC-Q control system: every pulse, move, readout and decode appears at the time the model executed it, and every board and core of the controller lights up when it plays. Drag to turn the view, scroll to zoom.</p>
     <div class="runpick" role="group" aria-label="Run">${runButtons}</div>
@@ -74,7 +74,8 @@ export async function renderStudy(el, id) {
     if (!r.track) { twin.innerHTML = `<p class="no">No track was recorded for this run.</p>`; return; }
     const { mountTwin } = await import("/reproduce/twin3d.js");
     const tr = r.track;
-    viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}${tr.controller ? ", " + tr.controller.cores.length + " control cores" : " (the runtime simulator's schedule; no control system ran it)"}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time. Part sizes are drawn for legibility; positions and times are the run's.` });
+    el.querySelector("[data-hw]")?.setAttribute("href", "/hw/design?doc=" + encodeURIComponent("example:" + id + ":" + i));
+    viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}${tr.controller ? ", " + tr.controller.cores.length + " control cores" : " (the runtime simulator's schedule; no control system ran it)"}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time. The machine is this run's hardware document, the one the design page builds; positions and times are the run's, and the room-scale parts are illustrative envelopes.` });
   };
   el.querySelectorAll(".runpick button").forEach((b) => b.addEventListener("click", () => show(Number(b.dataset.run))));
   show(0);

@@ -9,6 +9,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "/three/OrbitControls.js";
 import { buildControl, describePick, ROLE_COLORS, ROLE_LABEL } from "/reproduce/control3d.js";
+import { mountMachine } from "/hw/machine3d.js";
 
 const COLORS = {
   data: 0x22b8cf, ancilla: 0x8b7bd8, "1q": 0x34d399, "2q": 0xf97316, measure: 0xfacc15, reset: 0x60a5fa,
@@ -35,9 +36,19 @@ function haloTexture() {
 }
 
 /**
- * Mount the viewer. `track` = { device, endNs, events, moves }. Returns { dispose }.
+ * Mount the viewer of a run: the machine of its hardware document (studio/hw/machine3d.js), the
+ * same scene the design page (/hw/design) builds and edits, with the run played on it. A track whose
+ * device has no hardware document yet gets the schematic twin below. Returns { dispose, setTime, setView }.
  */
-export function mountTwin(root, track, { caption = "", external = false, compact = false } = {}) {
+export function mountTwin(root, track, options = {}) {
+  if (!options.schematic && ["transmon", "atoms", "ions", "ions-ring"].includes(track?.device?.kind)) return mountMachine(root, track, options);
+  return mountSchematic(root, track, options);
+}
+
+/**
+ * The schematic twin. `track` = { device, endNs, events, moves }. Returns { dispose }.
+ */
+export function mountSchematic(root, track, { caption = "", external = false, compact = false } = {}) {
   root.innerHTML = `
     <div class="twin-stage"><canvas></canvas>
       <div class="twin-hud"><div class="twin-time"></div><ol class="twin-now"></ol></div>

@@ -2,9 +2,11 @@
 // built from the run's own 3D track (riscq/hw/document.mjs), so the design page starts from exactly
 // the machine that page shows.
 //   GET /api/hw/documents          [{ id, title, platform, group }]
-//   GET /api/hw/document?id=…      a hardware document (kind "riscq-design", version 2)
+//   GET /api/hw/document?id=…      a hardware document (kind "riscq-design", version 2); a paper's other
+//                                  runs are reproduce:<paper>:<row>
+//   GET /api/hw/templates          the reference devices a page's riscq/hw/doc-core.mjs builds documents with
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
-import { documentFromTrack } from "./document.mjs";
+import { documentFromTrack, TEMPLATES } from "./document.mjs";
 
 const ROOT = new URL("../../", import.meta.url);
 const PAPERS = new URL("validation/ftqvm/papers/", ROOT), SITE = new URL("validation/calib/site/", ROOT);
@@ -76,7 +78,16 @@ export function hwService(path, query) {
       const { track } = s.load();
       return { id: s.id, title: s.title, group: s.group, platform: PLATFORM[track.device.kind] ?? track.device.kind, qubits: track.device.sites.length };
     });
+  if (path === "/templates") return TEMPLATES;
   if (path === "/document") {
+    const row = /^reproduce:([^:]+):(\d+)$/.exec(query.id ?? "");
+    if (row) {
+      const file = new URL(row[1] + ".json", PAPERS);
+      if (!/^[a-z0-9-]+$/.test(row[1]) || !existsSync(file)) throw Object.assign(Error("no reproduction " + row[1]), { status: 404 });
+      const data = read(file), r = data.rows?.[Number(row[2])];
+      if (!r?.track?.device) throw Object.assign(Error("no run " + row[2] + " with a track in " + row[1]), { status: 404 });
+      return documentFromTrack(r.track, { id: query.id, name: data.meta?.title ?? row[1], source: { kind: "reproduction", id: row[1], row: Number(row[2]) }, design: r.design ?? data.design });
+    }
     const s = sources().find((x) => x.id === query.id);
     if (!s) throw Object.assign(Error("no hardware document " + query.id), { status: 404 });
     const { track, ...rest } = s.load();

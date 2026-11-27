@@ -150,6 +150,8 @@ const routes = new Map([
   ["/hw/design.js", "studio/hw/design.js"],
   ["/hw/design.css", "studio/hw/design.css"],
   ["/hw/editor2d.js", "studio/hw/editor2d.js"],
+  ["/hw/machine3d.js", "studio/hw/machine3d.js"],
+  ["/hw/doc-core.mjs", "riscq/hw/doc-core.mjs"],
 ]);
 const mime = {
   ".mjs": "text/javascript",

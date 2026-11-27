@@ -117,7 +117,7 @@ export async function renderPaper(el, id) {
     <p>${badge(m.status)}</p>
     <p class="lead">${esc(m.summary)}</p>
     <p class="cite">${cite(m.paper)}</p>
-    <p><a class="btn design" href="/reproduce/${esc(id)}/design">Open the design: the whole machine, editable</a>
+    <p><a class="btn design" href="/reproduce/${esc(id)}/design">Open the design: the whole machine, editable</a> <a class="btn design" data-hw href="/hw/design?doc=reproduce:${esc(id)}:0">Build this machine in 3D</a>
     ${rows.some(studioKey) ? `<a class="btn design studio" href="${studioHref(id, rows.find(studioKey))}">Open this run in the RISC-Q studio: step through every instruction</a>` : ""}</p>
     ${rows.some((r) => r.track) ? `<h2>The twin, running the program</h2>
     <p>The machine below is the twin this page describes, running the compiled program. Every pulse, move, readout and decode appears at the time the Lean model of the control system executed it; drag to turn the view, scroll to zoom.</p>
@@ -150,7 +150,8 @@ export async function renderPaper(el, id) {
     }
     const { mountTwin } = await import("/reproduce/twin3d.js");
     const tr = rows[i].track;
-    viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time, shown in about 45 s. Part sizes are drawn for legibility; positions and times are the run's.` });
+    el.querySelector("[data-hw]")?.setAttribute("href", "/hw/design?doc=" + encodeURIComponent("reproduce:" + id + ":" + i));
+    viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time, shown in about 45 s. The machine is this run's hardware document, the one the design page builds; positions and times are the run's, and the room-scale parts are illustrative envelopes.` });
   };
   if (run) {
     el.querySelectorAll(".runpick button").forEach((b) => b.addEventListener("click", () => show(Number(b.dataset.run))));
