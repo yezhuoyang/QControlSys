@@ -61,7 +61,7 @@ test("every written lesson matches the curriculum: exercise count, stars, ids an
 
 test("every course page uses defined glossary terms and links only to pages that exist", () => {
   const pages = readdirSync(dir, { recursive: true }).filter((f) => f.endsWith(".html")).map((f) => path.join(dir, f));
-  const served = new Set(["/quantumos.svg", "/site-nav.js", "/riscq-model.js", "/home.css", "/learn", "/riscq-studio", "/riscq-design", "/riscq", "/machines", "/qccd-studio", "/qccd", "/neutral", "/feedforward", "/controller", "/validation", "/board-validation", "/"]);
+  const served = new Set(["/quantumos.svg", "/site-nav.js", "/riscq-model.js", "/home.css", "/learn", "/riscq-studio", "/riscq-design", "/riscq-design/wiring", "/riscq", "/machines", "/qccd-studio", "/qccd", "/neutral", "/feedforward", "/controller", "/validation", "/board-validation", "/"]);
   for (const file of pages) {
     const html = readFileSync(file, "utf8");
     for (const [, term] of html.matchAll(/data-term="([^"]+)"/g)) assert.ok(glossary[term], path.basename(file) + " uses undefined term " + term);

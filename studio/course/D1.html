@@ -49,7 +49,7 @@
           program with feed-forward of lesson <a href="/course/A1">A1</a>. <code>template=ring-decoder</code> adds a decoder core.</li>
         <li><code>node riscq/cli.mjs --ring-design &gt; machine.json</code> writes it to a file, and
           <code>node riscq/cli.mjs --design machine.json --qasm circuit.qasm</code> runs a program on it.</li>
-        <li>The <a href="/riscq-design">hardware design editor</a> starts from it and lets you edit it with the mouse.</li>
+        <li>The <a href="/riscq-design/wiring">wiring editor</a> starts from it and lets you edit it with the mouse.</li>
       </ul>
       <div class="key"><b>Units.</b> Lengths are mm, times ns, frequencies Hz, amplitudes a fraction of DAC full scale,
         phases rad. Positions are this project's choice: RISC-Q's calibration gives no geometry, so the board, the chip and
@@ -179,7 +179,7 @@
 
       <h2 id="editor"><span class="num">7</span>The editor and the debugger</h2>
       <p>
-        The <a href="/riscq-design">hardware design editor</a> works on the same document. Its <b>Start from</b> menu offers
+        The <a href="/riscq-design/wiring">wiring editor</a> works on the same document. Its <b>Start from</b> menu offers
         three transmons of the ring, the whole ring, or the ring with a decoder core. The left rail holds the
         <b>Components</b> palette (click a type, then click the canvas), <b>+ Qubit with readout</b>, which adds a qubit with
         its resonator, core, channels, converters and three coax lines, and the <b>Wire</b> tool with its medium. The canvas

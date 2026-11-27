@@ -114,7 +114,9 @@ Board A digitizes a readout and sends two bits over fiber. Board B samples them 
 
 Place boards, cores, DACs, ADCs, qubits and resonators, then route the wires in 3D. Each wire's delay follows from its routed length. Rules are checked on every edit. Then run a program on the result.
 
-<http://127.0.0.1:7432/riscq-design> → **Run on this hardware**
+<http://127.0.0.1:7432/riscq-design/wiring> → **Run on this hardware**
+
+The whole machine is built in 3D at <http://127.0.0.1:7432/riscq-design>: cryostat, optical table or vacuum chamber, the chip, array or trap, the RISC-Q boards and their cables, from one hardware document that every run page draws. Drag any part, edit the chip, array, trap or a board in 2D, and run a logical program on the machine you designed.
 
 ### Also runnable
 
@@ -145,7 +147,7 @@ node riscq/cli.mjs --list
 node riscq/cli.mjs --example superconducting-feedforward --outcome c=1 --out run.json
 ```
 
-Pages: `/` home · `/course` the course · `/riscq-studio` RISC-Q workspace · `/riscq-design` hardware design editor · `/riscq` controller debugger · `/qccd-studio` · `/qccd` · `/neutral` · `/feedforward` · `/controller` · `/validation` · `/board-validation`
+Pages: `/` home · `/course` the course · `/riscq-studio` RISC-Q workspace · `/riscq-design` the machine in 3D, its design page · `/riscq-design/wiring` control-wiring editor · `/riscq` controller debugger · `/qccd-studio` · `/qccd` · `/neutral` · `/feedforward` · `/controller` · `/validation` · `/board-validation`
 
 ## Deploy
 

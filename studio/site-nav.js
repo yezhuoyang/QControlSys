@@ -9,7 +9,7 @@ const PLATFORMS = [
     name: "Superconducting transmons",
     learn: "/learn#superconducting",
     how: "Microwave pulses on coax drive and read out each qubit.",
-    design: [["Design editor", "/riscq-design"]],
+    design: [["Design the machine in 3D", "/riscq-design?doc=new:superconducting"], ["Control wiring (2D)", "/riscq-design/wiring"]],
     runs: [
       ["IBM Quantum Manila · native pulse debugger", "/course/M1#step-through-the-published-commands"],
       ["Bell pair with feed-forward", "/riscq-studio?example=superconducting-feedforward&outcome=c=1"],
@@ -21,7 +21,7 @@ const PLATFORMS = [
     name: "Trapped-ion QCCD",
     learn: "/learn#trapped-ion",
     how: "Lasers address ions in gate zones; electrode voltages shuttle them between zones.",
-    design: [["QCCD Studio design page ↗", "https://www.qccd.academy/studio.html#design"]],
+    design: [["Design the machine in 3D", "/riscq-design?doc=new:qccd"], ["QCCD Studio design page ↗", "https://www.qccd.academy/studio.html#design"]],
     runs: [
       ["Quantinuum H2 · published phase scan", "/course/M3"],
       ["GHZ of three ions from OpenQASM", "/riscq-studio?example=qccd-ghz3&outcome=q0=1&outcome=q2=1"],
@@ -33,7 +33,7 @@ const PLATFORMS = [
     name: "Neutral atoms",
     learn: "/learn#neutral-atom",
     how: "Optical tweezers moved by AOD tones carry atoms; Rydberg and Raman lasers drive gates.",
-    design: [["ZAC architecture file (no editor yet)", "/learn#e1"]],
+    design: [["Design the machine in 3D", "/riscq-design?doc=new:neutral"], ["ZAC architecture file", "/learn#e1"]],
     runs: [["Lukin group · entanglement transport", "/course/M2"], ["ZAC 14-qubit program on a zoned array", "/riscq-studio?example=neutral-bv14"]],
   },
 ];

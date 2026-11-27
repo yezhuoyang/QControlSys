@@ -32,7 +32,9 @@ const routes = new Map([
   ["/riscq-layers.js", "studio/riscq-layers.js"],
   ["/riscq-disasm.js", "studio/riscq-disasm.js"],
   ["/riscq-glossary.js", "studio/riscq-glossary.js"],
-  ["/riscq-design", "studio/riscq-design.html"],
+  // The hardware design page is the 3D machine (studio/hw); its 2D control-wiring editor is /riscq-design/wiring.
+  ["/riscq-design", "studio/hw/design.html"],
+  ["/riscq-design/wiring", "studio/riscq-design.html"],
   ["/riscq-design.js", "studio/riscq-design.js"],
   ["/riscq-design.css", "studio/riscq-design.css"],
   ["/riscq-design-doc.js", "studio/riscq-design-doc.js"],
@@ -592,6 +594,16 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(
           [...examples, ...await import("./riscq/ftqvm/studio-runs.mjs").then((m) => m.studioExamples())]
             .map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
+      }
+      if (url.pathname === "/api/hw/wiring" && req.method === "POST") {
+        // The control wiring of a superconducting hardware document (riscq/hw/compile.mjs wiringOf), for /riscq-design/wiring.
+        const { doc } = JSON.parse(await readInput(req, 8 * 1024 * 1024));
+        const { wiringOf } = await import("./riscq/hw/compile.mjs");
+        try {
+          return reply(res, 200, "application/json", JSON.stringify({ design: wiringOf(doc) }));
+        } catch (error) {
+          return reply(res, 200, "application/json", JSON.stringify({ error: error.message }));
+        }
       }
       if (url.pathname === "/api/hw/run" && req.method === "POST") {
         // A logical program run on a hardware document (riscq/hw/compile.mjs): the OS schedules it, the

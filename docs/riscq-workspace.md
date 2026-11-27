@@ -64,7 +64,7 @@ Modules: [page](../studio/riscq-studio.js), [stage](../studio/riscq-stage.js), [
 
 ## Hardware design editor
 
-`/riscq-design` edits the machine itself: a `riscq-design` document of [riscq/design.mjs](../riscq/design.mjs). Its **Design** and **Debug** tabs switch between the editor and the workspace above.
+`/riscq-design/wiring` edits the control wiring: a `riscq-design` document of [riscq/design.mjs](../riscq/design.mjs). Its **Design** and **Debug** tabs switch between the editor and the workspace above.
 
 | Region | What it does |
 | --- | --- |

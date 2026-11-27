@@ -92,6 +92,9 @@ function paintInspector() {
   const board = doc.control.boards.find((b) => "board" + b.index === p.id);
   const isChip = p.id === system.equipment?.chip;
   const detail = isChip ? { superconducting: "Edit the chip in 2D", neutral: "Edit the atom array in 2D", qccd: "Edit the trap in 2D" }[doc.platform] : board ? "Open the board in 2D" : null;
+  // A superconducting machine's control wiring (cores, channels, DACs, ADCs, routed coax, calibration) is a
+  // 2D document of its own (riscq/design.mjs), edited at /riscq-design/wiring.
+  const wiring = doc.platform === "superconducting" && (board || isChip);
   const where = doc.parts.some((x) => x.id === p.id) ? "the control system" : (doc.extras ?? []).some((x) => x.id === p.id) ? "parts you added (drawn, not yet wired into the run)" : isChip ? "the device" : "the installation";
   el.innerHTML = `<div class="insp"><h3>${esc(p.label ?? p.id)}</h3>
     <dl><dt>Part</dt><dd>${esc(p.form ?? Object.keys(p.model ?? {})[0] ?? "")}</dd><dt>In</dt><dd>${esc(where)}</dd>
@@ -101,6 +104,7 @@ function paintInspector() {
     <div>Centre (mm)</div><div class="xyz">${p.centerMm.map((v, k) => `<input type="number" step="1" data-k="${k}" value="${round(v)}" aria-label="${"xyz"[k]} in mm">`).join("")}</div>
     <div class="actions">${detail ? `<button type="button" class="primary" id="detail2d">${esc(detail)}</button>` : ""}
       <button type="button" id="focus">Look at it</button>
+      ${wiring ? `<button type="button" id="wiring" title="Cores, channels, converters, routed coax and calibration, in the 2D wiring editor">Control wiring (2D)</button>` : ""}
       ${board && doc.control.boards.length > 1 && !board.cores.length ? `<button type="button" id="remove">Remove</button>` : ""}
       ${(doc.extras ?? []).some((x) => x.id === p.id) ? `<button type="button" id="remove">Remove</button>` : ""}</div>
     <p class="basis">${esc(p.basis ?? "")}</p></div>`;
@@ -110,6 +114,13 @@ function paintInspector() {
     moveTo(p.id, c);
   }));
   $("focus").onclick = () => fit([groups.get(p.id)]);
+  if ($("wiring")) $("wiring").onclick = async () => {
+    // This machine's own control wiring, derived from the document as the runs build it (riscq/hw/compile.mjs wiringOf).
+    const r = await (await fetch("/api/hw/wiring", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ doc }) })).json();
+    if (r.error) return alert(r.error);
+    try { localStorage.setItem("riscq-design:reproduce", JSON.stringify({ design: r.design })); } catch {}
+    location.href = "/riscq-design/wiring?from=reproduce";
+  };
   if ($("detail2d")) $("detail2d").onclick = () => openDetail(isChip ? doc.platform : "zcu216", doc, { board, onChange: change, close: () => $("detail").hidden = true });
   if ($("remove")) $("remove").onclick = () => change((d) => {
     d.parts = d.parts.filter((x) => x.id !== p.id);
@@ -307,6 +318,8 @@ $("playclose").onclick = () => { player?.dispose(); player = null; $("play").hid
 $("run").onclick = runProgram;
 
 async function main() {
+  // A control-wiring document handed over by the Workspace or a paper's design page goes to the 2D wiring editor.
+  if (["reproduce", "run"].includes(new URLSearchParams(location.search).get("from"))) return location.replace("/riscq-design/wiring" + location.search);
   const list = await (await fetch("/api/hw/documents")).json();
   const programs = await (await fetch("/api/hw/programs")).json();
   $("program").innerHTML = programs.map((p) => `<option value="${esc(p.id)}" title="${esc(p.summary)}">${esc(p.title)}</option>`).join("");

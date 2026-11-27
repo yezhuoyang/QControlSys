@@ -13,6 +13,7 @@
 import { transmonTwin, optical } from "../ftqvm/platforms.mjs";
 import { OPTICAL_DESIGNS } from "../ftqvm/optical.mjs";
 import { DESIGNS } from "../ftqvm/corpus.mjs";
+import { chipDesign } from "../ftqvm/sc-chip.mjs";
 
 const r2 = (v) => Math.round(v * 2) / 2;
 
@@ -37,18 +38,36 @@ function decoderUnits(doc) {
 /** Channels of a role on the document's cores. */
 const channelsOf = (doc, role) => doc.control.boards.flatMap((b) => b.cores.filter((c) => c.role === role).flatMap((c) => c.channels)).length;
 
+/** A superconducting document's chip as a twin device: { device, units } (riscq/ftqvm/twins.mjs shape). */
+function chipOf(doc) {
+  const dev = doc.device, title = doc.name ?? "designed machine";
+  const f = dev.trackFrame ?? { pitchMm: 2, offsetMm: [0, 0] };
+  const sites = dev.qubits.map((q) => ({
+    kind: /^data/.test(q.site ?? "") ? "data" : "ancilla",
+    rc: [r2((q.positionMm[2] + f.offsetMm[1]) / f.pitchMm), r2((q.positionMm[0] + f.offsetMm[0]) / f.pitchMm)],
+  }));
+  const units = decoderUnits(doc) ?? doc.run?.options ?? { decoders: 1, coresPerDecoder: 4 };
+  return { device: { id: title, title, sites, couplers: dev.couplers ?? [] }, units: { decoders: units.decoders ?? 1, coresPerDecoder: units.coresPerDecoder ?? 4 } };
+}
+
+/**
+ * The control wiring of a superconducting document (riscq/design.mjs, version 1): every transmon of
+ * its chip with its core, channels, DACs and ADC, its couplers' CZ channels, and the routed coax, as the
+ * runs build it (riscq/ftqvm/sc-chip.mjs chipDesign). The 2D wiring editor (/riscq-design/wiring) edits it.
+ */
+export function wiringOf(doc) {
+  if (doc.platform !== "superconducting") throw Error("only a superconducting machine has a control-wiring document");
+  const { device, units } = chipOf(doc);
+  const sites = device.sites.map((s, i) => ({ id: (s.kind === "data" ? "d" : "m") + i, kind: s.kind, rc: s.rc }));
+  return chipDesign({ ops: [] }, { sites, siteOf: () => undefined }, { ...units, device, name: device.title }).design;
+}
+
 /** The machine a document describes: { adapter, platform, title }. */
 export function machineOf(doc) {
   const dev = doc.device, title = doc.name ?? "designed machine";
   if (doc.platform === "superconducting") {
-    const f = dev.trackFrame ?? { pitchMm: 2, offsetMm: [0, 0] };
-    const sites = dev.qubits.map((q) => ({
-      kind: /^data/.test(q.site ?? "") ? "data" : "ancilla",
-      rc: [r2((q.positionMm[2] + f.offsetMm[1]) / f.pitchMm), r2((q.positionMm[0] + f.offsetMm[0]) / f.pitchMm)],
-    }));
-    const units = decoderUnits(doc) ?? doc.run?.options ?? { decoders: 1, coresPerDecoder: 4 };
-    const device = { id: title, title, sites, couplers: dev.couplers ?? [] };
-    return { platform: "superconducting", title, adapter: transmonTwin(device, { decoders: units.decoders ?? 1, coresPerDecoder: units.coresPerDecoder ?? 4 }) };
+    const { device, units } = chipOf(doc);
+    return { platform: "superconducting", title, adapter: transmonTwin(device, units) };
   }
   const ring = dev.trackFrame?.kind === "ring";
   const id = doc.run?.id && OPTICAL_DESIGNS[doc.run.id] ? doc.run.id : doc.platform === "neutral" ? "atoms-moving" : ring ? "quantinuum-h2" : "ions-qccd";
