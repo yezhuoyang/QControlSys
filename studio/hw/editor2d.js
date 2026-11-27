@@ -68,16 +68,20 @@ function draggable(svg, onDrop, snap) {
 
 // ------------------------------------------------------------------ the transmon chip
 function chipEditor(doc, { onChange }) {
-  const pitch = 2;
+  const pitch = doc.device.trackFrame?.pitchMm ?? 2, step = pitch / 2;
+  // Transmons sit on the lattice and half way between its points (a surface-code patch puts its
+  // ancillas there), relative to the chip's own lattice origin.
+  const off = doc.device.trackFrame?.offsetMm ?? [0, 0];
   const { svg, side, tools } = shell("Transmon chip · " + doc.device.qubits.length + " qubits",
-    "Drag a qubit to move it (it snaps to the " + pitch + " mm lattice). Click an empty lattice point to add a qubit; select a qubit and press Delete to remove it. Couplers join qubits one lattice step apart.");
+    "Drag a qubit to move it (it snaps to half the " + pitch + " mm lattice, where a surface-code patch puts its ancillas). Click an empty point to add a qubit; select a qubit and press Delete to remove it. Couplers join nearest neighbours.");
   tools.innerHTML = `<label><input type="checkbox" checked data-auto> Couplers between neighbours</label>`;
   let pick = null;
   const draw = () => {
     const d = doc.device, at = d.qubits.map((q) => [q.positionMm[0], q.positionMm[2]]);
     const b = d.layout.chip.boundsMm, span = fitView(svg, [b[0], b[2]], [b[1], b[3]], pitch * 0.6), dot = span / 90;
     const lat = [];
-    for (let x = Math.floor(b[0] / pitch) * pitch; x <= b[2] + 1e-9; x += pitch) for (let y = Math.floor(b[1] / pitch) * pitch; y <= b[3] + 1e-9; y += pitch) lat.push([x, y]);
+    const gx = (v) => Math.ceil((v + off[0]) / step) * step - off[0], gy = (v) => Math.ceil((v + off[1]) / step) * step - off[1];
+    for (let x = gx(b[0]); x <= b[2] + 1e-9; x += step) for (let y = gy(b[1]); y <= b[3] + 1e-9; y += step) lat.push([x, y]);
     svg.innerHTML = `<rect x="${b[0]}" y="${b[1]}" width="${b[2] - b[0]}" height="${b[3] - b[1]}" fill="#d8dee0" stroke="#7a8a92" vector-effect="non-scaling-stroke"/>` +
       lat.map(([x, y]) => `<circle class="lat" cx="${x}" cy="${y}" r="${dot * 0.35}" fill="#aab6bb"/>`).join("") +
       (d.couplers ?? []).map(([i, j]) => at[i] && at[j] ? `<line x1="${at[i][0]}" y1="${at[i][1]}" x2="${at[j][0]}" y2="${at[j][1]}" stroke="#b77743" stroke-width="${dot * 0.6}"/>` : "").join("") +
@@ -88,9 +92,12 @@ function chipEditor(doc, { onChange }) {
     side.innerHTML = `<b>${d.qubits.length} transmons</b>, ${(d.couplers ?? []).length} couplers<br>Chip ${(b[2] - b[0]).toFixed(1)} × ${(b[3] - b[1]).toFixed(1)} mm` +
       (pick !== null ? `<p>Selected <b>${esc(d.qubits[pick].id)}</b> at (${at[pick].map((v) => v.toFixed(2)).join(", ")}) mm</p>` : "");
   };
+  // Nearest neighbours: every pair at the smallest distance between two transmons of the chip.
   const neighbours = (at) => {
+    let near = Infinity;
+    at.forEach((a, i) => at.forEach((b, j) => { if (j > i) near = Math.min(near, Math.hypot(a[0] - b[0], a[1] - b[1])); }));
     const out = [];
-    at.forEach((a, i) => at.forEach((b, j) => { if (j > i && Math.abs(Math.hypot(a[0] - b[0], a[1] - b[1]) - pitch) < 1e-6) out.push([i, j]); }));
+    at.forEach((a, i) => at.forEach((b, j) => { if (j > i && Math.hypot(a[0] - b[0], a[1] - b[1]) < near + 1e-6) out.push([i, j]); }));
     return out;
   };
   const apply = (at, { auto = svg.closest(".detail").querySelector("[data-auto]")?.checked } = {}) => onChange((d) => {
@@ -99,10 +106,10 @@ function chipEditor(doc, { onChange }) {
     if (auto) d.device.couplers = neighbours(at);
     doc = d;
   });
-  const snap = (p) => ({ x: Math.round(p.x / pitch) * pitch, y: Math.round(p.y / pitch) * pitch });
+  const snap = (p) => ({ x: r6(Math.round((p.x + off[0]) / step) * step - off[0]), y: r6(Math.round((p.y + off[1]) / step) * step - off[1]) });
   draggable(svg, (i, x, y) => {
     const at = doc.device.qubits.map((q) => [q.positionMm[0], q.positionMm[2]]);
-    if (at.some(([a, b], k) => k !== i && a === x && b === y)) return draw();
+    if (at.some(([a, b], k) => k !== i && Math.abs(a - x) < 1e-6 && Math.abs(b - y) < 1e-6)) return draw();
     at[i] = [x, y];
     pick = i;
     apply(at);
@@ -113,7 +120,7 @@ function chipEditor(doc, { onChange }) {
     if (!e.target.classList.contains("lat")) return;
     const p = snap(point(svg, e));
     const at = doc.device.qubits.map((q) => [q.positionMm[0], q.positionMm[2]]);
-    if (at.some(([a, b]) => a === p.x && b === p.y)) return;
+    if (at.some(([a, b]) => Math.abs(a - p.x) < 1e-6 && Math.abs(b - p.y) < 1e-6)) return;
     onChange((d) => {
       const id = "q[" + (Math.max(-1, ...d.device.qubits.map((q) => Number(/\d+/.exec(q.id)?.[0] ?? 0))) + 1) + "]";
       d.device.qubits.push({ id, site: "qubit (added)", positionMm: [p.x, 0, p.y] });

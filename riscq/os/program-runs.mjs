@@ -18,10 +18,13 @@ import { DESIGNS } from "../ftqvm/corpus.mjs";
 const ADAPTERS = { superconducting: transmon, neutral: (o) => optical(o.id), qccd: (o) => optical(o.id) };
 export const platformOf = (design) => Object.entries(DESIGNS).find(([, ds]) => ds.some((d) => d.id === design))[0];
 
-/** A runner for calibrate(): place the timed listing on the design, build it, run it cycle-exact. */
-function runnerFor(design) {
-  const point = Object.values(DESIGNS).flat().find((d) => d.id === design);
-  const adapter = ADAPTERS[platformOf(design)](point.options);
+/**
+ * A runner for calibrate(): place the timed listing on the design, build it, run it cycle-exact.
+ * `machine` ({ adapter, title }) runs on a given machine instead of a corpus design (riscq/hw/compile.mjs).
+ */
+function runnerFor(design, machine) {
+  const point = machine ? { title: machine.title } : Object.values(DESIGNS).flat().find((d) => d.id === design);
+  const adapter = machine ? machine.adapter : ADAPTERS[platformOf(design)](point.options);
   return {
     adapter, point,
     async run(listing) {
@@ -53,10 +56,10 @@ function runnerFor(design) {
  * was told, its makespan, whether the run conformed, what it raised), machine (what it learned),
  * timetable (the final QSysASM text), report, track }.
  */
-export async function programRun(programId, design, { policy = "fifo", orderedPools = ["qubits"], maxIterations = 8, countReadouts = true } = {}) {
-  const platform = platformOf(design);
+export async function programRun(programId, design, { policy = "fifo", orderedPools = ["qubits"], maxIterations = 8, countReadouts = true, machine } = {}) {
+  const platform = machine?.platform ?? platformOf(design);
   const parsed = parse(programText(programId, platform));
-  const { run, point, adapter } = runnerFor(design);
+  const { run, point, adapter } = runnerFor(design, machine);
   const t0 = Date.now();
   // The OS first reads the machine's inventory: every capacity field is counted from the hardware
   // design (its beams, movers, decoders, readout channels, hub), as the platform states it
@@ -97,17 +100,17 @@ const ns = (x) => (x >= 10000 ? (x / 1000).toLocaleString("en", { maximumFractio
  * columns, failures, program (the timetable the OS ran), formKey (the form values it answers) }.
  * params: { program, design, policy, ordered ("on" | "off"), readouts ("counted" | "not counted") }.
  */
-export async function programRow({ program = "bell", design = "sc-B", policy = "fifo", ordered = "on", readouts = "counted", label } = {}) {
-  const r = await programRun(program, design, { policy, orderedPools: ordered === "on" ? ["qubits"] : [], countReadouts: readouts === "counted" });
+export async function programRow({ program = "bell", design = "sc-B", policy = "fifo", ordered = "on", readouts = "counted", label, machine } = {}) {
+  const r = await programRun(program, design, { policy, orderedPools: ordered === "on" ? ["qubits"] : [], countReadouts: readouts === "counted", machine });
   const p = PROGRAMS.find((x) => x.id === program);
   const learned = Object.entries(r.learned).filter(([k, v]) => /_ns$/.test(k) && v !== r.told[k]).map(([k, v]) => FIELD_WORD[k] + " " + ns(r.told[k]) + " → " + ns(v));
   const c = r.counted;
   return {
-    label: label ?? p.title + " · " + design, conforms: r.conforms, byKind: r.report?.byKind ?? {}, track: r.track, program: r.timetable,
+    label: label ?? p.title + " · " + (design ?? r.designTitle), conforms: r.conforms, byKind: r.report?.byKind ?? {}, track: r.track, program: r.timetable,
     formKey: { program, design, policy, ordered, readouts },
     columns: {
       Program: p.title + " (" + r.statements + " statements, no times)",
-      Design: design + " (" + r.designTitle + ")",
+      Design: design ? design + " (" + r.designTitle + ")" : r.designTitle,
       "Operating system": "scheduler policy " + policy + (ordered === "on" ? ", ancillas acquired in program order" : ", greedy acquisition"),
       "Capacities counted on the design": "gates " + c.max_parallel_gates + " · decoders " + c.decoders + " · factories " + c.factories + " · qubits " + c.qubits + (c.readout_channels !== undefined ? " · readout channels " + c.readout_channels : r.platform === "superconducting" ? " · a readout channel per transmon" : " · readout channels not counted") + (c.factory_gates ? " · a factory borrows " + c.factory_gates + " beams and " + c.factory_readouts + " readout channels" : ""),
       "Runs until it conforms": r.iterations.map((it, i) => "run " + (i + 1) + ": " + (it.conforms ? "conforms" : it.late + " of " + it.ops + " late") + ", " + (it.makespanNs / 1000).toFixed(1) + " µs").join("; "),

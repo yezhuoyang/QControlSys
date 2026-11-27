@@ -4,6 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Hardware design · QuantumOS</title>
   <link rel="icon" href="/quantumos.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/reproduce/twin3d.css">
   <link rel="stylesheet" href="/hw/design.css">
   <script type="importmap">{ "imports": { "three": "/three/three.module.js" } }</script>
 </head>
@@ -38,12 +39,17 @@
   <aside class="hw-right">
     <h2>Inspector</h2>
     <div id="inspector"><p class="hint">Nothing selected. Click a part in the scene or in the list.</p></div>
+    <h2>Run a program on this machine</h2>
+    <p class="hint">The operating system schedules a logical program, this machine is compiled to RISC-Q firmware, and the cycle-exact model runs it: what you design is what is tested.</p>
+    <div class="runbox"><select id="program" aria-label="Logical program"></select><button type="button" class="primary" id="run">Run</button></div>
+    <div id="runout" class="runout"></div>
     <h2>Document</h2>
     <p class="hint">One hardware document describes this machine: the design page edits it, and the run pages draw it.</p>
     <details><summary>The document (JSON)</summary><pre id="json" class="json"></pre></details>
   </aside>
 </div>
 <div id="detail" class="detail" hidden></div>
+<div id="play" class="detail" hidden><header><h3 id="playtitle">The run</h3><span class="grow"></span><button type="button" class="primary" id="playclose">Close</button></header><div class="canvas" id="playstage"></div><footer id="playnote"></footer></div>
 <script type="module" src="/site-nav.js"></script>
 <script type="module" src="/hw/design.js"></script>
 </body>

@@ -160,7 +160,7 @@ function controlParts(controller) {
  * The hardware document of a run, from its 3D track (riscq/ftqvm/track.mjs: device + controller).
  * `design` is the run's version-1 control document when it compiled one (superconducting).
  */
-export function documentFromTrack(track, { id, name, source, design } = {}) {
+export function documentFromTrack(track, { id, name, source, design, run } = {}) {
   if (!TEMPLATE) throw Error("hardware document: setTemplates() first (the reference devices)");
   const dev = track.device, platform = PLATFORM_OF[dev.kind];
   if (!platform) throw Error("no hardware document for a device of kind " + dev.kind);
@@ -178,6 +178,8 @@ export function documentFromTrack(track, { id, name, source, design } = {}) {
     kind: "riscq-design", version: 2, id, name: label, platform, device, parts, wires: [],
     control: { dspMHz: track.controller?.board?.dspMHz ?? 500, boards },
     install: {}, source: source ?? null, ...(design ? { design } : {}),
+    // The corpus design point the run used (riscq/hw/compile.mjs keeps its profile when it runs the document).
+    ...(run ? { run } : {}),
   };
 }
 

@@ -133,7 +133,10 @@ export function opticalDesign(listing, placement, id, overrides = {}) {
   // `profile` overrides (an edited twin): { field: { value, source } } replace the profile's constants.
   const prof = { ...PROFILES[point.profile], ...(point.profileOverrides ?? {}) };
   const pitch = prof.platform === "neutral" ? point.pitchUm : prof.segmentUm?.value ?? 1; // a race track places by zone index
-  const home = placement.sites.map((s) => [s.rc[1] * pitch, s.rc[0] * pitch]);
+  // A designed machine (riscq/hw/compile.mjs) gives every placed site its own position (`homeUm`).
+  if (point.homeUm && point.homeUm.length < placement.sites.length)
+    throw Error("the program does not fit this machine: it places " + placement.sites.length + " qubits and the machine has " + point.homeUm.length);
+  const home = placement.sites.map((s, k) => point.homeUm?.[k] ?? [s.rc[1] * pitch, s.rc[0] * pitch]);
   // Ions: the zone of a site is the site itself or its block's patch (non-block sites keep their own).
   const zoneOfSite = placement.sites.map((s, k) => {
     if (point.profile !== "ions" || point.zoneOf === "site") return k;

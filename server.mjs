@@ -544,7 +544,7 @@ const runSlots = {
   },
 };
 const isSimulation = (req, url) => url.pathname.startsWith("/api/") && !routes.has(url.pathname) &&
-  !["/api/riscq/examples", "/api/machines/examples", "/api/studio/h2"].includes(url.pathname) && !url.pathname.startsWith("/api/hw/") &&
+  !["/api/riscq/examples", "/api/machines/examples", "/api/studio/h2"].includes(url.pathname) && !(req.method === "GET" && url.pathname.startsWith("/api/hw/")) &&
   !(req.method === "GET" && url.pathname.startsWith("/api/riscq/design"));
 
 if (
@@ -592,6 +592,20 @@ if (
         return reply(res, 200, "application/json", JSON.stringify(
           [...examples, ...await import("./riscq/ftqvm/studio-runs.mjs").then((m) => m.studioExamples())]
             .map(({ id, platform, title, description, source }) => ({ id, platform, title, description, language: source.language }))));
+      }
+      if (url.pathname === "/api/hw/run" && req.method === "POST") {
+        // A logical program run on a hardware document (riscq/hw/compile.mjs): the OS schedules it, the
+        // design is compiled to RISC-Q firmware and run cycle-exact, every latency learned until it conforms.
+        const { doc, program = "memory", policy = "fifo", ordered = "on", readouts = "counted" } = JSON.parse(await readInput(req, 8 * 1024 * 1024));
+        if (doc?.kind !== "riscq-design" || doc.version !== 2) return reply(res, 400, "application/json", JSON.stringify({ error: "a hardware document (kind \"riscq-design\", version 2) is needed" }));
+        const { machineOf } = await import("./riscq/hw/compile.mjs");
+        const { programRow } = await import("./riscq/os/program-runs.mjs");
+        try {
+          const row = await programRow({ program, design: null, policy, ordered, readouts, machine: machineOf(doc) });
+          return reply(res, 200, "application/json", JSON.stringify(row));
+        } catch (error) {
+          return reply(res, 200, "application/json", JSON.stringify({ error: error.message }));
+        }
       }
       if (url.pathname.startsWith("/api/hw/") && req.method === "GET") {
         // Hardware documents (riscq/hw/service.mjs): every reproduction and Examples run as one document.

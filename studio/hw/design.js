@@ -270,8 +270,46 @@ function load(d) {
   paintPalette();
 }
 
+// ---------------------------------------------------------------- run a program on this machine
+let player = null;
+async function runProgram() {
+  const out = $("runout"), program = $("program").value;
+  out.innerHTML = `<p class="hint">Running ${esc($("program").selectedOptions[0]?.textContent ?? program)} on this machine… (the OS schedules it, then the cycle-exact model runs it; seconds to a minute)</p>`;
+  $("run").disabled = true;
+  try {
+    const sent = JSON.parse(JSON.stringify(doc));
+    const r = await (await fetch("/api/hw/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ doc: sent, program }) })).json();
+    if (r.error) {
+      out.innerHTML = `<p class="bad">✗ ${esc(r.error)}</p><p class="hint">${/not device qubits|no coupler|does not fit/.test(r.error)
+        ? "Open the device in 2D and add the qubits or couplers the program needs, or choose a smaller program." : ""}</p>`;
+      return;
+    }
+    out.innerHTML = `<p class="${r.conforms ? "ok" : "bad"}">${r.conforms ? "✓ Every operation ran inside its window on this machine." : "✗ " + esc(r.columns?.Result ?? "it does not conform")}</p>
+      <dl>${Object.entries(r.columns ?? {}).filter(([k]) => k !== "Program").map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+      ${r.track ? `<button type="button" class="primary" id="playrun">Play the run on this machine</button>` : ""}`;
+    if (r.track) $("playrun").onclick = () => play(r, sent);
+  } catch (e) {
+    out.innerHTML = `<p class="bad">✗ ${esc(e.message)}</p>`;
+  } finally {
+    $("run").disabled = false;
+  }
+}
+/** Play a run on the document it ran on (studio/hw/machine3d.js, the run pages' player). */
+async function play(r, ranOn) {
+  const { mountMachine } = await import("/hw/machine3d.js");
+  $("play").hidden = false;
+  $("playtitle").textContent = r.label;
+  $("playnote").textContent = "The run plays on the machine as it was when you ran it: every pulse, move, readout and decode at the time the cycle-exact model executed it.";
+  player?.dispose();
+  player = mountMachine($("playstage"), r.track, { doc: ranOn, caption: "" });
+}
+$("playclose").onclick = () => { player?.dispose(); player = null; $("play").hidden = true; };
+$("run").onclick = runProgram;
+
 async function main() {
   const list = await (await fetch("/api/hw/documents")).json();
+  const programs = await (await fetch("/api/hw/programs")).json();
+  $("program").innerHTML = programs.map((p) => `<option value="${esc(p.id)}" title="${esc(p.summary)}">${esc(p.title)}</option>`).join("");
   const groupsOf = [...new Set(list.map((x) => x.group))];
   $("doc").innerHTML = groupsOf.map((g) => `<optgroup label="${esc(g)}">${list.filter((x) => x.group === g).map((x) =>
     `<option value="${esc(x.id)}">${esc(x.title)} · ${esc(PLATFORM_WORD[x.platform] ?? x.platform)}, ${x.qubits} qubits</option>`).join("")}</optgroup>`).join("");
