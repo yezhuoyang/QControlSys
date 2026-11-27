@@ -9,7 +9,7 @@
 //   records          a statement that reads a record waits for the measurement that wrote it
 //   decoding         a statement that reads a record a decode_syndrome has read (a frame update,
 //                    a parity) waits for that decode: consumers of a syndrome need it decoded
-//   guards           a guarded statement (`… if c[3], ¬c[5:6]`) waits for its guard's records as
+//   guards           a guarded statement (`… when c[3], ¬c[5:6]`) waits for its guard's records as
 //                    for records it reads; whether it then runs is decided by their values at run time
 //   services         gates, decoders, factories, qubits and the three bandwidths are pools with the
 //                    machine line's capacities; a statement holds its demand while it runs, and

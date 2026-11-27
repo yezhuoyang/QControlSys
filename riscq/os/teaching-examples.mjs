@@ -83,7 +83,7 @@ export const EXAMPLES = [
     idea: "request_magic holds a factory for the factory's whole latency; T gates queue for factories.",
     lesson: "Two T gates each need a magic state, and one factory takes 5 µs per state, so the second T gate waits 5 µs for the factory. With 2 factories both states are made at once.",
     text: program(["Two T gates by magic-state injection, one factory."], { factories: 1, magic_state_latency_ns: 5000 },
-      range(2).flatMap((i) => [`request_magic state=|T> magic[${i}]`, `CNOT data[${i}], magic[${i}]`, `measure basis=Z magic[${i}] -> m[${i}]`, `m[${i}] -> pauli_frame_update Z data[${i}]`])),
+      range(2).flatMap((i) => [`magic[${i}] request_magic state=|T>`, `CNOT data[${i}], magic[${i}]`, `measure basis=Z magic[${i}] -> m[${i}]`, `m[${i}] -> pauli_frame_update Z data[${i}]`])),
     controls: ["factories"], options: { policy: "order" },
   },
   {

@@ -22,7 +22,7 @@ test("statements read back: records, bases, counts, Pauli tags and a factory's w
     "@80 ns   measure  basis=X  ancilla[0] -> s[0]",
     "@90 ns   s[0:1] -> decode_syndrome  rounds=3",
     "@95 ns   c[4:5] -> pauli_frame_update  X data[0], X data[3]",
-    "@100 ns  request_magic  state=|T>  ancilla[2:10]  with  ancilla[11:18]",
+    "@100 ns  ancilla[2:10]  request_magic  state=|T>  with  ancilla[11:18]",
   ].join("\n"));
   assert.equal(p.machine.measure_ns, 1000);
   const [req, cz, meas, dec, frame, magic] = p.ops;
@@ -86,8 +86,8 @@ test("a statement's own guard: parsed, printed back, evaluated, and waited for",
     "measure basis=Z data[0] -> c[3]",
     "measure basis=Z data[1] -> c[5]",
     "measure basis=Z data[2] -> c[6]",
-    "X data[3] if c[3], ¬c[5:6]",
-    "c[3] -> pauli_frame_update Z data[4] if !c[5]",
+    "X data[3] when c[3], ¬c[5:6]",
+    "c[3] -> pauli_frame_update Z data[4] when !c[5]",
   ].join("\n");
   const p = qsysasm.parse(text);
   const [, , , x, frame] = p.ops;
@@ -96,7 +96,7 @@ test("a statement's own guard: parsed, printed back, evaluated, and waited for",
   assert.equal(frame.guard.bands[0].negated, true);
   assert.deepEqual(frame.paulis, ["Z"]);
   // Printed back with ¬, and read again to the same guard.
-  assert.equal(qsysasm.guardText(x.guard), "if c[3], ¬c[5:6]");
+  assert.equal(qsysasm.guardText(x.guard), "when c[3], ¬c[5:6]");
   const again = qsysasm.parse(qsysasm.format({ ops: p.ops.map((o, i) => ({ ...o, start: i * 10, order: i })) }).text).ops;
   assert.deepEqual(again.map((o) => o.guard ?? null), p.ops.map((o) => o.guard ?? null));
   // Holds when c[3] = 1 and c[5] xor c[6] = 0.
@@ -105,23 +105,25 @@ test("a statement's own guard: parsed, printed back, evaluated, and waited for",
   assert.equal(qsysasm.guardHolds(x.guard, {}), false);
   // A band that is not one range of one register cannot be printed; a malformed band is refused.
   assert.throws(() => qsysasm.guardText({ bands: [{ negated: false, records: [{ register: "c", index: 1 }, { register: "c", index: 4 }] }] }));
-  assert.throws(() => qsysasm.parse("X data[0] if c[i]"), SyntaxError);
-  assert.throws(() => qsysasm.parse("X data[0] if"), SyntaxError);
+  assert.throws(() => qsysasm.parse("X data[0] when c[i]"), SyntaxError);
+  assert.throws(() => qsysasm.parse("X data[0] when"), SyntaxError);
+  assert.throws(() => qsysasm.parse("X data[0] if c[1]"), SyntaxError); // the compiler's keyword is `when`
+  assert.throws(() => qsysasm.parse("request_magic state=|T> magic[0]"), SyntaxError); // outputs come first
   assert.throws(() => qsysasm.parse("when c[1]:"), SyntaxError);
   // The scheduler waits for the guard's measurements.
   const edges = dependencies(p.ops);
   for (const [from, why] of [[0, "guard c[3]"], [1, "guard c[5]"], [2, "guard c[6]"]]) assert.ok(edges.some((e) => e.from === from && e.to === 3 && e.why === why), why);
   const s = schedule(p);
   assert.equal(s.ops[3].start, 1000);
-  assert.match(s.text, /X {2}data\[3\] {2}if c\[3\], ¬c\[5:6\]/);
+  assert.match(s.text, /X {2}data\[3\] {2}when c\[3\], ¬c\[5:6\]/);
 });
 
-test("an always-false guard prints as `if false` and reads back as never holding", () => {
+test("an always-false guard prints as `when false` and reads back as never holding", () => {
   const empty = { negated: false, records: [] }, c3 = { negated: false, records: [{ register: "c", index: 3 }] };
-  assert.equal(qsysasm.guardText({ bands: [c3, empty] }), "if false");
-  assert.equal(qsysasm.guardText({ bands: [{ negated: true, records: [] }, c3] }), "if c[3]"); // a negated empty band always holds
-  const [op] = qsysasm.parse("X data[0] if false").ops;
+  assert.equal(qsysasm.guardText({ bands: [c3, empty] }), "when false");
+  assert.equal(qsysasm.guardText({ bands: [{ negated: true, records: [] }, c3] }), "when c[3]"); // a negated empty band always holds
+  const [op] = qsysasm.parse("X data[0] when false").ops;
   assert.equal(qsysasm.guardHolds(op.guard, { "c[3]": 1 }), false);
-  assert.equal(qsysasm.guardText(op.guard), "if false");
+  assert.equal(qsysasm.guardText(op.guard), "when false");
   assert.equal(qsysasm.guardHolds({ bands: [c3, empty] }, { "c[3]": 1 }), false);
 });

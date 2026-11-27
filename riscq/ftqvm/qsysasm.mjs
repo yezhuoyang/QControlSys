@@ -3,7 +3,7 @@
 // A QSysASM program is flat. It names concrete physical qubits and classical records, and every
 // statement is one physical instruction or one system call. There are no gadgets, no contracts
 // for gadgets, no calls, no loops, no guard blocks and no parameters: a repeated round is written
-// out once per round. A statement may carry its own guard (`… if c[3], c[4:6]`): it runs only when
+// out once per round. A statement may carry its own guard (`… when c[3], c[4:6]`): it runs only when
 // measured records say so. The guard is part of that one statement; it opens no block and names
 // nothing. The instruction set, the system calls and the `machine { … }` fields are the
 // interface's; what a compiler may use to produce a listing (gadgets, loops, `when` blocks) is
@@ -13,10 +13,12 @@
 //   program    := header* statement*
 //   header     := "machine {" fields "}"                       the machine's declared services
 //               | "factory {" fields "}"                       the request_magic service contract
-//   statement  := time? (records "->")? op arg* operands? ("with" operands)? ("->" records)? guard?
-//                                                                "with": request_magic's workspace
-//   guard      := "if" band ("," band)*                           runs when every band holds
-//               | "if" "false"                                    never runs (a statically empty band)
+//   statement  := time? body guard?
+//   body       := (records "->")? op arg* operands? ("->" records)?
+//               | operands "request_magic" arg* ("with" operands)?   the factory's outputs first,
+//                                                                then its workspace (the compiler's order)
+//   guard      := "when" band ("," band)*                         runs when every band holds
+//               | "when" "false"                                  never runs (a statically empty band)
 //   band       := "¬"? register "[" integer (":" integer)? "]"    a record or an inclusive range; it
 //                                                                holds when the XOR of its records is
 //                                                                1, or 0 with "¬" ("!" is accepted for
@@ -25,7 +27,7 @@
 //   time       := "@" integer "ns"                              absolute start; omitted = not yet
 //                                                                scheduled (the OS assigns it)
 //   op         := H | S | Sdg | X | Z | CNOT | CZ | CY | measure
-//               | request_ancilla | release_ancilla | request_magic | route
+//               | request_ancilla | release_ancilla | route
 //               | decode_syndrome | pauli_frame_update | parity
 //   arg        := name "=" (integer | X | Y | Z | "|" name ">")  count=, basis=, rounds=, input_ns=, state=
 //   operands   := operand ("," operand)*
@@ -45,7 +47,7 @@ const REFUSED = [
   [/^spec\b/, "a contract for a gadget or program: the machine line declares every service"],
   [/^call\b|\bcall\s+\w+\s*\(/, "a gadget call: write the gadget's operations out"],
   [/^(for|repeat|loop)\b/, "a loop: write each iteration out"],
-  [/^(when|if)\b/, "a guard block: put the guard on each statement it governs (… if c[1])"],
+  [/^(when|if)\b/, "a guard block: put the guard on each statement it governs (… when c[1])"],
   [/^(params|program\[|codes:|code\s)/, "a logical-program declaration, not an instruction"],
   [/^maintenance\b/, "background maintenance is the operating system's, not the program's"],
   [/^resource\s*\{/, "a resource summary: the operating system derives it"],
@@ -71,7 +73,7 @@ export function sitesText(sites, paulis) {
 function paulisFrom(text, count) {
   // A guard's bands are records, not operands.
   // The operation's own name (X, Z, CZ …) is not a Pauli tag: only what follows it is read.
-  const body = text.replace(/^@\S+\s+ns\s+/, "").replace(/\s+if\s+[¬!]?[A-Za-z_]\w*\[.*$/, "").replace(/^.*?->\s*(?=[A-Za-z_]+\s)/, "").replace(/^\s*[A-Za-z_]\w*/, "");
+  const body = text.replace(/^@\S+\s+ns\s+/, "").replace(/\s+when\s+(?:false|[¬!]?[A-Za-z_]\w*\[).*$/, "").replace(/^.*?->\s*(?=[A-Za-z_]+\s)/, "").replace(/^\s*[A-Za-z_]\w*/, "");
   // Operand groups `P reg[i]`, `P reg[a:b]` or `reg[…]`; a parametric range's length is not in the
   // text, so it is what the other groups leave of `count`.
   const groups = [...body.matchAll(/(?:^|,|\s)(?:([XYZ])\s+)?[A-Za-z_]\w*\[([^\]]+)\]/g)].map((g) => {
@@ -96,6 +98,8 @@ function paulisFrom(text, count) {
 export function statement(op, { timed = true } = {}) {
   const parts = [];
   if (op.reads?.length && op.kind !== "measure") parts.push(sitesText(op.reads), "->");
+  // request_magic: its outputs come before it, as the compiler writes the statement.
+  if (op.kind === "request_magic" && op.qubits.length) parts.push(sitesText(op.qubits));
   parts.push(op.kind);
   if (op.kind === "measure" && op.arg) parts.push("basis=" + op.arg);
   if ((op.kind === "request_ancilla" || op.kind === "release_ancilla") && op.arg !== null && op.arg !== undefined) parts.push("count=" + op.arg);
@@ -105,7 +109,7 @@ export function statement(op, { timed = true } = {}) {
     if (op.inputNs) parts.push("input_ns=" + op.inputNs);
   }
   if (op.kind === "request_magic" && op.arg) parts.push("state=" + op.arg);
-  if (op.qubits.length) {
+  if (op.qubits.length && op.kind !== "request_magic") {
     const paulis = op.kind === "pauli_frame_update" || GATES.includes(op.kind) ? paulisFrom(op.text ?? "", op.qubits.length) : null;
     parts.push(sitesText(op.qubits, paulis));
   }
@@ -118,7 +122,8 @@ export function statement(op, { timed = true } = {}) {
 }
 
 /**
- * A guard ({ bands: [{ negated, records: [site, …] }, …] }) as `if c[3], ¬c[5:6]`. A band prints as
+ * A guard ({ bands: [{ negated, records: [site, …] }, …] }) as `when c[3], ¬c[5:6]`, the compiler's
+ * `when` written on the one statement it governs. A band prints as
  * one record or one inclusive range of one register; any other band cannot be written as one band
  * and is refused. A guard without bands (an older shape) prints nothing.
  */
@@ -126,7 +131,7 @@ export function guardText(guard) {
   if (!guard?.bands?.length) return "";
   // A band of no records has parity 0: plain, it never holds, so the whole guard is false; negated,
   // it always holds and says nothing. The compiler keeps such bands (a statically empty selector).
-  if (guard.bands.some((b) => !b.records?.length && !b.negated)) return "if false";
+  if (guard.bands.some((b) => !b.records?.length && !b.negated)) return "when false";
   const kept = guard.bands.filter((b) => b.records?.length);
   if (!kept.length) return "";
   const bands = kept.map(({ negated, records }) => {
@@ -134,7 +139,7 @@ export function guardText(guard) {
     if (!contiguous) throw Error("guard band " + records.map((s) => s.register + "[" + s.index + "]").join(" ") + " is not one record or one range of one register");
     return (negated ? "¬" : "") + sitesText(records);
   });
-  return "if " + bands.join(", ");
+  return "when " + bands.join(", ");
 }
 
 /** The records a guard reads, in order. */
@@ -148,14 +153,14 @@ export function guardHolds(guard, values) {
 
 /** Parse a guard's text (`c[3], ¬c[5:6]`) into { bands }. */
 function guardOf(text, line) {
-  // `if false`: a guard that never holds (a band of no records).
+  // `when false`: a guard that never holds (a band of no records).
   if (text.trim() === "false") return { bands: [{ negated: false, records: [] }] };
   const bands = text.split(",").map((b) => b.trim()).filter(Boolean).map((b) => {
     const m = /^([¬!])?\s*([A-Za-z_]\w*\[[^\]]*\])$/.exec(b);
     if (!m) throw new SyntaxError(`line ${line}: "${b}" is not a guard band (a record or a range, optionally negated with ¬)`);
     return { negated: !!m[1], records: sitesOf(m[2], line).sites };
   });
-  if (!bands.length) throw new SyntaxError(`line ${line}: "if" with no band`);
+  if (!bands.length) throw new SyntaxError(`line ${line}: "when" with no band`);
   return { bands };
 }
 
@@ -281,8 +286,9 @@ export function parse(text) {
     const line = i + 1, full = raw.replace(/#.*/, "").trim();
     if (!full) return;
     for (const [rx, why] of REFUSED) if (rx.test(full)) throw new SyntaxError(`line ${line}: ${why} ("${full.slice(0, 60)}")`);
-    // A statement's own guard: everything after its last top-level " if ".
-    const g = /\s+if\s+(.+)$/.exec(full);
+    // A statement's own guard: everything after " when ". `if` is not QSysASM's spelling.
+    if (/\s+if\s+(?:false\b|[¬!]?[A-Za-z_]\w*\[)/.test(full)) throw new SyntaxError(`line ${line}: a guard is written "when …", as the compiler writes it ("${full.slice(0, 60)}")`);
+    const g = /\s+when\s+(.+)$/.exec(full);
     const guard = g ? guardOf(g[1], line) : null;
     const s = g ? full.slice(0, g.index).trim() : full;
     const header = /^(machine|factory\w*)\s*\{(.*)\}$/.exec(s);
@@ -291,9 +297,15 @@ export function parse(text) {
       else factories[header[1]] = fieldsOf(header[2]);
       return;
     }
-    const m = /^(?:@(\d+)\s*ns\s+)?(?:((?:[A-Za-z_]\w*\[[^\]]*\]\s*,?\s*)+)->\s*)?([A-Za-z_]\w*)\b(.*)$/.exec(s);
+    // request_magic: its outputs come first (`ancilla[0:8] request_magic state=|T> with ancilla[9:16]`).
+    const magic = /^(?:@(\d+)\s*ns\s+)?((?:[A-Za-z_]\w*\[[^\]]*\]\s*,?\s*)+?)\s*request_magic\b(.*)$/.exec(s);
+    const m = magic ? [magic[0], magic[1], undefined, "request_magic", magic[3]]
+      : /^(?:@(\d+)\s*ns\s+)?(?:((?:[A-Za-z_]\w*\[[^\]]*\]\s*,?\s*)+)->\s*)?([A-Za-z_]\w*)\b(.*)$/.exec(s);
     if (!m || !OPS.has(m[3])) throw new SyntaxError(`line ${line}: "${s.slice(0, 60)}" is not a QSysASM instruction or system call`);
     const [, at, before, kind, restRaw] = m;
+    const magicOut = magic ? sitesOf(magic[2], line).sites : null;
+    if (kind === "request_magic" && !magic && /[A-Za-z_]\w*\[/.test(restRaw.replace(/\swith\s.*$/, "")))
+      throw new SyntaxError(`line ${line}: request_magic's outputs come first, as the compiler writes it: "<outputs> request_magic state=… with <workspace>"`);
     let rest = restRaw.trim(), writes = [];
     const arrow = rest.indexOf("->");
     if (arrow >= 0) { writes = sitesOf(rest.slice(arrow + 2), line).sites; rest = rest.slice(0, arrow).trim(); }
@@ -311,7 +323,8 @@ export function parse(text) {
       work = sitesOf(rest.slice(w.index + w[0].length - 1), line).sites;
       rest = rest.slice(0, w.index).trim();
     }
-    const { sites, paulis } = sitesOf(rest, line);
+    const { sites, paulis } = magicOut ? { sites: magicOut, paulis: magicOut.map(() => "") } : sitesOf(rest, line);
+    if (magicOut && rest) throw new SyntaxError(`line ${line}: request_magic names its outputs before it and its workspace after "with" ("${rest.slice(0, 40)}")`);
     const reads = before ? sitesOf(before, line).sites : [];
     const arg = kind === "measure" ? args.basis ?? "Z" : kind === "request_magic" ? args.state ?? null : args.count ?? null;
     const op = { uid: ops.length, order: ops.length, kind, start: at === undefined ? null : Number(at), duration: null,

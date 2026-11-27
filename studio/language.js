@@ -28,19 +28,21 @@ header     ::= "machine" "{" field ("," field)* "}"          # the machine's dec
 field      ::= name ":" nat unit
 unit       ::= "ns" | "total" | "bits/us" | "qubits/us"
 line       ::= statement | "#" text
-statement  ::= time? (records "->")? op arg* operands? ("with" operands)? ("->" records)? guard?
+statement  ::= time? body guard?
+body       ::= (records "->")? op arg* operands? ("->" records)?
+            |  operands "request_magic" arg* ("with" operands)?   # outputs first, then the workspace
 time       ::= "@" nat "ns"                                  # absolute start; none: the OS assigns it
 op         ::= gate | "measure" | syscall
 gate       ::= "H" | "S" | "Sdg" | "X" | "Z" | "CNOT" | "CZ" | "CY"
-syscall    ::= "request_ancilla" | "release_ancilla" | "request_magic" | "route"
+syscall    ::= "request_ancilla" | "release_ancilla" | "route"
             |  "decode_syndrome" | "pauli_frame_update" | "parity"
 arg        ::= name "=" (nat | pauli | "|" name ">")         # count=, basis=, rounds=, input_ns=, state=
 operands   ::= operand ("," operand)*
 operand    ::= pauli? register "[" nat (":" nat)? "]"        # a:b is inclusive
 records    ::= register "[" nat (":" nat)? "]" ("," register "[" nat (":" nat)? "]")*
 pauli      ::= "X" | "Y" | "Z"
-guard      ::= "if" band ("," band)*                          # runs when every band holds
-            |  "if" "false"                                 # never runs (a statically empty band)
+guard      ::= "when" band ("," band)*                        # runs when every band holds
+            |  "when" "false"                               # never runs (a statically empty band)
 band       ::= "¬"? register "[" nat (":" nat)? "]"            # XOR of its records is 1 (0 with ¬)
 nat        ::= digit+                                        # every index is a literal`;
 
@@ -95,7 +97,7 @@ const CONTEXT = {
   release_ancilla: ["request_ancilla count=1 ancilla[0]", "measure basis=Z ancilla[0] -> s[0]", "release_ancilla count=1 ancilla[0]", "request_ancilla count=1 ancilla[1]"],
   route: ["route ancilla[0], data[0:1]", "CNOT data[0], ancilla[0]", "CNOT data[1], ancilla[0]"],
   decode_syndrome: ["measure basis=Z ancilla[0] -> s[0]", "measure basis=Z ancilla[1] -> s[1]", "s[0:1] -> decode_syndrome rounds=1"],
-  request_magic: ["request_magic state=|T> magic[0]", "CNOT data[0], magic[0]", "measure basis=Z magic[0] -> m[0]", "m[0] -> pauli_frame_update Z data[0]"],
+  request_magic: ["magic[0] request_magic state=|T>", "CNOT data[0], magic[0]", "measure basis=Z magic[0] -> m[0]", "m[0] -> pauli_frame_update Z data[0]"],
   pauli_frame_update: ["measure basis=Z ancilla[0] -> s[0]", "measure basis=Z ancilla[1] -> s[1]", "s[0:1] -> decode_syndrome rounds=1", "s[0:1] -> pauli_frame_update X data[0:2]"],
   parity: ["measure basis=Z data[0] -> c[0]", "measure basis=Z data[1] -> c[1]", "c[0:1] -> parity -> p[0]"],
 };
@@ -107,7 +109,7 @@ const ABOUT = {
   release_ancilla: { sig: "release_ancilla count=N a[i:j]", what: "Returns qubits to the pool. Takes no time.", state: "the pool gains N qubits; the names are retired", lower: "nothing is played: the site is free for the next name placed on it" },
   route: { sig: "route q₁, …, qₙ", what: "Brings qubits together so that two-qubit gates among them are possible. A program's two-qubit gate needs a completed route.", state: "the qubits' next statements wait for it", lower: "transmon: nothing (a coupler joins every pair the program gates); ions: electrode-voltage shuttles; atoms: AOD tweezer moves" },
   decode_syndrome: { sig: "r[i:j] -> decode_syndrome rounds=R input_ns=D", what: "Decodes the syndrome in the records r[i..j] on a decoder unit. The corrections it finds are applied through the Pauli frame.", state: "the records become decoded; their consumers (frame updates) may start", lower: "a decoder core reads the bits from the hub and runs a decoder compiled for RISC-Q: a lookup table for a few bits, Helios union-find for a surface code" },
-  request_magic: { sig: "request_magic state=|T> q with w[i:j]", what: "Asks a magic-state factory for a state on the output qubits q; w are its workspace qubits.", state: "the output qubits hold the state; the factory is held for its whole latency", lower: "the factory's own circuit (injection, cultivation or distillation) on its qubits, and the factory's decode" },
+  request_magic: { sig: "q request_magic state=|T> with w[i:j]", what: "Asks a magic-state factory for a state on the output qubits q; w are its workspace qubits.", state: "the output qubits hold the state; the factory is held for its whole latency", lower: "the factory's own circuit (injection, cultivation or distillation) on its qubits, and the factory's decode" },
   pauli_frame_update: { sig: "r[i:j] -> pauli_frame_update P q, …", what: "Records a Pauli correction for the named qubits in the Pauli frame, as the decoded records say. No pulse is played: later measurement results are corrected in software.", state: "the frame words of the named qubits change", lower: "the frame core flips the X or Z bit of each named qubit's frame word, at the statement's time" },
   parity: { sig: "r[i:j] -> parity -> p[k]", what: "The parity (XOR) of records, written to a new record.", state: "p[k] becomes written", lower: "the frame core XORs the records into the output record" },
 };
@@ -149,7 +151,7 @@ export async function render(root, toc) {
   html += h2("qsysasm", "1", "QSysASM: physical instructions and system calls");
   html += `<p>A program is flat: one statement per operation, on concrete qubits and records, with an absolute start or none. There are no
   gadgets, no loops, no guard blocks and no parameters. A repeated round is written out once per round. A statement may carry its own
-  guard, <code>X data[3] if c[3], ¬c[5:6]</code>: it runs only when measured records say so. A statement under several nested
+  guard, <code>X data[3] when c[3], ¬c[5:6]</code>: it runs only when measured records say so. A statement under several nested
   conditions of a compiled program carries all their bands, outer first, so the guard is exact and still opens no block. The parser is <code>qsysasm.mjs</code>.</p>`;
   html += h3("q-syntax", "1.1 Syntax");
   html += bnf(QSYSASM_BNF);
@@ -163,7 +165,7 @@ export async function render(root, toc) {
     ${rule("Q-Fresh", ["a ∉ requested(P before k)"], "M ⊢ request_ancilla … a … wf at k")}
     ${rule("Q-Held", ["a ∈ held(P before k)"], "M ⊢ release_ancilla … a … wf at k")}
     ${rule("Q-Read", ["r ∈ written(P before k)"], "M ⊢ (r -> stmt) wf at k")}
-    ${rule("Q-Guard", ["∀ r ∈ guard(k). r ∈ written(P before k)"], "M ⊢ (stmt if g) wf at k")}
+    ${rule("Q-Guard", ["∀ r ∈ guard(k). r ∈ written(P before k)"], "M ⊢ (stmt when g) wf at k")}
     ${rule("Q-Field", ["kind(s) ∈ dom(DURATION)", "DURATION(kind(s)) ∈ dom(M)"], "M ⊢ s wf")}
     ${rule("Q-Done", ["held(P) = ∅", "undecoded(P) = ∅"], "M ⊢ P complete")}</div>`;
   html += table(["Rule", "Enforced by"], [
