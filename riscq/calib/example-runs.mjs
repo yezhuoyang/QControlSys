@@ -24,7 +24,7 @@ import { transmon, optical } from "../ftqvm/platforms.mjs";
 import { DESIGNS } from "../ftqvm/corpus.mjs";
 import { programRow } from "../os/program-runs.mjs";
 import { PROGRAMS as OS_PROGRAMS } from "../os/programs.mjs";
-import { MEDIUM_PROGRAMS, MEDIUM_RUNS, MEDIUM_DESIGN, mediumRow, storedVariants } from "../ftqvm/medium.mjs";
+import { MEDIUM_PROGRAMS, MEDIUM_HARDWARE, MEDIUM_DESIGN, mediumRow, storedVariants, storedRuns } from "../ftqvm/medium.mjs";
 
 const RUNS = new URL("../../validation/calib/site/runs/", import.meta.url);
 const ADAPTERS = { superconducting: transmon, neutral: (o) => optical(o.id), qccd: (o) => optical(o.id) };
@@ -167,13 +167,16 @@ export const STUDY_RUNS = {
 
 const INTRO = "Choose a program, a hardware design and how the operating system runs it, then run it on the cycle-exact model of the RISC-Q control hardware. The timetable is the compiler's QSysASM listing; a runtime policy runs the same program as soon as its dependencies and resources allow and the hardware then plays that schedule. Every operation is checked against its window.";
 
-// Algorithms at medium scale (riscq/ftqvm/medium.mjs): the programs whose compiled run is stored.
-const MEDIUM_STORE = new URL("../../validation/ftqvm/medium/", import.meta.url);
-const mediumStored = MEDIUM_RUNS.filter((r) => existsSync(new URL(r.params.program + ".json.gz", MEDIUM_STORE)));
-// Each stored run, then its stored variants with other decoders (computed offline: about an hour each).
+// Algorithms at medium scale (riscq/ftqvm/medium.mjs): every (program, hardware design) with a stored
+// compiled run. A run on the first design is labelled by its program alone, any other by its hardware too.
+const FIRST_HW = MEDIUM_HARDWARE[0].id;
+const HW_SHORT = { "sc-dense": "dense transmons", "atoms-moving": "moving atoms", "atoms-static": "static atoms", "ions-qccd": "QCCD ions", "ions-modules": "ion modules" };
+const hwLabel = (h) => (h.id === FIRST_HW ? "" : " · " + (HW_SHORT[h.id] ?? h.title.toLowerCase()));
+const mediumStored = storedRuns();
+// Each stored run, then (first design only) its stored variants with other decoders (computed offline: about an hour each).
 const variantLabel = (v) => v.decoders + " decoder unit" + (v.decoders === "1" ? "" : "s") + " of " + v.coresPerDecoder + " core" + (v.coresPerDecoder === "1" ? "" : "s");
-if (mediumStored.length) STUDY_RUNS.medium = mediumStored.flatMap((r) => [{ ...r, medium: true },
-  ...storedVariants(r.params.program).map((v) => ({ label: r.label + " · " + variantLabel(v), params: v, medium: true }))]);
+if (mediumStored.length) STUDY_RUNS.medium = mediumStored.flatMap(({ p, h }) => [{ label: p.title + hwLabel(h), params: { program: p.id, hardware: h.id }, medium: true },
+  ...(h.id === FIRST_HW ? storedVariants(p.id).map((v) => ({ label: p.title + " · " + variantLabel(v), params: { ...v, hardware: h.id }, medium: true })) : [])]);
 
 /** Statements of a medium run's listing shown on a page; the whole listing stays in its stored run. */
 const LISTING_LINES = 400;
@@ -211,15 +214,22 @@ export const studyRun = (r) => (r.os ? programRow({ ...r.params, label: r.label 
  */
 const mediumDesign = {
   intro: MEDIUM_DESIGN.intro,
-  // Only the programs with a stored run, the first of them chosen; sources in words, not paths.
-  params: () => MEDIUM_DESIGN.params().map((f) => f.key !== "program" ? f : {
-    ...f, value: mediumStored[0].params.program, source: "logical programs compiled at distance 5 (the programs with a stored run)",
-    options: f.options.filter((o) => mediumStored.some((r) => r.params.program === o.value)) }),
+  // The programs and designs with a stored run, the first stored run chosen; sources in words, not paths.
+  params: () => MEDIUM_DESIGN.params().map((f) => f.key === "program" ? { ...f, value: mediumStored[0].p.id, source: "logical programs compiled by the fault-tolerant compiler (the programs with a stored run)" }
+    : f.key === "hardware" ? { ...f, value: mediumStored[0].h.id } : f),
   async run(params = {}) {
     const defaults = Object.fromEntries(MEDIUM_DESIGN.params().map((f) => [f.key, String(f.value)]));
     const p = { ...defaults, ...Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v !== undefined && v !== null).map(([k, v]) => [k, String(v)])) };
-    const stored = storedVariants(p.program).some((v) => v.decoders === p.decoders && v.coresPerDecoder === p.coresPerDecoder);
-    if ((p.decoders !== defaults.decoders || p.coresPerDecoder !== defaults.coresPerDecoder) && !stored)
+    if (!mediumStored.some((x) => x.p.id === p.program && x.h.id === p.hardware)) {
+      const on = mediumStored.filter((x) => x.p.id === p.program).map((x) => x.h.platform + " · " + x.h.title);
+      throw Error("This program has no stored run on that hardware: each run is compiled offline by the fault-tolerant compiler. " + (on.length ? "It has runs on: " + on.join("; ") + "." : ""));
+    }
+    const otherDecoders = p.decoders !== defaults.decoders || p.coresPerDecoder !== defaults.coresPerDecoder;
+    if (p.hardware !== FIRST_HW) {
+      // Decoder variants exist for the first design only: the run keeps the decoders it was compiled with.
+      delete p.decoders;
+      delete p.coresPerDecoder;
+    } else if (otherDecoders && !storedVariants(p.program).some((v) => v.decoders === p.decoders && v.coresPerDecoder === p.coresPerDecoder))
       throw Error("A run with other decoders is a cycle-exact run of the whole control system (hundreds of cores over the program's full machine time) and takes about an hour, so the site does not start it. Run it from a checkout of the repository: mediumRow(" + JSON.stringify(p) + ") in the medium-scale module.");
     return { rows: [await mediumPageRow(p)] };
   },

@@ -64,15 +64,29 @@ export async function renderStudy(el, id) {
     <p class="pager">${prev ? `<a href="/examples/${esc(prev.id)}">← ${esc(prev.title)}</a>` : ""}${next ? `<a href="/examples/${esc(next.id)}">${esc(next.title)} →</a>` : ""}</p>`;
   if (!rows.length) return;
   const twin = el.querySelector("#twin"), detail = el.querySelector("#run");
-  let viewer;
+  let viewer, shown = -1;
   const show = async (i) => {
-    const r = rows[i];
+    shown = i;
     el.querySelectorAll(".runpick button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.run) === i)));
-    detail.innerHTML = runDetail(r);
     viewer?.dispose();
     viewer = undefined;
+    // A large run (its track and listing) is loaded when it is opened.
+    if (rows[i].detail) {
+      twin.innerHTML = `<p class="no">Loading this run…</p>`;
+      detail.innerHTML = "";
+      try {
+        rows[i] = await json(rows[i].detail);
+      } catch (error) {
+        if (shown === i) twin.innerHTML = `<p class="no">This run could not be loaded: ${esc(error.message)}</p>`;
+        return;
+      }
+      if (shown !== i) return;
+    }
+    const r = rows[i];
+    detail.innerHTML = runDetail(r);
     if (!r.track) { twin.innerHTML = `<p class="no">No track was recorded for this run.</p>`; return; }
     const { mountTwin } = await import("/reproduce/twin3d.js");
+    if (shown !== i) return;
     const tr = r.track;
     el.querySelector("[data-hw]")?.setAttribute("href", "/hw/design?doc=" + encodeURIComponent("example:" + id + ":" + i));
     viewer = mountTwin(twin, tr, { caption: `${tr.device.sites.length} qubits, ${tr.events.length} operations${tr.moves?.length ? ", " + tr.moves.length + " moves" : ""}${tr.controller ? ", " + tr.controller.cores.length + " control cores" : " (the runtime simulator's schedule; no control system ran it)"}, ${(tr.endNs / 1000).toFixed(1)} µs of machine time. The machine is this run's hardware document, the one the design page builds; positions and times are the run's, and the room-scale parts are illustrative envelopes.` });

@@ -9,7 +9,7 @@
   "id": "medium",
   "title": "Algorithms at medium scale",
   "kicker": "Scale · well-known algorithms",
-  "summary": "A GHZ state on 12 logical qubits in 359 physical qubits at distance 3, Deutsch–Jozsa on 13 logical qubits in 379 physical qubits at distance 3, a GHZ state on 6 logical qubits in 419 physical qubits at distance 5, Bernstein–Vazirani on 17 logical qubits in 480 physical qubits at distance 3, teleportation on 16 logical qubits in 429 physical qubits at distance 3, Deutsch–Jozsa on 9 logical qubits in 652 physical qubits at distance 5 and a GHZ state on 10 logical qubits in 699 physical qubits at distance 5, each run through the operating system's interface on a superconducting machine whose control system spans 91, 80, 111, 100, 100, 157 and 186 boards."
+  "summary": "27 runs of 14 programs of well-known algorithms on up to 17 logical qubits, encoded in 113 to 699 physical qubits, on 6 hardware designs of superconducting, neutral atoms and trapped ions. Each is run through the operating system's interface on its machine's RISC-Q control system."
  },
  {
   "id": "fabric",

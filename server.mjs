@@ -285,6 +285,28 @@ async function cards(section) {
   }
   return JSON.stringify(out);
 }
+/**
+ * A study page as the browser loads it: rows larger than 256 kB (a medium-scale run carries a 3D track of
+ * tens of thousands of operations and a long listing) are sent without their track and listing, which
+ * /examples/data/<id>/run/<i>.json serves when that run is opened. The stored file is unchanged.
+ */
+const studyCache = new Map();
+async function studyPage(id) {
+  const file = path.join(root, "validation", "calib", "site", id + ".json");
+  if (!existsSync(file)) return null;
+  const stamp = statSync(file).mtimeMs, cached = studyCache.get(file);
+  if (cached?.stamp === stamp) return cached;
+  const study = JSON.parse(await readFile(file, "utf8"));
+  const rows = study.rows ?? [];
+  const light = rows.map((row, i) => {
+    if (JSON.stringify(row).length <= 262144) return row;
+    const { track, program, ...rest } = row;
+    return { ...rest, detail: "/examples/data/" + id + "/run/" + i + ".json" };
+  });
+  const value = { stamp, rows, page: JSON.stringify({ ...study, rows: light }) };
+  studyCache.set(file, value);
+  return value;
+}
 async function cardTrack(section, id) {
   if (!/^[A-Za-z0-9._-]+$/.test(id)) return null;
   const file = section === "reproduce" ? path.join(root, "validation", "ftqvm", "papers", id + ".json") : path.join(root, "validation", "calib", "site", id + ".json");
@@ -674,6 +696,15 @@ if (
       if (url.pathname === "/reproduce/data/index.json") return reply(res, 200, "application/json", reproductionIndex());
       if (url.pathname === "/reproduce/data/previews.json") return replyLarge(req, res, await cards("reproduce"));
       if (url.pathname === "/examples/data/previews.json") return replyLarge(req, res, await cards("examples"));
+      {
+        const m = /^\/examples\/data\/([A-Za-z0-9_-]+)(?:\.json|\/run\/(\d+)\.json)$/.exec(url.pathname);
+        if (m && m[1] !== "index") {
+          const s = await studyPage(m[1]);
+          if (s && m[2] === undefined) return replyLarge(req, res, s.page);
+          if (s && s.rows[Number(m[2])]) return replyLarge(req, res, JSON.stringify(s.rows[Number(m[2])]));
+          if (m[2] !== undefined) return reply(res, 404, "text/plain", "no such run");
+        }
+      }
       {
         const m = /^\/(reproduce|examples)\/data\/([A-Za-z0-9._-]+)\/track\.json$/.exec(url.pathname);
         if (m) {
