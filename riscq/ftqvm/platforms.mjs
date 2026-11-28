@@ -17,6 +17,8 @@ const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) }
  *   qubitsPerCore    transmons one control core drives (1: a core per qubit)
  *   decoders         decoder units; coresPerDecoder  cores of one unit
  *   gap              empty lattice columns between code blocks
+ *   drivesPerDac     transmon drive lines summed on one RF-DAC (frequency-multiplexed drive; default 1,
+ *                    more only when a board runs out of DACs)
  *   memWords         words of RAM per control core (default: RISC-Q's x6y3 build; at most 16,384)
  *   trace            "summary" for medium programs: no trace frames, slim pulse records (default "io")
  *   factories        magic-state injections the chip runs at once (default 1). Each is realized on its
@@ -25,8 +27,8 @@ const v = (value, source, note) => ({ value, source, ...(note ? { note } : {}) }
  *   shards           Lean processes a summary run is split over, by groups of boards (default: one per
  *                    SHARD_OPS operations, at most 32); 1 runs the whole machine in one process
  */
-export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, name, memWords, trace, shards, factories = 1 } = {}) {
-  const options = { qubitsPerCore, decoders, coresPerDecoder, ...(memWords ? { memWords } : {}) };
+export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1, gap = 2, drivesPerDac, name, memWords, trace, shards, factories = 1 } = {}) {
+  const options = { qubitsPerCore, decoders, coresPerDecoder, ...(memWords ? { memWords } : {}), ...(drivesPerDac ? { drivesPerDac } : {}) };
   return {
     name: name ?? "transmon " + JSON.stringify(options),
     options,
@@ -60,7 +62,8 @@ export function transmon({ qubitsPerCore = 1, decoders = 1, coresPerDecoder = 1,
  * controller runs at 100 MHz (10 ns batches); gate slots are the addressing beams; a route
  * moves at most `movers` qubits at once; resets have their own pumping beams.
  */
-export function optical(id, overrides = {}) {
+// `trace`: "summary" for a medium listing (riscq/ftqvm/optical.mjs runOptical), else every event.
+export function optical(id, overrides = {}, { trace } = {}) {
   return {
     name: id, options: { id, ...overrides },
     gridNs: 10,
@@ -79,7 +82,7 @@ export function optical(id, overrides = {}) {
         reset_ns: g(p.resetNs.value), route_latency_ns: g(p.moveNs?.value ?? 10),
       };
     },
-    run: (listing, placement, design, { outcomes, distance }) => runOptical(listing, placement, design, { outcomes, distance }),
+    run: (listing, placement, design, { outcomes, distance }) => runOptical(listing, placement, design, { outcomes, distance, ...(trace ? { trace } : {}) }),
     capacities: (design, placement, durations) => {
       const route = Math.max(10, durations.route_latency_ns?.value ?? 10), reset = Math.max(10, durations.reset_ns?.value ?? 10);
       return {

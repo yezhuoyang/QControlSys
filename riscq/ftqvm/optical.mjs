@@ -33,7 +33,7 @@ import { placeOnBoards } from "../board.mjs";
 import { gatedPairs } from "./place.mjs";
 import { layers, checks } from "./surface.mjs";
 import { runDecodes, runFactoryDecodes } from "./decoder.mjs";
-import { conformance, addRows } from "./sc-run.mjs";
+import { conformance, addRows, batchBudget, checkFinished } from "./sc-run.mjs";
 import { buildTrack, controllerTrack } from "./track.mjs";
 
 // Every optical controller runs at RISC-Q's dspClk on the ZCU216, 500 MHz: the clock its RTL is measured
@@ -162,7 +162,27 @@ export function opticalDesign(listing, placement, id, overrides = {}) {
 
 /** Pools of channels a native instruction may take: the lowest free over its interval. */
 function pool(name, size) {
+  // Per channel: its intervals [start, end) sorted by start, the longest one's length (an interval that
+  // overlaps t starts after t − longest), and how many intervals end at each time.
   const busy = [];
+  const chan = (i) => (busy[i] ??= { iv: [], longest: 0, ends: new Map() });
+  const firstAtOrAfter = (iv, t) => {
+    let lo = 0, hi = iv.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (iv[m][0] < t) lo = m + 1; else hi = m; }
+    return lo;
+  };
+  // Free over [t, t + dur): no interval [a, b) with a < t + dur and b > t.
+  const freeOn = (i, t, dur) => {
+    const c = chan(i), iv = c.iv;
+    for (let j = firstAtOrAfter(iv, t + dur) - 1; j >= 0 && iv[j][0] + c.longest > t; j--) if (iv[j][1] > t) return false;
+    return true;
+  };
+  const hold = (i, t, end) => {
+    const c = chan(i);
+    c.iv.splice(firstAtOrAfter(c.iv, t + 1e-9), 0, [t, end]);
+    c.longest = Math.max(c.longest, end - t);
+    c.ends.set(end, (c.ends.get(end) ?? 0) + 1);
+  };
   let next = 0;
   return {
     name, size, peak: 0, lent: 0,
@@ -172,14 +192,20 @@ function pool(name, size) {
      *  operation does not conform (the design has no such channel). */
     /** Lengthen the interval a channel holds from `t` to end at `end`. */
     extend(i, t, end) {
-      const iv = (busy[i] ?? []).find(([a]) => a === t);
-      if (iv) iv[1] = Math.max(iv[1], end);
+      const c = busy[i];
+      if (!c) return;
+      const iv = c.iv[firstAtOrAfter(c.iv, t)];
+      if (!iv || iv[0] !== t || iv[1] >= end) return;
+      c.ends.set(iv[1], c.ends.get(iv[1]) - 1);
+      iv[1] = end;
+      c.ends.set(end, (c.ends.get(end) ?? 0) + 1);
+      c.longest = Math.max(c.longest, end - t);
     },
     take(t, dur, prefer) {
-      const free = (i) => (busy[i] ??= []).every(([a, b]) => t + dur <= a || b <= t);
+      const free = (i) => freeOn(i, t, dur);
       // A caller's own channel (a factory check's detector, round after round), when it is free.
       if (prefer !== undefined && prefer < size && free(prefer)) {
-        busy[prefer].push([t, t + dur]);
+        hold(prefer, t, t + dur);
         this.peak = Math.max(this.peak, prefer + 1);
         return prefer;
       }
@@ -187,22 +213,22 @@ function pool(name, size) {
       // for the next pulse of a sequence). Rotating instead would scatter one sequence over
       // several channels, and a pulse that spans a boundary between its steps would find every
       // channel touched although few are busy at any instant.
-      for (let i = 0; i < size; i++) if (busy[i]?.some(([, b]) => b === t) && free(i)) {
-        busy[i].push([t, t + dur]);
+      for (let i = 0; i < size; i++) if (busy[i]?.ends.get(t) > 0 && free(i)) {
+        hold(i, t, t + dur);
         this.peak = Math.max(this.peak, i + 1);
         return i;
       }
       for (let k = 0; k < size; k++) {
         const i = (next + k) % size;
         if (free(i)) {
-          busy[i].push([t, t + dur]);
+          hold(i, t, t + dur);
           this.peak = Math.max(this.peak, i + 1);
           next = (i + 1) % size;
           return i;
         }
       }
       for (let i = size; ; i++) if (free(i)) {
-        busy[i].push([t, t + dur]);
+        hold(i, t, t + dur);
         this.peak = Math.max(this.peak, i + 1);
         this.lent++;
         return i;
@@ -298,7 +324,9 @@ function planRoute(op, laterGates, design, state, placement) {
 }
 
 /** Lower and run a listing on an optical design. Returns { report, result }. */
-export async function runOptical(listing, placement, design, { outcomes = {}, distance = placement.d } = {}) {
+// `trace`: "io" (every event, for the debugger) or "summary" (pulses and host writes, for a medium listing:
+// the Lean model then runs up to its 2·10⁹-batch budget, and a run cut short by a limit throws).
+export async function runOptical(listing, placement, design, { outcomes = {}, distance = placement.d, trace = "io" } = {}) {
   const prof = design.prof, period = 1e12 / prof.dspHz;
   const b = (ns) => Math.ceil((ns * 1000) / period); // batches
   const beams = pool("beam", design.point.beams), readouts = pool("readout", design.readouts), movers = pool("mover", design.point.movers);
@@ -313,11 +341,14 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     },
   };
   const natives = [], origin = new Map(), classical = [], decodes = [], factories = [], measures = [], shared = [];
+  const nativeById = new Map();
   let counter = 0;
   const push = (op, n) => {
     const id = "h" + counter++;
     origin.set(id, op.uid);
-    natives.push({ ...n, id, source: "listing line " + op.line + " · " + op.text });
+    const native = { ...n, id, source: "listing line " + op.line + " · " + op.text };
+    natives.push(native);
+    nativeById.set(id, native);
     return id;
   };
   const gates = listing.ops.filter((o) => TWO.has(o.kind));
@@ -485,7 +516,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
           const dur = b(job.ns);
           const ch = movers.take(t0, dur);
           const nid = push(op, { op: "move", pool: "mover", channel: ch, at: t0, dur, job });
-          if (design.prof.platform === "neutral") aodJobs.set(t0, { native: natives.find((x) => x.id === nid) });
+          if (design.prof.platform === "neutral") aodJobs.set(t0, { native: nativeById.get(nid) });
         }
         break;
       }
@@ -539,9 +570,11 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   const sizeOf = { beam: beams.size, mover: movers.size, readout: readouts.size, pump: pumps.size, global: 3 };
   const lentOps = new Set(natives.filter((n) => n.channel >= sizeOf[n.pool]).map((n) => origin.get(n.id)));
   // An instruction on a lent channel is not run: the design has no such channel.
-  for (let i = natives.length - 1; i >= 0; i--) if (natives[i].channel >= sizeOf[natives[i].pool]) natives.splice(i, 1);
-  for (let i = measures.length - 1; i >= 0; i--) if (!natives.some((n) => n.id === measures[i].id)) measures.splice(i, 1);
-  const used = (p) => Math.max(1, ...natives.filter((n) => n.pool === p).map((n) => n.channel + 1));
+  for (let i = natives.length - 1; i >= 0; i--) if (natives[i].channel >= sizeOf[natives[i].pool]) nativeById.delete(natives[i].id);
+  if (nativeById.size < natives.length) { const kept = natives.filter((n) => nativeById.has(n.id)); natives.length = 0; for (const n of kept) natives.push(n); }
+  for (let i = measures.length - 1; i >= 0; i--) if (!nativeById.has(measures[i].id)) measures.splice(i, 1);
+  const maxOf = (xs, from) => xs.reduce((m, x) => (x > m ? x : m), from);
+  const used = (p) => maxOf(natives.filter((n) => n.pool === p).map((n) => n.channel + 1), 1);
   // Global pulses: kind k's j-th pulse goes to core j mod K of that kind, all on the kind's DAC.
   const GLOBAL_KINDS = ["rydberg", "raman", "pump"], PULSES_PER_CORE = 1500;
   const globalCount = [0, 0, 0];
@@ -552,31 +585,95 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   const globalCores = GLOBAL_KINDS.flatMap((kind, k) => Array.from({ length: globalCoresOf[k] }, (_, i) =>
     ({ name: "global-" + kind + i, channels: [{ name: kind, kind: "pulse", dac: globalDac[k], slots: 64, env_depth: 1024, interp: 4 }] })));
   // The controller: beam, mover and readout cores of at most 16 channels, a frame core.
-  const group = (prefix, count, make) => {
+  // A pool's channels, PER_CORE to a core. When a core would play more than PULSES_PER_CORE pulses (its
+  // program would outgrow its RAM), each channel is instead driven by ⌈pulses / PULSES_PER_CORE⌉ cores in
+  // turn, their outputs summed on the channel's DAC (as the global beams are), packed PER_CORE drivers and
+  // at most PULSES_PER_CORE pulses to a core. `driver`: pool and channel → the core and channel name of each
+  // of its drivers; a native goes to its channel's drivers in turn (`n.driver`).
+  const partsOf = (n) => Math.max(1, Math.ceil(n.dur / 65535));
+  const pulsesOf = new Map();
+  for (const n of natives) if (n.pool !== "global" && n.pool !== "readout") pulsesOf.set(n.pool + n.channel, (pulsesOf.get(n.pool + n.channel) ?? 0) + partsOf(n));
+  const driver = new Map();
+  const READS_PER_CORE = 150, readsOf = new Map();
+  for (const n of natives) if (n.pool === "readout") readsOf.set(n.channel, (readsOf.get(n.channel) ?? 0) + 1);
+  const readersOf = (k) => Math.max(1, Math.ceil((readsOf.get(k) ?? 0) / READS_PER_CORE));
+  const readerName = (k, d) => (d === 0 ? "readout" + k : "readout" + k + "." + d);
+  const readTurn = new Map();
+  for (const n of natives) if (n.pool === "readout") {
+    const t = readTurn.get(n.channel) ?? 0;
+    readTurn.set(n.channel, t + 1);
+    n.reader = t % readersOf(n.channel);
+  }
+  const group = (prefix, count, make, pool) => {
+    const load = (ch) => pulsesOf.get(pool + ch) ?? 0;
     const cores = [];
-    for (let i = 0; i < count; i += PER_CORE) cores.push({ name: prefix + i / PER_CORE, channels: Array.from({ length: Math.min(PER_CORE, count - i) }, (_, k) => make(i + k)) });
+    let fits = true;
+    for (let i = 0; i < count; i += PER_CORE) {
+      let sum = 0;
+      for (let k = i; k < Math.min(count, i + PER_CORE); k++) sum += load(k);
+      if (sum > PULSES_PER_CORE) fits = false;
+    }
+    if (fits) {
+      for (let i = 0; i < count; i += PER_CORE) {
+        cores.push({ name: prefix + i / PER_CORE, channels: Array.from({ length: Math.min(PER_CORE, count - i) }, (_, k) => make(i + k)) });
+        for (let k = i; k < Math.min(count, i + PER_CORE); k++) driver.set(pool + k, [{ core: prefix + i / PER_CORE, channel: make(k).name }]);
+      }
+      return cores;
+    }
+    let core = null, coreLoad = 0;
+    for (let ch = 0; ch < count; ch++) {
+      const drivers = Math.max(1, Math.ceil(load(ch) / PULSES_PER_CORE)), each = Math.ceil(load(ch) / drivers), list = [];
+      for (let d = 0; d < drivers; d++) {
+        if (!core || core.channels.length >= PER_CORE || coreLoad + each > PULSES_PER_CORE) {
+          core = { name: prefix + cores.length, channels: [] };
+          cores.push(core);
+          coreLoad = 0;
+        }
+        const base = make(ch), name = d === 0 ? base.name : base.name + "." + d;
+        core.channels.push({ ...base, name });
+        coreLoad += each;
+        list.push({ core: core.name, channel: name });
+      }
+      driver.set(pool + ch, list);
+    }
     return cores;
   };
   // Every other channel names its own logical DAC; placeOnBoards gives it one of its board's 16.
   const pulse = (name) => ({ name, kind: "pulse", dac: name, slots: 64, env_depth: 1024, interp: 4 });
   const cores = [
-    ...group("beams", used("beam"), (k) => pulse("b" + k)),
+    ...group("beams", used("beam"), (k) => pulse("b" + k), "beam"),
     // Each global beam (Rydberg, Raman, pumping) is one DAC driven by several cores in turn, so
     // that no core's program outgrows its memory; channels on one DAC are summed.
     ...globalCores,
-    ...group("pumps", used("pump"), (k) => pulse("p" + k)),
-    ...group("movers", used("mover"), (k) => pulse("m" + k)),
+    ...group("pumps", used("pump"), (k) => pulse("p" + k), "pump"),
+    ...group("movers", used("mover"), (k) => pulse("m" + k), "mover"),
     // A readout core per readout channel: its pulse and its counter line; a count holds the core.
-    ...Array.from({ length: used("readout") }, (_, k) => ({ name: "readout" + k, channels: [{ ...pulse("detect"), dac: "detect" + k }, { name: "pmt", kind: "dio", slots: 1 }] })),
+    // A count takes about 73 words of a core's program (GHZ-8 on atoms-moving: 21,286 words for ~290), so a
+    // readout channel with more than READS_PER_CORE counts is read by several cores in turn: their detection
+    // pulses are summed on the channel's DAC and its counter line is split to each core's DIO input.
+    ...Array.from({ length: used("readout") }, (_, k) => Array.from({ length: readersOf(k) }, (_, d) =>
+      ({ name: readerName(k, d), channels: [{ ...pulse("detect"), dac: "detect" + k }, { name: "pmt", kind: "dio", slots: 1 }] }))).flat(),
     { name: "frame", channels: [{ name: "status", kind: "dio", slots: 1 }] },
   ];
   // The cores on as many ZCU216 boards as they need (riscq/board.mjs); boards are joined by RISC-Q's PutLane.
   const onBoards = placeOnBoards(cores);
   const spec = socSpec({ name: design.id, dsp_freq_hz: prof.dspHz, link_pipe: 4, core_defaults: { mem_depth: 16384, with_mul: true, queue_depth: 32 }, cores: onBoards.cores }); // queue depth of RISC-Q's x6y3 build
-  const coreOf = (name) => spec.cores.findIndex((c) => c.name === name);
+  const coreIndex = new Map(spec.cores.map((c, k) => [c.name, k]));
+  const coreOf = (name) => coreIndex.get(name) ?? -1;
+  // A pooled native's driver: its channel's drivers in turn, in the order the natives were issued.
+  const turn = new Map();
+  for (const n of natives) if (driver.has(n.pool + n.channel)) {
+    const k = n.pool + n.channel, t = turn.get(k) ?? 0;
+    turn.set(k, t + 1);
+    n.driver = t % driver.get(k).length;
+  }
+  const driverOf = (n) => {
+    const d = driver.get(n.pool + n.channel)[n.driver];
+    return { core: coreOf(d.core), channel: d.channel };
+  };
   const where = (n) => n.pool === "global" ? { core: coreOf("global-" + GLOBAL_KINDS[n.channel] + (n.globalIndex % globalCoresOf[n.channel])), channel: GLOBAL_KINDS[n.channel] }
-    : n.pool === "readout" ? { core: coreOf("readout" + n.channel), channel: "detect" }
-    : { core: coreOf({ beam: "beams", mover: "movers", pump: "pumps" }[n.pool] + Math.floor(n.channel / PER_CORE)), channel: { beam: "b", mover: "m", pump: "p" }[n.pool] + n.channel };
+    : n.pool === "readout" ? { core: coreOf(readerName(n.channel, n.reader)), channel: "detect" }
+    : driverOf(n);
   const tables = new Map(), actions = [], bindings = [];
   const slotOf = (core, channel, dur, kind) => {
     const k = core + "/" + channel;
@@ -612,31 +709,37 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     const { uid: _u, id, ...rest } = c;
     actions.push({ segment: 0, core: frameCore, timed: true, ...rest, source: id });
   }
-  const span = Math.max(1, ...natives.map((n) => n.at + n.dur));
+  const span = maxOf(natives.map((n) => n.at + n.dur), 1);
   const lowered = { tables: [...tables.values()].map(({ keys: _k, ...t }) => t), segments: [{ span }], actions, bindings };
   // Photons: a bright readout pulses its counter line 3 times inside the exposure. The counter is
   // read when the exposure ends, and RISC-Q's event queue holds 8 events (EventLink.md), so a
   // bright readout is 3 photons (6 edges), above the threshold of 2; a dark one is none.
   const responses = measures.map((mm) => {
-    const core = coreOf("readout" + mm.channel), occurrence = firstPulse.get(mm.id);
+    const core = coreOf(readerName(mm.channel, nativeById.get(mm.id).reader)), occurrence = firstPulse.get(mm.id);
     const gap = Math.max(40, Math.floor(mm.dur / 8)), edges = [];
     if (outcomes[mm.bit]) for (let k = 0; k < 3; k++) edges.push({ after: gap * (2 * k + 1), levels: 1 }, { after: gap * (2 * k + 1) + 5, levels: 0 });
     const channels = spec.cores[core].channels;
     return { core, channel: channels.findIndex((c) => c.name === "detect"), occurrence, toCore: core, toChannel: channels.findIndex((c) => c.name === "pmt"), edges };
   });
   // The run's budget: its own span twice over, plus 20 ms for the decodes after it (the model's cap is 2·10⁹ cycles).
-  const built = assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, maxBatches: Math.min(2_000_000_000, 2 * span + 10_000_000), bindings, responses });
+  const built = trace === "summary"
+    ? assemble(spec, lowered, { trace, maxEvents: 400_000, maxSteps: 2_000_000_000, maxBatches: batchBudget(lowered), bindings, responses })
+    : assemble(spec, lowered, { trace: "io", maxEvents: 400_000, maxSteps: 20_000_000, maxBatches: Math.min(2_000_000_000, 2 * span + 10_000_000), bindings, responses });
   const result = await execute(built.document);
+  if (trace === "summary") checkFinished(result);
   const m = { period, decoderCore: frameCore };
   const hardware = { segments: [{ ops: natives.map((n) => ({ id: n.id, t: n.at * period })), span }] };
   // A gate served by a shared global pulse is that pulse's: attribute the pulse to its operation too.
+  const pulseOf = new Map(), fireOf = new Map();
+  for (const x of result.summary.pulses) if (!pulseOf.has(x.source)) pulseOf.set(x.source, x);
+  for (const a of actions) if (a.fire && !fireOf.has(a.source)) fireOf.set(a.source, a);
   for (const sh of [...shared, ...sharedMoves]) {
-    const host = natives.find((n) => n.id === sh.of);
+    const host = nativeById.get(sh.of);
     if (!host) { lentOps.add(origin.get(sh.id)); continue; } // its pulse was not run
-    const pulse = result.summary.pulses.find((x) => x.source === sh.of);
+    const pulse = pulseOf.get(sh.of);
     if (pulse) result.summary.pulses.push({ ...pulse, source: sh.id });
     hardware.segments[0].ops.push({ id: sh.id, t: host.at * period });
-    const action = actions.find((a) => a.source === sh.of && a.fire);
+    const action = fireOf.get(sh.of);
     if (action) lowered.actions.push({ ...action, source: sh.id });
   }
   const report = conformance(listing, { hardware, lowered, origin, unrealized: [], classical, quantization: { gridPs: period } }, result, built, m);
@@ -644,8 +747,9 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   const bitStoredNs = report.bitNs;
   // The readout channel stays held 8 batches past the exposure (its count is read): when that
   // channel is free again, for a scheduler that shares the channels (riscq/os/program-runs.mjs).
+  const rowOf = new Map(report.rows.map((r) => [r.uid, r]));
   for (const mm of measures) {
-    const n = natives.find((x) => x.id === mm.id), row = n && report.rows.find((r) => r.uid === origin.get(mm.id));
+    const n = nativeById.get(mm.id), row = n && rowOf.get(origin.get(mm.id));
     if (row && row.kind === "measure") row.channelNs = ((n.at + mm.dur + 8) * period) / 1000;
   }
   for (const r of report.rows) {
@@ -681,7 +785,7 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
     sitesOfOp: (id) => opOf.get(origin.get(id))?.qubits.map((q) => placement.siteOf(q)) });
   report.pools = { beams: beams.peak, movers: movers.peak, readouts: readouts.peak, pumps: pumps.peak, lent: beams.lent + movers.lent + readouts.lent + pumps.lent };
   report.bits = measuredBits(result, built);
-  report.globalEarlyNs = Math.max(0, ...shared.map((sh) => sh.earlyNs ?? 0));
+  report.globalEarlyNs = maxOf(shared.map((sh) => sh.earlyNs ?? 0), 0);
   report.boards = { count: onBoards.boards, summedDacs: onBoards.summed, cores: spec.cores.map((c) => c.board ?? 0) };
   void gatedPairs; void checks;
   // The native instructions as a hardware program (riscq/examples.mjs's shape), for the debugger.
