@@ -47,6 +47,12 @@ export const MEDIUM_PROGRAMS = [
   { id: "ghz-10-d5", short: "a GHZ state", title: "GHZ state on 10 logical qubits at distance 5", logical: 10, distance: 5,
     what: "10 blocks of the distance-5 surface code in |+⟩ joined by Z⊗Z lattice-surgery merges into a GHZ state, then read out in Z.",
     qppm: join(programsDir, "medium", "ghz-d5.qppm"), specialize: { n: 10 } },
+  { id: "simon-8", short: "Simon's algorithm", title: "Simon's algorithm on 8 inputs", logical: 16, distance: 3,
+    what: "A 2-to-1 oracle f(x) = f(x ⊕ s) with hidden s = 11010010₂: 8 inputs in |+⟩ and 8 outputs in |0⟩; the oracle copies x onto the outputs and, from input 1 (the lowest bit of s), adds s, all as lattice-surgery CNOTs. The inputs read out in X give a string y with y·s = 0; repeating the query recovers s.",
+    qppm: join(programsDir, "medium", "simon.qppm"), specialize: { n: 8, s: 210, j: 1 } },
+  { id: "teleport-10-d5", short: "teleportation", title: "Teleportation along 10 logical qubits at distance 5", logical: 10, distance: 5,
+    what: "A logical |+⟩ teleported block to block along a chain of 10 blocks of the distance-5 surface code, each step a Z⊗Z lattice-surgery merge and an X measurement whose outcomes set the next block's frame corrections; the last block, read out in X, gives +.",
+    qppm: join(programsDir, "medium", "teleport-d5.qppm"), specialize: { n: 10 } },
 ];
 /** The whole derivation of one program must finish within this many seconds (the module's header). */
 export const MEDIUM_BUDGET_S = 3600;
