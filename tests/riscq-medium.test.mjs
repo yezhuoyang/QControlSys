@@ -30,6 +30,16 @@ test("every stored medium run is larger than every reproduced paper, was derived
   }
 });
 
+test("every move of a stored track is between positions in its device's unit", () => {
+  for (const { id, r } of stored) {
+    if (!r.track?.moves?.length) continue;
+    const ring = r.track.device.kind === "ions-ring";
+    const ok = (p) => (ring ? Number.isFinite(p) : Array.isArray(p) && p.length >= 2 && p.every(Number.isFinite));
+    const bad = r.track.moves.filter((m) => !ok(m.from) || !ok(m.to));
+    assert.equal(bad.length, 0, id + " (" + r.track.device.kind + ", " + r.track.device.unit + "): " + JSON.stringify(bad[0]));
+  }
+});
+
 test("a stored run carries no path of the machine it was compiled on", () => {
   for (const { id, r } of stored) {
     const source = JSON.stringify(r.listing.source ?? {});

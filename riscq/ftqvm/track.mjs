@@ -7,7 +7,7 @@
 //             couplers?: [[a, b]], ring?: { zones }, unit },
 //   endNs,
 //   events: [{ k, t0, t1, s: [site], line }]   k: 1q 2q measure reset decode frame factory
-//   moves:  [{ t0, t1, s, from, to }]           positions (atoms, µm) or zones (ions)
+//   moves:  [{ t0, t1, s, from, to }]           positions (µm: atoms, grid and chain ions) or zones (ions-ring)
 // }
 
 const KIND = {

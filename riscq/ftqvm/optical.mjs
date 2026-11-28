@@ -772,9 +772,13 @@ export async function runOptical(listing, placement, design, { outcomes = {}, di
   }
   addRows(report, []);
   // The animation track: atoms at their positions (µm) or ions at their zones, and every move played.
-  const moveList = natives.filter((n) => n.op === "move" && n.job).flatMap((n) =>
-    (n.job.atoms ?? n.job.ions ?? []).map((mv) => ({ t0: (n.at * period) / 1000, t1: ((n.at + Math.max(n.dur, b(n.job.ns))) * period) / 1000, s: mv.site, from: mv.from, to: mv.to })));
   const ring = prof.ringZones?.value;
+  // A move on the race track is between zone numbers. Atoms carry positions. A grid or chain ion moves
+  // between zones, and the track places it in µm: at its own home in its home zone (its place in a
+  // chain), otherwise at the zone's position.
+  const placeOf = (mv, zone) => (ring || prof.platform === "neutral" ? zone : zone === design.zoneOfSite[mv.site] ? design.home[mv.site] : state.zonePos(zone));
+  const moveList = natives.filter((n) => n.op === "move" && n.job).flatMap((n) =>
+    (n.job.atoms ?? n.job.ions ?? []).map((mv) => ({ t0: (n.at * period) / 1000, t1: ((n.at + Math.max(n.dur, b(n.job.ns))) * period) / 1000, s: mv.site, from: placeOf(mv, mv.from), to: placeOf(mv, mv.to) })));
   report.track = buildTrack({ listing, placement, report, moves: moveList, device: {
     kind: prof.platform === "neutral" ? "atoms" : ring ? "ions-ring" : "ions", unit: prof.platform === "neutral" ? "µm" : ring ? "zone" : "µm",
     sites: placement.sites.map((s, k) => ({ kind: s.kind, at: prof.platform === "neutral" || !ring ? design.home[k] : [design.zoneOfSite[k], 0] })),
